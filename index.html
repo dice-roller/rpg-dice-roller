@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body>
+    <input type="text" id="input">
+    <textarea id="output"></textarea>
+
+    <button onclick="roll()">Roll</button>
+
+    <script src="dice-roller-compiled.js"></script>
+    <script>
+        function roll(){
+            var diceRoller  = new DiceRoller();
+
+            console.log(document.getElementById('input'), document.getElementById('input').value);
+            console.log(diceRoller.roll(document.getElementById('input').value));
+        }
+    </script>
+</body>
+</html>
