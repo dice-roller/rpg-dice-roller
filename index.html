@@ -6,17 +6,20 @@
 </head>
 <body>
     <input type="text" id="input">
-    <textarea id="output"></textarea>
+    <textarea rows="7" id="output"></textarea>
 
     <button onclick="roll()">Roll</button>
 
     <script src="dice-roller-compiled.js"></script>
     <script>
         function roll(){
-            var diceRoller  = new DiceRoller();
+            var diceRoller  = new DiceRoller(),
+                rolls       = diceRoller.roll(document.getElementById('input').value);
 
             console.log(document.getElementById('input'), document.getElementById('input').value);
-            console.log(diceRoller.roll(document.getElementById('input').value));
+            console.log(rolls);
+
+            document.getElementById('output').value = diceRoller.toString();
         }
     </script>
 </body>

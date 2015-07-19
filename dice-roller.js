@@ -9,13 +9,13 @@
   "use strict";
 
   window.DiceRoller = function(){
-    var lib = this;
-    var diceRange = Object.freeze({
-      MIN: 3,
-      MAX: 100
-    });
+    var lib = this,
+        diceRange = Object.freeze({
+          MIN: 3,
+          MAX: 100
+        });
 
-    this.log  = [];
+    this.log  = []; // a history of rolls
 
 
     var isNumeric       = function(val){
@@ -48,11 +48,19 @@
      * @returns {string}
      */
     this.toString = function(){
-      return lib.log.join(', ');
+      var response  = '';
+
+      for(var item in lib.log){
+        if(lib.log.hasOwnProperty(item)){
+          response += lib.log[item].die + ': ' + lib.log[item].rolls.join(', ') + '; ';
+        }
+      }
+
+      return response.substring(0, response.length-2);
     };
 
     /**
-     * Parses the given vale and returns
+     * Parses the given value and returns
      * the number of die sides
      *
      * @param val
@@ -105,7 +113,7 @@
       var dice  = [];
 
       if(val){
-        if(!isNumeric(val)){
+        if(isNumeric(val)){
           dice.push(lib.parseDie(val));
         }else if(typeof val === 'string'){
           dice =  val
@@ -127,29 +135,27 @@
      * @param {string} dice
      * @returns {Array}
      */
-    // TODO - this doesn't calculate correctly when concatenating dice
     this.roll = function(dice){
       var pDice = lib.parseDice(dice);
-      console.log(dice, pDice);
 
       lib.log  = [];
 
       for(var die in pDice){
         if(pDice.hasOwnProperty(die)){
-          var isSide = !isNumeric(pDice[die]),
-              sides  = pDice[die].sides || pDice[die] || null,
-              qty    = pDice[die].qty || 1;
-
-          console.log(sides, qty);
+          var sides   = pDice[die].sides || pDice[die] || null,
+              qty     = pDice[die].qty || 1,
+              rolls   = [];
 
           if(sides){
             for(var i = 0; i < qty; i++){
-              lib.log.push({
-                die:        qty + 'd' + sides,
-                rollNumber: i + 1,
-                result:     generateNumber(1, sides)
-              });
+              rolls.push(generateNumber(1, sides));
             }
+
+            lib.log.push({
+              die:        qty + 'd' + sides,
+              rollNumber: i + 1,
+              rolls:      rolls
+            });
           }
         }
       }
