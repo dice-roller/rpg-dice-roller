@@ -152,9 +152,8 @@
             }
 
             lib.log.push({
-              die:        qty + 'd' + sides,
-              rollNumber: i + 1,
-              rolls:      rolls
+              die:    qty + 'd' + sides,
+              rolls:  rolls
             });
           }
         }
