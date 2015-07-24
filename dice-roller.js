@@ -2,18 +2,13 @@
  * A basic JS based dice roller
  *
  * GreenImp Web - greenimp.co.uk
- * Date: 17/07/15 23:26
  */
 
 ;(function(){
   "use strict";
 
   window.DiceRoller = function(){
-    var lib = this,
-        diceRange = Object.freeze({
-          MIN: 3,
-          MAX: 100
-        });
+    var lib = this;
 
     this.log  = []; // a history of rolls
 
@@ -120,15 +115,8 @@
         // value is a number - ensure that it's an integer
         val = parseInt(val, 10);
 
-        // TODO - should we throw a warning and NOT parse if val is outside the range?
-        if(val >= diceRange.MIN){
-          // value is above or equal to the minimum.
-          // if it's equal to or less than the maximum, return it.
-          // otherwise, return the maximum.
-          die = (val <= diceRange.MAX) ? val : diceRange.MAX;
-        }else{
-          // value id below the minimum allowed - return the minimum
-          die = diceRange.MIN;
+        if(val > 0){
+          die = val;
         }
       }else if(typeof val === 'string'){
         if(val.indexOf('d') >= 0){
