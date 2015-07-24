@@ -190,21 +190,24 @@
      * @returns {Array}
      */
     this.roll = function(dice){
-      var pDice = lib.parseDice(dice);
+      var pDice = lib.parseDice(dice),
+          log   = [];
 
-      lib.log  = [];
-
+      // loop through each dice and roll it
       pDice.forEach(function(elm, index, array){
-        var sides   = elm.sides || elm,
-            qty     = elm.qty || 1,
-            rolls   = [];
+        var sides   = elm.sides || elm, // number of sides the die has
+            qty     = elm.qty || 1,     // number of times to roll the die
+            rolls   = [];               // list of roll results
 
+        // only continue if the number of sides is valid
         if(sides){
+          // loop through and roll for the quantity
           for(var i = 0; i < qty; i++){
             rolls.push(generateNumber(1, sides));
           }
 
-          lib.log.push({
+          // add the roll results to our log
+          log.push({
             die:    qty + 'd' + sides,
             rolls:  rolls,
             total:  totalNumbers(rolls)
@@ -212,7 +215,11 @@
         }
       });
 
-      return lib.log;
+      // add the roll log to our global log
+      lib.log.push(log);
+
+      // return the log
+      return log;
     };
   }
 }(window));
