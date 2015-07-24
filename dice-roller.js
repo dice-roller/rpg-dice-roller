@@ -68,8 +68,8 @@
 
       // add the totals together
       return rolls.reduce(function(prev, current){
-        return (current.total || 0) + (prev.total || 0);
-      });
+        return (current.total || 0) + prev;
+      }, 0);
     };
 
 
