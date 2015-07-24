@@ -46,7 +46,7 @@
      * Takes an array of numbers adds them
      * together and returns the total
      *
-     * @param {array} numbers
+     * @param {Array} numbers
      * @returns {number}
      */
     var totalNumbers    = function(numbers){
