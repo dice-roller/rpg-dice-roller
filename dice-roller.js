@@ -18,6 +18,12 @@
     this.log  = []; // a history of rolls
 
 
+    /**
+     * Checks if the given val is a valid number
+     *
+     * @param val
+     * @returns {boolean}
+     */
     var isNumeric       = function(val){
       return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
     };
@@ -41,6 +47,36 @@
       return Math.floor(Math.random() * (max - min + 1) + min);
     };
 
+    /**
+     * Takes an array of numbers adds them
+     * together and returns the total
+     *
+     * @param {array} numbers
+     * @returns {number}
+     */
+    var totalNumbers    = function(numbers){
+      return numbers.reduce(function(prev, current){
+        return current + prev;
+      }, 0);
+    };
+
+    /**
+     * Takes a list of dice rolls and returns
+     * the total value.
+     * If no `rolls` is defined, the log is used
+     *
+     * @param {Array=} rolls
+     * @returns {number}
+     */
+    var getRollTotals   = function(rolls){
+      rolls = (rolls && Array.isArray(rolls)) ? rolls : lib.log;
+
+      // add the totals together
+      return rolls.reduce(function(prev, current){
+        return (current.total || 0) + (prev.total || 0);
+      });
+    };
+
 
     /**
      * Returns the String representation of the object
@@ -50,80 +86,110 @@
     this.toString = function(){
       var response  = '';
 
-      for(var item in lib.log){
-        if(lib.log.hasOwnProperty(item)){
-          response += lib.log[item].die + ': ' + lib.log[item].rolls.join(', ') + '; ';
-        }
+      // loop through each dice log and build the response
+      lib.log.forEach(function(elm, index, array){
+        // add the rolls to the string
+        response += elm.die + ': ' + elm.rolls.join(', ') + ' = ' + elm.total + '; ';
+      });
+
+      // output the total
+      if(lib.log.length){
+        response += 'Total = ' + getRollTotals();
+      }else{
+        response = 'No dice rolled';
       }
 
-      return response.substring(0, response.length-2);
+      // return the response
+      return response;
     };
 
     /**
-     * Parses the given value and returns
-     * the number of die sides
+     * Parses the given value for a single die
+     * and returns the number of die sides and
+     * required quantity
      *
      * @param val
      * @returns {number|object}
      */
     this.parseDie   = function(val){
-      var dieNum;
+      var die;
 
       if(!val){
-        return dieNum;
+        return die;
       }else if(isNumeric(val)){
         // value is a number - ensure that it's an integer
         val = parseInt(val, 10);
 
+        // TODO - should we throw a warning and NOT parse if val is outside the range?
         if(val >= diceRange.MIN){
           // value is above or equal to the minimum.
           // if it's equal to or less than the maximum, return it.
           // otherwise, return the maximum.
-          dieNum  = (val <= diceRange.MAX) ? val : diceRange.MAX;
+          die = (val <= diceRange.MAX) ? val : diceRange.MAX;
         }else{
           // value id below the minimum allowed - return the minimum
-          dieNum  = diceRange.MIN;
+          die = diceRange.MIN;
         }
-      }else{
-        var parts = val.split(/d/),
-            sides = lib.parseDie(parts[(parts.length == 2) ? 1 : 0]),
-            qty   = (parts.length == 2) ? parseInt(parts[0], 10) : 1;
+      }else if(typeof val === 'string'){
+        if(val.indexOf('d') >= 0){
+          // just a single die
+          var parts = val.split(/d/),
+              sides = lib.parseDie(parts[(parts.length == 2) ? 1 : 0]),
+              qty   = ((parts.length == 2) && isNumeric(parts[0])) ? parseInt(parts[0], 10) : 1;
 
-        if(qty > 1){
-          dieNum = {
-            sides: sides,
-            qty:   (parts.length == 2) ? parseInt(parts[0], 10) : 1
-          };
-        }else{
-          dieNum = sides;
+          // only define the die if the sides are valid
+          if(sides){
+            if(qty > 1){
+              die = {
+                sides: sides,
+                qty: (parts.length == 2) ? parseInt(parts[0], 10) : 1
+              };
+            }else{
+              die = sides;
+            }
+          }
         }
       }
 
-      return dieNum;
+      return die;
     };
 
     /**
-     * Parses the given value for specified die
-     * and returns a list of die found
+     * Parses the given value for specified dice
+     * and returns a list of dice found
      *
-     * @param {string|number} val
+     * @param {string|number|Array} val
      * @returns {Array}
      */
-    this.parseDice  = function(val){
+    this.parseDice   = function(val){
       var dice  = [];
 
-      if(val){
-        if(isNumeric(val)){
-          dice.push(lib.parseDie(val));
-        }else if(typeof val === 'string'){
-          dice =  val
-              // split value by addition symbol
-              .split(/\+/)
-              .map(lib.parseDie)
-              ;//.reduce(function(a,b){return a + b;});
+      // ensure that val is valid and an array
+      if(!val){
+        // val is falsey - return empty result
+        return dice;
+      }else if(!Array.isArray(val)){
+        // val is NOt an array
+        if((typeof val === 'string') && (val.indexOf('+') >= 0)){
+          // val is a string with concatenated dice values - split by the join
+          val = val.split(/\+/);
+        }else{
+          // convert to an array
+          val = [val];
         }
       }
 
+      // loop through the given dice list and parse them
+      val.forEach(function(elm, index, array){
+        var die = lib.parseDie(elm);
+
+        // only add the die if it is valid
+        if(die){
+          dice.push(die);
+        }
+      });
+
+      // return the list of dice
       return dice;
     };
 
@@ -140,24 +206,23 @@
 
       lib.log  = [];
 
-      for(var die in pDice){
-        if(pDice.hasOwnProperty(die)){
-          var sides   = pDice[die].sides || pDice[die] || null,
-              qty     = pDice[die].qty || 1,
-              rolls   = [];
+      pDice.forEach(function(elm, index, array){
+        var sides   = elm.sides || elm,
+            qty     = elm.qty || 1,
+            rolls   = [];
 
-          if(sides){
-            for(var i = 0; i < qty; i++){
-              rolls.push(generateNumber(1, sides));
-            }
-
-            lib.log.push({
-              die:    qty + 'd' + sides,
-              rolls:  rolls
-            });
+        if(sides){
+          for(var i = 0; i < qty; i++){
+            rolls.push(generateNumber(1, sides));
           }
+
+          lib.log.push({
+            die:    qty + 'd' + sides,
+            rolls:  rolls,
+            total:  totalNumbers(rolls)
+          });
         }
-      }
+      });
 
       return lib.log;
     };

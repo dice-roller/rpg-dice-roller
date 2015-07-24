@@ -1,26 +1,59 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title></title>
+  <meta charset="UTF-8">
+  <title></title>
 </head>
-<body>
-    <input type="text" id="input">
-    <textarea rows="7" id="output"></textarea>
 
+<body>
+  <div>
+    <input type="text" placeholder="eg. 1d6+2d20" id="input">
     <button onclick="roll()">Roll</button>
 
-    <script src="dice-roller-compiled.js"></script>
-    <script>
-        function roll(){
-            var diceRoller  = new DiceRoller(),
-                rolls       = diceRoller.roll(document.getElementById('input').value);
+    <p>
+      <small>Accepted formats:</small>
+    </p>
 
-            console.log(document.getElementById('input'), document.getElementById('input').value);
-            console.log(rolls);
+    <ul>
+      <li>
+        <code>6</code> <small>(A 6 sided die)</small>
+      </li>
 
-            document.getElementById('output').value = diceRoller.toString();
-        }
-    </script>
+      <li>
+        <code>d6</code> <small>(A 6 sided die)</small>
+      </li>
+
+      <li>
+        <code>2d6</code> <small>(Two 6 sided dice)</small>
+      </li>
+
+      <li>
+        <code>4+2d10+1d20</code> <small>(A 4 sided die, two 10 sided dice, and one 20 sided die)</small>
+      </li>
+    </ul>
+  </div>
+
+  <hr>
+
+  <div>
+    <label for="output">Output</label>
+
+    <div>
+      <textarea rows="7" id="output"></textarea>
+    </div>
+  </div>
+
+  <script src="dice-roller.js"></script>
+  <script>
+    function roll(){
+      var diceRoller  = new DiceRoller(),
+          rolls       = diceRoller.roll(document.getElementById('input').value);
+
+      console.log(document.getElementById('input'), document.getElementById('input').value);
+      console.log(rolls);
+
+      document.getElementById('output').value = diceRoller.toString();
+    }
+  </script>
 </body>
 </html>
