@@ -45,9 +45,10 @@
 
   <script src="dice-roller.js"></script>
   <script>
+    var diceRoller  = new DiceRoller();
+
     function roll(){
-      var diceRoller  = new DiceRoller(),
-          rolls       = diceRoller.roll(document.getElementById('input').value);
+      var rolls = diceRoller.roll(document.getElementById('input').value);
 
       console.log(document.getElementById('input'), document.getElementById('input').value);
       console.log(rolls);

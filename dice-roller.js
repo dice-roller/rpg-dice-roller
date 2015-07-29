@@ -97,7 +97,7 @@
             response += elm.die + ': ' + elm.rolls.join(', ') + ' = ' + elm.total + '; ';
           });
 
-          response += 'Total = ' + getTotalRolls(elm);
+          response += 'Total = ' + getRollTotals(item);
 
           if(index < array.length-1){
             response += '|';
