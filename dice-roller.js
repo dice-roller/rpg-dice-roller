@@ -10,7 +10,12 @@
   window.DiceRoller = function(){
     var lib = this;
 
-    this.log  = []; // a history of rolls
+    /*
+     * history of log rolls
+     *
+     * {array}
+     */
+    this.log  = [];
 
 
     /**
@@ -60,16 +65,19 @@
      * the total value.
      * If no `rolls` is defined, the log is used
      *
-     * @param {Array=} rolls
+     * @param {Array} rolls
      * @returns {number}
      */
     var getRollTotals   = function(rolls){
-      rolls = (rolls && Array.isArray(rolls)) ? rolls : lib.log;
-
-      // add the totals together
-      return rolls.reduce(function(prev, current){
-        return (current.total || 0) + prev;
-      }, 0);
+      if(rolls && Array.isArray(rolls) && rolls.length){
+        // add the totals together
+        return rolls.reduce(function(prev, current){
+          return (current.total || 0) + prev;
+        }, 0);
+      }else{
+        // no valid rolls defined - return zero
+        return 0;
+      }
     };
 
 
@@ -81,16 +89,22 @@
     this.toString = function(){
       var response  = '';
 
-      // loop through each dice log and build the response
-      lib.log.forEach(function(elm, index, array){
-        // add the rolls to the string
-        response += elm.die + ': ' + elm.rolls.join(', ') + ' = ' + elm.total + '; ';
-      });
-
-      // output the total
       if(lib.log.length){
-        response += 'Total = ' + getRollTotals();
+        // loop through each dice log and build the response
+        lib.log.forEach(function(item, index, array){
+          item.forEach(function(elm, iIndex, iArray){
+            // add the rolls to the string
+            response += elm.die + ': ' + elm.rolls.join(', ') + ' = ' + elm.total + '; ';
+          });
+
+          response += 'Total = ' + getTotalRolls(elm);
+
+          if(index < array.length-1){
+            response += '|';
+          }
+        });
       }else{
+        // no rolls stored in the log
         response = 'No dice rolled';
       }
 
@@ -157,7 +171,7 @@
         // val is falsey - return empty result
         return dice;
       }else if(!Array.isArray(val)){
-        // val is NOt an array
+        // val is NOT an array
         if((typeof val === 'string') && (val.indexOf('+') >= 0)){
           // val is a string with concatenated dice values - split by the join
           val = val.split(/\+/);
