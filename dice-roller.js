@@ -235,5 +235,12 @@
       // return the log
       return log;
     };
+
+    /**
+     * Clears the roll history log
+     */
+    this.clearLog = function(){
+      lib.log  = [];
+    };
   }
 }(window));

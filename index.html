@@ -41,6 +41,8 @@
     <div>
       <textarea rows="7" id="output"></textarea>
     </div>
+
+    <button onclick="clearLog()">Clear log</button>
   </div>
 
   <script src="dice-roller.js"></script>
@@ -50,10 +52,15 @@
     function roll(){
       var rolls = diceRoller.roll(document.getElementById('input').value);
 
-      console.log(document.getElementById('input'), document.getElementById('input').value);
+      console.log('Notation:', document.getElementById('input').value);
       console.log(rolls);
+      console.log(diceRoller.log);
 
       document.getElementById('output').value = diceRoller.toString();
+    }
+
+    function clearLog(){
+      diceRoller.clearLog();
     }
   </script>
 </body>
