@@ -1,11 +1,42 @@
 /**
- * A basic JS based dice roller
+ * A JS based dice roller that uses limited standard dice notation
  *
  * GreenImp Web - greenimp.co.uk
  */
 
 ;(function(){
   "use strict";
+
+
+  /**
+   * Checks if the given val is a valid number
+   *
+   * @param val
+   * @returns {boolean}
+   */
+  var isNumeric       = function(val){
+    return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
+  };
+
+  /**
+   * Generates a random number between the
+   * min and max, inclusive
+   *
+   * @param {number} min
+   * @param {number} max
+   * @returns {*}
+   */
+  var generateNumber  = function(min, max){
+    min = min ? parseInt(min, 10) : 1;
+    max = max ? parseInt(max, 10) : min;
+
+    if(max <= min){
+      return min;
+    }
+
+    return Math.floor(Math.random() * (max - min + 1) + min);
+  };
+
 
   window.DiceRoller = function(){
     var lib = this;
@@ -19,43 +50,108 @@
 
 
     /**
-     * Checks if the given val is a valid number
-     *
-     * @param val
-     * @returns {boolean}
-     */
-    var isNumeric       = function(val){
-      return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
-    };
-
-    /**
-     * Generates a random number between the
-     * min and max, inclusive
-     *
-     * @param {number} min
-     * @param {number} max
-     * @returns {*}
-     */
-    var generateNumber  = function(min, max){
-      min = min ? parseInt(min, 10) : 1;
-      max = max ? parseInt(max, 10) : min;
-
-      if(max <= min){
-        return min;
-      }
-
-      return Math.floor(Math.random() * (max - min + 1) + min);
-    };
-
-
-    /**
-     * Returns the String representation of the object
+     * Returns the String representation of the object,
+     * in the format of:
+     * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
     this.toString = function(){
+      var log = lib.getLog();
+
       // return the response
-      return lib.log.length ? lib.log.join('; ') : 'No dice rolled';
+      return log.length ? log.join('; ') : 'No dice rolled';
+    };
+
+    /**
+     * Rolls the given dice sides for the
+     * set amount of rolls.
+     * Returns a list of results
+     *
+     * @param {string} notation
+     * @returns {Window.DiceRoll}
+     */
+    this.roll     = function(notation){
+      var diceRoll  = new DiceRoll(notation);
+
+      // add the roll log to our global log
+      lib.log.push(diceRoll);
+
+      // return the current DiceRoll
+      return diceRoll;
+    };
+
+    /**
+     * Clears the roll history log
+     */
+    this.clearLog = function(){
+      lib.log  = [];
+    };
+
+    /**
+     * Returns the current roll log
+     *
+     * @returns {Array}
+     */
+    this.getLog   = function(){
+      return lib.log || [];
+    };
+  };
+
+
+  /**
+   * A DiceRoll object, which takes a notation
+   * and parses it in to rolls
+   *
+   * @param {string} notation  The dice notation
+   * @constructor
+   */
+  window.DiceRoll   = function(notation){
+    var lib = this;
+
+    /**
+     * The roll total
+     *
+     * @type {number}
+     */
+    var total = 0;
+
+    this.notation = '';
+    this.rolls    = [];
+
+
+    /**
+     * Parses the notation and rolls the dice
+     *
+     * @param notation
+     */
+    var init          = function(notation){
+      var pDice = parseNotation(notation || lib.notation);
+
+      // store the notation
+      lib.notation  = notation || lib.notation;
+      // empty the current rolls
+      lib.rolls = [];
+      // zero the current total
+      total = 0;
+
+      // loop through each dice and roll it
+      pDice.forEach(function(elm, index, array){
+        var sides = elm.sides || elm, // number of sides the die has
+            qty   = elm.qty || 1,     // number of times to roll the die
+            rolls = [];               // list of roll results
+
+        // only continue if the number of sides is valid
+        if(sides){
+          // loop through and roll for the quantity
+          for(var i = 0; i < qty; i++){
+            rolls.push(generateNumber(1, sides));
+          }
+
+          // add the roll results to our log
+          lib.rolls.push(rolls);
+        }
+      });
     };
 
     /**
@@ -66,7 +162,7 @@
      * @param val
      * @returns {number|object}
      */
-    this.parseDie   = function(val){
+    var parseDie      = function(val){
       var die;
 
       if(!val){
@@ -82,7 +178,7 @@
         if(val.indexOf('d') >= 0){
           // just a single die
           var parts = val.split(/d/),
-              sides = lib.parseDie(parts[(parts.length == 2) ? 1 : 0]),
+              sides = parseDie(parts[(parts.length == 2) ? 1 : 0]),
               qty   = ((parts.length == 2) && isNumeric(parts[0])) ? parseInt(parts[0], 10) : 1;
 
           // only define the die if the sides are valid
@@ -109,7 +205,7 @@
      * @param {string|number|Array} val
      * @returns {Array}
      */
-    this.parseNotation   = function(val){
+    var parseNotation = function(val){
       var dice  = [];
 
       // ensure that val is valid and an array
@@ -129,7 +225,7 @@
 
       // loop through the given dice list and parse them
       val.forEach(function(elm, index, array){
-        var die = lib.parseDie(elm);
+        var die = parseDie(elm);
 
         // only add the die if it is valid
         if(die){
@@ -141,90 +237,25 @@
       return dice;
     };
 
-    /**
-     * Rolls the given dice sides for the
-     * set amount of rolls.
-     * Returns a list of results
-     *
-     * @param {string} notation
-     * @returns {DiceRoll}
-     */
-    this.roll = function(notation){
-      var pDice     = lib.parseNotation(notation),
-          diceRoll  = new DiceRoll(notation);
-
-      // loop through each dice and roll it
-      pDice.forEach(function(elm, index, array){
-        var sides   = elm.sides || elm, // number of sides the die has
-            qty     = elm.qty || 1,     // number of times to roll the die
-            rolls   = [];               // list of roll results
-
-        // only continue if the number of sides is valid
-        if(sides){
-          // loop through and roll for the quantity
-          for(var i = 0; i < qty; i++){
-            rolls.push(generateNumber(1, sides));
-          }
-
-          // add the roll results to our log
-          diceRoll.push(rolls);
-        }
-      });
-
-      // add the roll log to our global log
-      lib.log.push(diceRoll);
-
-      // return the log
-      return diceRoll;
-    };
 
     /**
-     * Clears the roll history log
-     */
-    this.clearLog = function(){
-      lib.log  = [];
-    };
-  };
-
-
-  /**
-   * A DiceRoll object, which takes a notation
-   * and parses it in to rolls
-   *
-   * @param {string} notation  The dice notation
-   * @constructor
-   */
-  var DiceRoll      = function(notation){
-      var lib = this;
-
-    /**
-     * The roll total
-     *
-     * @type {number}
-     */
-    var total = 0;
-
-    this.notation = notation;
-    this.rolls    = [];
-
-
-    /**
-     * Returns the String representation of the object
+     * Returns the String representation of the object,
+     * in the format of:
+     * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
     // TODO - this currently assumes all dice all added (ie; 1d6+2d10)
-    this.toString = function(){
-      var output  = 'inner';
-
-      // 2d20+1d6: [20, 2]+[2] = 24
-      output += this.notation + ': ';
+    this.toString     = function(){
+      var output  = this.notation + ': ';
 
       if(this.rolls.length){
+        // loop through and build the string for die rolled
         this.rolls.forEach(function(item, index, array){
           output += '[' + item.join(',') + ']' + ((index < array.length-1) ? '+' : '');
         });
 
+        // add the total
         output += ' = ' + this.getTotal();
       }else{
         output += 'No dice rolled';
@@ -239,7 +270,7 @@
      * @returns {*}
      */
     // TODO - this currently assumes all dice all added (ie; 1d6+2d10)
-    this.getTotal = function(){
+    this.getTotal     = function(){
       if(!total && Array.isArray(lib.rolls) && lib.rolls.length){
         // no total stored already - calculate it
         total = lib.rolls
@@ -257,15 +288,8 @@
       return total || 0;
     };
 
-    /**
-     * Adds a roll to the list
-     *
-     * @param {Array} rolls
-     */
-    this.push     = function(rolls){
-      if(Array.isArray(rolls)){
-        this.rolls.push(rolls);
-      }
-    };
+
+    // initialise the object
+    init(notation);
   };
 }(window));
