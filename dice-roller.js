@@ -1,5 +1,6 @@
 /**
- * A JS based dice roller that uses limited standard dice notation
+ * A JS based dice roller that uses limited standard dice notation,
+ * as described here: https://en.m.wikipedia.org/wiki/Dice_notation
  *
  * GreenImp Web - greenimp.co.uk
  */
@@ -115,6 +116,15 @@
      * @type {number}
      */
     var total = 0;
+
+    // this matches a standard dice notation. i.e;
+    // 3d10-2
+    // 4d20-L
+    // 2d7/4
+    // 3d8*2
+    // 2d3+4-1
+    // 2d10-H*1d6/2
+    var notationRegex = /^(([+\-*\/])?(\d*)d(\d+)(([+\-*\/])(\d+(?!d)|H|L))*)+$/;
 
     this.notation = '';
     this.rolls    = [];
@@ -269,7 +279,7 @@
      *
      * @returns {*}
      */
-    // TODO - this currently assumes all dice all added (ie; 1d6+2d10)
+    // TODO - this currently assumes all dice are added (ie; 1d6+2d10)
     this.getTotal     = function(){
       if(!total && Array.isArray(lib.rolls) && lib.rolls.length){
         // no total stored already - calculate it
