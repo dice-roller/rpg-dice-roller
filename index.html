@@ -31,6 +31,10 @@
         <code>4+2d10+1d20</code> <small>(A 4 sided die, two 10 sided dice, and one 20 sided die)</small>
       </li>
     </ul>
+
+    <p>
+      <small>See <a href="https://en.wikipedia.org/wiki/Dice_notation#Standard_notation" target="_blank">standard dice notation</a></small>
+    </p>
   </div>
 
   <hr>
@@ -53,14 +57,16 @@
       var rolls = diceRoller.roll(document.getElementById('input').value);
 
       console.log('Notation:', document.getElementById('input').value);
-      console.log(rolls);
-      console.log(diceRoller.log);
+      console.log('Current roll:', rolls);
+      console.log('Roll log:', diceRoller.log);
 
-      document.getElementById('output').value = diceRoller.toString();
+      document.getElementById('output').value = '' + diceRoller;
     }
 
     function clearLog(){
       diceRoller.clearLog();
+
+      document.getElementById('output').value = '';
     }
   </script>
 </body>
