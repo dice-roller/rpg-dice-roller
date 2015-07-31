@@ -115,15 +115,22 @@
      *
      * @type {number}
      */
-    var total = 0;
+    var total     = 0;
 
-    var regexes = new function(){
+    /**
+     * The parsed notation array
+     *
+     * @type {Array}
+     */
+    var parsedDie = [];
+
+    var regexes   = new function(){
       var strings = {
         operator: '[+\\-*\\/]',
-        dice:     '(\\d*)d(\\d+)'
+        dice:     '([1-9][0-9]*)?d([1-9][0-9]*)'
       };
 
-      strings.addition  = '(' + strings.operator + ')(\\d+(?!d)|H|L)';
+      strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
       /**
        * this matches a standard dice notation. i.e;
        * 3d10-2
@@ -154,7 +161,18 @@
       };
     };
 
+    /**
+     * The dice notation
+     *
+     * @type {string}
+     */
     this.notation = '';
+
+    /**
+     * Rolls for the notation.
+     *
+     * @type {Array}
+     */
     this.rolls    = [];
 
 
@@ -164,9 +182,9 @@
      * @param notation
      */
     var init          = function(notation){
-      var parsed = parseNotation(notation || lib.notation);
+      parsedDie = parseNotation(notation || lib.notation);
 
-      console.log('parsed:', parsed);
+      console.log('parsed:', parsedDie);
 
       // store the notation
       lib.notation  = notation || lib.notation;
@@ -175,25 +193,8 @@
       // zero the current total
       total = 0;
 
-      // loop through each dice and roll it
-      parsed.forEach(function(elm, index, array){
-        var sides = elm.sides,                    // number of sides the die has
-            qty   = (elm.qty > 0) ? elm.qty : 1,  // number of times to roll the die
-            rolls = [];                           // list of roll results
-
-        // only continue if the number of sides is valid
-        if(sides > 0){
-          // loop through and roll for the quantity
-          for(var i = 0; i < qty; i++){
-            rolls.push(generateNumber(1, sides));
-          }
-
-          // add the roll results to our log
-          lib.rolls.push(rolls);
-
-          // TODO - handle additions
-        }
-      });
+      // roll the dice
+      lib.roll();
     };
 
     /**
@@ -205,7 +206,9 @@
      * @returns {object|undefined}
      */
     var parseDie      = function(notation){
-      return lib.parseNotation(notation).shift();
+      // parse the notation and only return the first result
+      // (There should only be one result anyway, but it will be in an array and we want the raw result)
+      return parseNotation(notation).shift();
     };
 
     /**
@@ -216,13 +219,13 @@
      * @returns {Array}
      */
     var parseNotation = function(notation){
-      var parsed  = [];
+      var parsedDie = [];
 
       // parse the notation and find each valid dice (and any attributes)
       var match;
       while((match = regexes.get('notation').exec(notation)) !== null){
         var die = {
-          operator:   match[1],                               // dice operator for concatenating with previous rolls (+, -, /, *)
+          operator:   match[1] || '+',                        // dice operator for concatenating with previous rolls (+, -, /, *)
           qty:        match[2] ? parseInt(match[2], 10) : 1,  // number of times to roll the die
           sides:      parseInt(match[3], 10),                 // how many sides the die has
           additions:  []                                      // any additions (ie. +2, -L)
@@ -233,15 +236,54 @@
           var additionMatch;
           while((additionMatch = regexes.get('addition').exec(match[4]))){
             // add the addition to the list
-            die.additions.push([additionMatch[1], isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2]]);
+            die.additions.push({
+              operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
+              value:    isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
+                          parseFloat(additionMatch[2])
+                          :
+                          additionMatch[2]
+            });
           }
         }
 
-        parsed.push(die);
+        parsedDie.push(die);
       }
 
       // return the parsed dice
-      return parsed;
+      return parsedDie;
+    };
+
+    /**
+     * Rolls the dice for the existing notation
+     *
+     * @returns {Array}
+     */
+    this.roll         = function(){
+      var rolls = [];
+
+      // loop through each die and roll it
+      parsedDie.forEach(function(elm, index, array){
+        var sides     = elm.sides,                    // number of sides the die has
+            qty       = (elm.qty > 0) ? elm.qty : 1,  // number of times to roll the die
+            dieRolls  = [];                           // list of roll results for the die
+
+        // only continue if the number of sides is valid
+        if(sides > 0){
+          // loop through and roll for the quantity
+          for(var i = 0; i < qty; i++){
+            dieRolls.push(generateNumber(1, sides));
+          }
+        }
+
+        // add the roll results to our log
+        rolls.push(dieRolls);
+      });
+
+      // store the rolls
+      lib.rolls = rolls;
+
+      // return the rolls;
+      return lib.rolls;
     };
 
 
@@ -256,10 +298,18 @@
     this.toString     = function(){
       var output  = this.notation + ': ';
 
-      if(this.rolls.length){
+      if(parsedDie && this.rolls.length){
         // loop through and build the string for die rolled
-        this.rolls.forEach(function(item, index, array){
-          output += '[' + item.join(',') + ']' + ((index < array.length-1) ? '+' : '');
+        parsedDie.forEach(function(item, index, array){
+          var rolls = lib.rolls[index] || [];
+
+          output += ((index > 0) ? item.operator : '') + '[' + rolls.join(',') + ']';
+
+          if(item.additions.length){
+            output += item.additions.reduce(function(prev, current){
+              return prev + current.operator + current.value;
+            }, '');
+          }
         });
 
         // add the total
@@ -278,6 +328,14 @@
      */
     // TODO - this currently assumes all dice are added (ie; 1d6+2d10)
     this.getTotal     = function(){
+      /*var value = current.value;
+
+      if(value == 'H'){
+        value = Math.max.apply(null, rolls);
+      }else if(value == 'L'){
+        value = Math.min.apply(null, rolls);
+      }*/
+
       if(!total && Array.isArray(lib.rolls) && lib.rolls.length){
         // no total stored already - calculate it
         total = lib.rolls
