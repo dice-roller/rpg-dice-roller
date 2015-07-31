@@ -7,8 +7,10 @@
 
 <body>
   <div>
-    <input type="text" placeholder="eg. 1d6+2d20" id="input">
-    <button onclick="roll()">Roll</button>
+    <form action="" onsubmit="return roll();">
+      <input type="text" placeholder="eg. 1d6+2d20" id="input">
+      <button type="submit">Roll</button>
+    </form>
 
     <p>
       <small>Accepted formats:</small>
@@ -61,6 +63,9 @@
       console.log('Roll log:', diceRoller.log);
 
       document.getElementById('output').value = '' + diceRoller;
+
+      // stop event propagation
+      return false;
     }
 
     function clearLog(){

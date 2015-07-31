@@ -117,14 +117,42 @@
      */
     var total = 0;
 
-    // this matches a standard dice notation. i.e;
-    // 3d10-2
-    // 4d20-L
-    // 2d7/4
-    // 3d8*2
-    // 2d3+4-1
-    // 2d10-H*1d6/2
-    var notationRegex = /^(([+\-*\/])?(\d*)d(\d+)(([+\-*\/])(\d+(?!d)|H|L))*)+$/;
+    var regexes = new function(){
+      var strings = {
+        operator: '[+\\-*\\/]',
+        dice:     '(\\d*)d(\\d+)'
+      };
+
+      strings.addition  = '(' + strings.operator + ')(\\d+(?!d)|H|L)';
+      /**
+       * this matches a standard dice notation. i.e;
+       * 3d10-2
+       * 4d20-L
+       * 2d7/4
+       * 3d8*2
+       * 2d3+4-1
+       * 2d10-H*1d6/2
+       *
+       * @type {string}
+       */
+      strings.notation  = '(' + strings.operator + ')?' + strings.dice + '((?:' + strings.addition + ')*)';
+
+
+      var regExp  = {};
+
+      /**
+       *
+       * @param name
+       * @returns {RegExp}
+       */
+      this.get  = function(name){
+        if(!regExp[name]){
+          regExp[name]  = new RegExp(strings[name], 'g');
+        }
+
+        return regExp[name];
+      };
+    };
 
     this.notation = '';
     this.rolls    = [];
@@ -136,7 +164,9 @@
      * @param notation
      */
     var init          = function(notation){
-      var pDice = parseNotation(notation || lib.notation);
+      var parsed = parseNotation(notation || lib.notation);
+
+      console.log('parsed:', parsed);
 
       // store the notation
       lib.notation  = notation || lib.notation;
@@ -146,13 +176,13 @@
       total = 0;
 
       // loop through each dice and roll it
-      pDice.forEach(function(elm, index, array){
-        var sides = elm.sides || elm, // number of sides the die has
-            qty   = elm.qty || 1,     // number of times to roll the die
-            rolls = [];               // list of roll results
+      parsed.forEach(function(elm, index, array){
+        var sides = elm.sides,                    // number of sides the die has
+            qty   = (elm.qty > 0) ? elm.qty : 1,  // number of times to roll the die
+            rolls = [];                           // list of roll results
 
         // only continue if the number of sides is valid
-        if(sides){
+        if(sides > 0){
           // loop through and roll for the quantity
           for(var i = 0; i < qty; i++){
             rolls.push(generateNumber(1, sides));
@@ -160,6 +190,8 @@
 
           // add the roll results to our log
           lib.rolls.push(rolls);
+
+          // TODO - handle additions
         }
       });
     };
@@ -169,82 +201,47 @@
      * and returns the number of die sides and
      * required quantity
      *
-     * @param val
-     * @returns {number|object}
+     * @param {string} notation
+     * @returns {object|undefined}
      */
-    var parseDie      = function(val){
-      var die;
-
-      if(!val){
-        return die;
-      }else if(isNumeric(val)){
-        // value is a number - ensure that it's an integer
-        val = parseInt(val, 10);
-
-        if(val > 0){
-          die = val;
-        }
-      }else if(typeof val === 'string'){
-        if(val.indexOf('d') >= 0){
-          // just a single die
-          var parts = val.split(/d/),
-              sides = parseDie(parts[(parts.length == 2) ? 1 : 0]),
-              qty   = ((parts.length == 2) && isNumeric(parts[0])) ? parseInt(parts[0], 10) : 1;
-
-          // only define the die if the sides are valid
-          if(sides){
-            if(qty > 1){
-              die = {
-                sides: sides,
-                qty: (parts.length == 2) ? parseInt(parts[0], 10) : 1
-              };
-            }else{
-              die = sides;
-            }
-          }
-        }
-      }
-
-      return die;
+    var parseDie      = function(notation){
+      return lib.parseNotation(notation).shift();
     };
 
     /**
      * Parses the given value for specified dice
      * and returns a list of dice found
      *
-     * @param {string|number|Array} val
+     * @param {string} notation
      * @returns {Array}
      */
-    var parseNotation = function(val){
-      var dice  = [];
+    var parseNotation = function(notation){
+      var parsed  = [];
 
-      // ensure that val is valid and an array
-      if(!val){
-        // val is falsey - return empty result
-        return dice;
-      }else if(!Array.isArray(val)){
-        // val is NOT an array
-        if((typeof val === 'string') && (val.indexOf('+') >= 0)){
-          // val is a string with concatenated dice values - split by the join
-          val = val.split(/\+/);
-        }else{
-          // convert to an array
-          val = [val];
+      // parse the notation and find each valid dice (and any attributes)
+      var match;
+      while((match = regexes.get('notation').exec(notation)) !== null){
+        var die = {
+          operator:   match[1],                               // dice operator for concatenating with previous rolls (+, -, /, *)
+          qty:        match[2] ? parseInt(match[2], 10) : 1,  // number of times to roll the die
+          sides:      parseInt(match[3], 10),                 // how many sides the die has
+          additions:  []                                      // any additions (ie. +2, -L)
+        };
+
+        if(match[4]){
+          // we have additions (ie. +2, -L)
+          var additionMatch;
+          while((additionMatch = regexes.get('addition').exec(match[4]))){
+            // add the addition to the list
+            die.additions.push([additionMatch[1], isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2]]);
+          }
         }
+
+        parsed.push(die);
       }
 
-      // loop through the given dice list and parse them
-      val.forEach(function(elm, index, array){
-        var die = parseDie(elm);
-
-        // only add the die if it is valid
-        if(die){
-          dice.push(die);
-        }
-      });
-
-      // return the list of dice
-      return dice;
+      // return the parsed dice
+      return parsed;
     };
 
 
