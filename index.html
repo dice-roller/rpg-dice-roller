@@ -2,27 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title></title>
+  <title>Dice Roller demo</title>
+
+  <style>
+    code{
+      color: #444;
+      background: #eee;
+    }
+
+
+    #output{
+      width: 100%;
+    }
+  </style>
 </head>
 
 <body>
   <div>
     <form action="" onsubmit="return roll();">
+      <label for="input">Notation</label>
       <input type="text" placeholder="eg. 1d6+2d20" autofocus id="input">
       <button type="submit">Roll</button>
     </form>
 
-    <p>
-      <small>Accepted formats:</small>
-    </p>
+    <p>Accepted formats:</p>
 
     <ul>
       <li>
-        <code>6</code> <small>(A 6 sided die)</small>
-      </li>
-
-      <li>
-        <code>d6</code> <small>(A 6 sided die)</small>
+        <code>d6</code> or <code>1d6</code> <small>(A 6 sided die)</small>
       </li>
 
       <li>
@@ -30,7 +37,11 @@
       </li>
 
       <li>
-        <code>2d10+4+1d20</code> <small>(Roll two 10 sided dice add four, and roll one 20 sided die)</small>
+        <code>1d6+4</code> <small>(Roll a 6 sided dice and add 4 to the result)</small>
+      </li>
+
+      <li>
+        <code>2d10*4+1d20</code> <small>(Roll two 10 sided dice multiply by four, and roll one 20 sided die)</small>
       </li>
 
       <li>
@@ -39,7 +50,11 @@
     </ul>
 
     <p>
-      <small>See <a href="https://en.wikipedia.org/wiki/Dice_notation#Standard_notation" target="_blank">standard dice notation</a></small>
+      The following mathematical operators can be used: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>
+    </p>
+
+    <p>
+      <small>See <a href="https://en.wikipedia.org/wiki/Dice_notation" target="_blank">dice notation</a></small>
     </p>
   </div>
 
@@ -72,6 +87,9 @@
       diceRoller.clearLog();
 
       document.getElementById('output').value = '';
+
+      // stop event propagation
+      return false;
     }
   </script>
 </body>
