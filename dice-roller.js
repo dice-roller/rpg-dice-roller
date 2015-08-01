@@ -1,6 +1,6 @@
 /**
- * A JS based dice roller that uses limited standard dice notation,
- * as described here: https://en.m.wikipedia.org/wiki/Dice_notation
+ * A JS based dice roller that uses dice notation, as described here:
+ * https://en.m.wikipedia.org/wiki/Dice_notation
  *
  * GreenImp Web - greenimp.co.uk
  */
@@ -155,7 +155,7 @@
   DiceRoller.notationPatterns = new function(){
     var strings = {
       operator: '[+\\-*\\/]',
-      dice:     '([1-9][0-9]*)?d([1-9][0-9]*)'
+      dice:     '([1-9][0-9]*)?d([1-9][0-9]*|%)'
     };
 
     strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
@@ -204,10 +204,10 @@
     var match;
     while((match = DiceRoller.notationPatterns.get('notation').exec(notation)) !== null){
       var die = {
-        operator:   match[1] || '+',                        // dice operator for concatenating with previous rolls (+, -, /, *)
-        qty:        match[2] ? parseInt(match[2], 10) : 1,  // number of times to roll the die
-        sides:      parseInt(match[3], 10),                 // how many sides the die has
-        additions:  []                                      // any additions (ie. +2, -L)
+        operator:   match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
+        qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+        sides:      isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+        additions:  []                                                        // any additions (ie. +2, -L)
       };
 
       if(match[4]){
@@ -326,9 +326,9 @@
 
       // loop through each die and roll it
       parsedDice.forEach(function(elm, index, array){
-        var sides     = elm.sides,                    // number of sides the die has
-            qty       = (elm.qty > 0) ? elm.qty : 1,  // number of times to roll the die
-            dieRolls  = [];                           // list of roll results for the die
+        var sides     = (elm.sides == '%') ? 100 : elm.sides, // number of sides the die has - convert percentile to 100 sides
+            qty       = (elm.qty > 0) ? elm.qty : 1,          // number of times to roll the die
+            dieRolls  = [];                                   // list of roll results for the die
 
         // only continue if the number of sides is valid
         if(sides > 0){

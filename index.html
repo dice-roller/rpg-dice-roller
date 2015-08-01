@@ -47,6 +47,10 @@
       <li>
         <code>2d10+4+2d20-L</code> <small>(Roll two 10 sided dice add four, and roll two 20 sided die, taking away the lowest of the two)</small>
       </li>
+
+      <li>
+        <code>d%</code> <small>(A percentile die - equivalent to <code>d100</code>)</small>
+      </li>
     </ul>
 
     <p>
@@ -75,7 +79,7 @@
     var diceRoller  = new DiceRoller();
 
     function roll(){
-      var rolls = diceRoller.roll(document.getElementById('input').value);
+      diceRoller.roll(document.getElementById('input').value);
 
       document.getElementById('output').value = diceRoller.getLog().shift();
 
