@@ -38,6 +38,51 @@
     return Math.floor(Math.random() * (max - min + 1) + min);
   };
 
+  /**
+   * Takes an array of numbers and adds them together,
+   * returning the result
+   *
+   * @param {Array} numbers
+   * @returns {number}
+   */
+  var sumArray        = function(numbers){
+    return !Array.isArray(numbers) ? 0 : numbers.reduce(function(prev, current){
+      return prev + current;
+    }, 0);
+  };
+
+  /**
+   * Takes two numbers and runs a
+   * mathematical equation on them,
+   * using the given operator
+   *
+   * @param {number} a
+   * @param {number} b
+   * @param {string} operator A valid numerical operator (+, -, /, *)
+   * @returns {number}
+   */
+  var equateNumbers   = function(a, b, operator){
+    switch(operator){
+      case '*':
+        // multiply the value
+        return a *= b;
+        break;
+      case '/':
+        // divide the value
+        return a /= b;
+        break;
+      case '-':
+        // subtract from the value
+        return a -= b;
+        break;
+      case '+':
+      default:
+        // add to the value
+        return a += b;
+        break;
+    }
+  };
+
 
   window.DiceRoller = function(){
     var lib = this;
@@ -99,6 +144,109 @@
     };
   };
 
+  /**
+   * Stores a list of regular expression
+   * patterns for dice notations.
+   * They can be retrieved, by name, using
+   * the `get(name)` method
+   *
+   * @type {notationPatterns}
+   */
+  DiceRoller.notationPatterns = new function(){
+    var strings = {
+      operator: '[+\\-*\\/]',
+      dice:     '([1-9][0-9]*)?d([1-9][0-9]*)'
+    };
+
+    strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
+    /**
+     * this matches a standard dice notation. i.e;
+     * 3d10-2
+     * 4d20-L
+     * 2d7/4
+     * 3d8*2
+     * 2d3+4-1
+     * 2d10-H*1d6/2
+     *
+     * @type {string}
+     */
+    strings.notation  = '(' + strings.operator + ')?' + strings.dice + '((?:' + strings.addition + ')*)';
+
+
+    var regExp  = {};
+
+    /**
+     *
+     * @param name
+     * @returns {RegExp}
+     */
+    this.get  = function(name){
+      if(!regExp[name]){
+        regExp[name]  = new RegExp(strings[name], 'g');
+      }
+
+      return regExp[name];
+    };
+  };
+
+  /**
+   * Parses the given dice notation
+   * and returns a list of dice found
+   *
+   * @link https://en.m.wikipedia.org/wiki/Dice_notation
+   * @param {string} notation
+   * @returns {Array}
+   */
+  DiceRoller.parseNotation    = function(notation){
+    var parsed  = [];
+
+    // parse the notation and find each valid dice (and any attributes)
+    var match;
+    while((match = DiceRoller.notationPatterns.get('notation').exec(notation)) !== null){
+      var die = {
+        operator:   match[1] || '+',                        // dice operator for concatenating with previous rolls (+, -, /, *)
+        qty:        match[2] ? parseInt(match[2], 10) : 1,  // number of times to roll the die
+        sides:      parseInt(match[3], 10),                 // how many sides the die has
+        additions:  []                                      // any additions (ie. +2, -L)
+      };
+
+      if(match[4]){
+        // we have additions (ie. +2, -L)
+        var additionMatch;
+        while((additionMatch = DiceRoller.notationPatterns.get('addition').exec(match[4]))){
+          // add the addition to the list
+          die.additions.push({
+            operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
+            value:    isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
+                        parseFloat(additionMatch[2])
+                        :
+                        additionMatch[2]
+          });
+        }
+      }
+
+      parsed.push(die);
+    }
+
+    // return the parsed dice
+    return parsed;
+  };
+
+  /**
+   * Parses the given notation for a single die
+   * and returns the number of die sides, required
+   * quantity, etc.
+   *
+   * @param {string} notation
+   * @returns {object|undefined}
+   */
+  DiceRoller.parseDie         = function(notation){
+    // parse the notation and only return the first result
+    // (There should only be one result anyway, but it will be in an array and we want the raw result)
+    return DiceRoller.parseNotation(notation).shift();
+  };
+
+
 
   /**
    * A DiceRoll object, which takes a notation
@@ -115,65 +263,28 @@
      *
      * @type {number}
      */
-    var total     = 0;
+    var total       = 0;
 
     /**
      * The parsed notation array
      *
      * @type {Array}
      */
-    var parsedDie = [];
-
-    var regexes   = new function(){
-      var strings = {
-        operator: '[+\\-*\\/]',
-        dice:     '([1-9][0-9]*)?d([1-9][0-9]*)'
-      };
-
-      strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
-      /**
-       * this matches a standard dice notation. i.e;
-       * 3d10-2
-       * 4d20-L
-       * 2d7/4
-       * 3d8*2
-       * 2d3+4-1
-       * 2d10-H*1d6/2
-       *
-       * @type {string}
-       */
-      strings.notation  = '(' + strings.operator + ')?' + strings.dice + '((?:' + strings.addition + ')*)';
-
-
-      var regExp  = {};
-
-      /**
-       *
-       * @param name
-       * @returns {RegExp}
-       */
-      this.get  = function(name){
-        if(!regExp[name]){
-          regExp[name]  = new RegExp(strings[name], 'g');
-        }
-
-        return regExp[name];
-      };
-    };
+    var parsedDice  = [];
 
     /**
      * The dice notation
      *
      * @type {string}
      */
-    this.notation = '';
+    this.notation   = '';
 
     /**
      * Rolls for the notation.
      *
      * @type {Array}
      */
-    this.rolls    = [];
+    this.rolls      = [];
 
 
     /**
@@ -182,75 +293,24 @@
      * @param notation
      */
     var init          = function(notation){
-      parsedDie = parseNotation(notation || lib.notation);
-
-      console.log('parsed:', parsedDie);
-
       // store the notation
-      lib.notation  = notation || lib.notation;
+      lib.notation  = notation;
+
+      // parse the notation
+      parsedDice = DiceRoller.parseNotation(notation);
+
+      console.log('notation:', notation);
+      console.log('parsed:', parsedDice);
+
       // empty the current rolls
       lib.rolls = [];
       // zero the current total
       total = 0;
 
       // roll the dice
-      lib.roll();
-    };
+      lib.roll(parsedDice);
 
-    /**
-     * Parses the given value for a single die
-     * and returns the number of die sides and
-     * required quantity
-     *
-     * @param {string} notation
-     * @returns {object|undefined}
-     */
-    var parseDie      = function(notation){
-      // parse the notation and only return the first result
-      // (There should only be one result anyway, but it will be in an array and we want the raw result)
-      return parseNotation(notation).shift();
-    };
-
-    /**
-     * Parses the given value for specified dice
-     * and returns a list of dice found
-     *
-     * @param {string} notation
-     * @returns {Array}
-     */
-    var parseNotation = function(notation){
-      var parsedDie = [];
-
-      // parse the notation and find each valid dice (and any attributes)
-      var match;
-      while((match = regexes.get('notation').exec(notation)) !== null){
-        var die = {
-          operator:   match[1] || '+',                        // dice operator for concatenating with previous rolls (+, -, /, *)
-          qty:        match[2] ? parseInt(match[2], 10) : 1,  // number of times to roll the die
-          sides:      parseInt(match[3], 10),                 // how many sides the die has
-          additions:  []                                      // any additions (ie. +2, -L)
-        };
-
-        if(match[4]){
-          // we have additions (ie. +2, -L)
-          var additionMatch;
-          while((additionMatch = regexes.get('addition').exec(match[4]))){
-            // add the addition to the list
-            die.additions.push({
-              operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
-              value:    isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
-                          parseFloat(additionMatch[2])
-                          :
-                          additionMatch[2]
-            });
-          }
-        }
-
-        parsedDie.push(die);
-      }
-
-      // return the parsed dice
-      return parsedDie;
+      console.log('current roll:', lib);
     };
 
     /**
@@ -258,11 +318,14 @@
      *
      * @returns {Array}
      */
-    this.roll         = function(){
+    this.roll         = function(dice){
       var rolls = [];
 
+      // reset the cached total
+      total = 0;
+
       // loop through each die and roll it
-      parsedDie.forEach(function(elm, index, array){
+      parsedDice.forEach(function(elm, index, array){
         var sides     = elm.sides,                    // number of sides the die has
             qty       = (elm.qty > 0) ? elm.qty : 1,  // number of times to roll the die
             dieRolls  = [];                           // list of roll results for the die
@@ -294,13 +357,12 @@
      *
      * @returns {string}
      */
-    // TODO - this currently assumes all dice all added (ie; 1d6+2d10)
     this.toString     = function(){
       var output  = this.notation + ': ';
 
-      if(parsedDie && this.rolls.length){
+      if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
         // loop through and build the string for die rolled
-        parsedDie.forEach(function(item, index, array){
+        parsedDice.forEach(function(item, index, array){
           var rolls = lib.rolls[index] || [];
 
           output += ((index > 0) ? item.operator : '') + '[' + rolls.join(',') + ']';
@@ -324,29 +386,37 @@
     /**
      * Returns the roll total
      *
-     * @returns {*}
+     * @returns {number}
      */
-    // TODO - this currently assumes all dice are added (ie; 1d6+2d10)
     this.getTotal     = function(){
-      /*var value = current.value;
-
-      if(value == 'H'){
-        value = Math.max.apply(null, rolls);
-      }else if(value == 'L'){
-        value = Math.min.apply(null, rolls);
-      }*/
-
-      if(!total && Array.isArray(lib.rolls) && lib.rolls.length){
+      if(!total && parsedDice && Array.isArray(lib.rolls) && lib.rolls.length){
         // no total stored already - calculate it
-        total = lib.rolls
-          // loop through and turn all the roll arrays into a single flat array
-          .reduce(function(prev, current){
-            return current.concat(prev);
-          })
-          // sum the new flat array of rolls
-          .reduce(function(prev, current){
-            return current + prev;
-          });
+        parsedDice.forEach(function(item, index, array){
+          var rolls     = lib.rolls[index] || [],
+              dieTotal  = sumArray(rolls);
+
+          if(item.additions.length){
+            // loop through the additions and handle them
+            item.additions.forEach(function(aItem, aIndex, aArray){
+              var value = aItem.value;
+
+              // run any necessary addition value modifications
+              if(value == 'H'){
+                // 'H' is equivalent to the highest roll
+                value = Math.max.apply(null, rolls);
+              }else if(value == 'L'){
+                // 'L' is equivalent to the lowest roll
+                value = Math.min.apply(null, rolls);
+              }
+
+              // run the actual mathematical equation
+              dieTotal = equateNumbers(dieTotal, value, aItem.operator);
+            });
+          }
+
+          // total the value
+          total = equateNumbers(total, dieTotal, item.operator);
+        });
       }
 
       // return the total

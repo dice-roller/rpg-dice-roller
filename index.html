@@ -8,7 +8,7 @@
 <body>
   <div>
     <form action="" onsubmit="return roll();">
-      <input type="text" placeholder="eg. 1d6+2d20" id="input">
+      <input type="text" placeholder="eg. 1d6+2d20" autofocus id="input">
       <button type="submit">Roll</button>
     </form>
 
@@ -32,6 +32,10 @@
       <li>
         <code>2d10+4+1d20</code> <small>(Roll two 10 sided dice add four, and roll one 20 sided die)</small>
       </li>
+
+      <li>
+        <code>2d10+4+2d20-L</code> <small>(Roll two 10 sided dice add four, and roll two 20 sided die, taking away the lowest of the two)</small>
+      </li>
     </ul>
 
     <p>
@@ -45,7 +49,7 @@
     <label for="output">Output</label>
 
     <div>
-      <textarea rows="7" id="output"></textarea>
+      <textarea rows="7" id="output" readonly></textarea>
     </div>
 
     <button onclick="clearLog()">Clear log</button>
@@ -58,11 +62,7 @@
     function roll(){
       var rolls = diceRoller.roll(document.getElementById('input').value);
 
-      console.log('Notation:', document.getElementById('input').value);
-      console.log('Current roll:', rolls);
-      console.log('Roll log:', diceRoller.log);
-
-      document.getElementById('output').value = '' + diceRoller;
+      document.getElementById('output').value = diceRoller.getLog().shift();
 
       // stop event propagation
       return false;
