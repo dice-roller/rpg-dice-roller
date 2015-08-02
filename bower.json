@@ -1,6 +1,6 @@
 {
   "name": "dice-roller",
-  "version": "1.0.1",
+  "version": "1.0.3",
   "description": "A dice roller that accepts typical dice notation",
   "main": [
     "dice-roller.js"
