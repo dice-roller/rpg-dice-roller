@@ -1,0 +1,28 @@
+{
+  "name": "dice-roller",
+  "version": "1.0.1",
+  "description": "A dice roller that accepts typical dice notation",
+  "main": [
+    "dice-roller.js"
+  ],
+  "dependencies": {},
+  "devDependencies": {},
+  "moduleType": [
+    "globals"
+  ],
+  "keywords": [
+    "dice",
+    "roller",
+    "notation",
+    "rpg"
+  ],
+  "authors": [
+    "GreenImp <info@greenimp.co.uk>"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components"
+  ]
+}
