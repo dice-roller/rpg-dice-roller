@@ -155,7 +155,7 @@
   DiceRoller.notationPatterns = new function(){
     var strings = {
       operator: '[+\\-*\\/]',
-      dice:     '([1-9][0-9]*)?d([1-9][0-9]*|%)'
+      dice:     '([1-9][0-9]*)?d([1-9][0-9]*|%|F(?:\\.[12])?)'
     };
 
     strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
