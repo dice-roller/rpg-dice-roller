@@ -48,6 +48,10 @@ You can use `DiceRoller` like so:
 </script>
 ```
 
+### Demo
+
+View the demo here: http://rpg.greenimp.co.uk/dice-roller
+
 
 ## Licence
 
