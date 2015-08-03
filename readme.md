@@ -48,6 +48,19 @@ You can use `DiceRoller` like so:
 </script>
 ```
 
+### Demo
+
+View the demo here: http://rpg.greenimp.co.uk/dice-roller
+
+
+## Licence
+
+This dice roller is released under the MIT licence, meaning that you can do pretty much anything you like with it, so long as the original copyright remains in place.
+
+You **can** use it in commercial products.
+
+If the licence terminology in the licence.txt is confusing, check out this: https://www.tldrlegal.com/l/mit
+
 
 ## Reference
 
