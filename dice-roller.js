@@ -10,7 +10,6 @@
 ;(function(){
   "use strict";
 
-
   /**
    * Checks if the given val is a valid number
    *
@@ -85,7 +84,10 @@
     }
   };
 
-
+  /**
+   *
+   * @constructor
+   */
   window.DiceRoller = function(){
     var lib = this;
 
@@ -94,7 +96,7 @@
      *
      * @type {Array}
      */
-    this.log  = [];
+    var log  = [];
 
 
     /**
@@ -112,8 +114,7 @@
     };
 
     /**
-     * Rolls the given dice sides for the
-     * set amount of rolls.
+     * Rolls the given dice notation.
      * Returns a list of results
      *
      * @param {string} notation
@@ -123,7 +124,7 @@
       var diceRoll  = new DiceRoll(notation);
 
       // add the roll log to our global log
-      lib.log.push(diceRoll);
+      log.push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;
@@ -133,7 +134,7 @@
      * Clears the roll history log
      */
     this.clearLog = function(){
-      lib.log  = [];
+      log  = [];
     };
 
     /**
@@ -142,7 +143,7 @@
      * @returns {Array}
      */
     this.getLog   = function(){
-      return lib.log || [];
+      return log || [];
     };
   };
 
