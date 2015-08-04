@@ -283,7 +283,7 @@
     this.notation   = '';
 
     /**
-     * Rolls for the notation.
+     * Rolls for the notation
      *
      * @type {Array}
      */
@@ -316,7 +316,7 @@
      *
      * @returns {Array}
      */
-    this.roll         = function(dice){
+    this.roll         = function(){
       var rolls = [];
 
       // reset the cached total
