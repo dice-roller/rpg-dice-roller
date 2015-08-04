@@ -301,9 +301,6 @@
       // parse the notation
       parsedDice = DiceRoller.parseNotation(notation);
 
-      console.log('notation:', notation);
-      console.log('parsed:', parsedDice);
-
       // empty the current rolls
       lib.rolls = [];
       // zero the current total
@@ -311,8 +308,6 @@
 
       // roll the dice
       lib.roll(parsedDice);
-
-      console.log('current roll:', lib);
     };
 
     /**
