@@ -157,13 +157,31 @@
    */
   DiceRoller.notationPatterns = new function(){
     var strings = {
+      /**
+       * Matches a basic mathematical operator
+       *
+       * @type {string}
+       */
       operator: '[+\\-*\\/]',
-      dice:     '([1-9][0-9]*)?d([1-9][0-9]*|%|F(?:\\.[12])?)'
+      /**
+       * Matches the numbers for a 'fudge' die (ie. F, F.2)
+       *
+       * @type {string}
+       */
+      fudge:    'F(?:\\.([12]))?'
     };
 
-    strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
+    // matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')';
+
     /**
-     * this matches a standard dice notation. i.e;
+     * Matches the addition to a dice (ie. +4, *2, -L)
+     * @type {string}
+     */
+    strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
+
+    /**
+     * Matches a standard dice notation. i.e;
      * 3d10-2
      * 4d20-L
      * 2d7/4
@@ -179,16 +197,18 @@
     var regExp  = {};
 
     /**
-     *
-     * @param name
+     * @param {string} name
+     * @param {string=} flags
+     * @param {boolean=} matchWhole
      * @returns {RegExp}
      */
-    this.get  = function(name){
-      if(!regExp[name]){
-        regExp[name]  = new RegExp(strings[name], 'g');
+    this.get  = function(name, flags, matchWhole){
+      var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+      if(!regExp[cacheName]){
+        regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
       }
 
-      return regExp[name];
+      return regExp[cacheName];
     };
   };
 
@@ -205,7 +225,7 @@
 
     // parse the notation and find each valid dice (and any attributes)
     var match;
-    while((match = DiceRoller.notationPatterns.get('notation').exec(notation)) !== null){
+    while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
       var die = {
         operator:   match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
         qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
@@ -213,10 +233,10 @@
         additions:  []                                                        // any additions (ie. +2, -L)
       };
 
-      if(match[4]){
+      if(match[5]){
         // we have additions (ie. +2, -L)
         var additionMatch;
-        while((additionMatch = DiceRoller.notationPatterns.get('addition').exec(match[4]))){
+        while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[5]))){
           // add the addition to the list
           die.additions.push({
             operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
@@ -308,7 +328,7 @@
       total = 0;
 
       // roll the dice
-      lib.roll(parsedDice);
+      lib.roll();
     };
 
     /**
@@ -328,11 +348,39 @@
             qty       = (elm.qty > 0) ? elm.qty : 1,          // number of times to roll the die
             dieRolls  = [];                                   // list of roll results for the die
 
+        // check for non-numerical dice formats
+        if(typeof sides === 'string'){
+          if(elm.sides === '%'){
+            // convert percentile to 100 sided die
+            sides = 100;
+          }else{
+            // check for fudge dice
+            var matches = sides.match(DiceRoller.notationPatterns.get('fudge', null, true));
+
+            if(matches !== null){
+              // we have a fudge dice - get a DiceRoll object for it's equivalent
+              sides = new DiceRoll('1d3-2');
+            }
+          }
+        }
+
         // only continue if the number of sides is valid
-        if(sides > 0){
+        if(sides){
           // loop through and roll for the quantity
           for(var i = 0; i < qty; i++){
-            dieRolls.push(generateNumber(1, sides));
+            var total = 0;
+
+            // generate the roll total
+            if(typeof sides === 'number'){
+              // sides is a number, generate a random number up to the sides amount
+              total += generateNumber(1, sides);
+            }else if(typeof sides.roll === 'function'){
+              // sides has `roll` function, assume DiceRoll object - roll it and use the total
+              sides.roll();
+              total += sides.getTotal();
+            }
+
+            dieRolls.push(total);
           }
         }
 
