@@ -2,14 +2,13 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version 1.0.5
+ * @version 1.0.6
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
 
 ;(function(){
   "use strict";
-
 
   /**
    * Checks if the given val is a valid number
@@ -85,7 +84,10 @@
     }
   };
 
-
+  /**
+   *
+   * @constructor
+   */
   window.DiceRoller = function(){
     var lib = this;
 
@@ -94,7 +96,7 @@
      *
      * @type {Array}
      */
-    this.log  = [];
+    var log  = [];
 
 
     /**
@@ -112,8 +114,7 @@
     };
 
     /**
-     * Rolls the given dice sides for the
-     * set amount of rolls.
+     * Rolls the given dice notation.
      * Returns a list of results
      *
      * @param {string} notation
@@ -123,7 +124,7 @@
       var diceRoll  = new DiceRoll(notation);
 
       // add the roll log to our global log
-      lib.log.push(diceRoll);
+      log.push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;
@@ -133,7 +134,7 @@
      * Clears the roll history log
      */
     this.clearLog = function(){
-      lib.log  = [];
+      log  = [];
     };
 
     /**
@@ -142,7 +143,7 @@
      * @returns {Array}
      */
     this.getLog   = function(){
-      return lib.log || [];
+      return log || [];
     };
   };
 
@@ -282,7 +283,7 @@
     this.notation   = '';
 
     /**
-     * Rolls for the notation.
+     * Rolls for the notation
      *
      * @type {Array}
      */
@@ -301,9 +302,6 @@
       // parse the notation
       parsedDice = DiceRoller.parseNotation(notation);
 
-      console.log('notation:', notation);
-      console.log('parsed:', parsedDice);
-
       // empty the current rolls
       lib.rolls = [];
       // zero the current total
@@ -311,8 +309,6 @@
 
       // roll the dice
       lib.roll(parsedDice);
-
-      console.log('current roll:', lib);
     };
 
     /**
@@ -320,7 +316,7 @@
      *
      * @returns {Array}
      */
-    this.roll         = function(dice){
+    this.roll         = function(){
       var rolls = [];
 
       // reset the cached total
