@@ -64,12 +64,15 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 
 #### `DiceRoller` object
 
-| Property   | type                          | description                                                                                                                    |
-| ---------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
-| `roll`     | `function({String} notation)` | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                        |
-| `getLog`   | `function()`                  | Returns the current roll log. Returns: `Array`                                                                                 |
-| `clearLog` | `function()`                  | Clears the roll history log.                                                                                                   |
-| `toString` | `function()`                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String` |
+| Property           | type                          | description                                                                                                                                |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `roll`             | `function({String} notation)` | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
+| `getLog`           | `function()`                  | Returns the current roll log. Returns: `Array`                                                                                             |
+| `clearLog`         | `function()`                  | Clears the roll history log.                                                                                                               |
+| `toString`         | `function()`                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
+| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                       |
+| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                          |
+| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object` |
 
 
 #### `DiceRoll` object
