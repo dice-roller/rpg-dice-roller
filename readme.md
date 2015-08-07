@@ -1,4 +1,4 @@
-# dice-roller
+# rpg-dice-roller
 
 A basic JS based dice roller that accepts typical dice notation.
 
@@ -7,6 +7,22 @@ A basic JS based dice roller that accepts typical dice notation.
 
 The standard notation formats are accepted, such as `2d6+12`, and also the use of `L` or `H` to represent the lowest or highest roll respectively.  
 ie. `4d6-L` (A roll of 4 six-sided dice, dropping the lowest result)
+
+
+### Fudge dice
+
+Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
+
+You can also use it in conjunction with other operators and additions.
+
+Examples:
+
+```
+dF      // this is the same as `dF.2`
+4dF.2   // roll 4 standard fudge dice
+4dF.2-L // roll 4 standard fudge dice, subtracting the lowest result
+dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
+```
 
 
 ### Operators
@@ -23,6 +39,7 @@ Although percentile dice can be rolled by using a `d100`, you can also use `d%`,
 ## Browsers
 
 This dice roller only works on the latest browsers and will **not** work in versions of IE older than 10.
+
 
 ## Usage
 
@@ -48,6 +65,7 @@ You can use `DiceRoller` like so:
 </script>
 ```
 
+
 ### API
 
 The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
@@ -61,6 +79,7 @@ var roller2 = new DiceRoller();
 ```
 
 Each instance keeps it's own log of dice rolls, so it's handy if you're rolling for several completely unrelated things.
+
 
 #### `DiceRoller` object
 
