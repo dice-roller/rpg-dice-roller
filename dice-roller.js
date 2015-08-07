@@ -121,10 +121,15 @@
      * @returns {Window.DiceRoll}
      */
     this.roll     = function(notation){
-      var diceRoll  = new DiceRoll(notation);
+      var diceRoll;
 
-      // add the roll log to our global log
-      log.push(diceRoll);
+      // only continue if a notation was passed
+      if(notation){
+        diceRoll = new DiceRoll(notation);
+
+        // add the roll log to our global log
+        log.push(diceRoll);
+      }
 
       // return the current DiceRoll
       return diceRoll;
@@ -223,32 +228,35 @@
   DiceRoller.parseNotation    = function(notation){
     var parsed  = [];
 
-    // parse the notation and find each valid dice (and any attributes)
-    var match;
-    while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
-      var die = {
-        operator:   match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
-        qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-        sides:      isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
-        additions:  []                                                        // any additions (ie. +2, -L)
-      };
+    // only continue if a notation was passed
+    if(notation){
+      // parse the notation and find each valid dice (and any attributes)
+      var match;
+      while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
+        var die = {
+          operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
+          qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+          sides: isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+          additions: []                                                        // any additions (ie. +2, -L)
+        };
 
-      if(match[5]){
-        // we have additions (ie. +2, -L)
-        var additionMatch;
-        while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[5]))){
-          // add the addition to the list
-          die.additions.push({
-            operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
-            value:    isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
-                        parseFloat(additionMatch[2])
-                        :
-                        additionMatch[2]
-          });
+        if (match[5]) {
+          // we have additions (ie. +2, -L)
+          var additionMatch;
+          while ((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[5]))) {
+            // add the addition to the list
+            die.additions.push({
+              operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
+              value: isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
+                parseFloat(additionMatch[2])
+                :
+                additionMatch[2]
+            });
+          }
         }
-      }
 
-      parsed.push(die);
+        parsed.push(die);
+      }
     }
 
     // return the parsed dice
@@ -354,6 +362,10 @@
      * @param notation
      */
     var init          = function(notation){
+      if(!notation){
+        throw 'DiceRoll exception: No notation specified';
+      }
+
       // store the notation
       lib.notation  = notation;
 

@@ -1,8 +1,13 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <title>Dice Roller demo</title>
+
+  <meta name="author" content="GreenImp Web - greenimp.co.uk">
 
   <style>
     code{
@@ -87,9 +92,13 @@
     var diceRoller  = new DiceRoller();
 
     function roll(){
-      diceRoller.roll(document.getElementById('input').value);
+      var value = document.getElementById('input').value;
 
-      document.getElementById('output').value = diceRoller.getLog().shift();
+      if(value){
+        diceRoller.roll(value);
+
+        document.getElementById('output').value = diceRoller.getLog().shift();
+      }
 
       // stop event propagation
       return false;
