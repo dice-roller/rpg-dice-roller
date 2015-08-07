@@ -21,7 +21,7 @@ Examples:
 dF      // this is the same as `dF.2`
 4dF.2   // roll 4 standard fudge dice
 4dF.2-L // roll 4 standard fudge dice, subtracting the lowest result
-dF.1*2  // roll non-standard fudge dice, multiplying thte result by 2
+dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
 ```
 
 
