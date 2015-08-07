@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version 1.0.6
+ * @version 1.1.0
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
@@ -157,13 +157,31 @@
    */
   DiceRoller.notationPatterns = new function(){
     var strings = {
+      /**
+       * Matches a basic mathematical operator
+       *
+       * @type {string}
+       */
       operator: '[+\\-*\\/]',
-      dice:     '([1-9][0-9]*)?d([1-9][0-9]*|%)'
+      /**
+       * Matches the numbers for a 'fudge' die (ie. F, F.2)
+       *
+       * @type {string}
+       */
+      fudge:    'F(?:\\.([12]))?'
     };
 
-    strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
+    // matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')';
+
     /**
-     * this matches a standard dice notation. i.e;
+     * Matches the addition to a dice (ie. +4, *2, -L)
+     * @type {string}
+     */
+    strings.addition  = '(' + strings.operator + ')([1-9]+(?!d)|H|L)';
+
+    /**
+     * Matches a standard dice notation. i.e;
      * 3d10-2
      * 4d20-L
      * 2d7/4
@@ -179,16 +197,18 @@
     var regExp  = {};
 
     /**
-     *
-     * @param name
+     * @param {string} name
+     * @param {string=} flags
+     * @param {boolean=} matchWhole
      * @returns {RegExp}
      */
-    this.get  = function(name){
-      if(!regExp[name]){
-        regExp[name]  = new RegExp(strings[name], 'g');
+    this.get  = function(name, flags, matchWhole){
+      var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+      if(!regExp[cacheName]){
+        regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
       }
 
-      return regExp[name];
+      return regExp[cacheName];
     };
   };
 
@@ -205,7 +225,7 @@
 
     // parse the notation and find each valid dice (and any attributes)
     var match;
-    while((match = DiceRoller.notationPatterns.get('notation').exec(notation)) !== null){
+    while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
       var die = {
         operator:   match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
         qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
@@ -213,10 +233,10 @@
         additions:  []                                                        // any additions (ie. +2, -L)
       };
 
-      if(match[4]){
+      if(match[5]){
         // we have additions (ie. +2, -L)
         var additionMatch;
-        while((additionMatch = DiceRoller.notationPatterns.get('addition').exec(match[4]))){
+        while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[5]))){
           // add the addition to the list
           die.additions.push({
             operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
@@ -275,6 +295,44 @@
      */
     var parsedDice  = [];
 
+    var diceRollMethods = {
+      /**
+       * Rolls a standard die
+       *
+       * @param sides
+       * @returns {*}
+       */
+      default:  function(sides){
+        return generateNumber(1, sides);
+      },
+      /**
+       * Rolls a fudge die
+       *
+       * @param {number} numNonBlanks
+       * @returns {number}
+       */
+      fudge:    function(numNonBlanks){
+        var total = 0;
+
+        if(numNonBlanks == 2){
+          // default fudge (2 of each non-blank) = 1d3 - 2
+          total = generateNumber(1, 3) - 2;
+        }else if(numNonBlanks == 1){
+          // only 1 of each non-blank
+          // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
+          var num = generateNumber(1, 6);
+          if(num == 1){
+            total = -1;
+          }else if(num == 6){
+            total = 1;
+          }
+        }
+
+        return total;
+      }
+    };
+
+
     /**
      * The dice notation
      *
@@ -308,7 +366,52 @@
       total = 0;
 
       // roll the dice
-      lib.roll(parsedDice);
+      lib.roll();
+    };
+
+    /**
+     * Rolls a single die for its quantity
+     * and returns an array of the results
+     *
+     * @param {object} die
+     * @returns {Array}
+     */
+    var rollDie       = function(die){
+      var sides     = die.sides,                    // number of sides the die has - convert percentile to 100 sides
+          qty       = (die.qty > 0) ? die.qty : 1,  // number of times to roll the die
+          dieRolls  = [],                           // list of roll results for the die
+          callback  = diceRollMethods.default;      // callback method for rolling the die
+
+      // check for non-numerical dice formats
+      if(typeof sides === 'string'){
+        if(die.sides === '%'){
+          // convert percentile to 100 sided die
+          sides = 100;
+        }else{
+          // check for fudge dice
+          var matches = sides.match(DiceRoller.notationPatterns.get('fudge', null, true));
+
+          if(matches !== null){
+            // we have a fudge dice - define the callback to return the `fudge` roll method
+            // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
+            // in case we want to use the number of sides as well, in the future
+            callback = function(sides){
+              return diceRollMethods.fudge(isNumeric(matches[1]) ? parseInt(matches[1]) : 2);
+            };
+          }
+        }
+      }
+
+      // only continue if the number of sides is valid
+      if(sides){
+        // loop through and roll for the quantity
+        for(var i = 0; i < qty; i++){
+          // generate the roll total
+          dieRolls.push(callback.call(this, sides));
+        }
+      }
+
+      return dieRolls;
     };
 
     /**
@@ -317,31 +420,17 @@
      * @returns {Array}
      */
     this.roll         = function(){
-      var rolls = [];
+      // clear the roll log
+      lib.rolls = [];
 
       // reset the cached total
       total = 0;
 
       // loop through each die and roll it
       parsedDice.forEach(function(elm, index, array){
-        var sides     = (elm.sides == '%') ? 100 : elm.sides, // number of sides the die has - convert percentile to 100 sides
-            qty       = (elm.qty > 0) ? elm.qty : 1,          // number of times to roll the die
-            dieRolls  = [];                                   // list of roll results for the die
-
-        // only continue if the number of sides is valid
-        if(sides > 0){
-          // loop through and roll for the quantity
-          for(var i = 0; i < qty; i++){
-            dieRolls.push(generateNumber(1, sides));
-          }
-        }
-
-        // add the roll results to our log
-        rolls.push(dieRolls);
+        // Roll the dice and add it to the log
+        lib.rolls.push(rollDie(elm));
       });
-
-      // store the rolls
-      lib.rolls = rolls;
 
       // return the rolls;
       return lib.rolls;
