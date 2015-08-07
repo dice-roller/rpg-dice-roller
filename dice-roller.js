@@ -295,6 +295,44 @@
      */
     var parsedDice  = [];
 
+    var diceRollMethods = {
+      /**
+       * Rolls a standard die
+       *
+       * @param sides
+       * @returns {*}
+       */
+      default:  function(sides){
+        return generateNumber(1, sides);
+      },
+      /**
+       * Rolls a fudge die
+       *
+       * @param {number} numNonBlanks
+       * @returns {number}
+       */
+      fudge:    function(numNonBlanks){
+        var total = 0;
+
+        if(numNonBlanks == 2){
+          // default fudge (2 of each non-blank) = 1d3 - 2
+          total = generateNumber(1, 3) - 2;
+        }else if(numNonBlanks == 1){
+          // only 1 of each non-blank
+          // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
+          var num = generateNumber(1, 6);
+          if(num == 1){
+            total = -1;
+          }else if(num == 6){
+            total = 1;
+          }
+        }
+
+        return total;
+      }
+    };
+
+
     /**
      * The dice notation
      *
@@ -332,64 +370,67 @@
     };
 
     /**
+     * Rolls a single die for its quantity
+     * and returns an array of the results
+     *
+     * @param {object} die
+     * @returns {Array}
+     */
+    var rollDie       = function(die){
+      var sides     = die.sides,                    // number of sides the die has - convert percentile to 100 sides
+          qty       = (die.qty > 0) ? die.qty : 1,  // number of times to roll the die
+          dieRolls  = [],                           // list of roll results for the die
+          callback  = diceRollMethods.default;      // callback method for rolling the die
+
+      // check for non-numerical dice formats
+      if(typeof sides === 'string'){
+        if(die.sides === '%'){
+          // convert percentile to 100 sided die
+          sides = 100;
+        }else{
+          // check for fudge dice
+          var matches = sides.match(DiceRoller.notationPatterns.get('fudge', null, true));
+
+          if(matches !== null){
+            // we have a fudge dice - define the callback to return the `fudge` roll method
+            // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
+            // in case we want to use the number of sides as well, in the future
+            callback = function(sides){
+              return diceRollMethods.fudge(isNumeric(matches[1]) ? parseInt(matches[1]) : 2);
+            };
+          }
+        }
+      }
+
+      // only continue if the number of sides is valid
+      if(sides){
+        // loop through and roll for the quantity
+        for(var i = 0; i < qty; i++){
+          // generate the roll total
+          dieRolls.push(callback.call(this, sides));
+        }
+      }
+
+      return dieRolls;
+    };
+
+    /**
      * Rolls the dice for the existing notation
      *
      * @returns {Array}
      */
     this.roll         = function(){
-      var rolls = [];
+      // clear the roll log
+      lib.rolls = [];
 
       // reset the cached total
       total = 0;
 
       // loop through each die and roll it
       parsedDice.forEach(function(elm, index, array){
-        var sides     = (elm.sides == '%') ? 100 : elm.sides, // number of sides the die has - convert percentile to 100 sides
-            qty       = (elm.qty > 0) ? elm.qty : 1,          // number of times to roll the die
-            dieRolls  = [];                                   // list of roll results for the die
-
-        // check for non-numerical dice formats
-        if(typeof sides === 'string'){
-          if(elm.sides === '%'){
-            // convert percentile to 100 sided die
-            sides = 100;
-          }else{
-            // check for fudge dice
-            var matches = sides.match(DiceRoller.notationPatterns.get('fudge', null, true));
-
-            if(matches !== null){
-              // we have a fudge dice - get a DiceRoll object for it's equivalent
-              sides = new DiceRoll('1d3-2');
-            }
-          }
-        }
-
-        // only continue if the number of sides is valid
-        if(sides){
-          // loop through and roll for the quantity
-          for(var i = 0; i < qty; i++){
-            var total = 0;
-
-            // generate the roll total
-            if(typeof sides === 'number'){
-              // sides is a number, generate a random number up to the sides amount
-              total += generateNumber(1, sides);
-            }else if(typeof sides.roll === 'function'){
-              // sides has `roll` function, assume DiceRoll object - roll it and use the total
-              sides.roll();
-              total += sides.getTotal();
-            }
-
-            dieRolls.push(total);
-          }
-        }
-
-        // add the roll results to our log
-        rolls.push(dieRolls);
+        // Roll the dice and add it to the log
+        lib.rolls.push(rollDie(elm));
       });
-
-      // store the rolls
-      lib.rolls = rolls;
 
       // return the rolls;
       return lib.rolls;
