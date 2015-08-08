@@ -36,6 +36,41 @@ However, the use of the mathematical symbols `×` and `÷` do not currently work
 Although percentile dice can be rolled by using a `d100`, you can also use `d%`, which will do the same thing, returning a number between 0 and 100.
 
 
+### Exploding dice
+
+Exploding dice roll an additional die if the maximum, on that die, is rolled. If that die is also the maximum it is rolled again, and so forth, until a roll is made that isn't the maximum.  
+ie. Rolling a 6 on a d6, or a 10 on a d10.
+
+To explode a dice, add an exclamation mark after the die sides: `4d10!`
+
+Each exploded die shows as a separate roll in the list, like so:
+
+```
+2d6!: [4, 6!, 6!, 2] = 20
+```
+
+Where the second roll exploded, so we rolled again, which also exploded. The fourth role, however, did not, so we stop rolling.
+
+You can even use `L` and `H`, which will look at exploded dice, as well as normal rolls.  
+i.e.
+
+```
+1d6!-L: [6!,6!,6!,3]-L = 18
+```
+
+
+#### Compounding
+
+Sometimes, you may want the exploded dice rolls to be added together under the same, original roll. In this situation, you can compound the dice by using two exclamation marks: `4d10!!`
+
+For example (using the examples of exploding dice above):
+
+```
+2d6!!: [4, 14!!] = 20   // the exploded dice rolls of [6, 6, 2] are added together
+1d6!!-L: [21!!]-L = 18  // the exploded dice rolls of [6, 6, 6, 3] are added together
+```
+
+
 ## Browsers
 
 This dice roller only works on the latest browsers and will **not** work in versions of IE older than 10.

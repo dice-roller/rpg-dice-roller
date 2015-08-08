@@ -174,7 +174,7 @@
        * @type {string}
        */
       fudge:    'F(?:\\.([12]))?',
-      explode:  '(!)'
+      explode:  '(!{1,2})'
     };
 
     // matches a dice (ie. 2d6, d10, d%, dF, dF.2)
@@ -239,7 +239,8 @@
           qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
           sides:      isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
           fudge:      false,                                                    // if fudge die this is set to the fudge notation match
-          explode:    (match[5] && match[5] == '!'),                            // flag - whether to explode the dice rolls or not
+          explode:    match[5],                                                 // flag - whether to explode the dice rolls or not
+          compound:   match[5] == '!!',                                         // flag - whether to compound exploding dice or not
           additions:  []                                                        // any additions (ie. +2, -L)
         };
 
@@ -248,10 +249,11 @@
           die.fudge = die.sides.match(DiceRoller.notationPatterns.get('fudge', null, true)) || false;
         }
 
-        if (match[6]) {
+
+        if(match[6]){
           // we have additions (ie. +2, -L)
           var additionMatch;
-          while ((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[6]))) {
+          while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[6]))){
             // add the addition to the list
             die.additions.push({
               operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
@@ -429,11 +431,18 @@
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
             // generate the roll total
-            roll = callback.call(this, sides);
+            roll = callback.call(this, sides) + (die.compound ? roll : 0);
 
-            // add the roll
+            // if we're NOT compounding, add the roll (otherwise we add it as a total afterwards)
+            if(!die.compound){
+              dieRolls.push(roll);
+            }
+          }while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
+
+          // if we're compounding, add the roll total
+          if(die.compound){
             dieRolls.push(roll);
-          }while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))))
+          }
         }
       }
 
@@ -484,8 +493,11 @@
           rolls.forEach(function(roll, rIndex, array){
             output += roll;
 
-            if(item.explode && ((roll == item.sides) || (item.fudge && (roll == 1)))){
-              output += '!';
+            if(item.explode){
+              if((roll >= item.sides) || (item.fudge && (roll >= 1))){
+                // this die roll exploded
+                output += '!' + (item.compound ? '!' : '');
+              }
             }
 
             if(rIndex != array.length-1){
