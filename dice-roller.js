@@ -173,11 +173,12 @@
        *
        * @type {string}
        */
-      fudge:    'F(?:\\.([12]))?'
+      fudge:    'F(?:\\.([12]))?',
+      explode:  '(!)'
     };
 
     // matches a dice (ie. 2d6, d10, d%, dF, dF.2)
-    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')';
+    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')' + strings.explode + '?';
 
     /**
      * Matches the addition to a dice (ie. +4, *2, -L)
@@ -234,16 +235,23 @@
       var match;
       while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
         var die = {
-          operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
-          qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-          sides: isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
-          additions: []                                                        // any additions (ie. +2, -L)
+          operator:   match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
+          qty:        match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+          sides:      isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+          fudge:      false,                                                    // if fudge die this is set to the fudge notation match
+          explode:    (match[5] && match[5] == '!'),                            // flag - whether to explode the dice rolls or not
+          additions:  []                                                        // any additions (ie. +2, -L)
         };
 
-        if (match[5]) {
+        // check if it's a fudge die
+        if(typeof die.sides === 'string'){
+          die.fudge = die.sides.match(DiceRoller.notationPatterns.get('fudge', null, true)) || false;
+        }
+
+        if (match[6]) {
           // we have additions (ie. +2, -L)
           var additionMatch;
-          while ((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[5]))) {
+          while ((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[6]))) {
             // add the addition to the list
             die.additions.push({
               operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
@@ -389,37 +397,43 @@
      * @returns {Array}
      */
     var rollDie       = function(die){
-      var sides     = die.sides,                    // number of sides the die has - convert percentile to 100 sides
-          qty       = (die.qty > 0) ? die.qty : 1,  // number of times to roll the die
-          dieRolls  = [],                           // list of roll results for the die
-          callback  = diceRollMethods.default;      // callback method for rolling the die
+      var sides     = die.sides,                // number of sides the die has - convert percentile to 100 sides
+          dieRolls  = [],                       // list of roll results for the die
+          callback  = diceRollMethods.default;  // callback method for rolling the die
+
+      // ensure that the roll quantity is valid
+      die.qty = (die.qty > 0) ? die.qty : 1;
 
       // check for non-numerical dice formats
-      if(typeof sides === 'string'){
+      if(die.fudge){
+        // we have a fudge dice - define the callback to return the `fudge` roll method
+        // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
+        // in case we want to use the number of sides as well, in the future
+        callback = function(sides){
+          return diceRollMethods.fudge(isNumeric(die.fudge[1]) ? parseInt(die.fudge[1]) : 2);
+        };
+      }else if(typeof die.sides === 'string'){
         if(die.sides === '%'){
           // convert percentile to 100 sided die
           sides = 100;
-        }else{
-          // check for fudge dice
-          var matches = sides.match(DiceRoller.notationPatterns.get('fudge', null, true));
-
-          if(matches !== null){
-            // we have a fudge dice - define the callback to return the `fudge` roll method
-            // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
-            // in case we want to use the number of sides as well, in the future
-            callback = function(sides){
-              return diceRollMethods.fudge(isNumeric(matches[1]) ? parseInt(matches[1]) : 2);
-            };
-          }
         }
       }
+
 
       // only continue if the number of sides is valid
       if(sides){
         // loop through and roll for the quantity
-        for(var i = 0; i < qty; i++){
-          // generate the roll total
-          dieRolls.push(callback.call(this, sides));
+        for(var i = 0; i < die.qty; i++){
+          var roll  = 0;  // the roll for the current die
+
+          // roll the die once, then check if it exploded and keep rolling until it stops
+          do{
+            // generate the roll total
+            roll = callback.call(this, sides);
+
+            // add the roll
+            dieRolls.push(roll);
+          }while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))))
         }
       }
 
@@ -462,10 +476,26 @@
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
         // loop through and build the string for die rolled
         parsedDice.forEach(function(item, index, array){
-          var rolls = lib.rolls[index] || [];
+          var rolls   = lib.rolls[index] || [];
 
-          output += ((index > 0) ? item.operator : '') + '[' + rolls.join(',') + ']';
+          output += ((index > 0) ? item.operator : '') + '[';
 
+          // output the rolls
+          rolls.forEach(function(roll, rIndex, array){
+            output += roll;
+
+            if(item.explode && ((roll == item.sides) || (item.fudge && (roll == 1)))){
+              output += '!';
+            }
+
+            if(rIndex != array.length-1){
+              output += ',';
+            }
+          });
+
+          output += ']';
+
+          // add any additions
           if(item.additions.length){
             output += item.additions.reduce(function(prev, current){
               return prev + current.operator + current.value;
