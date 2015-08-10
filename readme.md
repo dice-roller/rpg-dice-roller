@@ -9,22 +9,6 @@ The standard notation formats are accepted, such as `2d6+12`, and also the use o
 ie. `4d6-L` (A roll of 4 six-sided dice, dropping the lowest result)
 
 
-### Fudge dice
-
-Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
-
-You can also use it in conjunction with other operators and additions.
-
-Examples:
-
-```
-dF      // this is the same as `dF.2`
-4dF.2   // roll 4 standard fudge dice
-4dF.2-L // roll 4 standard fudge dice, subtracting the lowest result
-dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
-```
-
-
 ### Operators
 
 You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.  
@@ -99,6 +83,22 @@ Where the second roll exploded, so we rolled again, which also exploded (rolled 
 Remember that we subtract 1 from penetrated rolls, which is why we show '5' and '1', instead of '6', and '2'.
 
 You can also compound penetrating dice, like so: `2d6!!p`
+
+
+### Fudge dice
+
+Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
+
+You can also use it in conjunction with other operators and additions.
+
+Examples:
+
+```
+dF      // this is the same as `dF.2`
+4dF.2   // roll 4 standard fudge dice
+4dF.2-L // roll 4 standard fudge dice, subtracting the lowest result
+dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
+```
 
 
 ## Browsers
