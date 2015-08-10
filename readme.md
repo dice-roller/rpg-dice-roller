@@ -70,6 +70,36 @@ For example (using the examples of exploding dice above):
 1d6!!-L: [21!!]-L = 18  // the exploded dice rolls of [6, 6, 6, 3] are added together
 ```
 
+#### Penetrating
+
+Some exploding dice system use a penetrating rule.
+
+Taken from the Hackmaster Basic rules:
+
+> Should you roll the maximum value 
+  on this particular die, you may re-roll and add the result of 
+  the extra die, less one point, to the total (penetration can 
+  actually result in simply the maximum die value if a 1 is subsequently 
+  rolled, since any fool knows that 1-1=0). This 
+  process continues indefinitely as long as the die in question 
+  continues to come up maximum (but there’s always only a 
+  –1 subtracted from the extra die, even if it’s, say, the third 
+  die of penetration)
+
+So, if I rolled `1d6` (penetrating), and got a 6, I would roll another `d6`, subtracting 1 from the result. If that `d6` rolled a 6 (before the -1) it would penetrate, and so on.
+
+The syntax for penetrating is very similar to exploding, but with a lowercase 'p' appended: `2d6!p`.  
+i.e. (Using the same example from exploding dice above):
+
+```
+2d6!p: [4, 6!p, 5, 1] = 20
+```
+
+Where the second roll exploded, so we rolled again, which also exploded (rolled a 6). The fourth role, however, rolled a 2, so did not penetrate, so we stop rolling.  
+Remember that we subtract 1 from penetrated rolls, which is why we show '5' and '1', instead of '6', and '2'.
+
+You can also compound penetrating dice, like so: `2d6!!p`
+
 
 ## Browsers
 
