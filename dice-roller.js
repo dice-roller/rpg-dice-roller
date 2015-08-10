@@ -241,7 +241,7 @@
           fudge:      false,                                                    // if fudge die this is set to the fudge notation match
           explode:    match[5],                                                 // flag - whether to explode the dice rolls or not
           penetrate:  (match[5] == '!p') || (match[5] == '!!p'),                // flag - whether to penetrate the dice rolls or not
-          compound:   match[5] == '!!',                                         // flag - whether to compound exploding dice or not
+          compound:   (match[5] == '!!') || (match[5] == '!!p'),                // flag - whether to compound exploding dice or not
           additions:  []                                                        // any additions (ie. +2, -L)
         };
 
@@ -427,7 +427,8 @@
       if(sides){
         // loop through and roll for the quantity
         for(var i = 0; i < die.qty; i++){
-          var reRolls = []; // the rolls for the current die (only multiple rolls if exploding)
+          var reRolls   = [], // the rolls for the current die (only multiple rolls if exploding)
+              rollCount = 0;  // count of rolls for this die roll (Only > 1 if exploding)
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
@@ -437,6 +438,13 @@
 
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
+
+            // subtract 1 from penetrated rolls (only consecutive rolls, after initial roll are subtratcted)
+            if(die.penetrate && (rollCount > 0)){
+              reRolls[index]--;
+            }
+
+            rollCount++;
           }while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
 
           // add the rolls
@@ -483,7 +491,9 @@
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
         // loop through and build the string for die rolled
         parsedDice.forEach(function(item, index, array){
-          var rolls   = lib.rolls[index] || [];
+          var rolls       = lib.rolls[index] || [],
+              maxVal      = item.fudge ? 1 : item.sides,  // the maximum value rollable on the die
+              explodeVal  = maxVal;                       // the value to explode on
 
           output += ((index > 0) ? item.operator : '') + '[';
 
@@ -491,11 +501,9 @@
           rolls.forEach(function(roll, rIndex, array){
             output += roll;
 
-            if(item.explode){
-              if((roll >= item.sides) || (item.fudge && (roll >= 1))){
-                // this die roll exploded
-                output += '!' + (item.compound ? '!' : '');
-              }
+            if(item.explode && (roll == explodeVal) || (roll > maxVal)){
+              // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
+              output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
             }
 
             if(rIndex != array.length-1){
