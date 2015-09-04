@@ -9,6 +9,114 @@ The standard notation formats are accepted, such as `2d6+12`, and also the use o
 ie. `4d6-L` (A roll of 4 six-sided dice, dropping the lowest result)
 
 
+### Operators
+
+You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.  
+However, the use of the mathematical symbols `×` and `÷` do not currently work, but are planned.
+
+
+### Percentile dice (d%)
+
+Although percentile dice can be rolled by using a `d100`, you can also use `d%`, which will do the same thing, returning a number between 0 and 100.
+
+
+### Exploding dice
+
+Exploding dice roll an additional die if the maximum, on that die, is rolled. If that die is also the maximum it is rolled again, and so forth, until a roll is made that isn't the maximum.  
+ie. Rolling a 6 on a d6, or a 10 on a d10.
+
+To explode a dice, add an exclamation mark after the die sides: `4d10!`
+
+Each exploded die shows as a separate roll in the list, like so:
+
+```
+2d6!: [4, 6!, 6!, 2] = 20
+```
+
+Where the second roll exploded, so we rolled again, which also exploded. The fourth role, however, did not, so we stop rolling.
+
+You can even use `L` and `H`, which will look at exploded dice, as well as normal rolls.  
+i.e.
+
+```
+1d6!-L: [6!,6!,6!,3]-L = 18
+```
+
+
+#### Compounding
+
+Sometimes, you may want the exploded dice rolls to be added together under the same, original roll. In this situation, you can compound the dice by using two exclamation marks: `4d10!!`
+
+For example (using the examples of exploding dice above):
+
+```
+2d6!!: [4, 14!!] = 20   // the exploded dice rolls of [6, 6, 2] are added together
+1d6!!-L: [21!!]-L = 18  // the exploded dice rolls of [6, 6, 6, 3] are added together
+```
+
+
+#### Penetrating
+
+Some exploding dice system use a penetrating rule.
+
+Taken from the Hackmaster Basic rules:
+
+> Should you roll the maximum value 
+  on this particular die, you may re-roll and add the result of 
+  the extra die, less one point, to the total (penetration can 
+  actually result in simply the maximum die value if a 1 is subsequently 
+  rolled, since any fool knows that 1-1=0). This 
+  process continues indefinitely as long as the die in question 
+  continues to come up maximum (but there’s always only a 
+  –1 subtracted from the extra die, even if it’s, say, the third 
+  die of penetration)
+
+So, if I rolled `1d6` (penetrating), and got a 6, I would roll another `d6`, subtracting 1 from the result. If that `d6` rolled a 6 (before the -1) it would penetrate, and so on.
+
+The syntax for penetrating is very similar to exploding, but with a lowercase 'p' appended: `2d6!p`.  
+i.e. (Using the same example from exploding dice above):
+
+```
+2d6!p: [4, 6!p, 5, 1] = 20
+```
+
+Where the second roll exploded, so we rolled again, which also exploded (rolled a 6). The fourth role, however, rolled a 2, so did not penetrate, so we stop rolling.  
+Remember that we subtract 1 from penetrated rolls, which is why we show '5' and '1', instead of '6', and '2'.
+
+You can also compound penetrating dice, like so: `2d6!!p`
+
+#### Compare point
+
+By default, Exploding and penetrating dice do so if you roll the highest number possible on the dice (ie. a 6 on a `d6`, a 1 on a Fudge die).  
+You can easily change the exploding compare point by adding a comparison after it.
+ie. to explode only if you roll a 4:
+
+```
+2d6!=4
+```
+
+Or exploding if you roll anything over a 4:
+
+```
+2d6!>4
+```
+
+You can also use this with penetrating and compounding dice:
+
+```
+2d6!!<=4  // compound if you roll a 4 or lower
+2d6!p!=4  // penetrate if you *don't* roll a 4
+```
+
+There is an obvious issue here, wherein you can't do a normal explode if you *don't* roll a certain number. ie:
+
+```
+2d6!!=4
+```
+
+This will actually tell it to compound if you roll a 4. Solutions are currently being looked in to.
+
+
 ### Fudge dice
 
 Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
@@ -23,17 +131,6 @@ dF      // this is the same as `dF.2`
 4dF.2-L // roll 4 standard fudge dice, subtracting the lowest result
 dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
 ```
-
-
-### Operators
-
-You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.  
-However, the use of the mathematical symbols `×` and `÷` do not currently work, but are planned.
-
-
-### Percentile dice (d%)
-
-Although percentile dice can be rolled by using a `d100`, you can also use `d%`, which will do the same thing, returning a number between 0 and 100.
 
 
 ## Browsers
