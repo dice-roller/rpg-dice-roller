@@ -59,7 +59,7 @@
    *
    * @param {number} a
    * @param {number} b
-   * @param {string} operator A valid numerical operator (+, -, /, *)
+   * @param {string} operator A valid arithmetic operator (+, -, /, *)
    * @returns {number}
    */
   var equateNumbers   = function(a, b, operator){
@@ -67,22 +67,60 @@
       case '*':
         // multiply the value
         return a *= b;
-        break;
+      break;
       case '/':
         // divide the value
         return a /= b;
-        break;
+      break;
       case '-':
         // subtract from the value
         return a -= b;
-        break;
+      break;
       case '+':
       default:
         // add to the value
         return a += b;
-        break;
+      break;
     }
   };
+
+  /**
+   * Checks if `a` is comparative to `b` with the given operator.
+   * Returns true or false.
+   *
+   * @param {number} a
+   * @param {number} b
+   * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
+   * @returns {boolean}
+   */
+  var compareNumbers  = function(a, b, operator){
+    switch(operator){
+      case '=':
+      case '==':
+        return a == b;
+      break;
+      case '<':
+        return a < b;
+      break;
+      case '>':
+        return a > b;
+      break;
+      case '<=':
+        return a <= b;
+      break;
+      case '>=':
+        return a >= b;
+      break;
+      case '!':
+      case '!=':
+        return a != b;
+      break;
+      default:
+        return false;
+      break;
+    }
+  };
+
 
   /**
    *
@@ -247,8 +285,6 @@
       // parse the notation and find each valid dice (and any attributes)
       var match;
       while((match = DiceRoller.notationPatterns.get('notation', 'g').exec(notation)) !== null){
-        console.log(match);
-        console.log(DiceRoller.notationPatterns.get('notation', 'g'));
         var die = {
           operator:     match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
           qty:          match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
@@ -257,7 +293,7 @@
           explode:      match[5],                                                 // flag - whether to explode the dice rolls or not
           penetrate:    (match[6] == '!p') || (match[6] == '!!p'),                // flag - whether to penetrate the dice rolls or not
           compound:     (match[6] == '!!') || (match[6] == '!!p'),                // flag - whether to compound exploding dice or not
-          comparePoint: false,                                                 // the compare point for exploding/penetrating dice
+          comparePoint: false,                                                    // the compare point for exploding/penetrating dice
           additions:    []                                                        // any additions (ie. +2, -L)
         };
 
@@ -272,6 +308,12 @@
             operator: match[8],
             value:    parseInt(match[9], 10)
           };
+        }else if(die.explode){
+          // we are exploding the dice so we need a compare point, but none has been defined
+          die.comparePoint  = {
+            operator: '=',
+            value:    die.fudge ? 1 : ((die.sides == '%') ? 100 : die.sides)
+          }
         }
 
         // check if we have additions
@@ -417,6 +459,17 @@
     };
 
     /**
+     * Checks whether value matches the given compare point
+     *
+     * @param {object} comparePoint
+     * @param {number} value
+     * @returns {boolean}
+     */
+    var isComparePoint = function(comparePoint, value){
+      return comparePoint ? compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
+    };
+
+    /**
      * Rolls a single die for its quantity
      * and returns an array of the results
      *
@@ -469,7 +522,8 @@
             }
 
             rollCount++;
-          }while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
+          //}while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
+          }while(die.explode && isComparePoint(die.comparePoint, roll));
 
           // add the rolls
           dieRolls.push.apply(dieRolls, reRolls);

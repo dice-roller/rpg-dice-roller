@@ -54,6 +54,7 @@ For example (using the examples of exploding dice above):
 1d6!!-L: [21!!]-L = 18  // the exploded dice rolls of [6, 6, 6, 3] are added together
 ```
 
+
 #### Penetrating
 
 Some exploding dice system use a penetrating rule.
@@ -83,6 +84,37 @@ Where the second roll exploded, so we rolled again, which also exploded (rolled 
 Remember that we subtract 1 from penetrated rolls, which is why we show '5' and '1', instead of '6', and '2'.
 
 You can also compound penetrating dice, like so: `2d6!!p`
+
+#### Compare point
+
+By default, Exploding and penetrating dice do so if you roll the highest number possible on the dice (ie. a 6 on a `d6`, a 1 on a Fudge die).  
+You can easily change the exploding compare point by adding a comparison after it.
+ie. to explode only if you roll a 4:
+
+```
+2d6!=4
+```
+
+Or exploding if you roll anything over a 4:
+
+```
+2d6!>4
+```
+
+You can also use this with penetrating and compounding dice:
+
+```
+2d6!!<=4  // compound if you roll a 4 or lower
+2d6!p!=4  // penetrate if you *don't* roll a 4
+```
+
+There is an obvious issue here, wherein you can't do a normal explode if you *don't* roll a certain number. ie:
+
+```
+2d6!!=4
+```
+
+This will actually tell it to compound if you roll a 4. Solutions are currently being looked in to.
 
 
 ### Fudge dice
