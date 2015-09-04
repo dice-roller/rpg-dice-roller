@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version 1.1.1
+ * @version v1.2.0
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
