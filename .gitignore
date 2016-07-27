@@ -39,12 +39,5 @@ nbproject
 
 # Project specific
 
-## Laravel
-/vendor
 node_modules
-.env
-
-## Foundation
-public/assets/css/*
-public/assets/js/*
-public/assets/vendor/*
+bower_components
