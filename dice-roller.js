@@ -231,11 +231,11 @@
     strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')' + strings.explode + '?';
 
     /**
-     * Matches the addition to a dice (ie. +4, *2, -L)
+     * Matches the addition to a dice (ie. +4, -10, *2, -L)
      *
      * @type {string}
      */
-    strings.addition  = '(' + strings.arithmeticOperator + ')([1-9]+(?!d)|H|L)';
+    strings.addition  = '(' + strings.arithmeticOperator + ')([1-9]+0?(?![0-9]*d)|H|L)';
 
     /**
      * Matches a standard dice notation. i.e;
