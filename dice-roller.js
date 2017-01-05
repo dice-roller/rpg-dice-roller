@@ -7,7 +7,7 @@
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
 
-;(function(){
+;(function(root){
   "use strict";
 
   /**
@@ -126,7 +126,7 @@
    *
    * @constructor
    */
-  window.DiceRoller = function(){
+  var DiceRoller = function(){
     var lib = this;
 
     /*
@@ -156,7 +156,7 @@
      * Returns a list of results
      *
      * @param {string} notation
-     * @returns {Window.DiceRoll}
+     * @returns {DiceRoll}
      */
     this.roll     = function(notation){
       var diceRoll;
@@ -313,7 +313,7 @@
           die.comparePoint  = {
             operator: '=',
             value:    die.fudge ? 1 : ((die.sides == '%') ? 100 : die.sides)
-          }
+          };
         }
 
         // check if we have additions
@@ -363,7 +363,7 @@
    * @param {string} notation  The dice notation
    * @constructor
    */
-  window.DiceRoll   = function(notation){
+  var DiceRoll   = function(notation){
     var lib = this;
 
     /**
@@ -652,4 +652,7 @@
     // initialise the object
     init(notation);
   };
+
+  root.DiceRoller = DiceRoller;
+  root.DiceRoll = DiceRoll;
 }(window));
