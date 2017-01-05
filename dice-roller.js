@@ -126,7 +126,7 @@
    *
    * @constructor
    */
-  root.DiceRoller = function(){
+  var DiceRoller = function(){
     var lib = this;
 
     /*
@@ -363,7 +363,7 @@
    * @param {string} notation  The dice notation
    * @constructor
    */
-  root.DiceRoll   = function(notation){
+  var DiceRoll   = function(notation){
     var lib = this;
 
     /**
@@ -652,4 +652,7 @@
     // initialise the object
     init(notation);
   };
+
+  root.DiceRoller = DiceRoller;
+  root.DiceRoll = DiceRoll;
 }(window));
