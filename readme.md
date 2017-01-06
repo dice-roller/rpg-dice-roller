@@ -163,6 +163,11 @@ You can use `DiceRoller` like so:
 ```
 
 
+### UMD
+
+You can also load the library using AMD and CommonJS.
+
+
 ### API
 
 The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
