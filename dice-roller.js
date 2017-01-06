@@ -77,22 +77,23 @@
     switch(operator){
       case '*':
         // multiply the value
-        return a *= b;
+        a *= b;
       break;
       case '/':
         // divide the value
-        return a /= b;
+        a /= b;
       break;
       case '-':
         // subtract from the value
-        return a -= b;
+        a -= b;
       break;
-      case '+':
       default:
         // add to the value
-        return a += b;
+        a += b;
       break;
     }
+
+    return a;
   };
 
   /**
@@ -105,31 +106,32 @@
    * @returns {boolean}
    */
   var compareNumbers  = function(a, b, operator){
+    var result = false;
+
     switch(operator){
       case '=':
       case '==':
-        return a == b;
+        result = a == b;
       break;
       case '<':
-        return a < b;
+        result = a < b;
       break;
       case '>':
-        return a > b;
+        result = a > b;
       break;
       case '<=':
-        return a <= b;
+        result = a <= b;
       break;
       case '>=':
-        return a >= b;
+        result = a >= b;
       break;
       case '!':
       case '!=':
-        return a != b;
-      break;
-      default:
-        return false;
+        result = a != b;
       break;
     }
+
+    return result;
   };
 
 
@@ -209,7 +211,7 @@
    *
    * @type {notationPatterns}
    */
-  DiceRoller.notationPatterns = new function(){
+  DiceRoller.notationPatterns = (function(){
     var strings = {
       /**
        * Matches a basic arithmetic operator
@@ -278,7 +280,7 @@
 
       return regExp[cacheName];
     };
-  };
+  })();
 
   /**
    * Parses the given dice notation
@@ -516,13 +518,17 @@
         // loop through and roll for the quantity
         for(var i = 0; i < die.qty; i++){
           var reRolls   = [], // the rolls for the current die (only multiple rolls if exploding)
-              rollCount = 0;  // count of rolls for this die roll (Only > 1 if exploding)
+              rollCount = 0,  // count of rolls for this die roll (Only > 1 if exploding)
+              roll,           // the total rolled
+              index;          // re-roll index
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
-            // generate the roll total
-            var roll  = callback.call(this, sides),         // the total rolled on this die
-                index = die.compound ? 0 : reRolls.length;  // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
+            // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
+            index = die.compound ? 0 : reRolls.length;
+			
+			// get the total rolled on this die
+            roll  = callback.call(this, sides);
 
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
@@ -533,7 +539,6 @@
             }
 
             rollCount++;
-          //}while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
           }while(die.explode && isComparePoint(die.comparePoint, roll));
 
           // add the rolls
