@@ -266,19 +266,21 @@
 
     var regExp  = {};
 
-    /**
-     * @param {string} name
-     * @param {string=} flags
-     * @param {boolean=} matchWhole
-     * @returns {RegExp}
-     */
-    this.get  = function(name, flags, matchWhole){
-      var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-      if(!regExp[cacheName]){
-        regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
-      }
+    return {
+      /**
+       * @param {string} name
+       * @param {string=} flags
+       * @param {boolean=} matchWhole
+       * @returns {RegExp}
+       */
+      get: function(name, flags, matchWhole){
+        var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+        if(!regExp[cacheName]){
+          regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
+        }
 
-      return regExp[cacheName];
+        return regExp[cacheName];
+      }
     };
   })();
 
@@ -526,8 +528,8 @@
           do{
             // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
             index = die.compound ? 0 : reRolls.length;
-			
-			// get the total rolled on this die
+
+			      // get the total rolled on this die
             roll  = callback.call(this, sides);
 
             // add the roll to our list
