@@ -2,11 +2,14 @@ var customMatchers = {
   toBeWithinRange: function(util,customEqualityTesters){
     return {
       compare: function(actual, expected){
-        var result = {pass: true};
+        var result = {};
 
         if((actual < expected.min) || (actual > expected.max)){
           result.pass = false;
           result.message = 'Expected ' + actual + ' to be within range: ' + expected.min + ' - ' + expected.max;
+        }else{
+          result.pass = true;
+          result.message = 'Expected ' + actual + ' NOT to be within range: ' + expected.min + ' - ' + expected.max;
         }
 
         return result;
@@ -16,8 +19,7 @@ var customMatchers = {
   toArraySumEqualTo: function(util,customEqualityTesters){
     return {
       compare: function(actual, expected){
-        //expect(roll.rolls[0].reduce(function(a, b){ return a+b; })).toEqual(total);
-        var result = {pass: true},
+        var result = {},
             reduce = function(obj){
               if(Array.isArray(obj)){
                 return obj.reduce(function(a, b){
@@ -33,6 +35,9 @@ var customMatchers = {
         if(sum !== expected){
           result.pass = false;
           result.message = 'Expected Array sum ' + sum + ' to equal ' + actual;
+        }else{
+          result.pass = true;
+          result.message = 'Expected Array sum ' + sum + ' NOT to equal ' + actual;
         }
 
         return result;
@@ -42,7 +47,7 @@ var customMatchers = {
   toHaveRolls: function(util,customEqualityTesters){
     return {
       compare: function(actual, expected){
-        var result = {pass: true},
+        var result = {pass: true, message: 'Expected "' + actual + '" Not to have rolls'},
             rolls = actual.rolls,
             rollsReq = expected ? expected.rolls : null,
             rollI;
@@ -50,7 +55,7 @@ var customMatchers = {
         if(!rolls.length) {
           result.pass = false;
           result.message = 'Expected "' + actual + '" to have rolls';
-        }else if(rollsReq && (rollsReq.length != rolls.length)){
+        }else if(rollsReq && (rollsReq.length !== rolls.length)){
           result.pass = false;
           result.message = 'Expected "' + actual + '" to have ' + rollsReq.length + ' rolls';
         }else{
@@ -58,10 +63,11 @@ var customMatchers = {
           for(rollI in rolls){
             if(!rolls[rollI].length){
               result.pass = false;
-              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have roll values'
-            }else if(rollsReq && rollsReq[rollI] && (rollsReq[rollI] != '*') && (rollsReq[rollI] != rolls[rollI].length)){
+              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have roll values';
+            }else if(rollsReq && rollsReq[rollI] && (rollsReq[rollI] !== '*') && (rollsReq[rollI] !== rolls[rollI].length)){
               // roll length doesn't match expected (Ignore *, which means unlimited)
-              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have ' + rollsReq[rollI] + ' rolls'
+              result.pass = false;
+              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have ' + rollsReq[rollI] + ' rolls';
             }
           }
         }
@@ -70,10 +76,11 @@ var customMatchers = {
       }
     };
   },
+  // TODO - this should ensure at least the first die explodes, once we have a way of forcing explode
   toExplode: function(util, customEqualityTesters){
     return {
       compare: function(actual, expected){
-        var result = {pass: true},
+        var result = {pass: true, message: 'Expected "' + actual + '" NOT to explode'},
             rollList = actual,
             rollI,
             max = expected.max || null,
@@ -87,7 +94,7 @@ var customMatchers = {
           for(rollI in rollList){
             var value = rollList[rollI];
 
-            if(penetrating && (rollI == 1)){
+            if(penetrating && (rollI === 1)){
               // we need to compensate for the -1 on consecutive rolls when penetrating
               max--;
               min--;
@@ -120,12 +127,15 @@ var customMatchers = {
   toMatchParsedNotation: function(util, customEqualityTesters){
     return {
       compare: function(actual, expected){
-        var result = {pass: true},
+        var result = {},
             toMatch = expected.notation + ': ' + expected.rolls + ' = ' + expected.total;
 
         if(actual != toMatch){
           result.pass = false;
           result.message = 'Expected "' + actual + '" to match parsed notation "' + toMatch + '"';
+        }else{
+          result.pass = true;
+          result.message = 'Expected "' + actual + '" NOT to match parsed notation "' + toMatch + '"';
         }
 
         return result;
