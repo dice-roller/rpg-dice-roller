@@ -16,6 +16,31 @@ var customMatchers = {
       }
     };
   },
+  toHaveValuesWithinRange: function(util,customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {pass: true},
+            i;
+
+        if(!Array.isArray(actual)){
+          result.pass = false;
+          result.message = 'Expected ' + actual + ' to be an Array';
+        }else{
+          for(i = 0; i < actual.length; i++){
+            if((actual[i] < expected.min) || (actual[i] > expected.max)){
+              result.pass = false;
+              result.message = 'Expected ' + actual[i] + ' to be within range: ' + expected.min + ' - ' + expected.max;
+
+              // end loop
+              i = actual.length;
+            }
+          }
+        }
+
+        return result;
+      }
+    };
+  },
   toArraySumEqualTo: function(util,customEqualityTesters){
     return {
       compare: function(actual, expected){
@@ -171,8 +196,8 @@ describe('basic dice', function(){
     expect(diceRoller.getLog()).toEqual([]);
   });
 
-  it('should return between 1 and 6 for `1d6`', function(){
-    var notation = '1d6',
+  it('should return between 1 and 6 for `d6`', function(){
+    var notation = 'd6',
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
 
@@ -376,6 +401,70 @@ describe('basic equations', function(){
   });
 });
 
+describe('multiple dice', function(){
+  'use strict';
+
+  // create a new instance of the DiceRoller
+  var diceRoller;
+
+  beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
+    diceRoller = new DiceRoller();
+  });
+
+  it('should roll a 6 sided die 4 times', function(){
+    var notation = '4d6',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 4, max: 24});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
+    expect(roll.rolls).toArraySumEqualTo(total);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+  });
+
+  it('should roll a 10 sided die 8 times', function(){
+    var notation = '8d10',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 8, max: 80});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [8]});
+    expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 10});
+    expect(roll.rolls).toArraySumEqualTo(total);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+  });
+
+  it('should roll a 20 sided die 5 times', function(){
+    var notation = '5d20',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 5, max: 100});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [5]});
+    expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 20});
+    expect(roll.rolls).toArraySumEqualTo(total);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+  });
+});
+
 describe('exploding, compounding, and penetrating', function(){
   'use strict';
 
@@ -464,4 +553,4 @@ describe('exploding, compounding, and penetrating', function(){
 // TODO - test log clearing
 // TODO - check H|L dice
 // TODO - test compare point
-// TODO - test multiple dice in single equation
+// TODO - test notation segments (additional dice, multiplication etc.)
