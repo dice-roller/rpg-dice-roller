@@ -1,3 +1,139 @@
+var customMatchers = {
+  toBeWithinRange: function(util,customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {pass: true};
+
+        if((actual < expected.min) || (actual > expected.max)){
+          result.pass = false;
+          result.message = 'Expected ' + actual + ' to be within range: ' + expected.min + ' - ' + expected.max;
+        }
+
+        return result;
+      }
+    };
+  },
+  toArraySumEqualTo: function(util,customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        //expect(roll.rolls[0].reduce(function(a, b){ return a+b; })).toEqual(total);
+        var result = {pass: true},
+            reduce = function(obj){
+              if(Array.isArray(obj)){
+                return obj.reduce(function(a, b){
+
+                  return reduce(a) + reduce(b);
+                }, 0);
+              }else{
+                return obj;
+              }
+            },
+            sum = reduce(actual);
+
+        if(sum !== expected){
+          result.pass = false;
+          result.message = 'Expected Array sum ' + sum + ' to equal ' + actual;
+        }
+
+        return result;
+      }
+    };
+  },
+  toHaveRolls: function(util,customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {pass: true},
+            rolls = actual.rolls,
+            rollsReq = expected ? expected.rolls : null,
+            rollI;
+
+        if(!rolls.length) {
+          result.pass = false;
+          result.message = 'Expected "' + actual + '" to have rolls';
+        }else if(rollsReq && (rollsReq.length != rolls.length)){
+          result.pass = false;
+          result.message = 'Expected "' + actual + '" to have ' + rollsReq.length + ' rolls';
+        }else{
+          // loop through each roll and ensure that it has rolls (multiples for exploded)
+          for(rollI in rolls){
+            if(!rolls[rollI].length){
+              result.pass = false;
+              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have roll values'
+            }else if(rollsReq && rollsReq[rollI] && (rollsReq[rollI] != '*') && (rollsReq[rollI] != rolls[rollI].length)){
+              // roll length doesn't match expected (Ignore *, which means unlimited)
+              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have ' + rollsReq[rollI] + ' rolls'
+            }
+          }
+        }
+
+        return result;
+      }
+    };
+  },
+  toExplode: function(util, customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {pass: true},
+            rollList = actual,
+            rollI,
+            max = expected.max || null,
+            min = expected.min || null,
+            penetrating = !!expected.penetrate;
+
+        if(!max || !min){
+          result.pass = false;
+          result.message = "Expected explode argument to provide max and min";
+        }else{
+          for(rollI in rollList){
+            var value = rollList[rollI];
+
+            if(penetrating && (rollI == 1)){
+              // we need to compensate for the -1 on consecutive rolls when penetrating
+              max--;
+              min--;
+            }
+
+            if(value > max){
+              // rolled over max
+              result.pass = false;
+              result.message = "Expected " + value + ' to be less than max';
+            }else if (value < min){
+              // rolled under min
+              result.pass = false;
+              result.message = "Expected " + value + ' to be greater than min';
+            }else if((value == max) && (rollList.length === (rollI+1))){
+              // rolled max, but didn't explode
+              result.pass = false;
+              result.message = "Expected " + value + ' to explode';
+            }else if((value < max) && (rollList.length > (rollI+1))){
+              // rolled under max, but exploded
+              result.pass = false;
+              result.message = "Expected " + value + ' to NOT explode';
+            }
+          }
+        }
+
+        return result;
+      }
+    };
+  },
+  toMatchParsedNotation: function(util, customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {pass: true},
+            toMatch = expected.notation + ': ' + expected.rolls + ' = ' + expected.total;
+
+        if(actual != toMatch){
+          result.pass = false;
+          result.message = 'Expected "' + actual + '" to match parsed notation "' + toMatch + '"';
+        }
+
+        return result;
+      }
+    };
+  }
+};
+
 /*global describe it expect */
 describe('basic dice', function(){
   'use strict';
@@ -6,6 +142,8 @@ describe('basic dice', function(){
   var diceRoller;
 
   beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
     diceRoller = new DiceRoller();
   });
 
@@ -57,6 +195,8 @@ describe('fudge dice', function(){
   var diceRoller;
 
   beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
     diceRoller = new DiceRoller();
   });
 
@@ -97,6 +237,8 @@ describe('basic equations', function(){
   var diceRoller;
 
   beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
     diceRoller = new DiceRoller();
   });
 
@@ -160,6 +302,8 @@ describe('exploding, compounding, and penetrating', function(){
   var diceRoller;
 
   beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
     diceRoller = new DiceRoller();
   });
 
