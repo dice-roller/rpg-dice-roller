@@ -1,3 +1,4 @@
+/*global beforeEach, describe, DiceRoller, expect, jasmine, it */
 var customMatchers = {
   toBeWithinRange: function(util,customEqualityTesters){
     return {
@@ -138,7 +139,7 @@ var customMatchers = {
               // rolled under min
               result.pass = false;
               result.message = "Expected " + value + ' to be greater than or equal to min';
-            }else if((value == max) && (rollList.length === (rollI+1))){
+            }else if((value === max) && (rollList.length === (rollI+1))){
               // rolled max, but didn't explode
               result.pass = false;
               result.message = "Expected " + value + ' to explode';
@@ -165,7 +166,7 @@ var customMatchers = {
         var result = {},
             toMatch = expected.notation + ': ' + expected.rolls + ' = ' + expected.total;
 
-        if(actual != toMatch){
+        if(actual !== toMatch){
           result.pass = false;
           result.message = 'Expected "' + actual + '" to match parsed notation "' + toMatch + '"';
         }else{
@@ -208,7 +209,6 @@ var customMatchers = {
   }
 };
 
-/*global describe it expect */
 describe('basic dice', function(){
   'use strict';
 
