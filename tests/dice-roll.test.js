@@ -118,6 +118,7 @@
               rollI,
               max = expected.max || null,
               min = expected.min || null,
+              comparePoint = expected.comparePoint || {operator: '=', value: max},
               penetrating = !!expected.penetrate;
 
           if(!max || !min){
@@ -136,19 +137,47 @@
               if(value > max){
                 // rolled over max
                 result.pass = false;
-                result.message = "Expected " + value + ' to be less than or equal to max';
+                result.message = "Expected " + value + ' to be less than or equal to max (' + max + ')';
               }else if (value < min){
                 // rolled under min
                 result.pass = false;
-                result.message = "Expected " + value + ' to be greater than or equal to min';
-              }else if((value === max) && (rollList.length === (rollI+1))){
-                // rolled max, but didn't explode
-                result.pass = false;
-                result.message = "Expected " + value + ' to explode';
-              }else if((value < max) && (rollList.length > (rollI+1))){
-                // rolled under max, but exploded
-                result.pass = false;
-                result.message = "Expected " + value + ' to NOT explode';
+                result.message = "Expected " + value + ' to be greater than or equal to min (' + min + ')';
+              }else{
+                var didExplode = rollList.length > (rollI+1),
+                    shouldExplode = false;
+
+                switch(comparePoint.operator){
+                  case '=':
+                  case '==':
+                    shouldExplode = value === comparePoint.value;
+                    break;
+                  case '<':
+                    shouldExplode = value < comparePoint.value;
+                    break;
+                  case '>':
+                    shouldExplode = value > comparePoint.value;
+                    break;
+                  case '<=':
+                    shouldExplode = value <= comparePoint.value;
+                    break;
+                  case '>=':
+                    shouldExplode = value >= comparePoint.value;
+                    break;
+                  case '!':
+                  case '!=':
+                    shouldExplode = value !== comparePoint.value;
+                    break;
+                }
+
+                if(shouldExplode && !didExplode){
+                  // met comparison, but didn't explode
+                  result.pass = false;
+                  result.message = "Expected " + value + ' to explode at ' + comparePoint.operator + ' ' + comparePoint.value;
+                }else if(!shouldExplode && didExplode){
+                  // didn't meet comparison, but exploded
+                  result.pass = false;
+                  result.message = "Expected " + value + ' to NOT explode at ' + comparePoint.operator + ' ' + comparePoint.value;
+                }
               }
 
               if(!result.pass){
@@ -471,7 +500,7 @@
       expect(roll.rolls[0]).toExplode({min: 1, max: 2, penetrate: true});
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0][0] + (roll.rolls[0].length > 1 ? '!p,' + roll.rolls[0].slice(1).join(',') : '') + ']', total: total});
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']', total: total});
     });
 
     // TODO - can we force this to penetrate compound
@@ -489,6 +518,42 @@
 
       // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+    });
+
+    // TODO - can we force this to explode
+    it('should explode if higher than 2 for `1d6!>1`', function(){
+      var notation = '1d6!>1',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: ['*']});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 2}});
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+    });
+
+    // TODO - can we force this to compound
+    it('should explode if higher than 2 for `1d6!!>1`', function(){
+      var notation = '1d6!!>1',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 1) ? '!!' : '') + ']', total: total});
     });
   });
 
@@ -703,7 +768,7 @@
     });
   });
 
-  describe('Roll log', function(){
+  describe('roll log', function(){
     // create a new instance of the DiceRoller
     var diceRoller = new DiceRoller();
 
