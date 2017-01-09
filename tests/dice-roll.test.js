@@ -60,7 +60,7 @@ var customMatchers = {
           result.message = 'Expected "' + actual + '" to have ' + rollsReq.length + ' rolls';
         }else{
           // loop through each roll and ensure that it has rolls (multiples for exploded)
-          for(rollI in rolls){
+          for(rollI = 0; rollI < rolls.length; rollI++){
             if(!rolls[rollI].length){
               result.pass = false;
               result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have roll values';
@@ -68,6 +68,11 @@ var customMatchers = {
               // roll length doesn't match expected (Ignore *, which means unlimited)
               result.pass = false;
               result.message = 'Expected "' + actual + '" index "' + rollI + '" (' + rolls[rollI].length + ') to have ' + rollsReq[rollI] + ' roll values';
+            }
+
+            if(!result.pass){
+              // end the loop
+              rollI = rolls.length;
             }
           }
         }
@@ -91,7 +96,7 @@ var customMatchers = {
           result.pass = false;
           result.message = "Expected explode argument to provide max and min";
         }else{
-          for(rollI in rollList){
+          for(rollI = 0; rollI < rollList.length; rollList++){
             var value = rollList[rollI];
 
             if(penetrating && (rollI === 1)){
@@ -103,11 +108,11 @@ var customMatchers = {
             if(value > max){
               // rolled over max
               result.pass = false;
-              result.message = "Expected " + value + ' to be less than max';
+              result.message = "Expected " + value + ' to be less than or equal to max';
             }else if (value < min){
               // rolled under min
               result.pass = false;
-              result.message = "Expected " + value + ' to be greater than min';
+              result.message = "Expected " + value + ' to be greater than or equal to min';
             }else if((value == max) && (rollList.length === (rollI+1))){
               // rolled max, but didn't explode
               result.pass = false;
@@ -116,6 +121,11 @@ var customMatchers = {
               // rolled under max, but exploded
               result.pass = false;
               result.message = "Expected " + value + ' to NOT explode';
+            }
+
+            if(!result.pass){
+              // end the loop
+              rollI = rollList.length;
             }
           }
         }
