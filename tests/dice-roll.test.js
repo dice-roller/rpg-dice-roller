@@ -67,7 +67,7 @@ var customMatchers = {
             }else if(rollsReq && rollsReq[rollI] && (rollsReq[rollI] !== '*') && (rollsReq[rollI] !== rolls[rollI].length)){
               // roll length doesn't match expected (Ignore *, which means unlimited)
               result.pass = false;
-              result.message = 'Expected "' + actual + '" roll index "' + rollI + '" to have ' + rollsReq[rollI] + ' rolls';
+              result.message = 'Expected "' + actual + '" index "' + rollI + '" (' + rolls[rollI].length + ') to have ' + rollsReq[rollI] + ' roll values';
             }
           }
         }
@@ -170,7 +170,7 @@ describe('basic dice', function(){
     expect(total).toBeWithinRange({min: 1, max: 6});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -186,7 +186,7 @@ describe('basic dice', function(){
     expect(total).toBeWithinRange({min: 1, max: 10});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -202,7 +202,7 @@ describe('basic dice', function(){
     expect(total).toBeWithinRange({min: 1, max: 20});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -218,7 +218,7 @@ describe('basic dice', function(){
     expect(total).toBeWithinRange({min: 0, max: 100});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -248,7 +248,7 @@ describe('fudge dice', function(){
     expect(total).toBeWithinRange({min: -1, max: 1});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -265,7 +265,7 @@ describe('fudge dice', function(){
     expect(total).toBeWithinRange({min: -1, max: 1});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -281,7 +281,7 @@ describe('fudge dice', function(){
     expect(total).toBeWithinRange({min: -1, max: 1});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -310,7 +310,7 @@ describe('basic equations', function(){
     expect(total).toBeWithinRange({min: 3, max: 8});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total-2);
 
     // check the output string
@@ -326,7 +326,7 @@ describe('basic equations', function(){
     expect(total).toBeWithinRange({min: -1, max: 2});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total+2);
 
     // check the output string
@@ -342,7 +342,7 @@ describe('basic equations', function(){
     expect(total).toBeWithinRange({min: 2, max: 20});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total/2);
 
     // check the output string
@@ -358,7 +358,7 @@ describe('basic equations', function(){
     expect(total).toBeWithinRange({min: 0.5, max: 4});
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total*2);
 
     // check the output string
@@ -388,7 +388,7 @@ describe('exploding, compounding, and penetrating', function(){
     expect(total).toBeGreaterThan(0);
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [['*']]});
+    expect(roll).toHaveRolls({rolls: ['*']});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     expect(roll.rolls[0]).toExplode({min: 1, max: 2});
@@ -407,7 +407,7 @@ describe('exploding, compounding, and penetrating', function(){
     expect(total).toBeGreaterThan(0);
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string
@@ -424,7 +424,7 @@ describe('exploding, compounding, and penetrating', function(){
     expect(total).toBeGreaterThan(0);
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [['*']]});
+    expect(roll).toHaveRolls({rolls: ['*']});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     expect(roll.rolls[0]).toExplode({min: 1, max: 2, penetrate: true});
@@ -443,7 +443,7 @@ describe('exploding, compounding, and penetrating', function(){
     expect(total).toBeGreaterThan(0);
 
     // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [[1]]});
+    expect(roll).toHaveRolls({rolls: [1]});
     expect(roll.rolls).toArraySumEqualTo(total);
 
     // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
