@@ -49,7 +49,6 @@ var customMatchers = {
             reduce = function(obj){
               if(Array.isArray(obj)){
                 return obj.reduce(function(a, b){
-
                   return reduce(a) + reduce(b);
                 }, 0);
               }else{
@@ -573,6 +572,142 @@ describe('basic equations', function(){
     // check the output string
     expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total*2) + ']/2', total: total});
   });
+
+  it('should subtract the LOWEST roll for `4d6-L', function(){
+    var notation = '4d6-L',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 3, max: 18});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
+    expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-L', total: total});
+  });
+
+  it('should add the LOWEST roll for `4d6+L', function(){
+    var notation = '4d6+L',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 5, max: 30});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before lowest is added) is equal to the total, with the lowest subtracted
+    expect(roll.rolls).toArraySumEqualTo(total - Math.min.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+L', total: total});
+  });
+
+  it('should multiply by the LOWEST roll for `4d6*L', function(){
+    var notation = '4d6*L',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 4, max: 144});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before multiplied by lowest) is equal to the total, divided by the lowest
+    expect(roll.rolls).toArraySumEqualTo(total / Math.min.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*L', total: total});
+  });
+
+  it('should divide by the LOWEST roll for `4d6/L', function(){
+    var notation = '4d6/L',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 4, max: 19});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before divided by lowest) is equal to the total, multiplied by the lowest
+    expect(roll.rolls).toArraySumEqualTo(total * Math.min.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/L', total: total});
+  });
+
+  it('should subtract the HIGHEST roll for `4d6-H', function(){
+    var notation = '4d6-H',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 3, max: 18});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before highest is subtracted) is equal to the total, with the highest added
+    expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-H', total: total});
+  });
+
+  it('should add the HIGHEST roll for `4d6+H', function(){
+    var notation = '4d6+H',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 5, max: 30});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before highest is added) is equal to the total, with the highest subtracted
+    expect(roll.rolls).toArraySumEqualTo(total - Math.max.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+H', total: total});
+  });
+
+  it('should multiply by the HIGHEST roll for `4d6*H', function(){
+    var notation = '4d6*H',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 4, max: 144});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before multiplied by highest) is equal to the total, divided by the highest
+    expect(roll.rolls).toArraySumEqualTo(total / Math.max.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*H', total: total});
+  });
+
+  it('should divide by the HIGHEST roll for `4d6/H', function(){
+    var notation = '4d6/H',
+      roll = diceRoller.roll(notation),
+      total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 1.5, max: 4});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [4]});
+    // check if the sum of the rolls (before divided by highest) is equal to the total, multiplied by the highest
+    expect(roll.rolls).toArraySumEqualTo(total * Math.max.apply(this, roll.rolls[0]));
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/H', total: total});
+  });
 });
 
 describe('Roll log', function(){
@@ -612,6 +747,6 @@ describe('Roll log', function(){
   });
 });
 
-// TODO - check H|L dice
+// TODO - check H|L dice on exploding, compounding, penetrating, fudge
 // TODO - test compare point
 // TODO - test notation segments (additional dice, multiplication etc.)
