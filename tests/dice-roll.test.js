@@ -176,6 +176,35 @@ var customMatchers = {
         return result;
       }
     };
+  },
+  toHaveLogLength: function(util, customEqualityTesters){
+    return {
+      compare: function(actual, expected){
+        var result = {},
+            logLength = actual.getLog().length;
+
+        if(typeof expected !== 'number'){
+          // no length specified - just check if it has a length
+          if(!logLength){
+            // no length
+            result.pass = false;
+            result.message = 'Expected log to have a length';
+          }else{
+            // no length
+            result.pass = true;
+            result.message = 'Expected log to NOT have a length';
+          }
+        }else if(logLength === expected){
+          result.pass = true;
+          result.message = 'Expected log length ' + logLength + ' NOT to be ' + expected;
+        }else{
+          result.pass = false;
+          result.message = 'Expected log length ' + logLength + ' to be ' + expected;
+        }
+
+        return result;
+      }
+    };
   }
 };
 
@@ -190,10 +219,6 @@ describe('basic dice', function(){
     jasmine.addMatchers(customMatchers);
 
     diceRoller = new DiceRoller();
-  });
-
-  it('should be no dice rolled', function(){
-    expect(diceRoller.getLog()).toEqual([]);
   });
 
   it('should return between 1 and 6 for `d6`', function(){
@@ -321,83 +346,6 @@ describe('fudge dice', function(){
 
     // check the output string
     expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-  });
-});
-
-describe('basic equations', function(){
-  'use strict';
-
-  // create a new instance of the DiceRoller
-  var diceRoller;
-
-  beforeEach(function(){
-    jasmine.addMatchers(customMatchers);
-
-    diceRoller = new DiceRoller();
-  });
-
-  it('should return between 3 and 8 for `1d6+2`', function(){
-    var notation = '1d6+2',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
-
-    // check value is within allowed range
-    expect(total).toBeWithinRange({min: 3, max: 8});
-
-    // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [1]});
-    expect(roll.rolls).toArraySumEqualTo(total-2);
-
-    // check the output string
-    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total-2) + ']+2', total: total});
-  });
-
-  it('should return between -1 and 2 for `1d4-2`', function(){
-    var notation = '1d4-2',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
-
-    // check value is within allowed range
-    expect(total).toBeWithinRange({min: -1, max: 2});
-
-    // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [1]});
-    expect(roll.rolls).toArraySumEqualTo(total+2);
-
-    // check the output string
-    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total+2) + ']-2', total: total});
-  });
-
-  it('should return between 2 and 20 for `1d10*2`', function(){
-    var notation = '1d10*2',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
-
-    // check value is within allowed range
-    expect(total).toBeWithinRange({min: 2, max: 20});
-
-    // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [1]});
-    expect(roll.rolls).toArraySumEqualTo(total/2);
-
-    // check the output string
-    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total/2) + ']*2', total: total});
-  });
-
-  it('should return between 0.5 and 4 for `1d8/2`', function(){
-    var notation = '1d8/2',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
-
-    // check value is within allowed range
-    expect(total).toBeWithinRange({min: 0.5, max: 4});
-
-    // check the rolls list is correct
-    expect(roll).toHaveRolls({rolls: [1]});
-    expect(roll.rolls).toArraySumEqualTo(total*2);
-
-    // check the output string
-    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total*2) + ']/2', total: total});
   });
 });
 
@@ -550,7 +498,120 @@ describe('exploding, compounding, and penetrating', function(){
   });
 });
 
-// TODO - test log clearing
+describe('basic equations', function(){
+  'use strict';
+
+  // create a new instance of the DiceRoller
+  var diceRoller;
+
+  beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+
+    diceRoller = new DiceRoller();
+  });
+
+  it('should return between 3 and 8 for `1d6+2`', function(){
+    var notation = '1d6+2',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 3, max: 8});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [1]});
+    expect(roll.rolls).toArraySumEqualTo(total-2);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total-2) + ']+2', total: total});
+  });
+
+  it('should return between -1 and 2 for `1d4-2`', function(){
+    var notation = '1d4-2',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: -1, max: 2});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [1]});
+    expect(roll.rolls).toArraySumEqualTo(total+2);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total+2) + ']-2', total: total});
+  });
+
+  it('should return between 2 and 20 for `1d10*2`', function(){
+    var notation = '1d10*2',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 2, max: 20});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [1]});
+    expect(roll.rolls).toArraySumEqualTo(total/2);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total/2) + ']*2', total: total});
+  });
+
+  it('should return between 0.5 and 4 for `1d8/2`', function(){
+    var notation = '1d8/2',
+        roll = diceRoller.roll(notation),
+        total = roll.getTotal();
+
+    // check value is within allowed range
+    expect(total).toBeWithinRange({min: 0.5, max: 4});
+
+    // check the rolls list is correct
+    expect(roll).toHaveRolls({rolls: [1]});
+    expect(roll.rolls).toArraySumEqualTo(total*2);
+
+    // check the output string
+    expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total*2) + ']/2', total: total});
+  });
+});
+
+describe('Roll log', function(){
+  'use strict';
+
+  // create a new instance of the DiceRoller
+  var diceRoller = new DiceRoller();
+
+  beforeEach(function(){
+    jasmine.addMatchers(customMatchers);
+  });
+
+  it('should be no dice rolled', function(){
+    expect(diceRoller).not.toHaveLogLength();
+    expect(diceRoller + '').toEqual('No dice rolled');
+  });
+
+  it('should have 1 dice rolled', function(){
+    diceRoller.roll('d6');
+
+    expect(diceRoller).toHaveLogLength(1);
+  });
+
+  it('should be cleared log', function(){
+    diceRoller.roll('d6');
+    diceRoller.clearLog();
+
+    expect(diceRoller).not.toHaveLogLength();
+    expect(diceRoller + '').toEqual('No dice rolled');
+  });
+
+  it('should have 2 dice rolled', function(){
+    diceRoller.roll('1d6');
+    diceRoller.roll('d10');
+
+    expect(diceRoller).toHaveLogLength(2);
+  });
+});
+
 // TODO - check H|L dice
 // TODO - test compare point
 // TODO - test notation segments (additional dice, multiplication etc.)
