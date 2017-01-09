@@ -60,10 +60,10 @@ var customMatchers = {
 
         if(sum !== expected){
           result.pass = false;
-          result.message = 'Expected Array sum ' + sum + ' to equal ' + actual;
+          result.message = 'Expected Array sum ' + sum + ' to equal ' + expected;
         }else{
           result.pass = true;
-          result.message = 'Expected Array sum ' + sum + ' NOT to equal ' + actual;
+          result.message = 'Expected Array sum ' + sum + ' NOT to equal ' + expected;
         }
 
         return result;
@@ -166,7 +166,7 @@ var customMatchers = {
         var result = {},
             toMatch = expected.notation + ': ' + expected.rolls + ' = ' + expected.total;
 
-        if(actual !== toMatch){
+        if(''+actual !== toMatch){
           result.pass = false;
           result.message = 'Expected "' + actual + '" to match parsed notation "' + toMatch + '"';
         }else{
