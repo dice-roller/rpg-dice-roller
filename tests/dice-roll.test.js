@@ -261,8 +261,8 @@
 
         it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
           for(j = 0; j < loopCount; j++){
-              roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              var roll = diceRoller.roll(notation),
+                  total = roll.getTotal();
 
               // check value is within allowed range
               expect(total).toBeWithinRange({min: 1, max: sides});
