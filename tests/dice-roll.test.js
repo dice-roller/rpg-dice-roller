@@ -533,15 +533,53 @@
       expect(roll).toHaveRolls({rolls: ['*']});
       expect(roll.rolls).toArraySumEqualTo(total);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 2}});
+      expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 1}});
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+    });
+
+    // TODO - can we force this to explode
+    it('should explode if less than 2 for `1d2!<2`', function(){
+      var notation = '1d2!<2',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: ['*']});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      expect(roll.rolls[0]).toExplode({min: 1, max: 2, comparePoint: {operator: '<', value: 2}});
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+    });
+
+    // TODO - can we force this to explode
+    it('should explode if equal to 2 for `1d3!=2`', function(){
+      var notation = '1d3!=2',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: ['*']});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      expect(roll.rolls[0]).toExplode({min: 1, max: 3, comparePoint: {operator: '=', value: 2}});
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
     });
 
     // TODO - can we force this to compound
-    it('should explode if higher than 2 for `1d6!!>1`', function(){
-      var notation = '1d6!!>1',
+    it('should compound if higher than 2 for `1d6!!>1`', function(){
+      var notation = '1d2!!p',
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
@@ -552,8 +590,45 @@
       expect(roll).toHaveRolls({rolls: [1]});
       expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 1) ? '!!' : '') + ']', total: total});
+      // check the output string (Compunds if over 1, so any total of 2 or more means that it must have compounded)
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+    });
+
+    // TODO - can we force this to compound
+    it('should compound if less than 2 for `1d2!!<2`', function(){
+      var notation = '1d2!!<2',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
+	  // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!p' : '') + ']', total: total});
+    });
+
+    // TODO - can we force this to compound
+    it('should compound if equal to 2 for `1d2!!=2`', function(){
+      // TODO - this compound
+      var notation = '1d3!!=2',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeGreaterThan(0);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
+	  // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!p' : '') + ']', total: total});
     });
   });
 
@@ -804,6 +879,5 @@
   });
 
   // TODO - check H|L dice on exploding, compounding, penetrating, fudge
-  // TODO - test compare point
   // TODO - test notation segments (additional dice, multiplication etc.)
 }());
