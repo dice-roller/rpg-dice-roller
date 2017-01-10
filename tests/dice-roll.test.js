@@ -242,77 +242,40 @@
 
   describe('basic dice', function(){
     // create a new instance of the DiceRoller
-    var diceRoller;
+    var diceRoller,
+        dice = [4, 6, 10, 20, '%'],
+        loopCount = 1000,
+        i, j;
 
     beforeEach(function(){
       jasmine.addMatchers(customMatchers);
 
       diceRoller = new DiceRoller();
+      i = 0;
     });
+	
+    for(i = 0; i < dice.length; i++){
+        var die = dice[i],
+            sides = die === '%' ? 100 : die,
+            notation = 'd' + die;
 
-    it('should return between 1 and 6 for `d6`', function(){
-      var notation = 'd6',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
+          for(j = 0; j < loopCount; j++){
+              roll = diceRoller.roll(notation),
+              total = roll.getTotal();
 
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 1, max: 6});
+              // check value is within allowed range
+              expect(total).toBeWithinRange({min: 1, max: sides});
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+              // check the rolls list is correct
+              expect(roll).toHaveRolls({rolls: [1]});
+              expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
-
-    it('should return between 1 and 10 for `1d10`', function(){
-      var notation = '1d10',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 1, max: 10});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
-
-    it('should return between 1 and 20 for `1d20`', function(){
-      var notation = '1d20',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 1, max: 20});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
-
-    it('should be a percentage for `1d%`', function(){
-      var notation = '1d%',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 0, max: 100});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
+              // check the output string
+              expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
+          }
+        });
+    }
   });
 
   describe('fudge dice', function(){
