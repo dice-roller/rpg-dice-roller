@@ -252,91 +252,72 @@
 
       diceRoller = new DiceRoller();
       i = 0;
+      j = 0;
     });
 	
+    // loop through and run the tests for the dice
     for(i = 0; i < dice.length; i++){
-        var die = dice[i],
-            sides = die === '%' ? 100 : die,
-            notation = 'd' + die;
+      var die = dice[i],
+          sides = die === '%' ? 100 : die,
+          notation = 'd' + die;
 
-        it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
-          for(j = 0; j < loopCount; j++){
-              var roll = diceRoller.roll(notation),
-                  total = roll.getTotal();
+      it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
+        for(j = 0; j < loopCount; j++){
+          var roll = diceRoller.roll(notation),
+              total = roll.getTotal();
 
-              // check value is within allowed range
-              expect(total).toBeWithinRange({min: 1, max: sides});
+          // check value is within allowed range
+          expect(total).toBeWithinRange({min: 1, max: sides});
 
-              // check the rolls list is correct
-              expect(roll).toHaveRolls({rolls: [1]});
-              expect(roll.rolls).toArraySumEqualTo(total);
+          // check the rolls list is correct
+          expect(roll).toHaveRolls({rolls: [1]});
+          expect(roll.rolls).toArraySumEqualTo(total);
 
-              // check the output string
-              expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-          }
-        });
+          // check the output string
+          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
+        }
+      });
     }
   });
 
   describe('fudge dice', function(){
     // create a new instance of the DiceRoller
-    var diceRoller;
+    var diceRoller,
+        dice = ['dF', 'dF.2', 'dF.1'],
+        loopCount = 1000,
+        i, j;
 
     beforeEach(function(){
       jasmine.addMatchers(customMatchers);
 
       diceRoller = new DiceRoller();
+      i = 0;
+      j = 0;
     });
+	
+    // loop through and run the tests for the dice
+    for(i = 0; i < dice.length; i++){
+      var die = dice[i],
+          notation = die;
 
-    // `dF` or `dF.2` equates mathematically to `1d3 - 2`
-    it('should be between -1 and 1 for `dF`', function(){
-      var notation = 'dF',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+      // Fudge dice always provide a value between -1 and 1
+      it('should be between -1 and 1 for `' + notation + '`', function(){
+        for(j = 0; j < loopCount; j++){
+          var roll = diceRoller.roll(notation),
+              total = roll.getTotal();
 
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: -1, max: 1});
+          // check value is within allowed range
+          expect(total).toBeWithinRange({min: -1, max: 1});
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+          // check the rolls list is correct
+          expect(roll).toHaveRolls({rolls: [1]});
+          expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
-
-    // `dF` or `dF.2` equates mathematically to `1d3 - 2`
-    it('should be between -1 and 1 for `dF.2`', function(){
-      var notation = 'dF.2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: -1, max: 1});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
-
-    it('should be between -1 and 1 for `dF.1`', function(){
-      var notation = 'dF.1',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: -1, max: 1});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
-    });
+          // check the output string
+          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
+        }
+      });
+    }
   });
 
   describe('multiple dice', function(){
