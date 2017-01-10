@@ -352,7 +352,7 @@
               total = roll.getTotal();
 
           // check value is within allowed range
-          expect(total).toBeWithinRange({min: die.sides, max: die.rolls*die.sides});
+          expect(total).toBeWithinRange({min: die.rolls, max: die.rolls*die.sides});
 
           // check the rolls list is correct
           expect(roll).toHaveRolls({rolls: [die.rolls]});
