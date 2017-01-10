@@ -254,7 +254,7 @@
       i = 0;
       j = 0;
     });
-	
+
     // loop through and run the tests for the dice
     for(i = 0; i < dice.length; i++){
       var die = dice[i],
@@ -295,7 +295,7 @@
       i = 0;
       j = 0;
     });
-	
+
     // loop through and run the tests for the dice
     for(i = 0; i < dice.length; i++){
       var die = dice[i],
@@ -340,7 +340,7 @@
       i = 0;
       j = 0;
     });
-    
+
     for(i = 0; i < dice.length; i++){
       var die = dice[i],
           notation = die.rolls + 'd' + die.sides;
@@ -519,7 +519,7 @@
       expect(roll.rolls).toArraySumEqualTo(total);
 
       // check the output string (Compunds if over 1, so any total of 2 or more means that it must have compounded)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!' : '') + ']', total: total});
     });
 
     // TODO - can we force this to compound
@@ -537,13 +537,12 @@
 
       // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
 	  // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!p' : '') + ']', total: total});
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
     });
 
     // TODO - can we force this to compound
     it('should compound if equal to 2 for `1d2!!=2`', function(){
-      // TODO - this compound
-      var notation = '1d3!!=2',
+      var notation = '1d2!!=2',
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
@@ -555,8 +554,8 @@
       expect(roll.rolls).toArraySumEqualTo(total);
 
       // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
-	  // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!p' : '') + ']', total: total});
+	    // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!' : '') + ']', total: total});
     });
   });
 
