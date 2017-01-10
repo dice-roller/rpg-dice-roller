@@ -262,6 +262,7 @@
           notation = 'd' + die;
 
       it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
+        // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
           var roll = diceRoller.roll(notation),
               total = roll.getTotal();
@@ -302,6 +303,7 @@
 
       // Fudge dice always provide a value between -1 and 1
       it('should be between -1 and 1 for `' + notation + '`', function(){
+        // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
           var roll = diceRoller.roll(notation),
               total = roll.getTotal();
@@ -322,64 +324,46 @@
 
   describe('multiple dice', function(){
     // create a new instance of the DiceRoller
-    var diceRoller;
+    var diceRoller,
+        dice = [
+          {sides: 6, rolls: 4},
+          {sides: 10, rolls: 8},
+          {sides: 20, rolls: 5}
+        ],
+        loopCount = 1000,
+        i, j;
 
     beforeEach(function(){
       jasmine.addMatchers(customMatchers);
 
       diceRoller = new DiceRoller();
+      i = 0;
+      j = 0;
     });
+    
+    for(i = 0; i < dice.length; i++){
+      var die = dice[i],
+          notation = die.rolls + 'd' + die.sides;
 
-    it('should roll a 6 sided die 4 times', function(){
-      var notation = '4d6',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+      it('should roll a ' + die.sides + ' sided die ' + die.rolls + ' times', function(){
+        // run the tests multiple times for consistency
+        for(j = 0; j < loopCount; j++){
+          var roll = diceRoller.roll(notation),
+              total = roll.getTotal();
 
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 4, max: 24});
+          // check value is within allowed range
+          expect(total).toBeWithinRange({min: die.sides, max: die.rolls*die.sides});
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [4]});
-      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
-      expect(roll.rolls).toArraySumEqualTo(total);
+          // check the rolls list is correct
+          expect(roll).toHaveRolls({rolls: [die.rolls]});
+          expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: die.sides});
+          expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
-    });
-
-    it('should roll a 10 sided die 8 times', function(){
-      var notation = '8d10',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 8, max: 80});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [8]});
-      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 10});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
-    });
-
-    it('should roll a 20 sided die 5 times', function(){
-      var notation = '5d20',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
-
-      // check value is within allowed range
-      expect(total).toBeWithinRange({min: 5, max: 100});
-
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [5]});
-      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 20});
-      expect(roll.rolls).toArraySumEqualTo(total);
-
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
-    });
+          // check the output string
+          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+        }
+      });
+    }
   });
 
   describe('exploding, compounding, and penetrating', function(){
