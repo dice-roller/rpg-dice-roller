@@ -926,6 +926,62 @@
       // if we run many rolls, we should expect at least one to have exploded
       expect(hasExploded).toBeTruthy();
     });
+
+    it('should subtract the LOWEST compound roll for `d6!!-L`', function(){
+      var notation = 'd6!!-L',
+        hasCompounded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toEqual(0);
+
+        // check if the rolls actually exist
+        expect(roll.rolls).toBeGreaterThan(0);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0][0] + (roll.rolls[0][0] > 6 ? '!!' : '') + ']-L', total: total});
+
+        // determine whether this roll exploded by checking if the value is greater than the max
+        hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasCompounded).toBeTruthy();
+    });
+
+    it('should subtract the HIGHEST compound roll for `d6!!-H`', function(){
+      var notation = 'd6!!-H',
+        hasCompounded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toEqual(0);
+
+        // check if the rolls actually exist
+        expect(roll.rolls).toBeGreaterThan(0);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0][0] + (roll.rolls[0][0] > 6 ? '!!' : '') + ']-H', total: total});
+
+        // determine whether this roll exploded by checking if the value is greater than the max
+        hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasCompounded).toBeTruthy();
+    });
   });
 
   describe('roll log', function(){
@@ -963,6 +1019,6 @@
     });
   });
 
-  // TODO - check H|L dice on exploding, compounding, penetrating, fudge
+  // TODO - check H|L dice on penetrating, fudge
   // TODO - test notation segments (additional dice, multiplication etc.)
 }());
