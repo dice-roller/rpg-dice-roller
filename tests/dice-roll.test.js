@@ -870,6 +870,62 @@
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/H', total: total});
     });
+
+    it('should subtract the LOWEST explode roll for `d6!-L`', function(){
+      var notation = 'd6!-L',
+        hasExploded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(-1);
+
+        // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
+        expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-L', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
+    });
+
+    it('should subtract the Highest explode roll for `d6!-H`', function(){
+      var notation = 'd6!-H',
+        hasExploded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(-1);
+
+        // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
+        expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-H', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
+    });
   });
 
   describe('roll log', function(){
