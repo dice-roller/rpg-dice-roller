@@ -109,7 +109,6 @@
         }
       };
     },
-    // TODO - this should ensure at least the first die explodes, once we have a way of forcing explode
     toExplode: function(util, customEqualityTesters){
       return {
         compare: function(actual, expected){
@@ -368,194 +367,297 @@
 
   describe('exploding, compounding, and penetrating', function(){
     // create a new instance of the DiceRoller
-    var diceRoller;
+    var diceRoller,
+        loopCount = 1000,
+        i;
 
     beforeEach(function(){
       jasmine.addMatchers(customMatchers);
 
       diceRoller = new DiceRoller();
+      i = 0;
     });
 
-    // TODO - can we force this to explode
     it('could explode for `1d2!`', function(){
       var notation = '1d2!',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasExploded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: ['*']});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 2});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll.rolls[0]).toExplode({min: 1, max: 2});
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
     });
 
-    // TODO - can we force this to compound
     it('could compound explode for `1d2!!`', function(){
       var notation = '1d2!!',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasCompounded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll.rolls).toArraySumEqualTo(total);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total > 2);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
     });
 
-    // TODO - can we force this to penetrate
     it('could penetrate for `1d2!p`', function(){
       var notation = '1d2!p',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasExploded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++) {
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: ['*']});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 2, penetrate: true});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']', total: total});
+        expect(roll.rolls[0]).toExplode({min: 1, max: 2, penetrate: true});
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
     });
 
-    // TODO - can we force this to penetrate compound
     it('could penetrate compound for `1d2!!p`', function(){
       var notation = '1d2!!p',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasCompounded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll.rolls).toArraySumEqualTo(total);
+
+        // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total >= 2);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
     });
 
-    // TODO - can we force this to explode
-    it('should explode if higher than 2 for `1d6!>1`', function(){
+    it('should explode if higher than 1 for `1d6!>1`', function(){
       var notation = '1d6!>1',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasExploded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: ['*']});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 1}});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 1}});
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
     });
 
-    // TODO - can we force this to explode
     it('should explode if less than 2 for `1d2!<2`', function(){
       var notation = '1d2!<2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasExploded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: ['*']});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 2, comparePoint: {operator: '<', value: 2}});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll.rolls[0]).toExplode({min: 1, max: 2, comparePoint: {operator: '<', value: 2}});
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
     });
 
-    // TODO - can we force this to explode
     it('should explode if equal to 2 for `1d3!=2`', function(){
       var notation = '1d3!=2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasExploded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: ['*']});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      expect(roll.rolls[0]).toExplode({min: 1, max: 3, comparePoint: {operator: '=', value: 2}});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll.rolls[0]).toExplode({min: 1, max: 3, comparePoint: {operator: '=', value: 2}});
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
     });
 
-    // TODO - can we force this to compound
-    it('should compound if higher than 2 for `1d6!!>1`', function(){
-      var notation = '1d2!!p',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should compound if higher than 1 for `1d6!!>1`', function(){
+      var notation = '1d6!!>1',
+          hasCompounded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      // check the output string (Compunds if over 1, so any total of 2 or more means that it must have compounded)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!' : '') + ']', total: total});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll.rolls).toArraySumEqualTo(total);
+
+        // check the output string (Compounds if over 1, so any total of 2 or more means that it must have compounded)
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!' : '') + ']', total: total});
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total >= 2);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
     });
 
-    // TODO - can we force this to compound
     it('should compound if less than 2 for `1d2!!<2`', function(){
       var notation = '1d2!!<2',
-          roll = diceRoller.roll(notation),
+          hasCompounded = false;
+
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll.rolls).toArraySumEqualTo(total);
 
-      // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
-	  // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+        // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
+        // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total > 2);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
     });
 
-    // TODO - can we force this to compound
     it('should compound if equal to 2 for `1d2!!=2`', function(){
       var notation = '1d2!!=2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          hasCompounded = false;
 
-      // check value is within allowed range
-      expect(total).toBeGreaterThan(0);
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+            total = roll.getTotal();
 
-      // check the rolls list is correct
-      expect(roll).toHaveRolls({rolls: [1]});
-      expect(roll.rolls).toArraySumEqualTo(total);
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
 
-      // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
-	    // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!' : '') + ']', total: total});
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll.rolls).toArraySumEqualTo(total);
+
+        // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
+        // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!' : '') + ']', total: total});
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total > 4);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
     });
   });
 
