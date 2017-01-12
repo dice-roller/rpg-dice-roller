@@ -417,7 +417,7 @@
       i = 0;
     });
 
-    it('could explode for `1d2!`', function(){
+    it('should explode for `1d2!`', function(){
       var notation = '1d2!',
           hasExploded = false;
 
@@ -446,7 +446,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('could compound explode for `1d2!!`', function(){
+    it('should compound explode for `1d2!!`', function(){
       var notation = '1d2!!',
           hasCompounded = false;
 
@@ -473,7 +473,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('could penetrate for `1d2!p`', function(){
+    it('should penetrate for `1d2!p`', function(){
       var notation = '1d2!p',
           hasExploded = false;
 
@@ -502,7 +502,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('could penetrate compound for `1d2!!p`', function(){
+    it('should penetrate compound for `1d2!!p`', function(){
       var notation = '1d2!!p',
           hasCompounded = false;
 
@@ -1021,6 +1021,62 @@
       // if we run many rolls, we should expect at least one to have exploded
       expect(hasCompounded).toBeTruthy();
     });
+
+    it('should subtract the LOWEST penetrating roll for `d6!p-L`', function(){
+      var notation = 'd6!p-L',
+        hasExploded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(-1);
+
+        // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
+        expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-L', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
+    });
+
+    it('should subtract the HIGHEST penetrating roll for `d6!p-H`', function(){
+      var notation = 'd6!p-H',
+        hasExploded = false,
+        loopCount = 1000,
+        i;
+
+      // loop this roll for consistency (We need it to have exploded at least once)
+      for(i = 0; i < loopCount; i++){
+        var roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(-1);
+
+        // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
+        expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-H', total: total});
+
+        // determine whether this roll exploded by checking the amount of rolls
+        hasExploded = hasExploded || (roll.rolls[0].length > 1);
+      }
+
+      // if we run many rolls, we should expect at least one to have exploded
+      expect(hasExploded).toBeTruthy();
+    });
   });
 
   describe('roll log', function(){
@@ -1058,6 +1114,6 @@
     });
   });
 
-  // TODO - check H|L dice on penetrating, fudge
+  // TODO - check H|L dice on fudge
   // TODO - test notation segments (additional dice, multiplication etc.)
 }());
