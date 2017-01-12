@@ -236,6 +236,46 @@
           return result;
         }
       };
+    },
+    toBeDiceRoll: function(util, customEqualityTesters){
+      return {
+        compare: function(actual, expected){
+          var result = {pass: true, message: 'Expected "' + actual + '" to NOT be a Dice Roll'},
+              resultT,
+              roll = actual,
+              total = roll.getTotal();
+
+          // check value is within allowed range
+          resultT = customMatchers.toBeWithinRange().compare(total, {min: expected.totalRange.min, max: expected.totalRange.max});
+          if(!resultT.pass){
+            result = resultT;
+          }
+
+          // check the rolls list is correct
+          resultT = customMatchers.toHaveRolls().compare(roll, {rolls: expected.rolls});
+          if(!resultT.pass){
+            result = resultT;
+          }
+
+          resultT = customMatchers.toHaveValuesWithinRange().compare(roll.rolls[0], {min: expected.dieRange.min, max: expected.dieRange.max});
+          if(!resultT.pass){
+            result = resultT;
+          }
+
+          resultT = customMatchers.toArraySumEqualTo().compare(roll.rolls, total);
+          if(!resultT.pass){
+            result = resultT;
+          }
+
+          // check the output string
+          resultT = customMatchers.toMatchParsedNotation().compare(roll, {notation: expected.notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+          if(!resultT.pass){
+            result = resultT;
+          }
+
+          return result;
+        }
+      };
     }
   };
 
@@ -263,18 +303,18 @@
       it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          var roll = diceRoller.roll(notation),
-              total = roll.getTotal();
-
-          // check value is within allowed range
-          expect(total).toBeWithinRange({min: 1, max: sides});
-
-          // check the rolls list is correct
-          expect(roll).toHaveRolls({rolls: [1]});
-          expect(roll.rolls).toArraySumEqualTo(total);
-
-          // check the output string
-          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
+          expect(diceRoller.roll(notation)).toBeDiceRoll({
+            dieRange: {
+              min: 1,
+              max: sides
+            },
+            totalRange: {
+              min: 1,
+              max: sides
+            },
+            rolls: [1],
+            notation: notation
+          });
         }
       });
     }
@@ -304,18 +344,18 @@
       it('should be between -1 and 1 for `' + notation + '`', function(){
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          var roll = diceRoller.roll(notation),
-              total = roll.getTotal();
-
-          // check value is within allowed range
-          expect(total).toBeWithinRange({min: -1, max: 1});
-
-          // check the rolls list is correct
-          expect(roll).toHaveRolls({rolls: [1]});
-          expect(roll.rolls).toArraySumEqualTo(total);
-
-          // check the output string
-          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ']', total: total});
+          expect(diceRoller.roll(notation)).toBeDiceRoll({
+            dieRange: {
+              min: -1,
+              max: 1
+            },
+            totalRange: {
+              min: -1,
+              max: 1
+            },
+            rolls: [1],
+            notation: notation
+          });
         }
       });
     }
@@ -347,19 +387,18 @@
       it('should roll a ' + die.sides + ' sided die ' + die.rolls + ' times', function(){
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          var roll = diceRoller.roll(notation),
-              total = roll.getTotal();
-
-          // check value is within allowed range
-          expect(total).toBeWithinRange({min: die.rolls, max: die.rolls*die.sides});
-
-          // check the rolls list is correct
-          expect(roll).toHaveRolls({rolls: [die.rolls]});
-          expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: die.sides});
-          expect(roll.rolls).toArraySumEqualTo(total);
-
-          // check the output string
-          expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']', total: total});
+          expect(diceRoller.roll(notation)).toBeDiceRoll({
+            dieRange: {
+              min: 1,
+              max: die.sides
+            },
+            totalRange: {
+              min: die.rolls,
+              max: die.rolls*die.sides
+            },
+            rolls: [die.rolls],
+            notation: notation
+          });
         }
       });
     }
