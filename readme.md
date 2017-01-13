@@ -165,6 +165,30 @@ You can use `DiceRoller` like so:
 ```
 
 
+### UMD
+
+You can also load the library using AMD and CommonJS.
+
+Here is the above example in Node.js:
+
+```
+// require the dice-roller library
+const dr = require("./dice-roller.js");
+
+// create a new instance of the DiceRoller
+var diceRoller  = new dr.DiceRoller();
+
+// roll the dice
+diceRoller.roll('4d20-L');
+
+// get the latest dice rolls from the log
+var latestRoll = diceRoller.getLog().shift();
+
+// output the latest roll - it has a toString method for nice output
+console.log(latestRoll.toString());
+```
+
+
 ### API
 
 The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
