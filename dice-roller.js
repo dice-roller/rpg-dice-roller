@@ -6,8 +6,10 @@
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
-
+/*global define, exports */
 ;(function (root, factory) {
+  "use strict";
+
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory);
@@ -77,22 +79,23 @@
     switch(operator){
       case '*':
         // multiply the value
-        return a *= b;
-      break;
+        a *= b;
+        break;
       case '/':
         // divide the value
-        return a /= b;
-      break;
+        a /= b;
+        break;
       case '-':
         // subtract from the value
-        return a -= b;
-      break;
-      case '+':
+        a -= b;
+        break;
       default:
         // add to the value
-        return a += b;
-      break;
+        a += b;
+        break;
     }
+
+    return a;
   };
 
   /**
@@ -105,31 +108,32 @@
    * @returns {boolean}
    */
   var compareNumbers  = function(a, b, operator){
+    var result = false;
+
     switch(operator){
       case '=':
       case '==':
-        return a == b;
-      break;
+        result = a === b;
+        break;
       case '<':
-        return a < b;
-      break;
+        result = a < b;
+        break;
       case '>':
-        return a > b;
-      break;
+        result = a > b;
+        break;
       case '<=':
-        return a <= b;
-      break;
+        result = a <= b;
+        break;
       case '>=':
-        return a >= b;
-      break;
+        result = a >= b;
+        break;
       case '!':
       case '!=':
-        return a != b;
-      break;
-      default:
-        return false;
-      break;
+        result = a !== b;
+        break;
     }
+
+    return result;
   };
 
 
@@ -209,7 +213,7 @@
    *
    * @type {notationPatterns}
    */
-  DiceRoller.notationPatterns = new function(){
+  DiceRoller.notationPatterns = (function(){
     var strings = {
       /**
        * Matches a basic arithmetic operator
@@ -264,21 +268,23 @@
 
     var regExp  = {};
 
-    /**
-     * @param {string} name
-     * @param {string=} flags
-     * @param {boolean=} matchWhole
-     * @returns {RegExp}
-     */
-    this.get  = function(name, flags, matchWhole){
-      var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-      if(!regExp[cacheName]){
-        regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
-      }
+    return {
+      /**
+       * @param {string} name
+       * @param {string=} flags
+       * @param {boolean=} matchWhole
+       * @returns {RegExp}
+       */
+      get: function(name, flags, matchWhole){
+        var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+        if(!regExp[cacheName]){
+          regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
+        }
 
-      return regExp[cacheName];
+        return regExp[cacheName];
+      }
     };
-  };
+  })();
 
   /**
    * Parses the given dice notation
@@ -302,8 +308,8 @@
           sides:        isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
           fudge:        false,                                                    // if fudge die this is set to the fudge notation match
           explode:      match[5],                                                 // flag - whether to explode the dice rolls or not
-          penetrate:    (match[6] == '!p') || (match[6] == '!!p'),                // flag - whether to penetrate the dice rolls or not
-          compound:     (match[6] == '!!') || (match[6] == '!!p'),                // flag - whether to compound exploding dice or not
+          penetrate:    (match[6] === '!p') || (match[6] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+          compound:     (match[6] === '!!') || (match[6] === '!!p'),              // flag - whether to compound exploding dice or not
           comparePoint: false,                                                    // the compare point for exploding/penetrating dice
           additions:    []                                                        // any additions (ie. +2, -L)
         };
@@ -323,7 +329,7 @@
           // we are exploding the dice so we need a compare point, but none has been defined
           die.comparePoint  = {
             operator: '=',
-            value:    die.fudge ? 1 : ((die.sides == '%') ? 100 : die.sides)
+            value:    die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
           };
         }
 
@@ -410,16 +416,16 @@
       fudge:    function(numNonBlanks){
         var total = 0;
 
-        if(numNonBlanks == 2){
+        if(numNonBlanks === 2){
           // default fudge (2 of each non-blank) = 1d3 - 2
           total = generateNumber(1, 3) - 2;
-        }else if(numNonBlanks == 1){
+        }else if(numNonBlanks === 1){
           // only 1 of each non-blank
           // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
           var num = generateNumber(1, 6);
-          if(num == 1){
+          if(num === 1){
             total = -1;
-          }else if(num == 6){
+          }else if(num === 6){
             total = 1;
           }
         }
@@ -516,13 +522,17 @@
         // loop through and roll for the quantity
         for(var i = 0; i < die.qty; i++){
           var reRolls   = [], // the rolls for the current die (only multiple rolls if exploding)
-              rollCount = 0;  // count of rolls for this die roll (Only > 1 if exploding)
+              rollCount = 0,  // count of rolls for this die roll (Only > 1 if exploding)
+              roll,           // the total rolled
+              index;          // re-roll index
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
-            // generate the roll total
-            var roll  = callback.call(this, sides),         // the total rolled on this die
-                index = die.compound ? 0 : reRolls.length;  // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
+            // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
+            index = die.compound ? 0 : reRolls.length;
+
+            // get the total rolled on this die
+            roll  = callback.call(this, sides);
 
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
@@ -533,7 +543,6 @@
             }
 
             rollCount++;
-          //}while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
           }while(die.explode && isComparePoint(die.comparePoint, roll));
 
           // add the rolls
@@ -590,12 +599,12 @@
           rolls.forEach(function(roll, rIndex, array){
             output += roll;
 
-            if(item.explode && (roll == explodeVal) || (roll > maxVal)){
+            if(item.explode && (roll === explodeVal) || (roll > maxVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
               output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
             }
 
-            if(rIndex != array.length-1){
+            if(rIndex !== array.length-1){
               output += ',';
             }
           });
@@ -637,10 +646,10 @@
               var value = aItem.value;
 
               // run any necessary addition value modifications
-              if(value == 'H'){
+              if(value === 'H'){
                 // 'H' is equivalent to the highest roll
                 value = Math.max.apply(null, rolls);
-              }else if(value == 'L'){
+              }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
                 value = Math.min.apply(null, rolls);
               }

@@ -2,6 +2,8 @@
 
 A basic JS based dice roller that accepts typical dice notation.
 
+[![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?develop)](https://travis-ci.org/GreenImp/rpg-dice-roller)
+
 
 ## Supported notation
 
