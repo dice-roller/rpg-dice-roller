@@ -2,6 +2,30 @@
 ;(function(){
   'use strict';
 
+  var utils = {
+    /**
+     * Reduces an array to a single value
+     *
+     * @param obj
+     * @returns {*}
+     */
+    reduceArray: function(obj){
+      if(Array.isArray(obj)){
+        return obj.reduce(function(a, b){
+          return utils.reduceArray(a) + utils.reduceArray(b);
+        }, 0);
+      }else{
+        return obj;
+      }
+    },
+    getMin: function(obj){
+      return Math.min.apply(this, obj);
+    },
+    getMax: function(obj){
+      return Math.max.apply(this, obj);
+    }
+  };
+
   var customMatchers = {
     toBeWithinRange: function(util,customEqualityTesters){
       return {
@@ -49,16 +73,7 @@
       return {
         compare: function(actual, expected){
           var result = {},
-              reduce = function(obj){
-                if(Array.isArray(obj)){
-                  return obj.reduce(function(a, b){
-                    return reduce(a) + reduce(b);
-                  }, 0);
-                }else{
-                  return obj;
-                }
-              },
-              sum = reduce(actual);
+              sum = utils.reduceArray(actual);
 
           if(sum !== expected){
             result.pass = false;
@@ -402,6 +417,66 @@
         }
       });
     }
+
+    it('should compute multiple dice rolls for `1d6+2d10`', function(){
+      var notation = '1d6+2d10',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 3, max: 26});
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1,2]});
+
+      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
+      expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 10});
+
+      expect(roll.rolls).toArraySumEqualTo(total);
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']+[' + roll.rolls[1].join(',') + ']', total: total});
+    });
+
+    it('should compute multiple dice rolls for `3d6*2d10-L`', function(){
+      var notation = '3d6*2d10-L',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 3, max: 180});
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [3,2]});
+
+      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
+      expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 10});
+
+      expect(utils.reduceArray(roll.rolls[0]) * (utils.reduceArray(roll.rolls[1]) - utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']*[' + roll.rolls[1].join(',') + ']-L', total: total});
+    });
+
+    it('should compute multiple dice rolls for `4d6/2d3`', function(){
+      var notation = '4d6/2d3',
+          roll = diceRoller.roll(notation),
+          total = roll.getTotal();
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 0.66, max: 12});
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [4,2]});
+
+      expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
+      expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 3});
+
+      expect(utils.reduceArray(roll.rolls[0]) / utils.reduceArray(roll.rolls[1])).toArraySumEqualTo(total);
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']/[' + roll.rolls[1].join(',') + ']', total: total});
+    });
   });
 
   describe('exploding, compounding, and penetrating', function(){
@@ -785,7 +860,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-      expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-L', total: total});
@@ -802,7 +877,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before lowest is added) is equal to the total, with the lowest subtracted
-      expect(roll.rolls).toArraySumEqualTo(total - Math.min.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total - utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+L', total: total});
@@ -819,7 +894,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before multiplied by lowest) is equal to the total, divided by the lowest
-      expect(roll.rolls).toArraySumEqualTo(total / Math.min.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total / utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*L', total: total});
@@ -836,7 +911,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by lowest) is equal to the total, multiplied by the lowest
-      expect(roll.rolls).toArraySumEqualTo(total * Math.min.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total * utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/L', total: total});
@@ -853,7 +928,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before highest is subtracted) is equal to the total, with the highest added
-      expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-H', total: total});
@@ -870,7 +945,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before highest is added) is equal to the total, with the highest subtracted
-      expect(roll.rolls).toArraySumEqualTo(total - Math.max.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total - utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+H', total: total});
@@ -887,7 +962,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before multiplied by highest) is equal to the total, divided by the highest
-      expect(roll.rolls).toArraySumEqualTo(total / Math.max.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total / utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*H', total: total});
@@ -904,7 +979,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by highest) is equal to the total, multiplied by the highest
-      expect(roll.rolls).toArraySumEqualTo(total * Math.max.apply(this, roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total * utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/H', total: total});
@@ -925,7 +1000,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-L', total: total});
@@ -953,7 +1028,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-H', total: total});
@@ -1037,7 +1112,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + Math.min.apply(this, roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-L', total: total});
@@ -1065,7 +1140,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + Math.max.apply(this, roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-H', total: total});
@@ -1113,7 +1188,4 @@
       expect(diceRoller).toHaveLogLength(2);
     });
   });
-
-  // TODO - check H|L dice on fudge
-  // TODO - test notation segments (additional dice, multiplication etc.)
 }());
