@@ -39,5 +39,8 @@ nbproject
 
 # Project specific
 
+.grunt
 node_modules
 bower_components
+
+output/testresults

@@ -2,12 +2,14 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version v1.2.3
+ * @version v1.3.0
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
-
+/*global define, exports */
 ;(function (root, factory) {
+  "use strict";
+
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
     define([], factory);
@@ -20,118 +22,6 @@
   }
 }(this, function(exports){
   "use strict";
-
-  /**
-   * Checks if the given val is a valid number
-   *
-   * @param val
-   * @returns {boolean}
-   */
-  var isNumeric       = function(val){
-    return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
-  };
-
-  /**
-   * Generates a random number between the
-   * min and max, inclusive
-   *
-   * @param {number} min
-   * @param {number} max
-   * @returns {*}
-   */
-  var generateNumber  = function(min, max){
-    min = min ? parseInt(min, 10) : 1;
-    max = max ? parseInt(max, 10) : min;
-
-    if(max <= min){
-      return min;
-    }
-
-    return Math.floor(Math.random() * (max - min + 1) + min);
-  };
-
-  /**
-   * Takes an array of numbers and adds them together,
-   * returning the result
-   *
-   * @param {Array} numbers
-   * @returns {number}
-   */
-  var sumArray        = function(numbers){
-    return !Array.isArray(numbers) ? 0 : numbers.reduce(function(prev, current){
-      return prev + current;
-    }, 0);
-  };
-
-  /**
-   * Takes two numbers and runs a
-   * mathematical equation on them,
-   * using the given operator
-   *
-   * @param {number} a
-   * @param {number} b
-   * @param {string} operator A valid arithmetic operator (+, -, /, *)
-   * @returns {number}
-   */
-  var equateNumbers   = function(a, b, operator){
-    switch(operator){
-      case '*':
-        // multiply the value
-        return a *= b;
-      break;
-      case '/':
-        // divide the value
-        return a /= b;
-      break;
-      case '-':
-        // subtract from the value
-        return a -= b;
-      break;
-      case '+':
-      default:
-        // add to the value
-        return a += b;
-      break;
-    }
-  };
-
-  /**
-   * Checks if `a` is comparative to `b` with the given operator.
-   * Returns true or false.
-   *
-   * @param {number} a
-   * @param {number} b
-   * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
-   * @returns {boolean}
-   */
-  var compareNumbers  = function(a, b, operator){
-    switch(operator){
-      case '=':
-      case '==':
-        return a == b;
-      break;
-      case '<':
-        return a < b;
-      break;
-      case '>':
-        return a > b;
-      break;
-      case '<=':
-        return a <= b;
-      break;
-      case '>=':
-        return a >= b;
-      break;
-      case '!':
-      case '!=':
-        return a != b;
-      break;
-      default:
-        return false;
-      break;
-    }
-  };
-
 
   /**
    *
@@ -149,17 +39,14 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
-    this.toString = function(){
-      var log = lib.getLog();
-
-      // return the response
-      return log.length ? log.join('; ') : 'No dice rolled';
+    this.getNotation = function(){
+        // return the log as a joined string
+      return lib.getLog().join('; ');
     };
 
     /**
@@ -199,8 +86,130 @@
     this.getLog   = function(){
       return log || [];
     };
+
+    /**
+     * Returns the String representation
+     * of the object as the roll notations
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
   };
 
+  /**
+   * Utility helper functions
+   */
+  DiceRoller.utils = {
+      /**
+       * Checks if the given val is a valid number
+       *
+       * @param val
+       * @returns {boolean}
+       */
+      isNumeric: function(val){
+        return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
+      },
+      /**
+       * Generates a random number between the
+       * min and max, inclusive
+       *
+       * @param {number} min
+       * @param {number} max
+       * @returns {*}
+       */
+      generateNumber: function(min, max){
+        min = min ? parseInt(min, 10) : 1;
+        max = max ? parseInt(max, 10) : min;
+
+        if(max <= min){
+          return min;
+        }
+
+        return Math.floor(Math.random() * (max - min + 1) + min);
+      },
+      /**
+       * Takes an array of numbers and adds them together,
+       * returning the result
+       *
+       * @param {Array} numbers
+       * @returns {number}
+       */
+      sumArray: function(numbers){
+        return !Array.isArray(numbers) ? 0 : numbers.reduce(function(prev, current){
+          return prev + current;
+        }, 0);
+      },
+      /**
+       * Takes two numbers and runs a
+       * mathematical equation on them,
+       * using the given operator
+       *
+       * @param {number} a
+       * @param {number} b
+       * @param {string} operator A valid arithmetic operator (+, -, /, *)
+       * @returns {number}
+       */
+      equateNumbers: function(a, b, operator){
+        switch(operator){
+          case '*':
+            // multiply the value
+            a *= b;
+            break;
+          case '/':
+            // divide the value
+            a /= b;
+            break;
+          case '-':
+            // subtract from the value
+            a -= b;
+            break;
+          default:
+            // add to the value
+            a += b;
+            break;
+        }
+
+        return a;
+      },
+      /**
+       * Checks if `a` is comparative to `b` with the given operator.
+       * Returns true or false.
+       *
+       * @param {number} a
+       * @param {number} b
+       * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
+       * @returns {boolean}
+       */
+      compareNumbers: function(a, b, operator){
+        var result = false;
+
+        switch(operator){
+          case '=':
+          case '==':
+            result = a === b;
+            break;
+          case '<':
+            result = a < b;
+            break;
+          case '>':
+            result = a > b;
+            break;
+          case '<=':
+            result = a <= b;
+            break;
+          case '>=':
+            result = a >= b;
+            break;
+          case '!':
+          case '!=':
+            result = a !== b;
+            break;
+        }
+
+        return result;
+      }
+  };
+  
   /**
    * Stores a list of regular expression
    * patterns for dice notations.
@@ -209,7 +218,7 @@
    *
    * @type {notationPatterns}
    */
-  DiceRoller.notationPatterns = new function(){
+  DiceRoller.notationPatterns = (function(){
     var strings = {
       /**
        * Matches a basic arithmetic operator
@@ -264,21 +273,23 @@
 
     var regExp  = {};
 
-    /**
-     * @param {string} name
-     * @param {string=} flags
-     * @param {boolean=} matchWhole
-     * @returns {RegExp}
-     */
-    this.get  = function(name, flags, matchWhole){
-      var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-      if(!regExp[cacheName]){
-        regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
-      }
+    return {
+      /**
+       * @param {string} name
+       * @param {string=} flags
+       * @param {boolean=} matchWhole
+       * @returns {RegExp}
+       */
+      get: function(name, flags, matchWhole){
+        var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+        if(!regExp[cacheName]){
+          regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
+        }
 
-      return regExp[cacheName];
+        return regExp[cacheName];
+      }
     };
-  };
+  })();
 
   /**
    * Parses the given dice notation
@@ -299,11 +310,11 @@
         var die = {
           operator:     match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
           qty:          match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-          sides:        isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+          sides:        DiceRoller.utils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
           fudge:        false,                                                    // if fudge die this is set to the fudge notation match
           explode:      match[5],                                                 // flag - whether to explode the dice rolls or not
-          penetrate:    (match[6] == '!p') || (match[6] == '!!p'),                // flag - whether to penetrate the dice rolls or not
-          compound:     (match[6] == '!!') || (match[6] == '!!p'),                // flag - whether to compound exploding dice or not
+          penetrate:    (match[6] === '!p') || (match[6] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+          compound:     (match[6] === '!!') || (match[6] === '!!p'),              // flag - whether to compound exploding dice or not
           comparePoint: false,                                                    // the compare point for exploding/penetrating dice
           additions:    []                                                        // any additions (ie. +2, -L)
         };
@@ -323,7 +334,7 @@
           // we are exploding the dice so we need a compare point, but none has been defined
           die.comparePoint  = {
             operator: '=',
-            value:    die.fudge ? 1 : ((die.sides == '%') ? 100 : die.sides)
+            value:    die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
           };
         }
 
@@ -335,7 +346,7 @@
             // add the addition to the list
             die.additions.push({
               operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
-              value:    isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
+              value: DiceRoller.utils.isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
                 parseFloat(additionMatch[2])
                 :
                 additionMatch[2]
@@ -399,7 +410,7 @@
        * @returns {*}
        */
       default:  function(sides){
-        return generateNumber(1, sides);
+        return DiceRoller.utils.generateNumber(1, sides);
       },
       /**
        * Rolls a fudge die
@@ -410,16 +421,16 @@
       fudge:    function(numNonBlanks){
         var total = 0;
 
-        if(numNonBlanks == 2){
+        if(numNonBlanks === 2){
           // default fudge (2 of each non-blank) = 1d3 - 2
-          total = generateNumber(1, 3) - 2;
-        }else if(numNonBlanks == 1){
+          total = DiceRoller.utils.generateNumber(1, 3) - 2;
+        }else if(numNonBlanks === 1){
           // only 1 of each non-blank
           // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
-          var num = generateNumber(1, 6);
-          if(num == 1){
+          var num = DiceRoller.utils.generateNumber(1, 6);
+          if(num === 1){
             total = -1;
-          }else if(num == 6){
+          }else if(num === 6){
             total = 1;
           }
         }
@@ -477,7 +488,7 @@
      * @returns {boolean}
      */
     var isComparePoint = function(comparePoint, value){
-      return comparePoint ? compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
+      return comparePoint ? DiceRoller.utils.compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
     };
 
     /**
@@ -501,7 +512,7 @@
         // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
         // in case we want to use the number of sides as well, in the future
         callback = function(sides){
-          return diceRollMethods.fudge(isNumeric(die.fudge[1]) ? parseInt(die.fudge[1]) : 2);
+          return diceRollMethods.fudge(DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1]) : 2);
         };
       }else if(typeof die.sides === 'string'){
         if(die.sides === '%'){
@@ -516,13 +527,17 @@
         // loop through and roll for the quantity
         for(var i = 0; i < die.qty; i++){
           var reRolls   = [], // the rolls for the current die (only multiple rolls if exploding)
-              rollCount = 0;  // count of rolls for this die roll (Only > 1 if exploding)
+              rollCount = 0,  // count of rolls for this die roll (Only > 1 if exploding)
+              roll,           // the total rolled
+              index;          // re-roll index
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
-            // generate the roll total
-            var roll  = callback.call(this, sides),         // the total rolled on this die
-                index = die.compound ? 0 : reRolls.length;  // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
+            // the reRolls index to use
+            index = reRolls.length;
+
+            // get the total rolled on this die
+            roll  = callback.call(this, sides);
 
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
@@ -533,7 +548,6 @@
             }
 
             rollCount++;
-          //}while(die.explode && ((roll == sides) || (die.fudge && (roll == 1))));
           }while(die.explode && isComparePoint(die.comparePoint, roll));
 
           // add the rolls
@@ -568,13 +582,12 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
-    this.toString     = function(){
+    this.getNotation = function(){
       var output  = this.notation + ': ';
 
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
@@ -582,20 +595,41 @@
         parsedDice.forEach(function(item, index, array){
           var rolls       = lib.rolls[index] || [],
               maxVal      = item.fudge ? 1 : item.sides,  // the maximum value rollable on the die
-              explodeVal  = maxVal;                       // the value to explode on
+              explodeVal  = maxVal,                       // the value to explode on
+              currentRoll = 0;                                      // current roll total - used for totalling compounding rolls
 
           output += ((index > 0) ? item.operator : '') + '[';
 
           // output the rolls
           rolls.forEach(function(roll, rIndex, array){
-            output += roll;
+            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll,
+                delimit = rIndex !== array.length-1;
 
-            if(item.explode && (roll == explodeVal) || (roll > maxVal)){
+            if(item.explode && isComparePoint(item.comparePoint, rollVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-              output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
+              
+              if(item.compound){
+                  // roll compounds - add the current roll to the roll total so it's only output as one number
+                  currentRoll += roll;
+                  // do NOT add the delimeter after this roll as we're not outputting it
+                  delimit = false;
+              }else{
+                // not compunding
+                output += roll + '!' + (item.penetrate ? 'p' : '');
+              }
+            }else if(item.compound && currentRoll){
+                // last roll in a compounding set (This one didn't compound)
+                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
+
+                // reset current roll total
+                currentRoll = 0;
+            }else{
+                // just a normal roll
+                output += roll;
             }
 
-            if(rIndex != array.length-1){
+            if(delimit){
               output += ',';
             }
           });
@@ -629,7 +663,10 @@
         // no total stored already - calculate it
         parsedDice.forEach(function(item, index, array){
           var rolls     = lib.rolls[index] || [],
-              dieTotal  = sumArray(rolls);
+              dieTotal  = DiceRoller.utils.sumArray(rolls),
+              rollsValues = item.compound ? [rolls.reduce(function(a, b){
+                return a + b;
+              }, 0)] : rolls;
 
           if(item.additions.length){
             // loop through the additions and handle them
@@ -637,21 +674,21 @@
               var value = aItem.value;
 
               // run any necessary addition value modifications
-              if(value == 'H'){
+              if(value === 'H'){
                 // 'H' is equivalent to the highest roll
-                value = Math.max.apply(null, rolls);
-              }else if(value == 'L'){
+                value = Math.max.apply(null,  rollsValues);
+              }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
-                value = Math.min.apply(null, rolls);
+                value = Math.min.apply(null, rollsValues);
               }
 
               // run the actual mathematical equation
-              dieTotal = equateNumbers(dieTotal, value, aItem.operator);
+              dieTotal = DiceRoller.utils.equateNumbers(dieTotal, value, aItem.operator);
             });
           }
 
           // total the value
-          total = equateNumbers(total, dieTotal, item.operator);
+          total = DiceRoller.utils.equateNumbers(total, dieTotal, item.operator);
         });
       }
 
@@ -659,6 +696,13 @@
       return total || 0;
     };
 
+    /**
+     * Returns the String representation
+     * of the object as the roll notation
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
 
     // initialise the object
     init(notation);
