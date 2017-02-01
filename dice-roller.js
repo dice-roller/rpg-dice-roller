@@ -603,7 +603,7 @@
           rolls.forEach(function(roll, rIndex, array){
             output += roll;
 
-            if(item.explode && (roll === explodeVal) || (roll > maxVal)){
+            if(item.explode && isComparePoint(item.comparePoint, roll)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
               output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
             }
