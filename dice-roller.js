@@ -663,7 +663,10 @@
         // no total stored already - calculate it
         parsedDice.forEach(function(item, index, array){
           var rolls     = lib.rolls[index] || [],
-              dieTotal  = sumArray(rolls);
+              dieTotal  = sumArray(rolls),
+              rollsValues = item.compound ? [rolls.reduce(function(a, b){
+                return a + b;
+              }, 0)] : rolls;
 
           if(item.additions.length){
             // loop through the additions and handle them
@@ -673,10 +676,10 @@
               // run any necessary addition value modifications
               if(value === 'H'){
                 // 'H' is equivalent to the highest roll
-                value = Math.max.apply(null, rolls);
+                value = Math.max.apply(null,  rollsValues);
               }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
-                value = Math.min.apply(null, rolls);
+                value = Math.min.apply(null, rollsValues);
               }
 
               // run the actual mathematical equation
