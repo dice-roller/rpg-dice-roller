@@ -620,7 +620,7 @@
               }
             }else if(item.compound && currentRoll){
                 // last roll in a compounding set (This one didn't compound)
-                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '')
+                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
 
                 // reset current roll total
                 currentRoll = 0;
