@@ -533,8 +533,8 @@
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
-            // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
-            index = die.compound ? 0 : reRolls.length;
+            // the reRolls index to use
+            index = reRolls.length;
 
             // get the total rolled on this die
             roll  = callback.call(this, sides);
@@ -595,23 +595,41 @@
         parsedDice.forEach(function(item, index, array){
           var rolls       = lib.rolls[index] || [],
               maxVal      = item.fudge ? 1 : item.sides,  // the maximum value rollable on the die
-              explodeVal  = maxVal;                       // the value to explode on
+              explodeVal  = maxVal,                       // the value to explode on
+              currentRoll = 0;                                      // current roll total - used for totalling compounding rolls
 
           output += ((index > 0) ? item.operator : '') + '[';
 
           // output the rolls
           rolls.forEach(function(roll, rIndex, array){
             // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll;
-              
-            output += roll;
+            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll,
+                delimit = rIndex !== array.length-1;
 
             if(item.explode && isComparePoint(item.comparePoint, rollVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-              output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
+              
+              if(item.compound){
+                  // roll compounds - add the current roll to the roll total so it's only output as one number
+                  currentRoll += roll;
+                  // do NOT add the delimeter after this roll as we're not outputting it
+                  delimit = false;
+              }else{
+                // not compunding
+                output += roll + '!' + (item.penetrate ? 'p' : '');
+              }
+            }else if(item.compound && currentRoll){
+                // last roll in a compounding set (This one didn't compound)
+                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '')
+
+                // reset current roll total
+                currentRoll = 0;
+            }else{
+                // just a normal roll
+                output += roll;
             }
 
-            if(rIndex !== array.length-1){
+            if(delimit){
               output += ',';
             }
           });
