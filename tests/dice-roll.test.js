@@ -764,10 +764,10 @@
 
         // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
         // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >3) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
 
         // determine whether this roll compounded by checking the value of the roll
-        hasCompounded = hasCompounded || (total > 3);
+        hasCompounded = hasCompounded || (total > 2);
       }
 
       // if we run many rolls, we should expect at least one to have compounded
@@ -1063,7 +1063,7 @@
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-L', total: total});
 
         // determine whether this roll exploded by checking if the value is greater than the max
-        hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
+        hasCompounded = hasCompounded || (rollsTotal > 6);
       }
 
       // if we run many rolls, we should expect at least one to have exploded
@@ -1092,7 +1092,7 @@
         expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-H', total: total});
 
         // determine whether this roll exploded by checking if the value is greater than the max
-        hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
+        hasCompounded = hasCompounded || (rollsTotal > 6);
       }
 
       // if we run many rolls, we should expect at least one to have exploded
