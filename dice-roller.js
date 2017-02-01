@@ -153,17 +153,14 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
-    this.toString = function(){
-      var log = lib.getLog();
-
-      // return the response
-      return log.length ? log.join('; ') : 'No dice rolled';
+    this.getNotation = function(){
+        // return the log as a joined string
+      return lib.getLog().join('; ');
     };
 
     /**
@@ -203,6 +200,14 @@
     this.getLog   = function(){
       return log || [];
     };
+
+    /**
+     * Returns the String representation
+     * of the object as the roll notations
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
   };
 
   /**
@@ -577,13 +582,12 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
-    this.toString     = function(){
+    this.getNotation = function(){
       var output  = this.notation + ': ';
 
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
@@ -668,6 +672,13 @@
       return total || 0;
     };
 
+    /**
+     * Returns the String representation
+     * of the object as the roll notation
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
 
     // initialise the object
     init(notation);
