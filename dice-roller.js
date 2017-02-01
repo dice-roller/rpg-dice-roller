@@ -601,9 +601,12 @@
 
           // output the rolls
           rolls.forEach(function(roll, rIndex, array){
+            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll;
+              
             output += roll;
 
-            if(item.explode && isComparePoint(item.comparePoint, roll)){
+            if(item.explode && isComparePoint(item.comparePoint, rollVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
               output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
             }
