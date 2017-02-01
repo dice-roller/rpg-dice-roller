@@ -534,7 +534,7 @@
         expect(total).toBeGreaterThan(0);
 
         // check the rolls list is correct
-        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string
@@ -590,7 +590,7 @@
         expect(total).toBeGreaterThan(0);
 
         // check the rolls list is correct
-        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
@@ -704,7 +704,7 @@
         expect(total).toBeGreaterThan(0);
 
         // check the rolls list is correct
-        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (Compounds if over 1, so any total of 2 or more means that it must have compounded)
@@ -731,7 +731,7 @@
         expect(total).toBeGreaterThan(0);
 
         // check the rolls list is correct
-        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
@@ -759,15 +759,15 @@
         expect(total).toBeGreaterThan(0);
 
         // check the rolls list is correct
-        expect(roll).toHaveRolls({rolls: [1]});
+        expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
         // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 4) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >3) ? '!!' : '') + ']', total: total});
 
         // determine whether this roll compounded by checking the value of the roll
-        hasCompounded = hasCompounded || (total > 4);
+        hasCompounded = hasCompounded || (total > 3);
       }
 
       // if we run many rolls, we should expect at least one to have compounded
@@ -1050,16 +1050,17 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
         var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          total = roll.getTotal(),
+          rollsTotal = utils.reduceArray(roll.rolls);
 
         // check value is within allowed range
         expect(total).toEqual(0);
 
         // check if the rolls actually exist
-        expect(roll.rolls).toBeGreaterThan(0);
+        expect(rollsTotal).toBeGreaterThan(0);
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0][0] + (roll.rolls[0][0] > 6 ? '!!' : '') + ']-L', total: total});
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-L', total: total});
 
         // determine whether this roll exploded by checking if the value is greater than the max
         hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
@@ -1078,16 +1079,17 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
         var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+          total = roll.getTotal(),
+          rollsTotal = utils.reduceArray(roll.rolls);
 
         // check value is within allowed range
         expect(total).toEqual(0);
 
         // check if the rolls actually exist
-        expect(roll.rolls).toBeGreaterThan(0);
+        expect(rollsTotal).toBeGreaterThan(0);
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0][0] + (roll.rolls[0][0] > 6 ? '!!' : '') + ']-H', total: total});
+        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-H', total: total});
 
         // determine whether this roll exploded by checking if the value is greater than the max
         hasCompounded = hasCompounded || (roll.rolls[0][0] > 6);
