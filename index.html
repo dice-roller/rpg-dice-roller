@@ -64,7 +64,7 @@
       <label for="output">Output</label>
 
       <div>
-        <textarea rows="1" id="output" readonly></textarea>
+        <textarea rows="1" id="output" readonly placeholder="No dice rolled"></textarea>
       </div>
 
       <button onclick="clearLog()">Clear log</button>
@@ -141,7 +141,7 @@
     </p>
   </main>
 
-    <hr>
+  <hr>
 
   <footer id="footer">
     Copyright &copy; 2015 - 2017 GreenImp ltd. (MIT) -
@@ -155,11 +155,9 @@
     function roll(){
       var value = document.getElementById('input').value;
 
-      if(value){
-        diceRoller.roll(value);
+      diceRoller.roll(value);
 
-        document.getElementById('output').value = diceRoller.getLog().shift();
-      }
+      document.getElementById('output').value = diceRoller.getNotation();
 
       // stop event propagation
       return false;
@@ -168,7 +166,7 @@
     function clearLog(){
       diceRoller.clearLog();
 
-      document.getElementById('output').value = '';
+      document.getElementById('output').value = diceRoller.getNotation();
 
       // stop event propagation
       return false;

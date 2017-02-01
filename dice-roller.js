@@ -153,17 +153,14 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
-    this.toString = function(){
-      var log = lib.getLog();
-
-      // return the response
-      return log.length ? log.join('; ') : 'No dice rolled';
+    this.getNotation = function(){
+        // return the log as a joined string
+      return lib.getLog().join('; ');
     };
 
     /**
@@ -203,6 +200,14 @@
     this.getLog   = function(){
       return log || [];
     };
+
+    /**
+     * Returns the String representation
+     * of the object as the roll notations
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
   };
 
   /**
@@ -528,8 +533,8 @@
 
           // roll the die once, then check if it exploded and keep rolling until it stops
           do{
-            // the reRolls index to use (if compounding always use `0`, otherwise use next empty index)
-            index = die.compound ? 0 : reRolls.length;
+            // the reRolls index to use
+            index = reRolls.length;
 
             // get the total rolled on this die
             roll  = callback.call(this, sides);
@@ -577,13 +582,12 @@
 
 
     /**
-     * Returns the String representation of the object,
-     * in the format of:
+     * Returns the roll notation in the format of:
      * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
-    this.toString     = function(){
+    this.getNotation = function(){
       var output  = this.notation + ': ';
 
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
@@ -591,20 +595,41 @@
         parsedDice.forEach(function(item, index, array){
           var rolls       = lib.rolls[index] || [],
               maxVal      = item.fudge ? 1 : item.sides,  // the maximum value rollable on the die
-              explodeVal  = maxVal;                       // the value to explode on
+              explodeVal  = maxVal,                       // the value to explode on
+              currentRoll = 0;                                      // current roll total - used for totalling compounding rolls
 
           output += ((index > 0) ? item.operator : '') + '[';
 
           // output the rolls
           rolls.forEach(function(roll, rIndex, array){
-            output += roll;
+            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll,
+                delimit = rIndex !== array.length-1;
 
-            if(item.explode && (roll === explodeVal) || (roll > maxVal)){
+            if(item.explode && isComparePoint(item.comparePoint, rollVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-              output += '!' + (item.compound ? '!' : '') + (item.penetrate ? 'p' : '');
+              
+              if(item.compound){
+                  // roll compounds - add the current roll to the roll total so it's only output as one number
+                  currentRoll += roll;
+                  // do NOT add the delimeter after this roll as we're not outputting it
+                  delimit = false;
+              }else{
+                // not compunding
+                output += roll + '!' + (item.penetrate ? 'p' : '');
+              }
+            }else if(item.compound && currentRoll){
+                // last roll in a compounding set (This one didn't compound)
+                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
+
+                // reset current roll total
+                currentRoll = 0;
+            }else{
+                // just a normal roll
+                output += roll;
             }
 
-            if(rIndex !== array.length-1){
+            if(delimit){
               output += ',';
             }
           });
@@ -638,7 +663,10 @@
         // no total stored already - calculate it
         parsedDice.forEach(function(item, index, array){
           var rolls     = lib.rolls[index] || [],
-              dieTotal  = sumArray(rolls);
+              dieTotal  = sumArray(rolls),
+              rollsValues = item.compound ? [rolls.reduce(function(a, b){
+                return a + b;
+              }, 0)] : rolls;
 
           if(item.additions.length){
             // loop through the additions and handle them
@@ -648,10 +676,10 @@
               // run any necessary addition value modifications
               if(value === 'H'){
                 // 'H' is equivalent to the highest roll
-                value = Math.max.apply(null, rolls);
+                value = Math.max.apply(null,  rollsValues);
               }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
-                value = Math.min.apply(null, rolls);
+                value = Math.min.apply(null, rollsValues);
               }
 
               // run the actual mathematical equation
@@ -668,6 +696,13 @@
       return total || 0;
     };
 
+    /**
+     * Returns the String representation
+     * of the object as the roll notation
+     *
+     * @returns {string}
+     */
+    this.toString = this.getNotation;
 
     // initialise the object
     init(notation);
