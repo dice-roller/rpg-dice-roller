@@ -26,6 +26,7 @@ module.exports = function(grunt){
         'dice-roller.js'
       ],
       options: {
+        helpers: 'tests/helpers/*.helper.js',
         specs: 'tests/*.test.js',
         junit: {
           path: 'output/testresults'
