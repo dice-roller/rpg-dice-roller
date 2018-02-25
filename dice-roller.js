@@ -704,9 +704,34 @@
      */
     this.toString = this.getNotation;
 
+
+    /**
+     * Exports the DiceRoll in the given format.
+     * If no format is specified, JSON is returned.
+     *
+     * @param {DiceRoll.exportFormats=} format The format to export the data as (ie. JSON, base64)
+     * @returns {string|null}
+     */
+    this.export = function(format){
+      switch(format || DiceRoll.exportFormats.JSON){
+        case DiceRoll.exportFormats.BASE_64:
+          // JSON encode, then base64, otherwise it only exports the notation
+          return btoa(lib.export(DiceRoll.exportFormats.JSON));
+        case DiceRoll.exportFormats.JSON:
+          return JSON.stringify(lib);
+        default:
+          throw new Error('Unrecognised export format specified: ' + format);
+      }
+    };
+
     // initialise the object
     init(notation);
   };
+
+  DiceRoll.exportFormats = Object.freeze({
+    JSON: 0,
+    BASE_64: 1
+  });
 
   exports.DiceRoller = DiceRoller;
   exports.DiceRoll = DiceRoll;
