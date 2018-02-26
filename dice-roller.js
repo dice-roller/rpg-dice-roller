@@ -777,7 +777,7 @@
    *
    * Returns `null` if import fails.
    *
-   * @param data The data to import
+   * @param {*} data The data to import
    * @param {DiceRoll.exportFormats=} format The format of the import data (ie. JSON, base64)
    * @returns {DiceRoll|null}
    */
