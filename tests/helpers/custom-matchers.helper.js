@@ -185,7 +185,7 @@ beforeEach(function(){
       return {
         compare: function (actual, expected) {
           var result = {},
-            toMatch = expected.notation + ': ' + expected.rolls + ' = ' + expected.total;
+            toMatch = expected.notation + ': ' + expected.rolls + (expected.total !== undefined ? ' = ' + expected.total : '');
 
           if ('' + actual !== toMatch) {
             result.pass = false;

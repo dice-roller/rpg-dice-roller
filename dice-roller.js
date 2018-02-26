@@ -109,6 +109,13 @@
       isNumeric: function(val){
         return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
       },
+      isBase64: function(val){
+        try{
+          return val && (btoa(atob(val)) === val);
+        }catch(e){
+          return false;
+        }
+      },
       /**
        * Generates a random number between the
        * min and max, inclusive
@@ -462,22 +469,52 @@
      */
     var init          = function(notation){
       if(!notation){
-        throw 'DiceRoll exception: No notation specified';
+        throw new Error('DiceRoll exception: No notation specified');
       }
 
-      // store the notation
-      lib.notation  = notation;
-
-      // parse the notation
-      parsedDice = DiceRoller.parseNotation(notation);
-
-      // empty the current rolls
-      lib.rolls = [];
       // zero the current total
       total = 0;
 
-      // roll the dice
-      lib.roll();
+      if(notation instanceof Object){
+        // validate object
+        if(!notation.notation){
+          // object doesn't contain a notation property
+          throw new Error('Object has no notation: ' + notation);
+        }else if(notation.rolls){
+          // we have rolls - validate them
+          if(!Array.isArray(notation.rolls)){
+            // rolls is not an array
+            throw new Error('Rolls must be an Array: ' + notation.rolls);
+          }else{
+            // loop through each rolls, make sure they're valid
+            notation.rolls.forEach(function(roll, i){
+              if(!Array.isArray(roll) || roll.some(isNaN)){
+                // not all rolls are valid
+                throw new Error('Rolls are invalid at index [' + i + ']: ' + roll);
+              }
+            });
+          }
+        }
+
+        // store the notation
+        lib.notation = notation.notation;
+        // store the rolls
+        lib.rolls = notation.rolls || [];
+
+        // parse the notation
+        parsedDice = DiceRoller.parseNotation(lib.notation);
+      }else{
+        // store the notation
+        lib.notation = notation;
+        // empty the current rolls
+        lib.rolls = [];
+
+        // parse the notation
+        parsedDice = DiceRoller.parseNotation(lib.notation);
+
+        // roll the dice
+        lib.roll();
+      }
     };
 
     /**
@@ -542,7 +579,7 @@
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
 
-            // subtract 1 from penetrated rolls (only consecutive rolls, after initial roll are subtratcted)
+            // subtract 1 from penetrated rolls (only consecutive rolls, after initial roll are subtracted)
             if(die.penetrate && (rollCount > 0)){
               reRolls[index]--;
             }
@@ -715,7 +752,7 @@
     this.export = function(format){
       switch(format || DiceRoll.exportFormats.JSON){
         case DiceRoll.exportFormats.BASE_64:
-          // JSON encode, then base64, otherwise it only exports the notation
+          // JSON encode, then base64, otherwise it exports the string representation of the roll output
           return btoa(lib.export(DiceRoll.exportFormats.JSON));
         case DiceRoll.exportFormats.JSON:
           return JSON.stringify(lib);
@@ -732,6 +769,43 @@
     JSON: 0,
     BASE_64: 1
   });
+
+  /**
+   * Imports the given dice roll data and build a `DiceRoll` object
+   * from it.
+   * If no format is specified, it assumes the data is JSON encoded.
+   *
+   * Returns `null` if import fails.
+   *
+   * @param data The data to import
+   * @param {DiceRoll.exportFormats=} format The format of the import data (ie. JSON, base64)
+   * @returns {DiceRoll|null}
+   */
+  DiceRoll.import = function(data, format){
+    if(!data){
+      throw new Error('No data to import');
+    }
+
+    switch(format){
+      case DiceRoll.exportFormats.BASE_64:
+        if(!DiceRoller.utils.isBase64(data)){
+          throw new Error('Cannot import DiceRoll as base64: data is not valid base64 encoded');
+        }
+
+        // decode the data, parse as JSON, and import
+        return DiceRoll.import(atob(data), DiceRoll.exportFormats.JSON);
+      case DiceRoll.exportFormats.JSON:
+        try{
+          // attempt to parse as JSON
+          return new DiceRoll(JSON.parse(data));
+        }catch(e){
+          throw new Error('Cannot import DiceRoll as JSON: ' + e.message);
+        }
+        break;
+      default:
+        throw new Error('Unrecognised import format specified: ' + format);
+    }
+  };
 
   exports.DiceRoller = DiceRoller;
   exports.DiceRoll = DiceRoll;
