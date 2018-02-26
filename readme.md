@@ -139,35 +139,35 @@ dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
 
 You only need to include the `dice-roller.js` file in your project:
 
-```<script src="dice-roller.js"></script>```
+```html
+<script src="dice-roller.js"></script>
+```
 
 You can use `DiceRoller` like so:
 
-```
-    <script>
-      // create a new instance of the DiceRoller
-      var diceRoller  = new DiceRoller();
-    
-      // roll the dice
-      diceRoller.roll('4d20-L');
-      
-      // get the latest dice rolls from the log
-      var latestRoll  = diceRoller.getLog().shift();
-      
-      // output the latest roll - it has a toString method for nice output
-      document.write(latestRoll);
-      
-      
-      // roll a single notation without saving it to the log
-      var diceRoll = new DiceRoll('2d6-L);
-      
-      // export the dice roll
-      var exportedData = diceRoll.export(DiceRoll.exportFormats.JSON);
-      
-      // we can also import data either from a previous export, or built up manually
-      // Note that here we're calling `import` on the `DiceRoll` class, not an existing object
-      var importedDiceRoll = DiceRoll.import(exportedData, DiceRoll.exportFormats.JSON);
-    </script>
+```js
+// create a new instance of the DiceRoller
+var diceRoller  = new DiceRoller();
+
+// roll the dice
+diceRoller.roll('4d20-L');
+
+// get the latest dice rolls from the log
+var latestRoll  = diceRoller.getLog().shift();
+
+// output the latest roll - it has a toString method for nice output
+document.write(latestRoll);
+
+
+// roll a single notation without saving it to the log
+var diceRoll = new DiceRoll('2d6-L');
+
+// export the dice roll
+var exportedData = diceRoll.export(DiceRoll.exportFormats.JSON);
+
+// we can also import data either from a previous export, or built up manually
+// Note that here we're calling `import` on the `DiceRoll` class, not an existing object
+var importedDiceRoll = DiceRoll.import(exportedData, DiceRoll.exportFormats.JSON);
 ```
 
 
@@ -177,7 +177,7 @@ You can also load the library using AMD and CommonJS.
 
 Here is the above example in Node.js:
 
-```
+```js
 // require the dice-roller library
 const dr = require("./dice-roller.js");
 
@@ -199,7 +199,7 @@ console.log(latestRoll.toString());
 
 The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
 
-```
+```js
 // my first DiceRoller
 var roller1 = new DiceRoller();
 
@@ -229,7 +229,7 @@ A `DiceRoll` object takes a notation and parses it in to rolls.
 
 It can be created like so:
 
-```
+```js
 var notation  = '4d10';
 
 var roll      = new DiceRoll(notation);
@@ -245,11 +245,11 @@ var roll      = new DiceRoll(notation);
 | `export`   | `function({DiceRoll.exportFormats} format)` | Exports the DiceRoll object to the specified format. Returns `String`                                            |
 
 
-##### Global properties
+##### Static properties
 
-Global properties can be called on the class itself, without instantiating an object, like so:
+Static properties can be called on the class itself, without instantiating an object, like so:
 
-```
+```js
 var diceRoll = DiceRoll.import(data, format);
 ```
 
