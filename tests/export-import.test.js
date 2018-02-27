@@ -49,8 +49,7 @@
               rolls: [
                 [rollVal]
               ]
-            }),
-            DiceRoll.exportFormats.JSON
+            })
           );
 
       // check if response is a DiceRoll object
@@ -79,8 +78,7 @@
               rolls: [
                 [rollVal]
               ]
-            })),
-            DiceRoll.exportFormats.BASE_64
+            }))
           );
 
       // check if response if a DiceRoll object
@@ -111,8 +109,7 @@
               rolls: [
                 rollVals
               ]
-            }),
-            DiceRoll.exportFormats.JSON
+            })
           );
 
         // check value is within allowed range
@@ -136,8 +133,7 @@
                 rolls: [
                   rollVals
                 ]
-              }),
-              DiceRoll.exportFormats.JSON
+              })
             );
 
         // check if response is a DiceRoll object
@@ -166,8 +162,7 @@
                 rolls: [
                   rollVals
                 ]
-              }),
-              DiceRoll.exportFormats.JSON
+              })
             );
 
         // check value is within allowed range
@@ -189,8 +184,7 @@
           imported = DiceRoll.import(
             JSON.stringify({
               notation: notation
-            }),
-            DiceRoll.exportFormats.JSON
+            })
           );
 
       // check if response is a DiceRoll object
@@ -214,35 +208,22 @@
       expect(function(){ DiceRoll.import(null); }).toThrowError('No data to import');
     });
 
-    it('should throw error for invalid import formats', function(){
-      expect(function(){ DiceRoll.import('foo'); }).toThrowError('Unrecognised import format specified: undefined');
-
-      expect(function(){ DiceRoll.import('foo', null); }).toThrowError('Unrecognised import format specified: null');
-
-      expect(function(){ DiceRoll.import('foo', 'bar'); }).toThrowError('Unrecognised import format specified: bar');
-    });
-
-    it('should throw an error if import data is not correctly formatted', function(){
-      // importing invalid JSON
-      expect(function(){ DiceRoll.import('foo', DiceRoll.exportFormats.JSON); }).toThrowError(/Cannot import DiceRoll as JSON/);
-
-      // importing invalid base64
-      expect(function(){ DiceRoll.import('foo', DiceRoll.exportFormats.BASE_64); }).toThrowError(/Cannot import DiceRoll as base64/);
-
-      // importing valid base64 encoded invalid data (Not JSON)
-      expect(function(){ DiceRoll.import(btoa('foo'), DiceRoll.exportFormats.BASE_64); }).toThrowError(/Cannot import DiceRoll as JSON/);
-    });
-
     it('should throw error if import data is invalid', function(){
+      // importing invalid format (String)
+      expect(function(){ DiceRoll.import('foo'); }).toThrowError(/Unrecognised import format for data/);
+
+      // importing valid base64 encoded but invalid data (Not JSON)
+      expect(function(){ DiceRoll.import(btoa('foo')); }).toThrowError(/Unrecognised import format for data/);
+
       // importing valid JSON but missing notation
-      expect(function(){ DiceRoll.import(JSON.stringify({foo: 'bar'}), DiceRoll.exportFormats.JSON); }).toThrowError(/Object has no notation/);
+      expect(function(){ DiceRoll.import(JSON.stringify({foo: 'bar'})); }).toThrowError(/Object has no notation/);
 
       // importing valid JSON but invalid rolls
-      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: 23}), DiceRoll.exportFormats.JSON); }).toThrowError(/Rolls must be an Array/);
+      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: 23})); }).toThrowError(/Rolls must be an Array/);
       // rolls array must be 2 dimensional
-      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: [23, 4]}), DiceRoll.exportFormats.JSON); }).toThrowError(/Rolls are invalid at index/);
-      // rolls must all be numeric
-      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: [[23], [4], ['foo']]}), DiceRoll.exportFormats.JSON); }).toThrowError(/Rolls are invalid at index/);
+      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: [23, 4]})); }).toThrowError(/Rolls are invalid at index/);
+      // rolls must all be numerics
+      expect(function(){ DiceRoll.import(JSON.stringify({notation: '1d6', rolls: [[23], [4], ['foo']]})); }).toThrowError(/Rolls are invalid at index/);
     });
 
     it('should import from exported data', function(){
@@ -252,12 +233,10 @@
           // export the roll and re-import as a new roll for each format type
           importedRolls = [
             DiceRoll.import(
-              diceRoll.export(DiceRoll.exportFormats.JSON),
-              DiceRoll.exportFormats.JSON
+              diceRoll.export(DiceRoll.exportFormats.JSON)
             ),
             DiceRoll.import(
-              diceRoll.export(DiceRoll.exportFormats.BASE_64),
-              DiceRoll.exportFormats.BASE_64
+              diceRoll.export(DiceRoll.exportFormats.BASE_64)
             )
           ];
 

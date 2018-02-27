@@ -167,7 +167,7 @@ var exportedData = diceRoll.export(DiceRoll.exportFormats.JSON);
 
 // we can also import data either from a previous export, or built up manually
 // Note that here we're calling `import` on the `DiceRoll` class, not an existing object
-var importedDiceRoll = DiceRoll.import(exportedData, DiceRoll.exportFormats.JSON);
+var importedDiceRoll = DiceRoll.import(exportedData);
 ```
 
 
@@ -253,10 +253,10 @@ Static properties can be called on the class itself, without instantiating an ob
 var diceRoll = DiceRoll.import(data, format);
 ```
 
-| Property        | type                                                      | description                                                            |
-| --------------- | --------------------------------------------------------- | ---------------------------------------------------------------------- |
-| `exportFormats` | `Object`                                                  | List of available export / import formats                              |
-| `import`        | `function({mixed} data, {DiceRoll.exportFormats} format)` | Imports the given data and creates a new dice roll. Returns `DiceRoll` |
+| Property        | type                     | description                                                            |
+| --------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `exportFormats` | `Object`                 | List of available export / import formats                              |
+| `import`        | `function({mixed} data)` | Imports the given data and creates a new dice roll. Returns `DiceRoll` |
 
 
 ## Browser support

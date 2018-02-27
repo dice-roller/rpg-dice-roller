@@ -116,6 +116,13 @@
           return false;
         }
       },
+      isJson: function(val){
+        try{
+          return !!(val && JSON.parse(val));
+        }catch(e){
+          return false;
+        }
+      },
       /**
        * Generates a random number between the
        * min and max, inclusive
@@ -771,39 +778,26 @@
   });
 
   /**
-   * Imports the given dice roll data and build a `DiceRoll` object
+   * Imports the given dice roll data and builds a `DiceRoll` object
    * from it.
-   * If no format is specified, it assumes the data is JSON encoded.
    *
-   * Returns `null` if import fails.
+   * Throws Error on failure
    *
+   * @throws Error
    * @param {*} data The data to import
-   * @param {DiceRoll.exportFormats=} format The format of the import data (ie. JSON, base64)
-   * @returns {DiceRoll|null}
+   * @returns {DiceRoll}
    */
-  DiceRoll.import = function(data, format){
+  DiceRoll.import = function(data){
     if(!data){
       throw new Error('No data to import');
-    }
-
-    switch(format){
-      case DiceRoll.exportFormats.BASE_64:
-        if(!DiceRoller.utils.isBase64(data)){
-          throw new Error('Cannot import DiceRoll as base64: data is not valid base64 encoded');
-        }
-
-        // decode the data, parse as JSON, and import
-        return DiceRoll.import(atob(data), DiceRoll.exportFormats.JSON);
-      case DiceRoll.exportFormats.JSON:
-        try{
-          // attempt to parse as JSON
-          return new DiceRoll(JSON.parse(data));
-        }catch(e){
-          throw new Error('Cannot import DiceRoll as JSON: ' + e.message);
-        }
-        break;
-      default:
-        throw new Error('Unrecognised import format specified: ' + format);
+    }else if(DiceRoller.utils.isJson(data)){
+      // data is JSON format - parse and create DiceRoll
+      return new DiceRoll(JSON.parse(data));
+    }else if(DiceRoller.utils.isBase64(data)){
+      // data is base64 encoded - decode the import
+      return DiceRoll.import(atob(data));
+    }else{
+      throw new Error('Unrecognised import format for data: ' + data);
     }
   };
 
