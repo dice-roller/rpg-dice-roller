@@ -96,6 +96,12 @@
     this.toString = this.getNotation;
   };
 
+  DiceRoller.exportFormats = Object.freeze({
+    JSON: 0,
+    BASE_64: 1,
+    OBJECT: 2
+  });
+
   /**
    * Utility helper functions
    */
@@ -396,7 +402,7 @@
    * A DiceRoll object, which takes a notation
    * and parses it in to rolls
    *
-   * @param {string} notation  The dice notation
+   * @param {string|Object} notation  The dice notation or object
    * @constructor
    */
   var DiceRoll      = function(notation){
@@ -748,34 +754,9 @@
      */
     this.toString = this.getNotation;
 
-
-    /**
-     * Exports the DiceRoll in the given format.
-     * If no format is specified, JSON is returned.
-     *
-     * @param {DiceRoll.exportFormats=} format The format to export the data as (ie. JSON, base64)
-     * @returns {string|null}
-     */
-    this.export = function(format){
-      switch(format || DiceRoll.exportFormats.JSON){
-        case DiceRoll.exportFormats.BASE_64:
-          // JSON encode, then base64, otherwise it exports the string representation of the roll output
-          return btoa(lib.export(DiceRoll.exportFormats.JSON));
-        case DiceRoll.exportFormats.JSON:
-          return JSON.stringify(lib);
-        default:
-          throw new Error('Unrecognised export format specified: ' + format);
-      }
-    };
-
     // initialise the object
     init(notation);
   };
-
-  DiceRoll.exportFormats = Object.freeze({
-    JSON: 0,
-    BASE_64: 1
-  });
 
   /**
    * Imports the given dice roll data and builds a `DiceRoll` object
@@ -791,13 +772,42 @@
     if(!data){
       throw new Error('No data to import');
     }else if(DiceRoller.utils.isJson(data)){
-      // data is JSON format - parse and create DiceRoll
-      return new DiceRoll(JSON.parse(data));
-    }else if(DiceRoller.utils.isBase64(data)){
-      // data is base64 encoded - decode the import
+      // data is JSON format - parse and import
+      return DiceRoll.import(JSON.parse(data));
+    }else if(DiceRoller.utils.isBase64(data)) {
+      // data is base64 encoded - decode then import
       return DiceRoll.import(atob(data));
+    }else if(typeof data === 'object'){
+      if(data.constructor.name === 'DiceRoll'){
+        // already a DiceRoll object
+        return data;
+      }else{
+        return new DiceRoll(data);
+      }
     }else{
       throw new Error('Unrecognised import format for data: ' + data);
+    }
+  };
+
+  /**
+   * Exports the DiceRoll in the given format.
+   * If no format is specified, JSON is returned.
+   *
+   * @throws Error
+   * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @returns {string|null}
+   */
+  DiceRoll.prototype.export = function(format){
+    switch(format || DiceRoller.exportFormats.JSON){
+      case DiceRoller.exportFormats.BASE_64:
+        // JSON encode, then base64, otherwise it exports the string representation of the roll output
+        return btoa(this.export(DiceRoller.exportFormats.JSON));
+      case DiceRoller.exportFormats.JSON:
+        return JSON.stringify(this);
+      case DiceRoller.exportFormats.OBJECT:
+        return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
+      default:
+        throw new Error('Unrecognised export format specified: ' + format);
     }
   };
 

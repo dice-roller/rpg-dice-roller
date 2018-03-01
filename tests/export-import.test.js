@@ -3,18 +3,24 @@
   'use strict';
 
   describe('export dice roll', function(){
-    var notation = '2d6+2',
-        diceRoll = new DiceRoll(notation);
+    var notation, diceRoll, exported;
+
+    beforeEach(function(){
+      notation = '2d6+2';
+
+      diceRoll = new DiceRoll(notation);
+    });
 
     it('should export as JSON', function(){
-      var exported = diceRoll.export(DiceRoll.exportFormats.JSON);
+      exported = diceRoll.export(DiceRoller.exportFormats.JSON);
 
       expect(exported).toBeJson();
     });
 
     it('should default export format to JSON', function(){
-      var exported = diceRoll.export(),
-          jsonExported = diceRoll.export(DiceRoll.exportFormats.JSON);
+      var jsonExported = diceRoll.export(DiceRoller.exportFormats.JSON);
+
+      exported = diceRoll.export();
 
       expect(exported).toBeJson();
 
@@ -22,8 +28,9 @@
     });
 
     it('should export as base64', function(){
-      var exported = diceRoll.export(DiceRoll.exportFormats.BASE_64),
-          jsonExported = diceRoll.export(DiceRoll.exportFormats.JSON);
+      var jsonExported = diceRoll.export(DiceRoller.exportFormats.JSON);
+
+      exported = diceRoll.export(DiceRoller.exportFormats.BASE_64);
 
       expect(exported).toBeBase64();
 
@@ -32,25 +39,41 @@
       expect(atob(exported)).toEqual(jsonExported);
     });
 
-    it('should throw error for invalid export formats', function(){
-      expect(function(){ diceRoll.export('foo'); }).toThrowError('Unrecognised export format specified: foo');
+    it('should export as Object', function(){
+      exported = diceRoll.export(DiceRoller.exportFormats.OBJECT);
+
+      expect(exported).toEqual(jasmine.any(Object));
+
+      // check the rolls list is correct
+      expect(exported).toHaveRolls({rolls: [2]});
+      expect(exported.rolls).toArraySumEqualTo(diceRoll.getTotal()-2);
     });
 
-    // TODO - verify validity of exports (Should this just be done during import testing?)
+    it('should throw error for invalid export formats', function(){
+      expect(function(){ diceRoll.export('foo'); }).toThrowError(/Unrecognised export format specified/);
+
+      expect(function(){ diceRoll.export('bar'); }).toThrowError(/Unrecognised export format specified/);
+    });
   });
 
   describe('import dice roll', function(){
+    var notation, rollVal, imported;
+
+    beforeEach(function(){
+      notation = '1d6';
+
+      rollVal = 4;
+    });
+
     it('should import from JSON', function(){
-      var notation = '1d6',
-          rollVal = 4,
-          imported = DiceRoll.import(
-            JSON.stringify({
-              notation: notation,
-              rolls: [
-                [rollVal]
-              ]
-            })
-          );
+      imported = DiceRoll.import(
+        JSON.stringify({
+          notation: notation,
+          rolls: [
+            [rollVal]
+          ]
+        })
+      );
 
       // check if response is a DiceRoll object
       expect(imported).toEqual(jasmine.any(DiceRoll));
@@ -70,16 +93,14 @@
     });
 
     it('should import from base64', function(){
-      var notation = '1d6',
-          rollVal = 4,
-          imported = DiceRoll.import(
-            btoa(JSON.stringify({
-              notation: notation,
-              rolls: [
-                [rollVal]
-              ]
-            }))
-          );
+      imported = DiceRoll.import(
+        btoa(JSON.stringify({
+          notation: notation,
+          rolls: [
+            [rollVal]
+          ]
+        }))
+      );
 
       // check if response if a DiceRoll object
       expect(imported).toEqual(jasmine.any(DiceRoll));
@@ -94,6 +115,53 @@
         totalRange: {
           min: rollVal,
           max: rollVal
+        }
+      });
+    });
+
+    it('should import from Object', function(){
+      imported = DiceRoll.import(
+        {
+          notation: notation,
+          rolls: [
+            [rollVal]
+          ]
+        }
+      );
+
+      // check if response is a DiceRoll object
+      expect(imported).toEqual(jasmine.any(DiceRoll));
+
+      expect(imported).toBeDiceRoll({
+        dieRange: {
+          min: rollVal,
+          max: rollVal
+        },
+        notation: notation,
+        rolls: [1],
+        totalRange: {
+          min: rollVal,
+          max: rollVal
+        }
+      });
+    });
+
+    it('should import from DiceRoll', function(){
+      imported = DiceRoll.import(new DiceRoll(notation));
+
+      // check if response is a DiceRoll object
+      expect(imported).toEqual(jasmine.any(DiceRoll));
+
+      expect(imported).toBeDiceRoll({
+        dieRange: {
+          min: 1,
+          max: 6
+        },
+        notation: notation,
+        rolls: [1],
+        totalRange: {
+          min: 1,
+          max: 6
         }
       });
     });
@@ -180,12 +248,11 @@
     });
 
     it('should import with empty rolls', function(){
-      var notation = '1d6',
-          imported = DiceRoll.import(
-            JSON.stringify({
-              notation: notation
-            })
-          );
+      imported = DiceRoll.import(
+        JSON.stringify({
+          notation: notation
+        })
+      );
 
       // check if response is a DiceRoll object
       expect(imported).toEqual(jasmine.any(DiceRoll));
@@ -227,16 +294,16 @@
     });
 
     it('should import from exported data', function(){
-      var notation = '2d6+2',
+      notation = '2d6+2';
           // roll the dice
-          diceRoll = new DiceRoll(notation),
+      var diceRoll = new DiceRoll(notation),
           // export the roll and re-import as a new roll for each format type
           importedRolls = [
             DiceRoll.import(
-              diceRoll.export(DiceRoll.exportFormats.JSON)
+              diceRoll.export(DiceRoller.exportFormats.JSON)
             ),
             DiceRoll.import(
-              diceRoll.export(DiceRoll.exportFormats.BASE_64)
+              diceRoll.export(DiceRoller.exportFormats.BASE_64)
             )
           ];
 

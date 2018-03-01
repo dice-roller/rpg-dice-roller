@@ -163,7 +163,7 @@ document.write(latestRoll);
 var diceRoll = new DiceRoll('2d6-L');
 
 // export the dice roll
-var exportedData = diceRoll.export(DiceRoll.exportFormats.JSON);
+var exportedData = diceRoll.export(DiceRoller.exportFormats.JSON);
 
 // we can also import data either from a previous export, or built up manually
 // Note that here we're calling `import` on the `DiceRoll` class, not an existing object
@@ -223,6 +223,19 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object` |
 
 
+##### Static properties
+
+Static properties can be called on the class itself, without instantiating an object, like so:
+
+```js
+var diceRoller = DiceRoller.import(data, format);
+```
+
+| Property        | type                     | description                               |
+| --------------- | ------------------------ | ----------------------------------------- |
+| `exportFormats` | `Object`                 | List of available export / import formats |
+
+
 #### `DiceRoll` object
 
 A `DiceRoll` object takes a notation and parses it in to rolls.
@@ -235,14 +248,14 @@ var notation  = '4d10';
 var roll      = new DiceRoll(notation);
 ```
 
-| Property   | type                                        | description                                                                                                      |
-| ---------- | ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `notation` | `String`                                    | The dice notation passed                                                                                         |
-| `rolls`    | `Array`                                     | Roll log for the notation                                                                                        |
-| `roll`     | `function()`                                | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
-| `getTotal` | `function()`                                | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
-| `toString` | `function()`                                | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
-| `export`   | `function({DiceRoll.exportFormats} format)` | Exports the DiceRoll object to the specified format. Returns `String`                                            |
+| Property   | type                                          | description                                                                                                      |
+| ---------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `notation` | `String`                                      | The dice notation passed                                                                                         |
+| `rolls`    | `Array`                                       | Roll log for the notation                                                                                        |
+| `roll`     | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
+| `getTotal` | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
+| `toString` | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
+| `export`   | `function({DiceRoller.exportFormats} format)` | Exports the DiceRoll object to the specified format. Returns `String`                                            |
 
 
 ##### Static properties
@@ -255,7 +268,6 @@ var diceRoll = DiceRoll.import(data, format);
 
 | Property        | type                     | description                                                            |
 | --------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `exportFormats` | `Object`                 | List of available export / import formats                              |
 | `import`        | `function({mixed} data)` | Imports the given data and creates a new dice roll. Returns `DiceRoll` |
 
 
