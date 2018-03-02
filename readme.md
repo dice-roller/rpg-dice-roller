@@ -212,15 +212,13 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 
 #### `DiceRoller` object
 
-| Property           | type                          | description                                                                                                                                |
-| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `roll`             | `function({String} notation)` | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
-| `getLog`           | `function()`                  | Returns the current roll log. Returns: `Array`                                                                                             |
-| `clearLog`         | `function()`                  | Clears the roll history log.                                                                                                               |
-| `toString`         | `function()`                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
-| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                       |
-| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                          |
-| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object` |
+| Property           | type                                          | description                                                                                                                                |
+| ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `clearLog`         | `function()`                                  | Clears the roll history log.                                                                                                               |
+| `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                   |
+| `getLog`           | `function()`                                  | Returns the current roll log. Returns: `Array`                                                                                             |
+| `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
+| `toString`         | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
 
 
 ##### Static properties
@@ -231,9 +229,13 @@ Static properties can be called on the class itself, without instantiating an ob
 var diceRoller = DiceRoller.import(data, format);
 ```
 
-| Property        | type                     | description                               |
-| --------------- | ------------------------ | ----------------------------------------- |
-| `exportFormats` | `Object`                 | List of available export / import formats |
+| Property           | type                          | description                                                                                                                                |
+| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `exportFormats`    | `Object`                      | List of available export / import formats                                                                                                  |
+| `import`           | `function({mixed} data)`      | Imports the given data and creates a new dice roll. Returns `DiceRoller`                                                                   |
+| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                       |
+| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object` |
+| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                          |
 
 
 #### `DiceRoll` object
@@ -250,12 +252,12 @@ var roll      = new DiceRoll(notation);
 
 | Property   | type                                          | description                                                                                                      |
 | ---------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `export`   | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                           |
+| `getTotal` | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
 | `notation` | `String`                                      | The dice notation passed                                                                                         |
 | `rolls`    | `Array`                                       | Roll log for the notation                                                                                        |
 | `roll`     | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
-| `getTotal` | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
 | `toString` | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
-| `export`   | `function({DiceRoller.exportFormats} format)` | Exports the DiceRoll object to the specified format. Returns `String`                                            |
 
 
 ##### Static properties

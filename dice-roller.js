@@ -27,7 +27,7 @@
    *
    * @constructor
    */
-  var DiceRoller = function(){
+  var DiceRoller = function(data){
     var lib = this;
 
     /*
@@ -37,6 +37,20 @@
      */
     var log  = [];
 
+    var init = function(data){
+      if(data){
+        lib.clearLog();
+
+        if(Array.isArray(data.log)){
+          // loop through each log entry and import it
+          data.log.forEach(function(roll){
+            log.push(DiceRoll.import(roll));
+          });
+        }else if(data.log){
+          throw new Error('DiceRoller: Roll log must be an Array');
+        }
+      }
+    };
 
     /**
      * Returns the roll notation in the format of:
@@ -94,6 +108,9 @@
      * @returns {string}
      */
     this.toString = this.getNotation;
+
+    // initialise the object
+    init(data);
   };
 
   DiceRoller.exportFormats = Object.freeze({
@@ -396,6 +413,42 @@
     return DiceRoller.parseNotation(notation).shift();
   };
 
+  DiceRoller.import = function(data){
+    if(!data){
+      throw new Error('DiceRoller: No data to import');
+    }else if(DiceRoller.utils.isJson(data)){
+      // data is JSON - parse and import
+      return DiceRoller.import(JSON.parse(data));
+    }else if(DiceRoller.utils.isBase64(data)){
+      // data is base64 encoded - decode an import
+      return DiceRoller.import(atob(data));
+    }else if(typeof data === 'object'){
+      return new DiceRoller(data);
+    }else{
+      throw new Error('DiceRoller: Unrecognised import format for data: ' + data);
+    }
+  };
+
+  /**
+   * Exports the roll log in the given format.
+   * If no format is specified, JSON is returned.
+   *
+   * @throws Error
+   * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @returns {string|null}
+   */
+  DiceRoller.prototype.export = function(format){
+    switch(format || DiceRoller.exportFormats.JSON){
+      case DiceRoller.exportFormats.BASE_64:
+        // JSON encode, then base64
+        return btoa(this.export(DiceRoller.exportFormats.JSON));
+      case DiceRoller.exportFormats.JSON:
+        return JSON.stringify(this.getLog());
+      default:
+        throw new Error('DiceRoller: Unrecognised export format specified: ' + format);
+    }
+  };
+
 
 
   /**
@@ -482,7 +535,7 @@
      */
     var init          = function(notation){
       if(!notation){
-        throw new Error('DiceRoll exception: No notation specified');
+        throw new Error('DiceRoll: No notation specified');
       }
 
       // zero the current total
@@ -770,12 +823,12 @@
    */
   DiceRoll.import = function(data){
     if(!data){
-      throw new Error('No data to import');
+      throw new Error('DiceRoll: No data to import');
     }else if(DiceRoller.utils.isJson(data)){
       // data is JSON format - parse and import
       return DiceRoll.import(JSON.parse(data));
     }else if(DiceRoller.utils.isBase64(data)) {
-      // data is base64 encoded - decode then import
+      // data is base64 encoded - decode and import
       return DiceRoll.import(atob(data));
     }else if(typeof data === 'object'){
       if(data.constructor.name === 'DiceRoll'){
@@ -785,7 +838,7 @@
         return new DiceRoll(data);
       }
     }else{
-      throw new Error('Unrecognised import format for data: ' + data);
+      throw new Error('DiceRoll: Unrecognised import format for data: ' + data);
     }
   };
 
@@ -807,7 +860,7 @@
       case DiceRoller.exportFormats.OBJECT:
         return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
       default:
-        throw new Error('Unrecognised export format specified: ' + format);
+        throw new Error('DiceRoll: Unrecognised export format specified: ' + format);
     }
   };
 

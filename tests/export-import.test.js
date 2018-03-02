@@ -268,11 +268,11 @@
     });
 
     it('should throw error if no import data', function(){
-      expect(function(){ DiceRoll.import(); }).toThrowError('No data to import');
+      expect(function(){ DiceRoll.import(); }).toThrowError('DiceRoll: No data to import');
 
-      expect(function(){ DiceRoll.import(''); }).toThrowError('No data to import');
+      expect(function(){ DiceRoll.import(''); }).toThrowError('DiceRoll: No data to import');
 
-      expect(function(){ DiceRoll.import(null); }).toThrowError('No data to import');
+      expect(function(){ DiceRoll.import(null); }).toThrowError('DiceRoll: No data to import');
     });
 
     it('should throw error if import data is invalid', function(){
@@ -324,6 +324,220 @@
         // check the output string
         expect(diceRoll).toMatchParsedNotation({notation: notation, rolls: '[' + diceRoll.rolls[0].join(',') + ']+2', total: total});
       });
+    });
+  });
+
+  describe('export roll log', function(){
+    var notations = [
+          '2d6+2',
+          '8d10-L',
+          'dF',
+          'd%'
+        ],
+        diceRoller;
+
+    beforeEach(function(){
+      diceRoller = new DiceRoller();
+
+      notations.forEach(function(notation){
+        diceRoller.roll(notation);
+      });
+    });
+
+    it('should export as JSON', function(){
+      var exported = diceRoller.export(DiceRoller.exportFormats.JSON);
+
+      expect(exported).toBeJson();
+    });
+
+    it('should export as base64', function(){
+      var exported = diceRoller.export(DiceRoller.exportFormats.BASE_64),
+          jsonExported = diceRoller.export(DiceRoller.exportFormats.JSON);
+
+      expect(exported).toBeBase64();
+
+      // compare to json export
+      expect(exported).toEqual(btoa(jsonExported));
+      expect(atob(exported)).toEqual(jsonExported);
+    });
+
+    it('should default export format to JSON', function(){
+      var exported = diceRoller.export(),
+          jsonExported = diceRoller.export(DiceRoller.exportFormats.JSON);
+
+      expect(exported).toBeJson();
+
+      expect(exported).toEqual(jsonExported);
+    });
+
+    it('should throw error for invalid export formats', function(){
+      expect(function(){ diceRoller.export('foo'); }).toThrowError('DiceRoller: Unrecognised export format specified: foo');
+    });
+  });
+
+  describe('import roll log', function(){
+    var importData, rollChecks, notations, imported;
+
+    beforeEach(function(){
+      importData = {
+        log: [
+          {
+            notation: '1d6',
+            rolls: [
+              [4]
+            ]
+          },
+          {
+            notation: '8d10-L',
+            rolls: [
+              [2,2,3,7,10,4,1,4]
+            ]
+          },
+          {
+            notation: 'dF',
+            rolls: [
+              [-1]
+            ]
+          },
+          {
+            notation: '2d3!',
+            rolls: [
+              [2,3,2]
+            ]
+          },
+          {
+            notation: '1d4!!',
+            rolls: [
+              [4,3]
+            ]
+          },
+          {
+            notation: '1d10!p',
+            rolls: [
+              [10,6]
+            ]
+          },
+          {
+            notation: '2d3!!p',
+            rolls: [
+              [3,2,0,3,2,1]
+            ]
+          }
+        ]
+      };
+
+      rollChecks = {};
+
+      notations = [
+        '1d6: [4] = 4',
+        '8d10-L: [2,2,3,7,10,4,1,4]-L = 32',
+        'dF: [-1] = -1',
+        '2d3!: [2,3!,2] = 7',
+        '1d4!!: [7!!] = 7',
+        '1d10!p: [10!p,6] = 16',
+        // TODO - this notation is incorrect, but a bug means that notation will be output like this
+        // @link https://github.com/GreenImp/rpg-dice-roller/issues/24
+        '2d3!!p: [5!!p,3,3!!p] = 11'
+      ];
+    });
+
+    it('should import full data from JSON', function(){
+      imported = DiceRoller.import(JSON.stringify(importData));
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    it('should import full data from Base64', function(){
+      imported = DiceRoller.import(btoa(JSON.stringify(importData)));
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    it('should import from Object', function(){
+      imported = DiceRoller.import(importData);
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    it('should import from Object with DiceRolls', function(){
+      // import, but convert all log entries to a DiceRoll object first
+      imported = DiceRoller.import({
+        log: importData.log.map(function(roll){
+          return DiceRoll.import(roll);
+        })
+      });
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    describe('empty rolls', function(){
+      it('should import with empty roll array', function(){
+        imported = DiceRoller.import({log: []});
+
+        expect(imported).toEqual(jasmine.any(DiceRoller));
+
+        expect(imported).toHaveLogLength(0);
+
+        expect(imported.getNotation()).toEqual('');
+      });
+
+      it('should import with falsey rolls', function(){
+        imported = DiceRoller.import({log: null});
+
+        expect(imported).toEqual(jasmine.any(DiceRoller));
+
+        expect(imported).toHaveLogLength(0);
+
+        expect(imported.getNotation()).toEqual('');
+      });
+    });
+
+    it('should import with no roll array', function(){
+      imported = DiceRoller.import({});
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(0);
+
+      expect(imported.getNotation()).toEqual('');
+    });
+
+    it('should throw error if no import data', function(){
+      expect(function(){ DiceRoller.import(); }).toThrowError('DiceRoller: No data to import');
+
+      expect(function(){ DiceRoller.import(''); }).toThrowError('DiceRoller: No data to import');
+
+      expect(function(){ DiceRoller.import(null); }).toThrowError('DiceRoller: No data to import');
+    });
+
+    it('should throw error if import data is invalid', function(){
+      // importing invalid format (String)
+      expect(function(){ DiceRoller.import('foo'); }).toThrowError(/Unrecognised import format for data/);
+
+      // importing valid base64 encoded but invalid data (Not JSON)
+      expect(function(){ DiceRoller.import(btoa('foo')); }).toThrowError(/Unrecognised import format for data/);
+
+      // importing valid Object but invalid log
+      expect(function(){ DiceRoller.import(JSON.stringify({log: 'foo'})); }).toThrowError(/Roll log must be an Array/);
+      expect(function(){ DiceRoller.import({log: true}); }).toThrowError(/Roll log must be an Array/);
+
+      expect(function(){ DiceRoller.import({log: ['foo']}); }).toThrowError(/Unrecognised import format for data/);
     });
   });
 }());
