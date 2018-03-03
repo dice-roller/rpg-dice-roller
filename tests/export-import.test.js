@@ -376,7 +376,7 @@
   });
 
   describe('import roll log', function(){
-    var importData, rollChecks, notations, imported;
+    var importData, notations, imported;
 
     beforeEach(function(){
       importData = {
@@ -425,8 +425,6 @@
           }
         ]
       };
-
-      rollChecks = {};
 
       notations = [
         '1d6: [4] = 4',
@@ -538,6 +536,91 @@
       expect(function(){ DiceRoller.import({log: true}); }).toThrowError(/Roll log must be an Array/);
 
       expect(function(){ DiceRoller.import({log: ['foo']}); }).toThrowError(/Unrecognised import format for data/);
+    });
+
+    it('should import to existing roll log', function(){
+      var rolls = [
+            {
+              log: [
+                {
+                  notation: '1d6',
+                  rolls: [
+                    [3]
+                  ]
+                },
+                {
+                  notation: '10d5-H',
+                  rolls: [
+                    [1,4,3,3,2,5,3,1,5,2]
+                  ]
+                },
+                {
+                  notation: '4d6*2',
+                  rolls: [
+                    [6,2,1,4]
+                  ]
+                }
+              ],
+              notations: '1d6: [3] = 3; 10d5-H: [1,4,3,3,2,5,3,1,5,2]-H = 24; 4d6*2: [6,2,1,4]*2 = 26'
+            },
+            {
+              log: [
+                {
+                  notation: '2d10',
+                  rolls: [
+                    [2,7]
+                  ]
+                },
+                {
+                  notation: '5d6',
+                  rolls: [
+                    [4,3,6,3,1]
+                  ]
+                }
+              ],
+              notations: '2d10: [2,7] = 9; 5d6: [4,3,6,3,1] = 17'
+            },
+            {
+              log: [
+                {
+                  notation: '2dF',
+                  rolls: [
+                    [1,0]
+                  ]
+                },
+                {
+                  notation: '2d%-L',
+                  rolls: [
+                    [23,65]
+                  ]
+                }
+              ],
+              notations: '2dF: [1,0] = 1; 2d%-L: [23,65]-L = 65'
+            }
+          ],
+          crntNotation = notations.join('; '),
+          crntLogLength = importData.log.length;
+
+      // start by importing some rolls using the static `DiceRoller.import()` method
+      imported = DiceRoller.import(importData);
+
+      // now that we have a DiceRoller object with rolls, import some more rolls
+      rolls.forEach(function(roll){
+        // add the current roll notations to the string
+        crntNotation += '; ' + roll.notations;
+        crntLogLength += roll.log.length;
+
+        // import the roll
+        imported.import({log: roll.log});
+
+        expect(imported).toEqual(jasmine.any(DiceRoller));
+
+        // check the roll log length
+        expect(imported).toHaveLogLength(crntLogLength);
+
+        // compare the notation
+        expect(imported.getNotation()).toEqual(crntNotation);
+      });
     });
   });
 }());

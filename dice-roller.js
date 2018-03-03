@@ -102,6 +102,41 @@
     };
 
     /**
+     * Takes the given roll data and imports it into
+     * the existing DiceRoller, appending the rolls
+     * to the current roll log.
+     * Returns the roll log.
+     *
+     * @throws Error
+     * @param data
+     * @returns {array}
+     */
+    this.import = function(data){
+      if(!data){
+        throw new Error('DiceRoller: No data to import');
+      }else if(DiceRoller.utils.isJson(data)){
+        // data is JSON - parse and import
+        return this.import(JSON.parse(data));
+      }else if(DiceRoller.utils.isBase64(data)){
+        // data is base64 encoded - decode an import
+        return this.import(atob(data));
+      }else if(typeof data === 'object'){
+        if(Array.isArray(data.log)){
+          // loop through each log entry and import it
+          data.log.forEach(function(roll){
+            log.push(DiceRoll.import(roll));
+          });
+        }else if(data.log){
+          throw new Error('DiceRoller: Roll log must be an Array');
+        }
+
+        return this.getLog();
+      }else{
+        throw new Error('DiceRoller: Unrecognised import format for data: ' + data);
+      }
+    };
+
+    /**
      * Returns the String representation
      * of the object as the roll notations
      *
@@ -413,20 +448,23 @@
     return DiceRoller.parseNotation(notation).shift();
   };
 
+  /**
+   * Takes the given data, imports it into a new DiceRoller instance
+   * and returns the DiceRoller
+   *
+   * @throws Error
+   * @param data
+   * @returns {DiceRoller}
+   */
   DiceRoller.import = function(data){
-    if(!data){
-      throw new Error('DiceRoller: No data to import');
-    }else if(DiceRoller.utils.isJson(data)){
-      // data is JSON - parse and import
-      return DiceRoller.import(JSON.parse(data));
-    }else if(DiceRoller.utils.isBase64(data)){
-      // data is base64 encoded - decode an import
-      return DiceRoller.import(atob(data));
-    }else if(typeof data === 'object'){
-      return new DiceRoller(data);
-    }else{
-      throw new Error('DiceRoller: Unrecognised import format for data: ' + data);
-    }
+    // create a new DiceRoller object
+    var diceRoller = new DiceRoller();
+
+    // import the data
+    diceRoller.import(data);
+
+    // return the DiceRoller
+    return diceRoller;
   };
 
   /**
