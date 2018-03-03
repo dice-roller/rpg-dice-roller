@@ -27,7 +27,7 @@
    *
    * @constructor
    */
-  var DiceRoller = function(){
+  var DiceRoller = function(data){
     var lib = this;
 
     /*
@@ -37,6 +37,20 @@
      */
     var log  = [];
 
+    var init = function(data){
+      if(data){
+        lib.clearLog();
+
+        if(Array.isArray(data.log)){
+          // loop through each log entry and import it
+          data.log.forEach(function(roll){
+            log.push(DiceRoll.import(roll));
+          });
+        }else if(data.log){
+          throw new Error('DiceRoller: Roll log must be an Array');
+        }
+      }
+    };
 
     /**
      * Returns the roll notation in the format of:
@@ -88,13 +102,57 @@
     };
 
     /**
+     * Takes the given roll data and imports it into
+     * the existing DiceRoller, appending the rolls
+     * to the current roll log.
+     * Returns the roll log.
+     *
+     * @throws Error
+     * @param data
+     * @returns {array}
+     */
+    this.import = function(data){
+      if(!data){
+        throw new Error('DiceRoller: No data to import');
+      }else if(DiceRoller.utils.isJson(data)){
+        // data is JSON - parse and import
+        return this.import(JSON.parse(data));
+      }else if(DiceRoller.utils.isBase64(data)){
+        // data is base64 encoded - decode an import
+        return this.import(atob(data));
+      }else if(typeof data === 'object'){
+        if(Array.isArray(data.log)){
+          // loop through each log entry and import it
+          data.log.forEach(function(roll){
+            log.push(DiceRoll.import(roll));
+          });
+        }else if(data.log){
+          throw new Error('DiceRoller: Roll log must be an Array');
+        }
+
+        return this.getLog();
+      }else{
+        throw new Error('DiceRoller: Unrecognised import format for data: ' + data);
+      }
+    };
+
+    /**
      * Returns the String representation
      * of the object as the roll notations
      *
      * @returns {string}
      */
     this.toString = this.getNotation;
+
+    // initialise the object
+    init(data);
   };
+
+  DiceRoller.exportFormats = Object.freeze({
+    JSON: 0,
+    BASE_64: 1,
+    OBJECT: 2
+  });
 
   /**
    * Utility helper functions
@@ -108,6 +166,20 @@
        */
       isNumeric: function(val){
         return !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0);
+      },
+      isBase64: function(val){
+        try{
+          return val && (btoa(atob(val)) === val);
+        }catch(e){
+          return false;
+        }
+      },
+      isJson: function(val){
+        try{
+          return !!(val && JSON.parse(val));
+        }catch(e){
+          return false;
+        }
       },
       /**
        * Generates a random number between the
@@ -376,13 +448,52 @@
     return DiceRoller.parseNotation(notation).shift();
   };
 
+  /**
+   * Takes the given data, imports it into a new DiceRoller instance
+   * and returns the DiceRoller
+   *
+   * @throws Error
+   * @param data
+   * @returns {DiceRoller}
+   */
+  DiceRoller.import = function(data){
+    // create a new DiceRoller object
+    var diceRoller = new DiceRoller();
+
+    // import the data
+    diceRoller.import(data);
+
+    // return the DiceRoller
+    return diceRoller;
+  };
+
+  /**
+   * Exports the roll log in the given format.
+   * If no format is specified, JSON is returned.
+   *
+   * @throws Error
+   * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @returns {string|null}
+   */
+  DiceRoller.prototype.export = function(format){
+    switch(format || DiceRoller.exportFormats.JSON){
+      case DiceRoller.exportFormats.BASE_64:
+        // JSON encode, then base64
+        return btoa(this.export(DiceRoller.exportFormats.JSON));
+      case DiceRoller.exportFormats.JSON:
+        return JSON.stringify(this.getLog());
+      default:
+        throw new Error('DiceRoller: Unrecognised export format specified: ' + format);
+    }
+  };
+
 
 
   /**
    * A DiceRoll object, which takes a notation
    * and parses it in to rolls
    *
-   * @param {string} notation  The dice notation
+   * @param {string|Object} notation  The dice notation or object
    * @constructor
    */
   var DiceRoll      = function(notation){
@@ -462,22 +573,52 @@
      */
     var init          = function(notation){
       if(!notation){
-        throw 'DiceRoll exception: No notation specified';
+        throw new Error('DiceRoll: No notation specified');
       }
 
-      // store the notation
-      lib.notation  = notation;
-
-      // parse the notation
-      parsedDice = DiceRoller.parseNotation(notation);
-
-      // empty the current rolls
-      lib.rolls = [];
       // zero the current total
       total = 0;
 
-      // roll the dice
-      lib.roll();
+      if(notation instanceof Object){
+        // validate object
+        if(!notation.notation){
+          // object doesn't contain a notation property
+          throw new Error('Object has no notation: ' + notation);
+        }else if(notation.rolls){
+          // we have rolls - validate them
+          if(!Array.isArray(notation.rolls)){
+            // rolls is not an array
+            throw new Error('Rolls must be an Array: ' + notation.rolls);
+          }else{
+            // loop through each rolls, make sure they're valid
+            notation.rolls.forEach(function(roll, i){
+              if(!Array.isArray(roll) || roll.some(isNaN)){
+                // not all rolls are valid
+                throw new Error('Rolls are invalid at index [' + i + ']: ' + roll);
+              }
+            });
+          }
+        }
+
+        // store the notation
+        lib.notation = notation.notation;
+        // store the rolls
+        lib.rolls = notation.rolls || [];
+
+        // parse the notation
+        parsedDice = DiceRoller.parseNotation(lib.notation);
+      }else{
+        // store the notation
+        lib.notation = notation;
+        // empty the current rolls
+        lib.rolls = [];
+
+        // parse the notation
+        parsedDice = DiceRoller.parseNotation(lib.notation);
+
+        // roll the dice
+        lib.roll();
+      }
     };
 
     /**
@@ -542,7 +683,7 @@
             // add the roll to our list
             reRolls[index] = (reRolls[index] || 0) + roll;
 
-            // subtract 1 from penetrated rolls (only consecutive rolls, after initial roll are subtratcted)
+            // subtract 1 from penetrated rolls (only consecutive rolls, after initial roll are subtracted)
             if(die.penetrate && (rollCount > 0)){
               reRolls[index]--;
             }
@@ -706,6 +847,59 @@
 
     // initialise the object
     init(notation);
+  };
+
+  /**
+   * Imports the given dice roll data and builds a `DiceRoll` object
+   * from it.
+   *
+   * Throws Error on failure
+   *
+   * @throws Error
+   * @param {*} data The data to import
+   * @returns {DiceRoll}
+   */
+  DiceRoll.import = function(data){
+    if(!data){
+      throw new Error('DiceRoll: No data to import');
+    }else if(DiceRoller.utils.isJson(data)){
+      // data is JSON format - parse and import
+      return DiceRoll.import(JSON.parse(data));
+    }else if(DiceRoller.utils.isBase64(data)) {
+      // data is base64 encoded - decode and import
+      return DiceRoll.import(atob(data));
+    }else if(typeof data === 'object'){
+      if(data.constructor.name === 'DiceRoll'){
+        // already a DiceRoll object
+        return data;
+      }else{
+        return new DiceRoll(data);
+      }
+    }else{
+      throw new Error('DiceRoll: Unrecognised import format for data: ' + data);
+    }
+  };
+
+  /**
+   * Exports the DiceRoll in the given format.
+   * If no format is specified, JSON is returned.
+   *
+   * @throws Error
+   * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @returns {string|null}
+   */
+  DiceRoll.prototype.export = function(format){
+    switch(format || DiceRoller.exportFormats.JSON){
+      case DiceRoller.exportFormats.BASE_64:
+        // JSON encode, then base64, otherwise it exports the string representation of the roll output
+        return btoa(this.export(DiceRoller.exportFormats.JSON));
+      case DiceRoller.exportFormats.JSON:
+        return JSON.stringify(this);
+      case DiceRoller.exportFormats.OBJECT:
+        return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
+      default:
+        throw new Error('DiceRoll: Unrecognised export format specified: ' + format);
+    }
   };
 
   exports.DiceRoller = DiceRoller;
