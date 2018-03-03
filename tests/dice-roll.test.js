@@ -1,4 +1,4 @@
-/*global beforeEach, describe, DiceRoller, expect, jasmine, it */
+/*global beforeEach, describe, DiceRoller, DiceRoll, expect, jasmine, it, utils */
 ;(function(){
   'use strict';
 
@@ -22,9 +22,15 @@
           notation = 'd' + die;
 
       it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
+        var roll;
+
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          expect(diceRoller.roll(notation)).toBeDiceRoll({
+          roll = diceRoller.roll(notation);
+
+          expect(roll).toEqual(jasmine.any(DiceRoll));
+
+          expect(roll).toBeDiceRoll({
             dieRange: {
               min: 1,
               max: sides
@@ -61,9 +67,15 @@
 
       // Fudge dice always provide a value between -1 and 1
       it('should be between -1 and 1 for `' + notation + '`', function(){
+        var roll;
+
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          expect(diceRoller.roll(notation)).toBeDiceRoll({
+          roll = diceRoller.roll(notation);
+
+          expect(roll).toEqual(jasmine.any(DiceRoll));
+
+          expect(roll).toBeDiceRoll({
             dieRange: {
               min: -1,
               max: 1
@@ -102,9 +114,15 @@
           notation = die.rolls + 'd' + die.sides;
 
       it('should roll a ' + die.sides + ' sided die ' + die.rolls + ' times', function(){
+        var roll;
+
         // run the tests multiple times for consistency
         for(j = 0; j < loopCount; j++){
-          expect(diceRoller.roll(notation)).toBeDiceRoll({
+          roll = diceRoller.roll(notation);
+
+          expect(roll).toEqual(jasmine.any(DiceRoll));
+
+          expect(roll).toBeDiceRoll({
             dieRange: {
               min: 1,
               max: die.sides
@@ -124,6 +142,8 @@
       var notation = '1d6+2d10',
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 3, max: 26});
@@ -145,6 +165,8 @@
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 3, max: 180});
 
@@ -164,6 +186,8 @@
       var notation = '4d6/2d3',
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 0.66, max: 12});
@@ -194,12 +218,15 @@
 
     it('should explode for `1d2!`', function(){
       var notation = '1d2!',
-          hasExploded = false;
+          hasExploded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -223,12 +250,15 @@
 
     it('should compound explode for `1d2!!`', function(){
       var notation = '1d2!!',
-          hasCompounded = false;
+          hasCompounded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -250,12 +280,15 @@
 
     it('should penetrate for `1d2!p`', function(){
       var notation = '1d2!p',
-          hasExploded = false;
+          hasExploded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++) {
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -279,12 +312,15 @@
 
     it('should penetrate compound for `1d2!!p`', function(){
       var notation = '1d2!!p',
-          hasCompounded = false;
+          hasCompounded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -306,12 +342,15 @@
 
     it('should explode if higher than 1 for `1d6!>1`', function(){
       var notation = '1d6!>1',
-          hasExploded = false;
+          hasExploded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -335,12 +374,15 @@
 
     it('should explode if less than 2 for `1d2!<2`', function(){
       var notation = '1d2!<2',
-          hasExploded = false;
+          hasExploded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -364,12 +406,15 @@
 
     it('should explode if equal to 2 for `1d3!=2`', function(){
       var notation = '1d3!=2',
-          hasExploded = false;
+          hasExploded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -393,12 +438,15 @@
 
     it('should compound if higher than 1 for `1d6!!>1`', function(){
       var notation = '1d6!!>1',
-          hasCompounded = false;
+          hasCompounded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -420,12 +468,15 @@
 
     it('should compound if less than 2 for `1d2!!<2`', function(){
       var notation = '1d2!!<2',
-          hasCompounded = false;
+          hasCompounded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -448,12 +499,15 @@
 
     it('should compound if equal to 2 for `1d2!!=2`', function(){
       var notation = '1d2!!=2',
-          hasCompounded = false;
+          hasCompounded = false,
+          roll, total;
 
       // loop this roll for consistency
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(0);
@@ -488,6 +542,8 @@
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 3, max: 8});
 
@@ -503,6 +559,8 @@
       var notation = '1d4-2',
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: -1, max: 2});
@@ -520,6 +578,8 @@
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 2, max: 20});
 
@@ -536,6 +596,8 @@
           roll = diceRoller.roll(notation),
           total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 0.5, max: 4});
 
@@ -551,6 +613,8 @@
       var notation = '4d6-L',
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 3, max: 18});
@@ -569,6 +633,8 @@
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 5, max: 30});
 
@@ -585,6 +651,8 @@
       var notation = '4d6*L',
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 4, max: 144});
@@ -603,6 +671,8 @@
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 4, max: 19});
 
@@ -619,6 +689,8 @@
       var notation = '4d6-H',
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 3, max: 18});
@@ -637,6 +709,8 @@
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 5, max: 30});
 
@@ -653,6 +727,8 @@
       var notation = '4d6*H',
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 4, max: 144});
@@ -671,6 +747,8 @@
         roll = diceRoller.roll(notation),
         total = roll.getTotal();
 
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
       // check value is within allowed range
       expect(total).toBeWithinRange({min: 1.5, max: 4});
 
@@ -687,12 +765,14 @@
       var notation = 'd6!-L',
         hasExploded = false,
         loopCount = 1000,
-        i;
+        i, roll, total;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(-1);
@@ -715,12 +795,14 @@
       var notation = 'd6!-H',
         hasExploded = false,
         loopCount = 1000,
-        i;
+        i, roll, total;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(-1);
@@ -743,13 +825,15 @@
       var notation = 'd6!!-L',
         hasCompounded = false,
         loopCount = 1000,
-        i;
+        i, roll, total, rollsTotal;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal(),
-          rollsTotal = utils.reduceArray(roll.rolls);
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+        rollsTotal = utils.reduceArray(roll.rolls);
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toEqual(0);
@@ -772,13 +856,15 @@
       var notation = 'd6!!-H',
         hasCompounded = false,
         loopCount = 1000,
-        i;
+        i, roll, total, rollsTotal;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal(),
-          rollsTotal = utils.reduceArray(roll.rolls);
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+        rollsTotal = utils.reduceArray(roll.rolls);
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toEqual(0);
@@ -801,12 +887,14 @@
       var notation = 'd6!p-L',
         hasExploded = false,
         loopCount = 1000,
-        i;
+        i, roll, total;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(-1);
@@ -829,12 +917,14 @@
       var notation = 'd6!p-H',
         hasExploded = false,
         loopCount = 1000,
-        i;
+        i, roll, total;
 
       // loop this roll for consistency (We need it to have exploded at least once)
       for(i = 0; i < loopCount; i++){
-        var roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
         expect(total).toBeGreaterThan(-1);
@@ -855,8 +945,12 @@
   });
 
   describe('roll log', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller = new DiceRoller();
+    var diceRoller;
+
+    beforeEach(function(){
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
 
     it('should be no dice rolled', function(){
       expect(diceRoller).not.toHaveLogLength();
@@ -882,6 +976,17 @@
       diceRoller.roll('d10');
 
       expect(diceRoller).toHaveLogLength(2);
+    });
+
+    it('should contain DiceRolls', function(){
+      diceRoller.roll('1d6');
+      diceRoller.roll('8d10');
+      diceRoller.roll('dF');
+
+      // loop through and check that each item in the log is actually a DiceRoll
+      diceRoller.getLog().forEach(function(roll){
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+      });
     });
   });
 }());
