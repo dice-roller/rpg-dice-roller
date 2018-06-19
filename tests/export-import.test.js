@@ -620,5 +620,28 @@
         expect(imported.getNotation()).toEqual(crntNotation);
       });
     });
+
+    it('should import without `log` property', function(){
+      imported = DiceRoller.import(importData.log);
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    it('should import an exported log', function(){
+      // import manual data that we know works, then export it, so we can re-import
+      var exported = DiceRoller.import(importData).export();
+
+      imported = DiceRoller.import(exported);
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
   });
 }());

@@ -121,7 +121,12 @@
         // data is base64 encoded - decode an import
         return this.import(atob(data));
       }else if(typeof data === 'object'){
-        if(Array.isArray(data.log)){
+        // if `log` is not defined, but data is an array, use it as the list of logs
+        if(!data.log && Array.isArray(data) && data.length){
+          data = {log: data};
+        }
+
+        if(data.log && Array.isArray(data.log)){
           // loop through each log entry and import it
           data.log.forEach(function(roll){
             log.push(DiceRoll.import(roll));
