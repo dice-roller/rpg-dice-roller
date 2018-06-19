@@ -340,6 +340,35 @@
       expect(hasCompounded).toBeTruthy();
     });
 
+    it('should penetrate compound for `2d2!!p', function(){
+      var notation = '2d2!!p',
+          hasCompounded = false,
+          roll, total;
+
+      // loop this roll for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+        total = roll.getTotal();
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+
+        // check value is within allowed range
+        expect(total).toBeGreaterThan(0);
+
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: ['*']});
+        expect(roll.rolls).toArraySumEqualTo(total);
+
+        // ideally we should check notation output here, but I can't see a sensible way of doing this correctly
+
+        // determine whether this roll compounded by checking the value of the roll
+        hasCompounded = hasCompounded || (total >= 4);
+      }
+
+      // if we run many rolls, we should expect at least one to have compounded
+      expect(hasCompounded).toBeTruthy();
+    });
+
     it('should explode if higher than 1 for `1d6!>1`', function(){
       var notation = '1d6!>1',
           hasExploded = false,
