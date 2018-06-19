@@ -27,8 +27,7 @@ module.exports = function(grunt){
       ],
       options: {
         helpers: 'tests/helpers/*.helper.js',
-        //specs: 'tests/*.test.js',
-        specs: 'tests/utilities.test.js',
+        specs: 'tests/*.test.js',
         junit: {
           path: 'output/testresults'
         }
