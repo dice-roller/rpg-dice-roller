@@ -433,9 +433,7 @@
         '2d3!: [2,3!,2] = 7',
         '1d4!!: [7!!] = 7',
         '1d10!p: [10!p,6] = 16',
-        // TODO - this notation is incorrect, but a bug means that notation will be output like this
-        // @link https://github.com/GreenImp/rpg-dice-roller/issues/24
-        '2d3!!p: [5!!p,3,3!!p] = 11'
+        '2d3!!p: [5!!p,6!!p] = 11'
       ];
     });
 
@@ -621,6 +619,29 @@
         // compare the notation
         expect(imported.getNotation()).toEqual(crntNotation);
       });
+    });
+
+    it('should import without `log` property', function(){
+      imported = DiceRoller.import(importData.log);
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
+    });
+
+    it('should import an exported log', function(){
+      // import manual data that we know works, then export it, so we can re-import
+      var exported = DiceRoller.import(importData).export();
+
+      imported = DiceRoller.import(exported);
+
+      expect(imported).toEqual(jasmine.any(DiceRoller));
+
+      expect(imported).toHaveLogLength(importData.log.length);
+
+      expect(imported.getNotation()).toEqual(notations.join('; '));
     });
   });
 }());
