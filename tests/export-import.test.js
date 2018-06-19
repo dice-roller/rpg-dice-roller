@@ -433,9 +433,7 @@
         '2d3!: [2,3!,2] = 7',
         '1d4!!: [7!!] = 7',
         '1d10!p: [10!p,6] = 16',
-        // TODO - this notation is incorrect, but a bug means that notation will be output like this
-        // @link https://github.com/GreenImp/rpg-dice-roller/issues/24
-        '2d3!!p: [5!!p,3,3!!p] = 11'
+        '2d3!!p: [5!!p,6!!p] = 11'
       ];
     });
 
