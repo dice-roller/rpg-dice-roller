@@ -735,39 +735,41 @@
         // loop through and build the string for die rolled
         parsedDice.forEach(function(item, index, array){
           var rolls       = lib.rolls[index] || [],
-              maxVal      = item.fudge ? 1 : item.sides,  // the maximum value rollable on the die
-              explodeVal  = maxVal,                       // the value to explode on
-              currentRoll = 0;                                      // current roll total - used for totalling compounding rolls
+              currentRoll = 0; // current roll total - used for totalling compounding rolls
 
           output += ((index > 0) ? item.operator : '') + '[';
 
           // output the rolls
           rolls.forEach(function(roll, rIndex, array){
             // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-            var rollVal = (item.penetrate && (rIndex > 0)) ? roll + 1 : roll,
+            var rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
                 delimit = rIndex !== array.length-1;
 
             if(item.explode && isComparePoint(item.comparePoint, rollVal)){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-              
+
+              // add the current roll to the roll total
+              currentRoll += roll;
+
               if(item.compound){
-                  // roll compounds - add the current roll to the roll total so it's only output as one number
-                  currentRoll += roll;
-                  // do NOT add the delimeter after this roll as we're not outputting it
+                  // do NOT add the delimiter after this roll as we're not outputting it
                   delimit = false;
               }else{
-                // not compunding
+                // not compounding
                 output += roll + '!' + (item.penetrate ? 'p' : '');
               }
             }else if(item.compound && currentRoll){
-                // last roll in a compounding set (This one didn't compound)
-                output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
+              // last roll in a compounding set (This one didn't compound)
+              output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
 
-                // reset current roll total
-                currentRoll = 0;
+              // reset current roll total
+              currentRoll = 0;
             }else{
-                // just a normal roll
-                output += roll;
+              // just a normal roll
+              output += roll;
+
+              // reset current roll total
+              currentRoll = 0;
             }
 
             if(delimit){
