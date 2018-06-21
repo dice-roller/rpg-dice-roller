@@ -973,6 +973,183 @@
     });
   });
 
+  describe('pool dice', function(){
+    var diceRoller,
+        loopCount = 1000,
+        i;
+
+    beforeEach(function(){
+      diceRoller = new DiceRoller();
+      i = 0;
+    });
+
+    it('should return number of successes for `4d6=6`', function(){
+      var notation = '4d6=6',
+        hasSucceeded = false,
+        roll,
+        rollNote,
+        successCount;
+
+      // run the tests multiple times for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+        successCount = roll.rolls[0].filter(function(num){
+          return num === 6;
+        }).length;
+        rollNote = roll.rolls[0].map(function(num){
+          return num + (num === 6 ? '*' : '');
+        }).join(',');
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [4]});
+
+        expect(roll).toHaveSuccesses(successCount);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: '[' + rollNote + ']',
+          total: (successCount || 0) + ' success' + (!successCount || (successCount > 1) ? 'es' : '')
+        });
+
+        hasSucceeded = hasSucceeded || (successCount > 0);
+      }
+
+      // if we run many rolls, we should expect at least one to have succeeded at least once
+      expect(hasSucceeded).toBeTruthy();
+    });
+
+    it('should return number of successes for `4d6<3`', function(){
+      var notation = '4d6<3',
+        hasSucceeded = false,
+        roll,
+        rollNote,
+        successCount;
+
+      // run the tests multiple times for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+        successCount = roll.rolls[0].filter(function(num){
+          return num < 3;
+        }).length;
+        rollNote = roll.rolls[0].map(function(num){
+          return num + (num < 3 ? '*' : '');
+        }).join(',');
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [4]});
+
+        expect(roll).toHaveSuccesses(successCount);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: '[' + rollNote + ']',
+          total: (successCount || 0) + ' success' + (!successCount || (successCount > 1) ? 'es' : '')
+        });
+
+        hasSucceeded = hasSucceeded || (successCount > 0);
+      }
+
+      // if we run many rolls, we should expect at least one to have succeeded at least once
+      expect(hasSucceeded).toBeTruthy();
+    });
+
+    it('should return number of successes for `4d6>=4`', function(){
+      var notation = '4d6>=4',
+        hasSucceeded = false,
+        roll,
+        rollNote,
+        successCount;
+
+      // run the tests multiple times for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+        successCount = roll.rolls[0].filter(function(num){
+          return num >= 4;
+        }).length;
+        rollNote = roll.rolls[0].map(function(num){
+          return num + (num >= 4 ? '*' : '');
+        }).join(',');
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [4]});
+
+        expect(roll).toHaveSuccesses(successCount);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: '[' + rollNote + ']',
+          total: (successCount || 0) + ' success' + (!successCount || (successCount > 1) ? 'es' : '')
+        });
+
+        hasSucceeded = hasSucceeded || (successCount > 0);
+      }
+
+      // if we run many rolls, we should expect at least one to have succeeded at least once
+      expect(hasSucceeded).toBeTruthy();
+    });
+
+    it('should return number of successes for `13d10>=5`', function(){
+      var notation = '13d10>=5',
+        hasSucceeded = false,
+        roll,
+        rollNote,
+        successCount;
+
+      // run the tests multiple times for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+        successCount = roll.rolls[0].filter(function(num){
+          return num >= 5;
+        }).length;
+        rollNote = roll.rolls[0].map(function(num){
+          return num + (num >= 5 ? '*' : '');
+        }).join(',');
+
+        expect(roll).toEqual(jasmine.any(DiceRoll));
+
+        // check the rolls list is correct
+        expect(roll).toHaveRolls({rolls: [13]});
+
+        expect(roll).toHaveSuccesses(successCount);
+
+        // check the output string
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: '[' + rollNote + ']',
+          total: (successCount || 0) + ' success' + (!successCount || (successCount > 1) ? 'es' : '')
+        });
+
+        hasSucceeded = hasSucceeded || (successCount > 0);
+      }
+
+      // if we run many rolls, we should expect at least one to have succeeded at least once
+      expect(hasSucceeded).toBeTruthy();
+    });
+
+    it('should return no successes for non-pool dice rolls', function(){
+      var notation = '4d6',
+        roll;
+
+      // run the tests multiple times for consistency
+      for(i = 0; i < loopCount; i++){
+        roll = diceRoller.roll(notation);
+
+        expect(roll).not.toHaveSuccesses();
+        // explicitly check against zero, just be be certain
+        expect(roll).toHaveSuccesses(0);
+      }
+    });
+  });
+
   describe('roll log', function(){
     var diceRoller;
 

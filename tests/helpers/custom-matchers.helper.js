@@ -100,6 +100,31 @@ beforeEach(function(){
         }
       };
     },
+    toHaveSuccesses: function(util, customEqualityTesters){
+      return {
+        compare: function(actual, expected){
+          var result = {
+                pass: true,
+                message: 'Expected "' + actual + '" Not to have ' + (expected ? expected + ' ' : '') + 'success' + (!expected || (expected > 1) ? 'es' : '')
+              },
+              successCount = actual.getSuccesses();
+
+          if((expected === null) || (typeof expected === 'undefined')){
+            // expected not defined so expecting an unspecified amount of successes, at least 1
+            if(!successCount){
+              result.pass = false;
+              result.message = 'Expected "' + actual + '" to have at least 1 success';
+            }
+          }else if(expected !== successCount){
+            // number of successes doesn't match expected
+            result.pass = false;
+            result.message = 'Expected "' + actual + '" to have ' + expected + ' success' + (!expected || (expected > 1) ? 'es' : '');
+          }
+
+          return result;
+        }
+      };
+    },
     toExplode: function (util, customEqualityTesters) {
       return {
         compare: function (actual, expected) {
