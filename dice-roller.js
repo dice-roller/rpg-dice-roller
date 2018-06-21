@@ -174,14 +174,18 @@
       },
       isBase64: function(val){
         try{
-          return val && (btoa(atob(val)) === val);
+          return !!(val && (btoa(atob(val)) === val));
         }catch(e){
           return false;
         }
       },
       isJson: function(val){
+        var parsed;
+
         try{
-          return !!(val && JSON.parse(val));
+          parsed = val ? JSON.parse(val) : false;
+
+          return !!(parsed && (typeof parsed === 'object'));
         }catch(e){
           return false;
         }
@@ -213,7 +217,7 @@
        */
       sumArray: function(numbers){
         return !Array.isArray(numbers) ? 0 : numbers.reduce(function(prev, current){
-          return prev + current;
+          return prev + (DiceRoller.utils.isNumeric(current) ? parseFloat(current) : 0);
         }, 0);
       },
       /**
@@ -227,23 +231,33 @@
        * @returns {number}
        */
       equateNumbers: function(a, b, operator){
-        switch(operator){
-          case '*':
-            // multiply the value
-            a *= b;
-            break;
-          case '/':
-            // divide the value
-            a /= b;
-            break;
-          case '-':
-            // subtract from the value
-            a -= b;
-            break;
-          default:
-            // add to the value
-            a += b;
-            break;
+        // ensure values are numeric
+        a = DiceRoller.utils.isNumeric(a) ? parseFloat(a) : 0;
+        b = DiceRoller.utils.isNumeric(b) ? parseFloat(b) : 0;
+
+        if(a && b){
+          // only carry out operation if we have both values
+          switch (operator){
+            case '*':
+              // multiply the value
+              a *= b;
+              break;
+            case '/':
+              // divide the value
+              a /= b;
+              break;
+            case '-':
+              // subtract from the value
+              a -= b;
+              break;
+            default:
+              // add to the value
+              a += b;
+              break;
+          }
+        }else if(b){
+          // a is not valid (or is 0), but b has a value, so use it
+          a = b;
         }
 
         return a;
@@ -259,6 +273,9 @@
        */
       compareNumbers: function(a, b, operator){
         var result = false;
+
+        a = parseFloat(a);
+        b = parseFloat(b);
 
         switch(operator){
           case '=':

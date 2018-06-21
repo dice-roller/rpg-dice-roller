@@ -1,4 +1,4 @@
-/*global beforeEach, console, jasmine */
+/*global beforeEach, console, DiceRoller, jasmine */
 beforeEach(function(){
   'use strict';
 
@@ -306,6 +306,23 @@ beforeEach(function(){
             result.message = 'Expected "' + actual + '" to NOT be base64 encoded';
           }else{
             result.message = 'Expected "' + actual + '" to be base64 encoded';
+          }
+
+          return result;
+        }
+      };
+    },
+    toWorkAsUtility: function(){
+      return {
+        compare: function(methodName, args, response){
+          var result = {};
+
+          result.pass = DiceRoller.utils[methodName].apply(window, args) === response;
+
+          if(result.pass){
+            result.message = 'Expected "' + methodName + '(' + args.join(',') + ')" to NOT equal ' + response;
+          }else{
+            result.message = 'Expected "' + methodName + '(' + args.join(',') + ')" to equal ' + response;
           }
 
           return result;
