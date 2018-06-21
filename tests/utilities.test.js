@@ -412,4 +412,187 @@
       expect('equateNumbers').toWorkAsUtility(['foo', 20], 20);
     });
   });
+
+  describe('compareNumbers utility', function(){
+    describe('= and ==', function(){
+      it('should be equal', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 1, '='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1, '=='], true);
+
+        expect('compareNumbers').toWorkAsUtility([10, 10, '='], true);
+
+        expect('compareNumbers').toWorkAsUtility([346, 346, '='], true);
+
+        expect('compareNumbers').toWorkAsUtility([10, 10.00, '='], true);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '1', '='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, '1', '='], true);
+      });
+
+      it('should not be equal', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 2, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1.02, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility(['h', 'h', '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([{}, {}, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([{}, [], '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([[], [], '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([null, null, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([false, false, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([null, false, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([true, true, '='], false);
+
+        expect('compareNumbers').toWorkAsUtility([NaN, NaN, '='], false);
+      });
+    });
+
+    describe('<', function(){
+      it('should be less than', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 2, '<'], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '<'], true);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '2', '<'], true);
+      });
+
+      it('should not be less than', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 1, '<'], false);
+
+        expect('compareNumbers').toWorkAsUtility([2, 1, '<'], false);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1, '<'], false);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '2', '<'], false);
+      });
+    });
+
+    describe('>', function(){
+      it('should be greater than', function(){
+        expect('compareNumbers').toWorkAsUtility([2, 1, '>'], true);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1, '>'], true);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '1', '>'], true);
+      });
+
+      it('should not be greater than', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 1, '>'], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, 2, '>'], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '>'], false);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '2', '>'], false);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '2', '>'], false);
+      });
+    });
+
+    describe('<=', function(){
+      it('should be less than or equal to', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 2, '<='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '<='], true);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '2', '<='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1, '<='], true);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '2', '<='], true);
+      });
+
+      it('should not be less than or equal to', function(){
+        expect('compareNumbers').toWorkAsUtility([2, 1, '<='], false);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1, '<='], false);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '1', '<='], false);
+      });
+    });
+
+    describe('>=', function(){
+      it('should be greater than', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 1, '>='], true);
+
+        expect('compareNumbers').toWorkAsUtility([2, 1, '>='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1, '>='], true);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '1', '>='], true);
+
+        expect('compareNumbers').toWorkAsUtility(['2', '2', '>='], true);
+      });
+
+      it('should not be greater than', function(){
+
+        expect('compareNumbers').toWorkAsUtility([1, 2, '>='], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '>='], false);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '2', '>='], false);
+      });
+    });
+
+    describe('! and !=', function(){
+      it('should not be equal', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 2, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1.01, '!='], true);
+
+        expect('compareNumbers').toWorkAsUtility([1.01, 1.02, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility(['h', 'h', '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([{}, {}, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([{}, [], '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([[], [], '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([null, null, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([false, false, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([null, false, '!'], true);
+
+        expect('compareNumbers').toWorkAsUtility([true, true, '!'], true);
+      });
+
+      it('should be equal', function(){
+        expect('compareNumbers').toWorkAsUtility([1, 1, '!'], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, 1, '!='], false);
+
+        expect('compareNumbers').toWorkAsUtility([10, 10, '!'], false);
+
+        expect('compareNumbers').toWorkAsUtility([346, 346, '!'], false);
+
+        expect('compareNumbers').toWorkAsUtility([10, 10.00, '!'], false);
+
+        expect('compareNumbers').toWorkAsUtility(['1', '1', '!'], false);
+
+        expect('compareNumbers').toWorkAsUtility([1, '1', '!'], false);
+      });
+    });
+
+    it('should return false if no operator defined', function(){
+      expect('compareNumbers').toWorkAsUtility([1, 1], false);
+
+      expect('compareNumbers').toWorkAsUtility([1, 2], false);
+
+      expect('compareNumbers').toWorkAsUtility([2, 1], false);
+    });
+  });
 }());

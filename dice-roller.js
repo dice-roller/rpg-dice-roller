@@ -274,6 +274,9 @@
       compareNumbers: function(a, b, operator){
         var result = false;
 
+        a = parseFloat(a);
+        b = parseFloat(b);
+
         switch(operator){
           case '=':
           case '==':
