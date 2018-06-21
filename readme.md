@@ -135,33 +135,45 @@ dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
 ```
 
 
-## Browsers
-
-This dice roller only works on the latest browsers and will **not** work in versions of IE older than 10.
-
-
 ## Usage
 
 You only need to include the `dice-roller.js` file in your project:
 
-```<script src="dice-roller.js"></script>```
+```html
+<script src="dice-roller.js"></script>
+```
 
 You can use `DiceRoller` like so:
 
-```
-<script>
-  // create a new instance of the DiceRoller
-  var diceRoller  = new DiceRoller();
+```js
+// create a new instance of the DiceRoller
+var roller  = new DiceRoller();
 
-  // roll the dice
-  diceRoller.roll('4d20-L');
-  
-  // get the latest dice rolls from the log
-  var latestRoll  = diceRoller.getLog().shift();
-  
-  // output the latest roll - it has a toString method for nice output
-  document.write(latestRoll);
-</script>
+// roll the dice
+roller.roll('4d20-L');
+
+// get the latest dice rolls from the log
+var latestRoll  = roller.getLog().shift();
+
+// output the latest roll - it has a toString method for nice output
+document.write(latestRoll);
+
+
+// roll a single notation without saving it to the log
+var diceRoll = new DiceRoll('2d6-L');
+
+// export the dice roll as JSON
+var exportedData = diceRoll.export(DiceRoller.exportFormats.JSON);
+
+// we can also import data either from a previous export, or built up manually
+// Note that here we're calling `import` on the `DiceRoll` class, not an existing object
+var importedDiceRoll = DiceRoll.import(exportedData);
+
+
+// importing into a DiceRoller is just as easy
+roller.import(exportedData); // appends roll data to the end of existing roll log
+
+var roller2 = DiceRoller.import(exportedData); // creates a new DiceRoller and stores the roll data
 ```
 
 
@@ -171,7 +183,7 @@ You can also load the library using AMD and CommonJS.
 
 Here is the above example in Node.js:
 
-```
+```js
 // require the dice-roller library
 const dr = require("./dice-roller.js");
 
@@ -193,7 +205,7 @@ console.log(latestRoll.toString());
 
 The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
 
-```
+```js
 // my first DiceRoller
 var roller1 = new DiceRoller();
 
@@ -206,15 +218,31 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 
 #### `DiceRoller` object
 
-| Property           | type                          | description                                                                                                                                |
-| ------------------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `roll`             | `function({String} notation)` | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
-| `getLog`           | `function()`                  | Returns the current roll log. Returns: `Array`                                                                                             |
-| `clearLog`         | `function()`                  | Clears the roll history log.                                                                                                               |
-| `toString`         | `function()`                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
-| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                       |
-| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                          |
-| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object` |
+| Property           | type                                          | description                                                                                                                                |
+| ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `clearLog`         | `function()`                                  | Clears the roll history log.                                                                                                               |
+| `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                   |
+| `getLog`           | `function()`                                  | Returns the current roll log. Returns: `Array`                                                                                             |
+| `import`           | `function({mixed} data)`                      | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array`                                  |
+| `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
+| `toString`         | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
+
+
+##### Static properties
+
+Static properties can be called on the class itself, without instantiating an object, like so:
+
+```js
+var diceRoller = DiceRoller.import(data, format);  returns a new DiceRoller instance with the given data
+```
+
+| Property           | type                          | description                                                                                                                                          |
+| ------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exportFormats`    | `Object`                      | List of available export / import formats                                                                                                            |
+| `import`           | `function({mixed} data)`      | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
+| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                                 |
+| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object`           |
+| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                                    |
 
 
 #### `DiceRoll` object
@@ -223,19 +251,38 @@ A `DiceRoll` object takes a notation and parses it in to rolls.
 
 It can be created like so:
 
-```
+```js
 var notation  = '4d10';
 
 var roll      = new DiceRoll(notation);
 ```
 
-| Property   | type         | description                                                                                                      |
-| ---------- | ------------ | ---------------------------------------------------------------------------------------------------------------- |
-| `notation` | `String`     | The dice notation passed                                                                                         |
-| `rolls`    | `Array`      | Roll log for the notation                                                                                        |
-| `roll`     | `function()` | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
-| `getTotal` | `function()` | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
-| `toString` | `function()` | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
+| Property   | type                                          | description                                                                                                      |
+| ---------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `export`   | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                           |
+| `getTotal` | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
+| `notation` | `String`                                      | The dice notation passed                                                                                         |
+| `rolls`    | `Array`                                       | Roll log for the notation                                                                                        |
+| `roll`     | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
+| `toString` | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
+
+
+##### Static properties
+
+Static properties can be called on the class itself, without instantiating an object, like so:
+
+```js
+var diceRoll = DiceRoll.import(data, format);
+```
+
+| Property        | type                     | description                                                            |
+| --------------- | ------------------------ | ---------------------------------------------------------------------- |
+| `import`        | `function({mixed} data)` | Imports the given data and creates a new dice roll. Returns `DiceRoll` |
+
+
+## Browser support
+
+This dice roller only works on the latest browsers and will **not** work in versions of IE older than 10.
 
 
 ### Demo
