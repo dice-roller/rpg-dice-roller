@@ -335,14 +335,32 @@
     };
 
     /**
+     * Matches a number comparison (ie. <=4, =5, >3, !=1)
+     *
+     * @type {string}
+     */
+    strings.numberComparison = '(' + strings.comparisonOperators + ')([0-9]+)';
+
+    /**
      * Matches exploding/penetrating dice notation
      *
      * @type {string}
      */
-    strings.explode   = '((!{1,2}p?)((' + strings.comparisonOperators + ')?([0-9]+))?)';
+    strings.explode   = '(!{1,2}p?)';
 
-    // matches a dice (ie. 2d6, d10, d%, dF, dF.2)
-    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')' + strings.explode + '?';
+    /**
+     * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+     *
+     * @type {string}
+     */
+    strings.dice      = '([1-9][0-9]*)?d([1-9][0-9]*|%|' + strings.fudge + ')';
+
+    /**
+     * Matches a dice, optional exploding/penetrating notation and roll comparison
+     *
+     * @type {string}
+     */
+    strings.diceFull  = strings.dice + strings.explode + '?(?:' + strings.numberComparison + ')?';
 
     /**
      * Matches the addition to a dice (ie. +4, -10, *2, -L)
@@ -362,7 +380,7 @@
      *
      * @type {string}
      */
-    strings.notation  = '(' + strings.arithmeticOperator + ')?' + strings.dice + '((?:' + strings.addition + ')*)';
+    strings.notation  = '(' + strings.arithmeticOperator + ')?' + strings.diceFull + '((?:' + strings.addition + ')*)';
 
 
     var regExp  = {};
@@ -406,9 +424,9 @@
           qty:          match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
           sides:        DiceRoller.utils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
           fudge:        false,                                                    // if fudge die this is set to the fudge notation match
-          explode:      match[5],                                                 // flag - whether to explode the dice rolls or not
-          penetrate:    (match[6] === '!p') || (match[6] === '!!p'),              // flag - whether to penetrate the dice rolls or not
-          compound:     (match[6] === '!!') || (match[6] === '!!p'),              // flag - whether to compound exploding dice or not
+          explode:      !!match[5],                                               // flag - whether to explode the dice rolls or not
+          penetrate:    (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+          compound:     (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
           comparePoint: false,                                                    // the compare point for exploding/penetrating dice
           additions:    []                                                        // any additions (ie. +2, -L)
         };
@@ -419,10 +437,10 @@
         }
 
         // check if we have a compare point
-        if(match[7]){
+        if(match[6]){
           die.comparePoint  = {
-            operator: match[8],
-            value:    parseInt(match[9], 10)
+            operator: match[6],
+            value:    parseInt(match[7], 10)
           };
         }else if(die.explode){
           // we are exploding the dice so we need a compare point, but none has been defined
@@ -433,10 +451,10 @@
         }
 
         // check if we have additions
-        if(match[10]){
+        if(match[8]){
           // we have additions (ie. +2, -L)
           var additionMatch;
-          while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[10]))){
+          while((additionMatch = DiceRoller.notationPatterns.get('addition', 'g').exec(match[8]))){
             // add the addition to the list
             die.additions.push({
               operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
