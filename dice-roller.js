@@ -535,6 +535,13 @@
     var lib = this;
 
     /**
+     * The count of success rolls
+     *
+     * @type {number}
+     */
+    var successes = 0;
+
+    /**
      * The roll total
      *
      * @type {number}
@@ -612,7 +619,7 @@
       }
 
       // zero the current total
-      total = 0;
+      resetTotals();
 
       if(notation instanceof Object){
         // validate object
@@ -665,6 +672,27 @@
      */
     var isComparePoint = function(comparePoint, value){
       return comparePoint ? DiceRoller.utils.compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
+    };
+
+    /**
+     * Checks whether the value matches the given compare point
+     * and returns the corresponding success / failure state value
+     * success = 1, fail = 0
+     *
+     * @param {number} value
+     * @param {object} comparePoint
+     * @returns {number}
+     */
+    var getSuccessStateValue = function(value, comparePoint){
+      return isComparePoint(comparePoint, value) ? 1 : 0;
+    };
+
+    /**
+     * Resets the current total and success count
+     */
+    var resetTotals = function(){
+      total = 0;
+      successes = 0;
     };
 
     /**
@@ -744,7 +772,7 @@
       lib.rolls = [];
 
       // reset the cached total
-      total = 0;
+      resetTotals();
 
       // loop through each die and roll it
       parsedDice.forEach(function(elm, index, array){
@@ -770,7 +798,8 @@
         // loop through and build the string for die rolled
         parsedDice.forEach(function(item, index, array){
           var rolls       = lib.rolls[index] || [],
-              currentRoll = 0; // current roll total - used for totalling compounding rolls
+              currentRoll = 0, // current roll total - used for totalling compounding rolls
+              hasComparePoint = item.comparePoint;
 
           output += ((index > 0) ? item.operator : '') + '[';
 
@@ -778,9 +807,10 @@
           rolls.forEach(function(roll, rIndex, array){
             // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
             var rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
-                delimit = rIndex !== array.length-1;
+                delimit = rIndex !== array.length-1,
+                hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
 
-            if(item.explode && isComparePoint(item.comparePoint, rollVal)){
+            if(item.explode && hasMatchedCP){
               // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
 
               // add the current roll to the roll total
@@ -793,9 +823,12 @@
                 // not compounding
                 output += roll + '!' + (item.penetrate ? 'p' : '');
               }
-            }else if(item.compound && currentRoll){
+            }else if(hasMatchedCP){
+              // not exploding but we've matched a compare point - this is a pool dice (success or failure)
+              output += roll + '*';
+            }else if(item.compound && currentRoll) {
               // last roll in a compounding set (This one didn't compound)
-              output += (roll + currentRoll)  + '!!' + (item.penetrate ? 'p' : '');
+              output += (roll + currentRoll) + '!!' + (item.penetrate ? 'p' : '');
 
               // reset current roll total
               currentRoll = 0;
@@ -832,32 +865,74 @@
     };
 
     /**
+     * Returns the count of successes for the roll
+     *
+     * @returns {number}
+     */
+    this.getSuccesses = function(){
+      if(!successes){
+        // no successes found - calculate the totals, which also calculates the successes
+        lib.getTotal();
+      }
+
+      return successes || 0;
+    };
+
+    /**
      * Returns the roll total
      *
      * @returns {number}
      */
     this.getTotal     = function(){
+      // only calculate the total if it has not already been done
       if(!total && parsedDice && Array.isArray(lib.rolls) && lib.rolls.length){
-        // no total stored already - calculate it
+        // reset the success count
+        successes = 0;
+
+        // loop through each roll and calculate the totals
         parsedDice.forEach(function(item, index, array){
           var rolls     = lib.rolls[index] || [],
-              dieTotal  = DiceRoller.utils.sumArray(rolls),
+              // actual values of the rolls for the purposes of L/H modifiers
               rollsValues = item.compound ? [rolls.reduce(function(a, b){
                 return a + b;
-              }, 0)] : rolls;
+              }, 0)] : rolls,
+              dieTotal  = 0,
+              isPool = !item.explode && item.comparePoint;
+
+          if(isPool){
+            // pool dice are success/failure so we don't want the actual dice roll
+            // we need to convert each roll to 1 (success) or 0 (failure)
+            rolls = rolls.map(function(value){
+              return getSuccessStateValue(value, item.comparePoint);
+            });
+          }
+
+          // add all the rolls together to get the total
+          dieTotal = DiceRoller.utils.sumArray(rolls);
+
 
           if(item.additions.length){
             // loop through the additions and handle them
             item.additions.forEach(function(aItem, aIndex, aArray){
-              var value = aItem.value;
+              var value = aItem.value,
+                  isPoolModifier = false;
 
               // run any necessary addition value modifications
               if(value === 'H'){
                 // 'H' is equivalent to the highest roll
-                value = Math.max.apply(null,  rollsValues);
+                value = Math.max.apply(null, rollsValues);
+                // flag that this value needs to eb modified to a success/failure value
+                isPoolModifier = true;
               }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
                 value = Math.min.apply(null, rollsValues);
+                // flag that this value needs to eb modified to a success/failure value
+                isPoolModifier = true;
+              }
+
+              if(isPool && isPoolModifier){
+                // pool dice are either success or failure, so value is converted to 1 or 0
+                value = getSuccessStateValue(value, item.comparePoint);
               }
 
               // run the actual mathematical equation
@@ -867,6 +942,11 @@
 
           // total the value
           total = DiceRoller.utils.equateNumbers(total, dieTotal, item.operator);
+
+          // if this is a pool dice, add it's success count to the count
+          if(isPool) {
+            successes = DiceRoller.utils.equateNumbers(successes, dieTotal, item.operator);
+          }
         });
       }
 
