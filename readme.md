@@ -271,7 +271,7 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 Static properties can be called on the class itself, without instantiating an object, like so:
 
 ```js
-var diceRoller = DiceRoller.import(data, format);  returns a new DiceRoller instance with the given data
+var diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance with the given data
 ```
 
 | Property           | type                          | description                                                                                                                                          |
@@ -311,7 +311,7 @@ var roll      = new DiceRoll(notation);
 Static properties can be called on the class itself, without instantiating an object, like so:
 
 ```js
-var diceRoll = DiceRoll.import(data, format);
+var diceRoll = DiceRoll.import(data);
 ```
 
 | Property        | type                     | description                                                            |
