@@ -404,12 +404,44 @@
       expect('equateNumbers').toWorkAsUtility(['foo', 'bar'], 0);
     });
 
-    it('should return first number if second number is invalid', function(){
-      expect('equateNumbers').toWorkAsUtility([10, 'bar'], 10);
+    it('should work if first number is 0', function(){
+      expect('equateNumbers').toWorkAsUtility([0, 20], 20);
+
+      expect('equateNumbers').toWorkAsUtility([0, 20, '-'], -20);
+
+      expect('equateNumbers').toWorkAsUtility([0, 20, '*'], 0);
+
+      expect('equateNumbers').toWorkAsUtility([0, 20, '/'], 0);
     });
 
-    it('should return second number if first number is invalid', function(){
+    it('should work if second number is 0', function(){
+      expect('equateNumbers').toWorkAsUtility([10, 0], 10);
+
+      expect('equateNumbers').toWorkAsUtility([10, 0, '-'], 10);
+
+      expect('equateNumbers').toWorkAsUtility([10, 0, '*'], 0);
+
+      expect('equateNumbers').toWorkAsUtility([10, 0, '/'], 0);
+    });
+
+    it('should work if first number is invalid', function(){
       expect('equateNumbers').toWorkAsUtility(['foo', 20], 20);
+
+      expect('equateNumbers').toWorkAsUtility(['foo', 20, '-'], -20);
+
+      expect('equateNumbers').toWorkAsUtility(['foo', 20, '*'], 0);
+
+      expect('equateNumbers').toWorkAsUtility(['foo', 20, '/'], 0);
+    });
+
+    it('should work if second number is invalid', function(){
+      expect('equateNumbers').toWorkAsUtility([10, 'bar'], 10);
+
+      expect('equateNumbers').toWorkAsUtility([10, 'bar', '-'], 10);
+
+      expect('equateNumbers').toWorkAsUtility([10, 'bar', '*'], 0);
+
+      expect('equateNumbers').toWorkAsUtility([10, 'bar', '/'], 0);
     });
   });
 
