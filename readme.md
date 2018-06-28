@@ -135,6 +135,44 @@ dF.1*2  // roll non-standard fudge dice, multiplying the result by 2
 ```
 
 
+### Dice pools
+
+Some systems use dice pool, whereby the total is equal to the number of dice rolled that meet a fixed condition, rather than the total value of the rolls.
+
+For example, a "pool" of 10 sided dice where you count the number of dice that roll an 8 or higher as "successes".  
+This can be achieved with:
+
+```
+5d10>=8
+```
+
+You can define various success conditions, by simply adding number comparisons directly after the dice roll.  
+Because of this, you can *not have a pool dice that also explodes*.
+
+Examples:
+
+```
+2d6=6: [4,6*] = 1               // only a roll of 6 is a success
+4d3>1: [1,3*,2*,1] = 2          // higher than a 1 is a success
+4d3<2: [1*,3,2,1*] = 2          // lower than a 2 is a success
+5d8>=5: [2,4,6*,3,8*] = 2       // higher than or equal to 5 is a success
+6d10<=4: [7,2*,10,3*,3*,4*] = 4 // less than or equal to 4 is a success
+```
+
+You can mix pool dice with other dice types or equations, and it will use the number of successes as the value in the equation:
+
+```
+2d6>4+3d5: [4,5*]+[3,1,1] = 6   // 1 success + the raw values of the other rolls
+2d6>4*d6!: [6*,5*]*[6!,4] = 20  // 1 success * raw values of the other rolls
+2d6>4+2: [3,5*]+2 = 3           // 1 success + 2
+2d6>4+H: [3,5*]+H = 2           // Highest roll is 5, which is a success, so value of 1
+2d6<4+H: [3*,5]+H = 1           // Highest roll is 5, which is a failure, so value of 0
+```
+
+The `getSuccesses()` method on the `DiceRoll` object will return the number of successes for a roll.  
+However, if the roll is just dice pool, and does not contain any other additions, or dice rolls, then the value returned will be the same as calling `getTotals()`.
+
+
 ## Usage
 
 You only need to include the `dice-roller.js` file in your project:
@@ -257,14 +295,15 @@ var notation  = '4d10';
 var roll      = new DiceRoll(notation);
 ```
 
-| Property   | type                                          | description                                                                                                      |
-| ---------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `export`   | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                           |
-| `getTotal` | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
-| `notation` | `String`                                      | The dice notation passed                                                                                         |
-| `rolls`    | `Array`                                       | Roll log for the notation                                                                                        |
-| `roll`     | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
-| `toString` | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
+| Property       | type                                          | description                                                                                                      |
+| -------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `export`       | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                           |
+| `getSuccesses` | `function()`                                  | Returns the successes for the roll, if using pool dice. Returns `Number`                                         |
+| `getTotal`     | `function()`                                  | Returns the roll total, generated from `roll()`. Returns `Number`                                                |
+| `notation`     | `String`                                      | The dice notation passed                                                                                         |
+| `rolls`        | `Array`                                       | Roll log for the notation                                                                                        |
+| `roll`         | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                  |
+| `toString`     | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String` |
 
 
 ##### Static properties
