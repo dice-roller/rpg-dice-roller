@@ -1,6 +1,5 @@
 {
   "name": "rpg-dice-roller",
-  "version": "1.4.0",
   "description": "A dice roller that accepts typical dice notation",
   "main": [
     "dice-roller.js"
