@@ -267,7 +267,7 @@
        * @returns {boolean}
        */
       compareNumbers: function(a, b, operator){
-        var result = false;
+        var result;
 
         a = parseFloat(a);
         b = parseFloat(b);
@@ -292,6 +292,9 @@
           case '!':
           case '!=':
             result = a !== b;
+            break;
+          default:
+            result = false;
             break;
         }
 
@@ -716,7 +719,7 @@
         // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
         // in case we want to use the number of sides as well, in the future
         callback = function(sides){
-          return diceRollMethods.fudge(DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1]) : 2);
+          return diceRollMethods.fudge(DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1], 10) : 2);
         };
       }else if(typeof die.sides === 'string'){
         if(die.sides === '%'){
