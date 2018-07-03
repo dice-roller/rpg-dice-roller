@@ -1,10 +1,27 @@
 {
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts typical dice notation",
-  "author": "GreenImp <info@greenimp.co.uk>",
-  "version": "1.5.1",
+  "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk",
+  "version": "1.5.2",
   "license": "MIT",
   "main": "dice-roller.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GreenImp/rpg-dice-roller.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GreenImp/rpg-dice-roller/issues"
+  },
+  "homepage": "https://github.com/GreenImp/rpg-dice-roller",
+  "keywords": [
+    "dice",
+    "roller",
+    "notation",
+    "rpg",
+    "roll",
+    "pathfinder",
+    "d&d"
+  ],
   "devDependencies": {
     "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",

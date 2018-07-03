@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version v1.5.1
+ * @version v1.5.2
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
@@ -12,7 +12,9 @@
 
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define([], factory);
+    define([], function(){
+      return factory(root);
+    });
   } else if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
     // CommonJS
     factory(exports);
@@ -267,7 +269,7 @@
        * @returns {boolean}
        */
       compareNumbers: function(a, b, operator){
-        var result = false;
+        var result;
 
         a = parseFloat(a);
         b = parseFloat(b);
@@ -292,6 +294,9 @@
           case '!':
           case '!=':
             result = a !== b;
+            break;
+          default:
+            result = false;
             break;
         }
 
@@ -716,7 +721,7 @@
         // I'm using an anonymous function to call it instead of setting `sides` to the fudge match
         // in case we want to use the number of sides as well, in the future
         callback = function(sides){
-          return diceRollMethods.fudge(DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1]) : 2);
+          return diceRollMethods.fudge(DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1], 10) : 2);
         };
       }else if(typeof die.sides === 'string'){
         if(die.sides === '%'){
