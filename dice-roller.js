@@ -12,7 +12,9 @@
 
   if (typeof define === 'function' && define.amd) {
     // AMD. Register as an anonymous module.
-    define([], factory);
+    define([], function(){
+      return factory(root);
+    });
   } else if (typeof exports === 'object' && typeof exports.nodeName !== 'string') {
     // CommonJS
     factory(exports);
