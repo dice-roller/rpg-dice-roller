@@ -191,17 +191,17 @@
        * @param val
        * @returns {boolean}
        */
-      isNumeric: val => (
-        !Array.isArray(val) && ((val- parseFloat(val) + 1) >= 0)
-      ),
-      isBase64: val => {
+      isNumeric(val) {
+        return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
+      },
+      isBase64(val){
         try{
           return !!(val && (btoa(atob(val)) === val));
         }catch(e){
           return false;
         }
       },
-      isJson: val => {
+      isJson(val){
         try{
           let parsed = val ? JSON.parse(val) : false;
 
@@ -218,7 +218,7 @@
        * @param {number|string} max
        * @returns {*}
        */
-      generateNumber: (min, max) => {
+      generateNumber(min, max){
         min = min ? parseInt(min, 10) : 1;
         max = max ? parseInt(max, 10) : min;
 
@@ -296,7 +296,7 @@
        * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
        * @returns {boolean}
        */
-      compareNumbers: (a, b, operator) => {
+      compareNumbers(a, b, operator){
         let result;
 
         a = parseFloat(a);
@@ -579,14 +579,16 @@
        * @param sides
        * @returns {*}
        */
-      default:  sides => DiceRoller.utils.generateNumber(1, sides),
+      default(sides){
+        return DiceRoller.utils.generateNumber(1, sides);
+      },
       /**
        * Rolls a fudge die
        *
        * @param {number} numNonBlanks
        * @returns {number}
        */
-      fudge:    numNonBlanks => {
+      fudge(numNonBlanks){
         let total = 0;
 
         if(numNonBlanks === 2){
@@ -886,7 +888,7 @@
      *
      * @returns {number}
      */
-    this.getSuccesses = () =>{
+    this.getSuccesses = () => {
       if(!successes){
         // no successes found - calculate the totals, which also calculates the successes
         this.getTotal();

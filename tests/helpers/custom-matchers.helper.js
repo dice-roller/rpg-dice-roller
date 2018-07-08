@@ -3,9 +3,9 @@ beforeEach(() => {
   'use strict';
 
   const customMatchers = {
-    toBeWithinRange: (util, customEqualityTesters) => {
+    toBeWithinRange(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const result = {};
 
           if ((actual < expected.min) || (actual > expected.max)) {
@@ -20,9 +20,9 @@ beforeEach(() => {
         }
       };
     },
-    toHaveValuesWithinRange: (util, customEqualityTesters) => {
+    toHaveValuesWithinRange(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           let result = {pass: true},
               i;
 
@@ -45,9 +45,9 @@ beforeEach(() => {
         }
       };
     },
-    toArraySumEqualTo: (util, customEqualityTesters) => {
+    toArraySumEqualTo(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const sum = utils.reduceArray(actual);
           let result = {};
 
@@ -63,9 +63,9 @@ beforeEach(() => {
         }
       };
     },
-    toHaveRolls: (util, customEqualityTesters) => {
+    toHaveRolls(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const rolls = actual.rolls,
                 rollsReq = expected ? expected.rolls : null;
           let result = {pass: true, message: 'Expected "' + actual + '" Not to have rolls'},
@@ -100,9 +100,9 @@ beforeEach(() => {
         }
       };
     },
-    toHaveSuccesses: (util, customEqualityTesters) => {
+    toHaveSuccesses(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const successCount = actual.getSuccesses();
           let result = {
                 pass: true,
@@ -125,9 +125,9 @@ beforeEach(() => {
         }
       };
     },
-    toExplode: (util, customEqualityTesters) => {
+    toExplode(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           let result = {pass: true, message: 'Expected "' + actual + '" NOT to explode'},
               rollI,
               max = expected.max || null,
@@ -211,9 +211,9 @@ beforeEach(() => {
         }
       };
     },
-    toMatchParsedNotation: (util, customEqualityTesters) => {
+    toMatchParsedNotation(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const toMatch = expected.notation + ': ' + expected.rolls + (expected.total !== undefined ? ' = ' + expected.total : '');
           let result = {};
 
@@ -229,9 +229,9 @@ beforeEach(() => {
         }
       };
     },
-    toHaveLogLength: (util, customEqualityTesters) => {
+    toHaveLogLength(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const logLength = actual.getLog().length;
           let result = {};
 
@@ -258,9 +258,9 @@ beforeEach(() => {
         }
       };
     },
-    toBeDiceRoll: (util, customEqualityTesters) => {
+    toBeDiceRoll(util, customEqualityTesters){
       return {
-        compare: (actual, expected) => {
+        compare(actual, expected){
           const roll = actual,
                 total = roll.getTotal();
           let result = {pass: true, message: 'Expected "' + actual + '" to NOT be a Dice Roll'},
@@ -308,9 +308,9 @@ beforeEach(() => {
         }
       };
     },
-    toBeJson: () => {
+    toBeJson(){
       return {
-        compare: actual => {
+        compare(actual){
           let result = {};
 
           result.pass = utils.isJSON(actual);
@@ -325,9 +325,9 @@ beforeEach(() => {
         }
       };
     },
-    toBeBase64: () => {
+    toBeBase64(){
       return {
-        compare: actual => {
+        compare(actual){
           let result = {};
 
           result.pass = utils.isBase64Encoded(actual);
@@ -342,9 +342,9 @@ beforeEach(() => {
         }
       };
     },
-    toWorkAsUtility: () => {
+    toWorkAsUtility(){
       return {
-        compare: (methodName, args, response) => {
+        compare(methodName, args, response){
           let result = {};
 
           result.pass = DiceRoller.utils[methodName].apply(window, args) === response;
@@ -371,16 +371,20 @@ beforeEach(() => {
      * @param obj
      * @returns {*}
      */
-    reduceArray: obj => {
+    reduceArray(obj){
       if(Array.isArray(obj)){
         return obj.reduce((a, b) => utils.reduceArray(a) + utils.reduceArray(b), 0);
       }else{
         return obj;
       }
     },
-    getMin: obj => Math.min.apply(this, obj),
-    getMax: obj => Math.max.apply(this, obj),
-    isJSON: obj => {
+    getMin(obj){
+      return Math.min.apply(this, obj);
+    },
+    getMax(obj){
+      return Math.max.apply(this, obj);
+    },
+    isJSON(obj){
       if(!obj){
         return false;
       }
@@ -393,7 +397,7 @@ beforeEach(() => {
 
       return true;
     },
-    isBase64Encoded: obj => {
+    isBase64Encoded(obj){
       try{
         return obj && (btoa(atob(obj)) === obj);
       }catch(e){
