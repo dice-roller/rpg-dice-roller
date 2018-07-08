@@ -1,12 +1,12 @@
 /*global beforeEach, console, DiceRoller, jasmine */
-beforeEach(function(){
+beforeEach(() => {
   'use strict';
 
-  var customMatchers = {
-    toBeWithinRange: function(util, customEqualityTesters){
+  const customMatchers = {
+    toBeWithinRange: (util, customEqualityTesters) => {
       return {
-        compare: function(actual, expected){
-          var result = {};
+        compare: (actual, expected) => {
+          const result = {};
 
           if ((actual < expected.min) || (actual > expected.max)) {
             result.pass = false;
@@ -20,11 +20,11 @@ beforeEach(function(){
         }
       };
     },
-    toHaveValuesWithinRange: function (util, customEqualityTesters) {
+    toHaveValuesWithinRange: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {pass: true},
-            i;
+        compare: (actual, expected) => {
+          let result = {pass: true},
+              i;
 
           if (!Array.isArray(actual)) {
             result.pass = false;
@@ -45,11 +45,11 @@ beforeEach(function(){
         }
       };
     },
-    toArraySumEqualTo: function (util, customEqualityTesters) {
+    toArraySumEqualTo: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {},
-            sum = utils.reduceArray(actual);
+        compare: (actual, expected) => {
+          const sum = utils.reduceArray(actual);
+          let result = {};
 
           if (sum !== expected) {
             result.pass = false;
@@ -63,13 +63,13 @@ beforeEach(function(){
         }
       };
     },
-    toHaveRolls: function (util, customEqualityTesters) {
+    toHaveRolls: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {pass: true, message: 'Expected "' + actual + '" Not to have rolls'},
-            rolls = actual.rolls,
-            rollsReq = expected ? expected.rolls : null,
-            rollI;
+        compare: (actual, expected) => {
+          const rolls = actual.rolls,
+                rollsReq = expected ? expected.rolls : null;
+          let result = {pass: true, message: 'Expected "' + actual + '" Not to have rolls'},
+              rollI;
 
           if (!rolls.length) {
             result.pass = false;
@@ -100,14 +100,14 @@ beforeEach(function(){
         }
       };
     },
-    toHaveSuccesses: function(util, customEqualityTesters){
+    toHaveSuccesses: (util, customEqualityTesters) => {
       return {
-        compare: function(actual, expected){
-          var result = {
+        compare: (actual, expected) => {
+          const successCount = actual.getSuccesses();
+          let result = {
                 pass: true,
                 message: 'Expected "' + actual + '" Not to have ' + (expected ? expected + ' ' : '') + 'success' + (!expected || (expected > 1) ? 'es' : '')
-              },
-              successCount = actual.getSuccesses();
+              };
 
           if((expected === null) || (typeof expected === 'undefined')){
             // expected not defined so expecting an unspecified amount of successes, at least 1
@@ -125,23 +125,23 @@ beforeEach(function(){
         }
       };
     },
-    toExplode: function (util, customEqualityTesters) {
+    toExplode: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {pass: true, message: 'Expected "' + actual + '" NOT to explode'},
-            rollList = actual,
-            rollI,
-            max = expected.max || null,
-            min = expected.min || null,
-            comparePoint = expected.comparePoint || {operator: '=', value: max},
-            penetrating = !!expected.penetrate;
+        compare: (actual, expected) => {
+          let result = {pass: true, message: 'Expected "' + actual + '" NOT to explode'},
+              rollI,
+              max = expected.max || null,
+              min = expected.min || null;
+          const rollList = Array.isArray(actual) ? actual : [actual],
+                comparePoint = expected.comparePoint || {operator: '=', value: max},
+                penetrating = !!expected.penetrate;
 
           if (!max || !min) {
             result.pass = false;
             result.message = "Expected explode argument to provide max and min";
           } else {
             for (rollI = 0; rollI < rollList.length; rollList++) {
-              var value = rollList[rollI];
+              const value = rollList[rollI];
 
               if (penetrating && (rollI === 1)) {
                 // we need to compensate for the -1 on consecutive rolls when penetrating
@@ -158,8 +158,8 @@ beforeEach(function(){
                 result.pass = false;
                 result.message = "Expected " + value + ' to be greater than or equal to min (' + min + ')';
               } else {
-                var didExplode = rollList.length > (rollI + 1),
-                  shouldExplode = false;
+                const didExplode = rollList.length > (rollI + 1);
+                let shouldExplode = false;
 
                 switch (comparePoint.operator) {
                   case '=':
@@ -206,11 +206,11 @@ beforeEach(function(){
         }
       };
     },
-    toMatchParsedNotation: function (util, customEqualityTesters) {
+    toMatchParsedNotation: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {},
-            toMatch = expected.notation + ': ' + expected.rolls + (expected.total !== undefined ? ' = ' + expected.total : '');
+        compare: (actual, expected) => {
+          const toMatch = expected.notation + ': ' + expected.rolls + (expected.total !== undefined ? ' = ' + expected.total : '');
+          let result = {};
 
           if ('' + actual !== toMatch) {
             result.pass = false;
@@ -224,11 +224,11 @@ beforeEach(function(){
         }
       };
     },
-    toHaveLogLength: function (util, customEqualityTesters) {
+    toHaveLogLength: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {},
-            logLength = actual.getLog().length;
+        compare: (actual, expected) => {
+          const logLength = actual.getLog().length;
+          let result = {};
 
           if (typeof expected !== 'number') {
             // no length specified - just check if it has a length
@@ -253,13 +253,13 @@ beforeEach(function(){
         }
       };
     },
-    toBeDiceRoll: function (util, customEqualityTesters) {
+    toBeDiceRoll: (util, customEqualityTesters) => {
       return {
-        compare: function (actual, expected) {
-          var result = {pass: true, message: 'Expected "' + actual + '" to NOT be a Dice Roll'},
-              resultT,
-              roll = actual,
-              total = roll.getTotal();
+        compare: (actual, expected) => {
+          const roll = actual,
+                total = roll.getTotal();
+          let result = {pass: true, message: 'Expected "' + actual + '" to NOT be a Dice Roll'},
+              resultT;
 
           // check value is within allowed range
           resultT = customMatchers.toBeWithinRange().compare(total, {
@@ -303,10 +303,10 @@ beforeEach(function(){
         }
       };
     },
-    toBeJson: function(){
+    toBeJson: () => {
       return {
-        compare: function(actual){
-          var result = {};
+        compare: actual => {
+          let result = {};
 
           result.pass = utils.isJSON(actual);
 
@@ -320,10 +320,10 @@ beforeEach(function(){
         }
       };
     },
-    toBeBase64: function(){
+    toBeBase64: () => {
       return {
-        compare: function(actual){
-          var result = {};
+        compare: actual => {
+          let result = {};
 
           result.pass = utils.isBase64Encoded(actual);
 
@@ -337,10 +337,10 @@ beforeEach(function(){
         }
       };
     },
-    toWorkAsUtility: function(){
+    toWorkAsUtility: () => {
       return {
-        compare: function(methodName, args, response){
-          var result = {};
+        compare: (methodName, args, response) => {
+          let result = {};
 
           result.pass = DiceRoller.utils[methodName].apply(window, args) === response;
 
@@ -366,22 +366,16 @@ beforeEach(function(){
      * @param obj
      * @returns {*}
      */
-    reduceArray: function(obj){
+    reduceArray: obj => {
       if(Array.isArray(obj)){
-        return obj.reduce(function(a, b){
-          return utils.reduceArray(a) + utils.reduceArray(b);
-        }, 0);
+        return obj.reduce((a, b) => utils.reduceArray(a) + utils.reduceArray(b), 0);
       }else{
         return obj;
       }
     },
-    getMin: function(obj){
-      return Math.min.apply(this, obj);
-    },
-    getMax: function(obj){
-      return Math.max.apply(this, obj);
-    },
-    isJSON: function(obj){
+    getMin: obj => Math.min.apply(this, obj),
+    getMax: obj => Math.max.apply(this, obj),
+    isJSON: obj => {
       if(!obj){
         return false;
       }
@@ -394,7 +388,7 @@ beforeEach(function(){
 
       return true;
     },
-    isBase64Encoded: function(obj){
+    isBase64Encoded: obj => {
       try{
         return obj && (btoa(atob(obj)) === obj);
       }catch(e){
