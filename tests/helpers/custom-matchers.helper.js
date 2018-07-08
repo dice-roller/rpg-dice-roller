@@ -140,13 +140,18 @@ beforeEach(() => {
             result.pass = false;
             result.message = "Expected explode argument to provide max and min";
           } else {
-            for (rollI = 0; rollI < rollList.length; rollList++) {
+            for (rollI = 0; rollI < rollList.length; rollI++) {
               const value = rollList[rollI];
 
               if (penetrating && (rollI === 1)) {
                 // we need to compensate for the -1 on consecutive rolls when penetrating
                 max--;
                 min--;
+
+                // ensure that the compare point value is not greater than the new max
+                if(comparePoint.value > max){
+                  comparePoint.value = max;
+                }
               }
 
               if (value > max) {
