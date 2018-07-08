@@ -13,7 +13,10 @@ module.exports = function(grunt){
     all: [
       'Gruntfile.js',
       'dice-roller.js'
-    ]
+    ],
+    options: {
+      jshintrc: true
+    }
   };
   grunt.registerTask('lint', 'jshint');
 

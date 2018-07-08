@@ -31,5 +31,8 @@
   },
   "scripts": {
     "test": "grunt ci"
+  },
+  "jshintConfig": {
+    "esversion": 6
   }
 }
