@@ -1,8 +1,8 @@
 /*global module, require*/
-module.exports = function(grunt){
+module.exports = grunt => {
   'use strict';
 
-  var gruntConfig = {
+  const gruntConfig = {
     pkg: grunt.file.readJSON('package.json')
   };
 
