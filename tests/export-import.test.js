@@ -200,7 +200,7 @@
         // check the output string (Compounds if over 1, so any total of 2 or more means that it must have compounded)
         expect(imported).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + '!!]',
+          rolls: `[${total}!!]`,
           total: total,
         });
       });
@@ -372,7 +372,7 @@
         // check the output string
         expect(diceRoll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + diceRoll.rolls[0].join(',') + ']+2',
+          rolls: `[${diceRoll.rolls[0].join(',')}]+2`,
           total: total,
         });
       });

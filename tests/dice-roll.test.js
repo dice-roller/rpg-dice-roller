@@ -19,7 +19,7 @@
             sides = die === '%' ? 100 : die,
             notation = 'd' + die;
 
-      it('should return between 1 and ' + sides + ' for `' + notation + '`', () => {
+      it(`should return between 1 and ${sides} for \`${notation}\``, () => {
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -58,7 +58,7 @@
             notation = die;
 
       // Fudge dice always provide a value between -1 and 1
-      it('should be between -1 and 1 for `' + notation + '`', () => {
+      it(`should be between -1 and 1 for \`${notation}\``, () => {
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -97,9 +97,9 @@
 
     for(let i = 0; i < dice.length; i++){
       const die = dice[i],
-            notation = die.rolls + 'd' + die.sides;
+            notation = `${die.rolls}d${die.sides}`;
 
-      it('should roll a ' + die.sides + ' sided die ' + die.rolls + ' times', () => {
+      it(`should roll a ${die.sides} sided die ${die.rolls} times`, () => {
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -143,7 +143,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + roll.rolls[0].join(',') + ']+[' + roll.rolls[1].join(',') + ']',
+        rolls: `[${roll.rolls[0].join(',')}]+[${roll.rolls[1].join(',')}]`,
         total: total,
       });
     });
@@ -169,7 +169,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + roll.rolls[0].join(',') + ']*[' + roll.rolls[1].join(',') + ']-L',
+        rolls: `[${roll.rolls[0].join(',')}]*[${roll.rolls[1].join(',')}]-L`,
         total: total,
       });
     });
@@ -195,7 +195,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + roll.rolls[0].join(',') + ']/[' + roll.rolls[1].join(',') + ']',
+        rolls: `[${roll.rolls[0].join(',')}]/[${roll.rolls[1].join(',')}]`,
         total: total,
       });
     });
@@ -232,7 +232,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']',
+          rolls: `[${roll.rolls[0].join('!,')}]`,
           total: total,
         });
 
@@ -265,7 +265,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + ((total > 2) ? '!!' : '') + ']',
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
           total: total,
         });
 
@@ -300,7 +300,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!p,') + ']',
+          rolls: `[${roll.rolls[0].join('!p,')}]`,
           total: total,
         });
 
@@ -333,7 +333,7 @@
         // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']',
+          rolls: `[${total}${(total >= 2) ? '!!p' : ''}]`,
           total: total,
         });
 
@@ -403,7 +403,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']',
+          rolls: `[${roll.rolls[0].join('!,')}]`,
           total: total,
         });
 
@@ -445,7 +445,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']',
+          rolls: `[${roll.rolls[0].join('!,')}]`,
           total: total,
         });
 
@@ -487,7 +487,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']',
+          rolls: `[${roll.rolls[0].join('!,')}]`,
           total: total,
         });
 
@@ -520,7 +520,7 @@
         // check the output string (Compounds if over 1, so any total of 2 or more means that it must have compounded)
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + ((total >= 2) ? '!!' : '') + ']',
+          rolls: `[${total}${(total >= 2) ? '!!' : ''}]`,
           total: total,
         });
 
@@ -554,7 +554,7 @@
         // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + ((total > 2) ? '!!' : '') + ']',
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
           total: total,
         });
 
@@ -588,7 +588,7 @@
         // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + total + ((total > 2) ? '!!' : '') + ']',
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
           total: total,
         });
 
@@ -626,7 +626,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (total-2) + ']+2',
+        rolls: `[${total-2}]+2`,
         total: total,
       });
     });
@@ -648,7 +648,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (total+2) + ']-2',
+        rolls: `[${total+2}]-2`,
         total: total,
       });
     });
@@ -670,7 +670,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (total/2) + ']*2',
+        rolls: `[${total/2}]*2`,
         total: total,
       });
     });
@@ -692,7 +692,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (total*2) + ']/2',
+        rolls: `[${total*2}]/2`,
         total: total,
       });
     });
@@ -715,7 +715,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']-L',
+        rolls: `[${roll.rolls[0].join(',')}]-L`,
         total: total,
       });
     });
@@ -738,7 +738,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']+L',
+        rolls: `[${roll.rolls[0].join(',')}]+L`,
         total: total,
       });
     });
@@ -761,7 +761,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']*L',
+        rolls: `[${roll.rolls[0].join(',')}]*L`,
         total: total,
       });
     });
@@ -784,7 +784,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']/L',
+        rolls: `[${roll.rolls[0].join(',')}]/L`,
         total: total,
       });
     });
@@ -807,7 +807,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']-H',
+        rolls: `[${roll.rolls[0].join(',')}]-H`,
         total: total,
       });
     });
@@ -830,7 +830,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']+H',
+        rolls: `[${roll.rolls[0].join(',')}]+H`,
         total: total,
       });
     });
@@ -853,7 +853,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']*H',
+        rolls: `[${roll.rolls[0].join(',')}]*H`,
         total: total,
       });
     });
@@ -876,7 +876,7 @@
       // check the output string
       expect(roll).toMatchParsedNotation({
         notation: notation,
-        rolls: '[' + (roll.rolls[0].join(',')) + ']/H',
+        rolls: `[${roll.rolls[0].join(',')}]/H`,
         total: total,
       });
     });
@@ -901,7 +901,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']-L',
+          rolls: `[${roll.rolls[0].join('!,')}]-L`,
           total: total,
         });
 
@@ -933,7 +933,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!,') + ']-H',
+          rolls: `[${roll.rolls[0].join('!,')}]-H`,
           total: total,
         });
 
@@ -966,7 +966,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-L',
+          rolls: `[${rollsTotal}${rollsTotal > 6 ? '!!' : ''}]-L`,
           total: total,
         });
 
@@ -999,7 +999,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-H',
+          rolls: `[${rollsTotal}${rollsTotal > 6 ? '!!' : ''}]-H`,
           total: total,
         });
 
@@ -1031,7 +1031,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!p,') + ']-L',
+          rolls: `[${roll.rolls[0].join('!p,')}]-L`,
           total: total,
         });
 
@@ -1063,7 +1063,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + roll.rolls[0].join('!p,') + ']-H',
+          rolls: `[${roll.rolls[0].join('!p,')}]-H`,
           total: total,
         });
 
@@ -1106,7 +1106,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1137,7 +1137,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1168,7 +1168,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1199,7 +1199,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1231,7 +1231,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']-H',
+          rolls: `[${rollNote}]-H`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1262,7 +1262,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']*2',
+          rolls: `[${rollNote}]*2`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1296,7 +1296,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']+[' + roll.rolls[1] + ']',
+          rolls: `[${rollNote}]+[${roll.rolls[1]}]`,
           total: total
         });
 
