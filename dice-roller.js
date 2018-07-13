@@ -71,18 +71,31 @@
      * @returns {DiceRoll}
      */
     this.roll     = notation => {
-      let diceRoll;
+      let diceRoll = new DiceRoll(notation);
 
-      // only continue if a notation was passed
-      if(notation){
-        diceRoll = new DiceRoll(notation);
-
-        // add the roll log to our global log
-        log.push(diceRoll);
-      }
+      // add the roll log to our global log
+      log.push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;
+    };
+
+    /**
+     * Rolls the given list of dice notations
+     * and returns a list of the DiceRolls
+     *
+     * @param {Array} notations
+     * @returns {Array}
+     */
+    this.rollMany = notations => {
+      if(!notations){
+        throw new Error('DiceRoller: No notations specified');
+      }else if(!Array.isArray(notations)){
+        throw new Error('DiceRoller: Notations are not valid');
+      }else{
+        // loop through and roll each notation, add it to the log and return it
+        return notations.map(notation => this.roll(notation));
+      }
     };
 
     /**
@@ -97,7 +110,7 @@
      *
      * @returns {Array}
      */
-    this.getLog   = () => {
+    this.getLog = () => {
       return log || [];
     };
 
@@ -265,7 +278,7 @@
           b = this.isNumeric(b) ? parseFloat(b) : 0;
 
           // only carry out operation if we have both values
-          switch (operator) {
+          switch(operator){
             case '*':
               // multiply the value
               a *= b;
@@ -642,18 +655,18 @@
         // validate object
         if(!notation.notation){
           // object doesn't contain a notation property
-          throw new Error('Object has no notation: ' + notation);
+          throw new Error('DiceRoll: Object has no notation: ' + notation);
         }else if(notation.rolls){
           // we have rolls - validate them
           if(!Array.isArray(notation.rolls)){
             // rolls is not an array
-            throw new Error('Rolls must be an Array: ' + notation.rolls);
+            throw new Error('DiceRoll: Rolls must be an Array: ' + notation.rolls);
           }else{
             // loop through each rolls, make sure they're valid
             notation.rolls.forEach((roll, i) => {
               if(!Array.isArray(roll) || roll.some(isNaN)){
                 // not all rolls are valid
-                throw new Error('Rolls are invalid at index [' + i + ']: ' + roll);
+                throw new Error('DiceRoll: Rolls are invalid at index [' + i + ']: ' + roll);
               }
             });
           }
@@ -666,7 +679,7 @@
 
         // parse the notation
         parsedDice = DiceRoller.parseNotation(this.notation);
-      }else{
+      }else if(typeof notation === 'string'){
         // store the notation
         this.notation = notation;
         // empty the current rolls
@@ -677,6 +690,8 @@
 
         // roll the dice
         this.roll();
+      }else{
+        throw new Error('DiceRoll: Notation is not valid');
       }
     };
 
@@ -817,7 +832,8 @@
           const rolls = this.rolls[index] || [],
                 hasComparePoint = item.comparePoint;
 
-          let currentRoll = 0; // current roll total - used for totalling compounding rolls
+          // current roll total - used for totalling compounding rolls
+          let currentRoll = 0;
 
           output += ((index > 0) ? item.operator : '') + '[';
 

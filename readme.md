@@ -193,8 +193,12 @@ roller.roll('4d20-L');
 // get the latest dice rolls from the log
 var latestRoll  = roller.getLog().shift();
 
-// output the latest roll - it has a toString method for nice output
+// output the latest roll - it has a toString method for nice output when converted to a string
 document.write(latestRoll);
+
+
+// roll several notations all at once, and store their DiceRoll objects
+var rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
 
 
 // roll a single notation without saving it to the log
@@ -260,9 +264,10 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `clearLog`         | `function()`                                  | Clears the roll history log.                                                                                                               |
 | `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                   |
-| `getLog`           | `function()`                                  | Returns the current roll log. Returns: `Array`                                                                                             |
-| `import`           | `function({mixed} data)`                      | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array`                                  |
+| `getLog`           | `function()`                                  | Returns the current roll log. Returns: `Array<DiceRoll>`                                                                                   |
+| `import`           | `function({mixed} data)`                      | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array<DiceRoll>`                        |
 | `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
+| `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
 | `toString`         | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
 
 

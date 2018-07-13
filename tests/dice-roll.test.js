@@ -1394,4 +1394,116 @@
       });
     });
   });
+
+  describe('invalid rolls', function(){
+    var diceRoller;
+
+    beforeEach(function(){
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('should throw an error calling `DiceRoller.roll()` with no notation defined', function(){
+      expect(function(){
+        diceRoller.roll();
+      }).toThrowError(/No notation specified/);
+
+      expect(function(){
+        diceRoller.roll(undefined);
+      }).toThrowError(/No notation specified/);
+
+      expect(function(){
+        diceRoller.roll(null);
+      }).toThrowError(/No notation specified/);
+
+      expect(function(){
+        diceRoller.roll(false);
+      }).toThrowError(/No notation specified/);
+    });
+
+    it('should throw error calling `DiceRoller.roll()` with number', function(){
+      expect(function(){
+        diceRoller.roll(1);
+      }).toThrowError(/Notation is not valid/);
+
+      expect(function(){
+        diceRoller.roll(0);
+      }).toThrowError(/No notation specified/);
+
+      expect(function(){
+        diceRoller.roll(100);
+      }).toThrowError(/Notation is not valid/);
+
+      expect(function(){
+        diceRoller.roll(-100);
+      }).toThrowError(/Notation is not valid/);
+
+      expect(function(){
+        diceRoller.roll(23.45);
+      }).toThrowError(/Notation is not valid/);
+    });
+
+    it('should throw error calling `DiceRoller.roll()` with array of rolls', function(){
+      expect(function(){
+        diceRoller.roll(['1d6', 'd10']);
+      }).toThrowError(/Object has no notation/);
+    });
+
+    it('should throw an error calling `DiceRoller.rollMany()` with no notation defined', function(){
+      expect(function(){
+        diceRoller.rollMany();
+      }).toThrowError(/No notations specified/);
+
+      expect(function(){
+        diceRoller.rollMany(undefined);
+      }).toThrowError(/No notations specified/);
+
+      expect(function(){
+        diceRoller.rollMany(null);
+      }).toThrowError(/No notations specified/);
+
+      expect(function(){
+        diceRoller.rollMany(false);
+      }).toThrowError(/No notations specified/);
+    });
+
+    it('should throw error calling `DiceRoller.rollMany()` without Array', function(){
+      expect(function(){
+        diceRoller.rollMany('1d6');
+      }).toThrowError(/Notations are not valid/);
+
+      expect(function(){
+        diceRoller.rollMany(1);
+      }).toThrowError(/Notations are not valid/);
+
+      expect(function(){
+        diceRoller.rollMany({foo: 'bar'});
+      }).toThrowError(/Notations are not valid/);
+
+      expect(function(){
+        diceRoller.rollMany(0);
+      }).toThrowError(/No notations specified/);
+    });
+  });
+
+  describe('multiple rolls', function(){
+    var diceRoller;
+
+    beforeEach(function(){
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('should roll multiple notations at the same time', function(){
+      diceRoller.rollMany(['1d6', 'd10']);
+
+      expect(diceRoller).toHaveLogLength(2);
+    });
+
+    it('should roll single notation in array if passed to `rollMultiple`', function(){
+      diceRoller.rollMany(['1d6']);
+
+      expect(diceRoller).toHaveLogLength(1);
+    });
+  });
 })();
