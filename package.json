@@ -23,11 +23,11 @@
     "d&d"
   ],
   "devDependencies": {
-    "grunt": "^1.0.3",
+    "grunt": "^1.0.1",
     "grunt-cli": "^1.2.0",
-    "grunt-contrib-jasmine": "^2.0.1",
+    "grunt-contrib-jasmine": "^1.0.3",
     "grunt-contrib-jshint": "^1.1.0",
-    "jshint": "^2.9.5"
+    "jshint": "^2.9.4"
   },
   "scripts": {
     "test": "grunt ci"
