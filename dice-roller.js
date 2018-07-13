@@ -73,18 +73,32 @@
      * @returns {DiceRoll}
      */
     this.roll     = function(notation){
-      var diceRoll;
+      var diceRoll = new DiceRoll(notation);
 
-      // only continue if a notation was passed
-      if(notation){
-        diceRoll = new DiceRoll(notation);
-
-        // add the roll log to our global log
-        log.push(diceRoll);
-      }
+      // add the roll log to our global log
+      log.push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;
+    };
+
+    /**
+     * Rolls the given list of dice notations
+     * and returns a list of the DiceRolls
+     *
+     * @param {Array} notations
+     * @returns {Array}
+     */
+    this.rollMany = function(notations){
+      if(!notations){
+        throw new Error('DiceRoller: No notations specified');
+      }else if(!Array.isArray(notations)){
+        throw new Error('DiceRoller: Notations are not valid');
+      }else{
+        return notations.map(function(notation){
+          lib.roll(notation);
+        });
+      }
     };
 
     /**
@@ -630,18 +644,18 @@
         // validate object
         if(!notation.notation){
           // object doesn't contain a notation property
-          throw new Error('Object has no notation: ' + notation);
+          throw new Error('DiceRoll: Object has no notation: ' + notation);
         }else if(notation.rolls){
           // we have rolls - validate them
           if(!Array.isArray(notation.rolls)){
             // rolls is not an array
-            throw new Error('Rolls must be an Array: ' + notation.rolls);
+            throw new Error('DiceRoll: Rolls must be an Array: ' + notation.rolls);
           }else{
             // loop through each rolls, make sure they're valid
             notation.rolls.forEach(function(roll, i){
               if(!Array.isArray(roll) || roll.some(isNaN)){
                 // not all rolls are valid
-                throw new Error('Rolls are invalid at index [' + i + ']: ' + roll);
+                throw new Error('DiceRoll: Rolls are invalid at index [' + i + ']: ' + roll);
               }
             });
           }
@@ -654,7 +668,7 @@
 
         // parse the notation
         parsedDice = DiceRoller.parseNotation(lib.notation);
-      }else{
+      }else if(typeof notation === 'string'){
         // store the notation
         lib.notation = notation;
         // empty the current rolls
@@ -665,6 +679,8 @@
 
         // roll the dice
         lib.roll();
+      }else{
+        throw new Error('DiceRoll: Notation is not valid');
       }
     };
 
