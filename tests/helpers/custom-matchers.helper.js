@@ -356,7 +356,7 @@ beforeEach(() => {
         compare(methodName, args, response){
           let result = {};
 
-          result.pass = DiceRoller.utils[methodName].apply(window, args) === response;
+          result.pass = DiceRoller.utils[methodName](...args) === response;
 
           if(result.pass){
             result.message = `Expected "${methodName}(${args.join(',')})" to NOT equal ${response}`;
@@ -388,10 +388,10 @@ beforeEach(() => {
       }
     },
     getMin(obj){
-      return Math.min.apply(this, obj);
+      return Math.min(...obj);
     },
     getMax(obj){
-      return Math.max.apply(this, obj);
+      return Math.max(...obj);
     },
     isJSON(obj){
       if(!obj){

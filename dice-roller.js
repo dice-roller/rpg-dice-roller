@@ -252,14 +252,14 @@
          * @param {Array} numbers
          * @returns {number}
          */
-        return numbers => {
-          return !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => {
-            return prev + (this.isNumeric(current) ? parseFloat(current) : 0);
-          }, 0);
-        };
+        return numbers => (
+          !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => (
+            prev + (this.isNumeric(current) ? parseFloat(current) : 0)
+          ), 0)
+        );
       },
       /**
-       * @returns {function(number, number, string): number}
+       * @returns {function(number, number, string=): number}
        */
       get equateNumbers(){
         /**
@@ -269,10 +269,10 @@
          *
          * @param {number} a
          * @param {number} b
-         * @param {string} operator A valid arithmetic operator (+, -, /, *)
+         * @param {string=} operator A valid arithmetic operator (+, -, /, *)
          * @returns {number}
          */
-        return (a, b, operator) => {
+        return (a, b, operator = '+') => {
           // ensure values are numeric
           a = this.isNumeric(a) ? parseFloat(a) : 0;
           b = this.isNumeric(b) ? parseFloat(b) : 0;
@@ -787,7 +787,7 @@
           }while(die.explode && isComparePoint(die.comparePoint, roll));
 
           // add the rolls
-          dieRolls.push.apply(dieRolls, reRolls);
+          dieRolls.push(...reRolls);
         }
       }
 
@@ -952,12 +952,12 @@
               // run any necessary addition value modifications
               if(value === 'H'){
                 // 'H' is equivalent to the highest roll
-                value = Math.max.apply(null, rollsValues);
+                value = Math.max(...rollsValues);
                 // flag that this value needs to eb modified to a success/failure value
                 isPoolModifier = true;
               }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
-                value = Math.min.apply(null, rollsValues);
+                value = Math.min(...rollsValues);
                 // flag that this value needs to eb modified to a success/failure value
                 isPoolModifier = true;
               }

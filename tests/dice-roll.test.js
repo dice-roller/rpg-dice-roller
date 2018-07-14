@@ -1217,7 +1217,7 @@
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
               rollNote = roll.rolls[0].map(num => num + (num >= 5 ? '*' : '')).join(',');
-        let hSuccessVal = Math.max.apply(window, roll.rolls[0]) >= 5 ? 1 : 0;
+        let hSuccessVal = Math.max(...roll.rolls[0]) >= 5 ? 1 : 0;
 
         expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length - hSuccessVal;
 
