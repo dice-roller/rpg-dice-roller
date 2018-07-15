@@ -48,7 +48,7 @@
 
       // check the rolls list is correct
       expect(exported).toHaveRolls({rolls: [2]});
-      expect(exported.rolls).toArraySumEqualTo(diceRoll.getTotal()-2);
+      expect(exported.rolls).toArraySumEqualTo(diceRoll.total-2);
     });
 
     it('should throw error for invalid export formats', () => {
@@ -191,7 +191,7 @@
         );
 
         // check value is within allowed range
-        expect(imported.getTotal()).toEqual(total);
+        expect(imported.total).toEqual(total);
 
         // check the rolls list is correct
         expect(imported).toHaveRolls({rolls: [rollVals.length]});
@@ -224,7 +224,7 @@
         expect(imported).toEqual(jasmine.any(DiceRoll));
 
         // check value is within allowed range
-        expect(imported.getTotal()).toEqual(total);
+        expect(imported.total).toEqual(total);
 
         // check the rolls list is correct
         expect(imported).toHaveRolls({rolls: [rollVals.length]});
@@ -256,7 +256,7 @@
         );
 
         // check value is within allowed range
-        expect(imported.getTotal()).toEqual(total);
+        expect(imported.total).toEqual(total);
 
         // check the rolls list is correct
         expect(imported).toHaveRolls({rolls: [rollVals.length]});
@@ -284,7 +284,7 @@
       expect(imported).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
-      expect(imported.getTotal()).toEqual(0);
+      expect(imported.total).toEqual(0);
 
       // check the rolls list is correct
       expect(imported.rolls.length).toEqual(0);
@@ -357,7 +357,7 @@
 
       // loop through each imported dice roll and validate it
       importedRolls.forEach(diceRoll => {
-        const total = diceRoll.getTotal();
+        const total = diceRoll.total;
 
         // check if response is a DiceRoll object
         expect(diceRoll).toEqual(jasmine.any(DiceRoll));

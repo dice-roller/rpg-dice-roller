@@ -125,7 +125,7 @@
     it('should compute multiple dice rolls for `1d6+2d10`', () => {
       const notation = '1d6+2d10',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -151,7 +151,7 @@
     it('should compute multiple dice rolls for `3d6*2d10-L`', () => {
       const notation = '3d6*2d10-L',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -177,7 +177,7 @@
     it('should compute multiple dice rolls for `4d6/2d3`', () => {
       const notation = '4d6/2d3',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -216,7 +216,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -251,7 +251,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -284,7 +284,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++) {
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -319,7 +319,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -352,7 +352,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -380,7 +380,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -422,7 +422,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -464,7 +464,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -506,7 +506,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -539,7 +539,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -573,7 +573,7 @@
       // loop this roll for consistency
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -612,7 +612,7 @@
     it('should return between 3 and 8 for `1d6+2`', () => {
       const notation = '1d6+2',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -634,7 +634,7 @@
     it('should return between -1 and 2 for `1d4-2`', () => {
       const notation = '1d4-2',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -656,7 +656,7 @@
     it('should return between 2 and 20 for `1d10*2`', () => {
       const notation = '1d10*2',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -678,7 +678,7 @@
     it('should return between 0.5 and 4 for `1d8/2`', () => {
       const notation = '1d8/2',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -700,7 +700,7 @@
     it('should subtract the LOWEST roll for `4d6-L', () => {
       const notation = '4d6-L',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -723,7 +723,7 @@
     it('should add the LOWEST roll for `4d6+L', () => {
       const notation = '4d6+L',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -746,7 +746,7 @@
     it('should multiply by the LOWEST roll for `4d6*L', () => {
       const notation = '4d6*L',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -769,7 +769,7 @@
     it('should divide by the LOWEST roll for `4d6/L', () => {
       const notation = '4d6/L',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -792,7 +792,7 @@
     it('should subtract the HIGHEST roll for `4d6-H', () => {
       const notation = '4d6-H',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -815,7 +815,7 @@
     it('should add the HIGHEST roll for `4d6+H', () => {
       const notation = '4d6+H',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -838,7 +838,7 @@
     it('should multiply by the HIGHEST roll for `4d6*H', () => {
       const notation = '4d6*H',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -861,7 +861,7 @@
     it('should divide by the HIGHEST roll for `4d6/H', () => {
       const notation = '4d6/H',
             roll = diceRoller.roll(notation),
-            total = roll.getTotal();
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -888,7 +888,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -920,7 +920,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -952,7 +952,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal(),
+              total = roll.total,
               rollsTotal = utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
@@ -985,7 +985,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal(),
+              total = roll.total,
               rollsTotal = utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
@@ -1018,7 +1018,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1050,7 +1050,7 @@
       // loop this roll for consistency (We need it to have exploded at least once)
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
-              total = roll.getTotal();
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 

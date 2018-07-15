@@ -106,7 +106,7 @@ beforeEach(() => {
     toHaveSuccesses(util, customEqualityTesters){
       return {
         compare(actual, expected){
-          const successCount = actual.getSuccesses();
+          const successCount = actual.successes;
           let result = {
                 pass: true,
                 message: `Expected "${actual}" Not to have ${(expected ? expected + ' ' : '')}success${(!expected || (expected > 1) ? 'es' : '')}`,
@@ -268,7 +268,7 @@ beforeEach(() => {
       return {
         compare(actual, expected){
           const roll = actual,
-                total = roll.getTotal();
+                total = roll.total;
           let result = {
                 pass: true,
                 message: `Expected "${actual}" to NOT be a Dice Roll`,

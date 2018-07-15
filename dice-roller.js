@@ -26,12 +26,12 @@
   "use strict";
 
   const DiceRoller = (() => {
-    /*
+    /**
      * history of log rolls
      *
-     * @type {Array}
+     * @type {symbol}
      */
-    const log = Symbol('log');
+    const _log = Symbol('log');
 
     /**
      * A DiceRoller handles dice rolling functionality,
@@ -47,13 +47,13 @@
        * @param data
        */
       constructor(data){
-        this[log] = [];
+        this[_log] = [];
 
         if(data){
           if(Array.isArray(data.log)){
             // loop through each log entry and import it
             data.log.forEach(roll => {
-              this[log].push(DiceRoll.import(roll));
+              this[_log].push(DiceRoll.import(roll));
             });
           }else if(data.log){
             throw new Error('DiceRoller: Roll log must be an Array');
@@ -93,7 +93,7 @@
         let diceRoll = new DiceRoll(notation);
 
         // add the roll log to our global log
-        this[log].push(diceRoll);
+        this[_log].push(diceRoll);
 
         // return the current DiceRoll
         return diceRoll;
@@ -121,7 +121,7 @@
        * Clears the roll history log
        */
       clearLog(){
-        this[log].length = 0;
+        this[_log].length = 0;
       }
 
       /**
@@ -130,7 +130,7 @@
        * @returns {Array}
        */
       get log(){
-        return this[log] || [];
+        return this[_log] || [];
       }
 
       /**
@@ -157,7 +157,7 @@
             // JSON encode, then base64
             return btoa(this.export(DiceRoller.exportFormats.JSON));
           case DiceRoller.exportFormats.JSON:
-            return JSON.stringify(this.log);
+            return JSON.stringify(this);
           default:
             throw new Error('DiceRoller: Unrecognised export format specified: ' + format);
         }
@@ -191,7 +191,7 @@
           if(data.log && Array.isArray(data.log)){
             // loop through each log entry and import it
             data.log.forEach(roll => {
-              this[log].push(DiceRoll.import(roll));
+              this[_log].push(DiceRoll.import(roll));
             });
           }else if(data.log){
             throw new Error('DiceRoller: Roll log must be an Array');
@@ -211,6 +211,19 @@
        */
       toString(){
         return this.notation;
+      }
+
+      /**
+       * Returns an object for JSON serialising
+       *
+       * @returns {{}}
+       */
+      toJSON(){
+        const {log,} = this;
+
+        return {
+          log,
+        };
       }
 
 
@@ -588,36 +601,45 @@
   })();
 
 
-
-  /**
-   * A DiceRoll object, which takes a notation
-   * and parses it in to rolls
-   *
-   * @param {string|Object} notation  The dice notation or object
-   * @constructor
-   */
-  const DiceRoll = function(notation){
+  const DiceRoll = (() => {
     /**
-     * The count of success rolls
+     * The dice notation
      *
-     * @type {number}
+     * @type {symbol}
      */
-    let successes = 0;
-
-    /**
-     * The roll total
-     *
-     * @type {number}
-     */
-    let total = 0;
+    const _notation = Symbol('notation');
 
     /**
      * The parsed notation array
      *
-     * @type {Array}
+     * @type {symbol}
      */
-    let parsedDice = [];
+    const _parsedDice = Symbol('parsedDice');
 
+    const _resetTotals = Symbol('resetTotals');
+
+    const _rolls = Symbol('rolls');
+
+    /**
+     * The count of success rolls
+     *
+     * @type {symbol}
+     */
+    const _successes = Symbol('successes');
+
+    /**
+     * The roll total
+     *
+     * @type {symbol}
+     */
+    const _total = Symbol('totals');
+
+
+    /**
+     * List of callbacks used for rolling dice types
+     *
+     * @type {{default(*=): *, fudge(number): number}}
+     */
     const diceRollMethods = {
       /**
        * Rolls a standard die
@@ -655,79 +677,6 @@
       }
     };
 
-
-    /**
-     * The dice notation
-     *
-     * @type {string}
-     */
-    this.notation = '';
-
-    /**
-     * Rolls for the notation
-     *
-     * @type {Array}
-     */
-    this.rolls = [];
-
-
-    /**
-     * Parses the notation and rolls the dice
-     *
-     * @param notation
-     */
-    const init = notation => {
-      if(!notation){
-        throw new Error('DiceRoll: No notation specified');
-      }
-
-      // zero the current total
-      resetTotals();
-
-      if(notation instanceof Object){
-        // validate object
-        if(!notation.notation){
-          // object doesn't contain a notation property
-          throw new Error('DiceRoll: Object has no notation: ' + notation);
-        }else if(notation.rolls){
-          // we have rolls - validate them
-          if(!Array.isArray(notation.rolls)){
-            // rolls is not an array
-            throw new Error('DiceRoll: Rolls must be an Array: ' + notation.rolls);
-          }else{
-            // loop through each rolls, make sure they're valid
-            notation.rolls.forEach((roll, i) => {
-              if(!Array.isArray(roll) || roll.some(isNaN)){
-                // not all rolls are valid
-                throw new Error('DiceRoll: Rolls are invalid at index [' + i + ']: ' + roll);
-              }
-            });
-          }
-        }
-
-        // store the notation
-        this.notation = notation.notation;
-        // store the rolls
-        this.rolls = notation.rolls || [];
-
-        // parse the notation
-        parsedDice = DiceRoller.parseNotation(this.notation);
-      }else if(typeof notation === 'string'){
-        // store the notation
-        this.notation = notation;
-        // empty the current rolls
-        this.rolls = [];
-
-        // parse the notation
-        parsedDice = DiceRoller.parseNotation(this.notation);
-
-        // roll the dice
-        this.roll();
-      }else{
-        throw new Error('DiceRoll: Notation is not valid');
-      }
-    };
-
     /**
      * Checks whether value matches the given compare point
      *
@@ -753,14 +702,6 @@
     };
 
     /**
-     * Resets the current total and success count
-     */
-    const resetTotals = () => {
-      total = 0;
-      successes = 0;
-    };
-
-    /**
      * Rolls a single die for its quantity
      * and returns an array of the results
      *
@@ -770,8 +711,8 @@
     const rollDie = die => {
       const dieRolls = []; // list of roll results for the die
 
-      let sides = die.sides,                    // number of sides the die has - convert percentile to 100 sides
-          callback  = diceRollMethods.default;  // callback method for rolling the die
+      let sides = die.sides,                  // number of sides the die has - convert percentile to 100 sides
+          callback = diceRollMethods.default; // callback method for rolling the die
 
       // ensure that the roll quantity is valid
       die.qty = (die.qty > 0) ? die.qty : 1;
@@ -827,262 +768,405 @@
       return dieRolls;
     };
 
-    /**
-     * Rolls the dice for the existing notation
-     *
-     * @returns {Array}
-     */
-    this.roll = () => {
-      // clear the roll log
-      this.rolls = [];
-
-      // reset the cached total
-      resetTotals();
-
-      // loop through each die and roll it
-      parsedDice.forEach(elm => {
-        // Roll the dice and add it to the log
-        this.rolls.push(rollDie(elm));
-      });
-
-      // return the rolls;
-      return this.rolls;
-    };
-
 
     /**
-     * Returns the roll notation in the format of:
-     * 2d20+1d6: [20,2]+[2] = 24
+     * A DiceRoll object, which takes a notation
+     * and parses it in to rolls
      *
-     * @returns {string}
+     * @param {string|Object} notation  The dice notation or object
      */
-    this.getNotation = () => {
-      let output  = this.notation + ': ';
+    class DiceRoll{
+      /**
+       * Parses the notation and rolls the dice
+       *
+       * @param notation
+       */
+      constructor(notation){
+        if(!notation){
+          throw new Error('DiceRoll: No notation specified');
+        }
 
-      if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
-        // loop through and build the string for die rolled
-        parsedDice.forEach((item, index) => {
-          const rolls = this.rolls[index] || [],
-                hasComparePoint = item.comparePoint;
+        // zero the current total
+        this[_resetTotals]();
 
-          // current roll total - used for totalling compounding rolls
-          let currentRoll = 0;
+        // initialise the parsed dice array
+        this[_parsedDice] = [];
 
-          output += ((index > 0) ? item.operator : '') + '[';
-
-          // output the rolls
-          rolls.forEach((roll, rIndex, array) => {
-            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-            const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
-                  hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
-
-            let delimit = rIndex !== array.length-1;
-
-            if(item.explode && hasMatchedCP){
-              // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-
-              // add the current roll to the roll total
-              currentRoll += roll;
-
-              if(item.compound){
-                  // do NOT add the delimiter after this roll as we're not outputting it
-                  delimit = false;
-              }else{
-                // not compounding
-                output += roll + '!' + (item.penetrate ? 'p' : '');
-              }
-            }else if(hasMatchedCP){
-              // not exploding but we've matched a compare point - this is a pool dice (success or failure)
-              output += roll + '*';
-            }else if(item.compound && currentRoll) {
-              // last roll in a compounding set (This one didn't compound)
-              output += (roll + currentRoll) + '!!' + (item.penetrate ? 'p' : '');
-
-              // reset current roll total
-              currentRoll = 0;
+        if(notation instanceof Object){
+          // validate object
+          if(!notation.notation){
+            // object doesn't contain a notation property
+            throw new Error('DiceRoll: Object has no notation: ' + notation);
+          }else if(notation.rolls){
+            // we have rolls - validate them
+            if(!Array.isArray(notation.rolls)){
+              // rolls is not an array
+              throw new Error('DiceRoll: Rolls must be an Array: ' + notation.rolls);
             }else{
-              // just a normal roll
-              output += roll;
-
-              // reset current roll total
-              currentRoll = 0;
+              // loop through each rolls, make sure they're valid
+              notation.rolls.forEach((roll, i) => {
+                if(!Array.isArray(roll) || roll.some(isNaN)){
+                  // not all rolls are valid
+                  throw new Error('DiceRoll: Rolls are invalid at index [' + i + ']: ' + roll);
+                }
+              });
             }
+          }
 
-            if(delimit){
-              output += ',';
+          // store the notation
+          this[_notation] = notation.notation;
+          // store the rolls
+          this[_rolls] = notation.rolls || [];
+
+          // parse the notation
+          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+        }else if(typeof notation === 'string'){
+          // store the notation
+          this[_notation] = notation;
+          // empty the current rolls
+          this[_rolls] = [];
+
+          // parse the notation
+          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+
+          // roll the dice
+          this.roll();
+        }else{
+          throw new Error('DiceRoll: Notation is not valid');
+        }
+      }
+
+
+      /** Private methods **/
+
+      /**
+       * Resets the current total and success count
+       *
+       * @private
+       */
+      [_resetTotals](){
+        this[_total] = 0;
+        this[_successes] = 0;
+      }
+
+
+      /** Public methods **/
+
+      /**
+       * Rolls the dice for the existing notation.
+       * This is useful if you want to re-roll the dice,
+       * for some reason, but it's usually better to
+       * create a new DiceRoll instance instead.
+       *
+       * @returns {Array}
+       */
+      roll(){
+        // clear the roll log
+        this[_rolls] = [];
+
+        // reset the cached total
+        this[_resetTotals]();
+
+        // loop through each die and roll it
+        this[_parsedDice].forEach(elm => {
+          // Roll the dice and add it to the log
+          this[_rolls].push(rollDie(elm));
+        });
+
+        // return the rolls;
+        return this[_rolls];
+      }
+
+      /**
+       * Returns the roll notation in the format of:
+       * 2d20+1d6: [20,2]+[2] = 24
+       *
+       * @returns {string}
+       */
+      getNotation(){
+        let output  = this.notation + ': ';
+
+        if(this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
+          // loop through and build the string for die rolled
+          this[_parsedDice].forEach((item, index) => {
+            const rolls = this.rolls[index] || [],
+                  hasComparePoint = item.comparePoint;
+
+            // current roll total - used for totalling compounding rolls
+            let currentRoll = 0;
+
+            output += ((index > 0) ? item.operator : '') + '[';
+
+            // output the rolls
+            rolls.forEach((roll, rIndex, array) => {
+              // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+              const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
+                    hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
+
+              let delimit = rIndex !== array.length-1;
+
+              if(item.explode && hasMatchedCP){
+                // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
+
+                // add the current roll to the roll total
+                currentRoll += roll;
+
+                if(item.compound){
+                    // do NOT add the delimiter after this roll as we're not outputting it
+                    delimit = false;
+                }else{
+                  // not compounding
+                  output += roll + '!' + (item.penetrate ? 'p' : '');
+                }
+              }else if(hasMatchedCP){
+                // not exploding but we've matched a compare point - this is a pool dice (success or failure)
+                output += roll + '*';
+              }else if(item.compound && currentRoll) {
+                // last roll in a compounding set (This one didn't compound)
+                output += (roll + currentRoll) + '!!' + (item.penetrate ? 'p' : '');
+
+                // reset current roll total
+                currentRoll = 0;
+              }else{
+                // just a normal roll
+                output += roll;
+
+                // reset current roll total
+                currentRoll = 0;
+              }
+
+              if(delimit){
+                output += ',';
+              }
+            });
+
+            output += ']';
+
+            // add any additions
+            if(item.additions.length){
+              output += item.additions.reduce((prev, current) => (
+                prev + current.operator + current.value
+              ), '');
             }
           });
 
-          output += ']';
+          // add the total
+          output += ' = ' + this.total;
+        }else{
+          output += 'No dice rolled';
+        }
 
-          // add any additions
-          if(item.additions.length){
-            output += item.additions.reduce((prev, current) => (
-              prev + current.operator + current.value
-            ), '');
+        return output;
+      }
+
+      /**
+       * The dice notation
+       *
+       * @returns {string}
+       */
+      get notation(){
+        return this[_notation] || '';
+      }
+
+      /**
+       * Rolls for the notation
+       *
+       * @returns {Array}
+       */
+      get rolls(){
+        return this[_rolls] || [];
+      }
+
+      /**
+       * Returns the count of successes for the roll
+       *
+       * @returns {number}
+       */
+      get successes(){
+        if(!this[_successes]){
+          // no successes found - calculate the totals, which also calculates the successes
+          // calling the `total` property calculates the total
+          let total = this.total;
+        }
+
+        return this[_successes] || 0;
+      }
+
+      /**
+       * Use `this.successes` property instead
+       *
+       * @deprecated
+       * @returns {number}
+       */
+      getSuccesses(){
+        return this.successes;
+      }
+
+      /**
+       * Returns the roll total
+       *
+       * @returns {number}
+       */
+      get total(){
+        // only calculate the total if it has not already been done
+        if(!this[_total] && this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
+          // reset the success count
+          this[_successes] = 0;
+
+          // loop through each roll and calculate the totals
+          this[_parsedDice].forEach((item, index) => {
+            let rolls = this.rolls[index] || [],
+                dieTotal = 0;
+
+            // actual values of the rolls for the purposes of L/H modifiers
+            const rollsValues = item.compound ? [rolls.reduce((a, b) => a + b, 0)] : rolls,
+                  isPool = !item.explode && item.comparePoint;
+
+            if(isPool){
+              // pool dice are success/failure so we don't want the actual dice roll
+              // we need to convert each roll to 1 (success) or 0 (failure)
+              rolls = rolls.map(value => getSuccessStateValue(value, item.comparePoint));
+            }
+
+            // add all the rolls together to get the total
+            dieTotal = DiceRoller.utils.sumArray(rolls);
+
+
+            if(item.additions.length){
+              // loop through the additions and handle them
+              item.additions.forEach(aItem => {
+                let value = aItem.value,
+                    isPoolModifier = false;
+
+                // run any necessary addition value modifications
+                if(value === 'H'){
+                  // 'H' is equivalent to the highest roll
+                  value = Math.max(...rollsValues);
+                  // flag that this value needs to eb modified to a success/failure value
+                  isPoolModifier = true;
+                }else if(value === 'L'){
+                  // 'L' is equivalent to the lowest roll
+                  value = Math.min(...rollsValues);
+                  // flag that this value needs to eb modified to a success/failure value
+                  isPoolModifier = true;
+                }
+
+                if(isPool && isPoolModifier){
+                  // pool dice are either success or failure, so value is converted to 1 or 0
+                  value = getSuccessStateValue(value, item.comparePoint);
+                }
+
+                // run the actual mathematical equation
+                dieTotal = DiceRoller.utils.equateNumbers(dieTotal, value, aItem.operator);
+              });
+            }
+
+            // total the value
+            this[_total] = DiceRoller.utils.equateNumbers(this[_total], dieTotal, item.operator);
+
+            // if this is a pool dice, add it's success count to the count
+            if(isPool) {
+              this[_successes] = DiceRoller.utils.equateNumbers(this[_successes], dieTotal, item.operator);
+            }
+          });
+        }
+
+        // return the total
+        return this[_total] || 0;
+      }
+
+      /**
+       * Use `this.total` property instead
+       *
+       * @deprecated
+       * @returns {number}
+       */
+      getTotal(){
+        return this.total;
+      }
+
+      /**
+       * Exports the DiceRoll in the given format.
+       * If no format is specified, JSON is returned.
+       *
+       * @throws Error
+       * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+       * @returns {string|null}
+       */
+      export(format = DiceRoller.exportFormats.JSON){
+        switch(format){
+          case DiceRoller.exportFormats.BASE_64:
+            // JSON encode, then base64, otherwise it exports the string representation of the roll output
+            return btoa(this.export(DiceRoller.exportFormats.JSON));
+          case DiceRoller.exportFormats.JSON:
+            return JSON.stringify(this);
+          case DiceRoller.exportFormats.OBJECT:
+            return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
+          default:
+            throw new Error('DiceRoll: Unrecognised export format specified: ' + format);
+        }
+      }
+
+      /**
+       * Returns the String representation
+       * of the object as the roll notation
+       *
+       * @returns {string}
+       */
+      toString(){
+        return this.getNotation();
+      }
+
+      /**
+       * Returns an object for JSON serialising
+       *
+       * @returns {{}}
+       */
+      toJSON(){
+        const {notation, rolls,} = this;
+
+        return {
+          notation,
+          rolls,
+        };
+      }
+
+
+      /**
+       * Imports the given dice roll data and builds a `DiceRoll` object
+       * from it.
+       *
+       * Throws Error on failure
+       *
+       * @throws Error
+       * @param {*} data The data to import
+       * @returns {DiceRoll}
+       */
+      static import(data){
+        if(!data){
+          throw new Error('DiceRoll: No data to import');
+        }else if(DiceRoller.utils.isJson(data)){
+          // data is JSON format - parse and import
+          return DiceRoll.import(JSON.parse(data));
+        }else if(DiceRoller.utils.isBase64(data)) {
+          // data is base64 encoded - decode and import
+          return DiceRoll.import(atob(data));
+        }else if(typeof data === 'object'){
+          if(data.constructor.name === 'DiceRoll'){
+            // already a DiceRoll object
+            return data;
+          }else{
+            return new DiceRoll(data);
           }
-        });
-
-        // add the total
-        output += ' = ' + this.getTotal();
-      }else{
-        output += 'No dice rolled';
+        }else{
+          throw new Error('DiceRoll: Unrecognised import format for data: ' + data);
+        }
       }
-
-      return output;
-    };
-
-    /**
-     * Returns the count of successes for the roll
-     *
-     * @returns {number}
-     */
-    this.getSuccesses = () => {
-      if(!successes){
-        // no successes found - calculate the totals, which also calculates the successes
-        this.getTotal();
-      }
-
-      return successes || 0;
-    };
-
-    /**
-     * Returns the roll total
-     *
-     * @returns {number}
-     */
-    this.getTotal = () => {
-      // only calculate the total if it has not already been done
-      if(!total && parsedDice && Array.isArray(this.rolls) && this.rolls.length){
-        // reset the success count
-        successes = 0;
-
-        // loop through each roll and calculate the totals
-        parsedDice.forEach((item, index) => {
-          let rolls = this.rolls[index] || [],
-              dieTotal = 0;
-
-          // actual values of the rolls for the purposes of L/H modifiers
-          const rollsValues = item.compound ? [rolls.reduce((a, b) => a + b, 0)] : rolls,
-                isPool = !item.explode && item.comparePoint;
-
-          if(isPool){
-            // pool dice are success/failure so we don't want the actual dice roll
-            // we need to convert each roll to 1 (success) or 0 (failure)
-            rolls = rolls.map(value => getSuccessStateValue(value, item.comparePoint));
-          }
-
-          // add all the rolls together to get the total
-          dieTotal = DiceRoller.utils.sumArray(rolls);
-
-
-          if(item.additions.length){
-            // loop through the additions and handle them
-            item.additions.forEach(aItem => {
-              let value = aItem.value,
-                  isPoolModifier = false;
-
-              // run any necessary addition value modifications
-              if(value === 'H'){
-                // 'H' is equivalent to the highest roll
-                value = Math.max(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
-                isPoolModifier = true;
-              }else if(value === 'L'){
-                // 'L' is equivalent to the lowest roll
-                value = Math.min(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
-                isPoolModifier = true;
-              }
-
-              if(isPool && isPoolModifier){
-                // pool dice are either success or failure, so value is converted to 1 or 0
-                value = getSuccessStateValue(value, item.comparePoint);
-              }
-
-              // run the actual mathematical equation
-              dieTotal = DiceRoller.utils.equateNumbers(dieTotal, value, aItem.operator);
-            });
-          }
-
-          // total the value
-          total = DiceRoller.utils.equateNumbers(total, dieTotal, item.operator);
-
-          // if this is a pool dice, add it's success count to the count
-          if(isPool) {
-            successes = DiceRoller.utils.equateNumbers(successes, dieTotal, item.operator);
-          }
-        });
-      }
-
-      // return the total
-      return total || 0;
-    };
-
-    /**
-     * Exports the DiceRoll in the given format.
-     * If no format is specified, JSON is returned.
-     *
-     * @throws Error
-     * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
-     * @returns {string|null}
-     */
-    this.export = format => {
-      switch(format || DiceRoller.exportFormats.JSON){
-        case DiceRoller.exportFormats.BASE_64:
-          // JSON encode, then base64, otherwise it exports the string representation of the roll output
-          return btoa(this.export(DiceRoller.exportFormats.JSON));
-        case DiceRoller.exportFormats.JSON:
-          return JSON.stringify(this);
-        case DiceRoller.exportFormats.OBJECT:
-          return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
-        default:
-          throw new Error('DiceRoll: Unrecognised export format specified: ' + format);
-      }
-    };
-
-    /**
-     * Returns the String representation
-     * of the object as the roll notation
-     *
-     * @returns {string}
-     */
-    this.toString = this.getNotation;
-
-    // initialise the object
-    init(notation);
-  };
-
-  /**
-   * Imports the given dice roll data and builds a `DiceRoll` object
-   * from it.
-   *
-   * Throws Error on failure
-   *
-   * @throws Error
-   * @param {*} data The data to import
-   * @returns {DiceRoll}
-   */
-  DiceRoll.import = data => {
-    if(!data){
-      throw new Error('DiceRoll: No data to import');
-    }else if(DiceRoller.utils.isJson(data)){
-      // data is JSON format - parse and import
-      return DiceRoll.import(JSON.parse(data));
-    }else if(DiceRoller.utils.isBase64(data)) {
-      // data is base64 encoded - decode and import
-      return DiceRoll.import(atob(data));
-    }else if(typeof data === 'object'){
-      if(data.constructor.name === 'DiceRoll'){
-        // already a DiceRoll object
-        return data;
-      }else{
-        return new DiceRoll(data);
-      }
-    }else{
-      throw new Error('DiceRoll: Unrecognised import format for data: ' + data);
     }
-  };
+
+    return DiceRoll;
+  })();
+
 
   exports.DiceRoller = DiceRoller;
   exports.DiceRoll = DiceRoll;
