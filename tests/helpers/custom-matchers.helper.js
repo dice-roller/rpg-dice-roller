@@ -238,7 +238,7 @@ beforeEach(() => {
     toHaveLogLength(util, customEqualityTesters){
       return {
         compare(actual, expected){
-          const logLength = actual.getLog().length;
+          const logLength = actual.log.length;
           let result = {};
 
           if (typeof expected !== 'number') {

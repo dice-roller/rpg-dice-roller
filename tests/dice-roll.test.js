@@ -1359,7 +1359,7 @@
 
     it('should be no dice rolled', () => {
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getNotation()).toEqual('');
+      expect(diceRoller.notation).toEqual('');
     });
 
     it('should have 1 dice rolled', () => {
@@ -1373,7 +1373,7 @@
       diceRoller.clearLog();
 
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getNotation()).toEqual('');
+      expect(diceRoller.notation).toEqual('');
     });
 
     it('should have 2 dice rolled', () => {
@@ -1389,7 +1389,7 @@
       diceRoller.roll('dF');
 
       // loop through and check that each item in the log is actually a DiceRoll
-      diceRoller.getLog().forEach(roll => {
+      diceRoller.log.forEach(roll => {
         expect(roll).toEqual(jasmine.any(DiceRoll));
       });
     });

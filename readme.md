@@ -191,7 +191,7 @@ var roller  = new DiceRoller();
 roller.roll('4d20-L');
 
 // get the latest dice rolls from the log
-var latestRoll  = roller.getLog().shift();
+var latestRoll  = roller.log.shift();
 
 // output the latest roll - it has a toString method for nice output when converted to a string
 document.write(latestRoll);
@@ -236,7 +236,7 @@ var diceRoller  = new dr.DiceRoller();
 diceRoller.roll('4d20-L');
 
 // get the latest dice rolls from the log
-var latestRoll = diceRoller.getLog().shift();
+var latestRoll = diceRoller.log.shift();
 
 // output the latest roll - it has a toString method for nice output
 console.log(latestRoll.toString());
@@ -264,11 +264,12 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `clearLog`         | `function()`                                  | Clears the roll history log.                                                                                                               |
 | `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                   |
-| `getLog`           | `function()`                                  | Returns the current roll log. Returns: `Array<DiceRoll>`                                                                                   |
 | `import`           | `function({mixed} data)`                      | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array<DiceRoll>`                        |
+| `log`              | `Array<DiceRoll>`                             | A list of the current roll log.                                                                                                            |
+| `notation`         | `String`                                      | String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`.                                          |
 | `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
 | `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
-| `toString`         | `function()`                                  | Returns the String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`. Returns `String`             |
+| `toString`         | `function()`                                  | Returns the `notation` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                            |
 
 
 ##### Static properties
@@ -283,7 +284,7 @@ var diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance w
 | ------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `exportFormats`    | `Object`                      | List of available export / import formats                                                                                                            |
 | `import`           | `function({mixed} data)`      | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
-| `notationPatterns` | `object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                                 |
+| `notationPatterns` | `Object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation                                 |
 | `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object`           |
 | `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                                    |
 
