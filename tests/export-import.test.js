@@ -501,7 +501,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import full data from Base64', () => {
@@ -511,7 +511,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import from Object', () => {
@@ -521,7 +521,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import from Object with DiceRolls', () => {
@@ -534,7 +534,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     describe('empty rolls', () => {
@@ -545,7 +545,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.notation).toEqual('');
+        expect(imported.getOutput()).toEqual('');
       });
 
       it('should import with falsey rolls', () => {
@@ -555,7 +555,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.notation).toEqual('');
+        expect(imported.getOutput()).toEqual('');
       });
     });
 
@@ -566,7 +566,7 @@
 
       expect(imported).toHaveLogLength(0);
 
-      expect(imported.notation).toEqual('');
+      expect(imported.getOutput()).toEqual('');
     });
 
     it('should throw error if no import data', () => {
@@ -688,7 +688,7 @@
         expect(imported).toHaveLogLength(crntLogLength);
 
         // compare the notation
-        expect(imported.notation).toEqual(crntNotation);
+        expect(imported.getOutput()).toEqual(crntNotation);
       });
     });
 
@@ -699,7 +699,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import an exported log', () => {
@@ -712,7 +712,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.notation).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
   });
 })();

@@ -62,12 +62,12 @@
       }
 
       /**
-       * Returns the roll notation in the format of:
+       * Returns the roll notation and rolls in the format of:
        * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
        *
        * @returns {string}
        */
-      get notation(){
+      get output(){
         // return the log as a joined string
         return this.log.join('; ');
       }
@@ -210,7 +210,7 @@
        * @returns {string}
        */
       toString(){
-        return this.notation;
+        return this.output;
       }
 
       /**
@@ -878,12 +878,12 @@
       }
 
       /**
-       * Returns the roll notation in the format of:
+       * Returns the roll notation and rolls in the format of:
        * 2d20+1d6: [20,2]+[2] = 24
        *
        * @returns {string}
        */
-      getNotation(){
+      get output(){
         let output  = this.notation + ': ';
 
         if(this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
@@ -1114,7 +1114,7 @@
        * @returns {string}
        */
       toString(){
-        return this.getNotation();
+        return this.output;
       }
 
       /**
