@@ -1298,7 +1298,7 @@
 
     it('should be no dice rolled', function(){
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getNotation()).toEqual('');
+      expect(diceRoller.getOutput()).toEqual('');
     });
 
     it('should have 1 dice rolled', function(){
@@ -1312,7 +1312,7 @@
       diceRoller.clearLog();
 
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getNotation()).toEqual('');
+      expect(diceRoller.getOutput()).toEqual('');
     });
 
     it('should have 2 dice rolled', function(){
