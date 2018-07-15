@@ -272,6 +272,8 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                 |
 | `toString`         | `function()`                                  | Returns the `notation` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                            |
+| ~~`getLog`~~       | ~~`function()`~~                              | ~~**Deprecated** use `log` property instead.~~                                                                                             |
+| ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated** use `notation` property instead.~~                                                                                        |
 
 
 ##### Static properties
@@ -304,17 +306,19 @@ const notation = '4d10';
 const roll = new DiceRoll(notation);
 ```
 
-| Property       | type                                          | description                                                                                                        |
-| -------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `export`       | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                             |
-| `getNotation`  | `function()`                                  | Returns the roll notation in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String`                          |
-| `notation`     | `String`                                      | The dice notation passed                                                                                           |
-| `rolls`        | `Array`                                       | Roll log for the notation                                                                                          |
-| `roll`         | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                    |
-| `successes`    | `Number`                                      | The number of successes for the roll, if using pool dice.                                                          |
-| `toJSON`       | `function()`                                  | Returns the JSON serializable object when the `DiceRoll` is passed to `JSON.stringify`. Returns `Object`           |
-| `toString`     | `function()`                                  | Returns the `getNotation()` response when the object is parsed as a string (ie. `diceroll + ''`). Returns `String` |
-| `total`        | `Number`                                      | The roll total generated from `roll()`.                                                                            |
+| Property           | type                                          | description                                                                                                        |
+| ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                             |
+| `getNotation`      | `function()`                                  | Returns the roll notation in the format of: `2d20+1d6: [20,2]+[2] = 24`. Returns `String`                          |
+| `notation`         | `String`                                      | The dice notation passed                                                                                           |
+| `rolls`            | `Array`                                       | Roll log for the notation                                                                                          |
+| `roll`             | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                    |
+| `successes`        | `Number`                                      | The number of successes for the roll, if using pool dice.                                                          |
+| `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoll` is passed to `JSON.stringify`. Returns `Object`           |
+| `toString`         | `function()`                                  | Returns the `getNotation()` response when the object is parsed as a string (ie. `diceroll + ''`). Returns `String` |
+| `total`            | `Number`                                      | The roll total generated from `roll()`.                                                                            |
+| ~~`getSuccesses`~~ | ~~`function()`~~                              | ~~**Deprecated** use `successes` property instead.~~                                                               |
+| ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated** use `total` property instead.~~                                                                   |
 
 
 ##### Static properties
