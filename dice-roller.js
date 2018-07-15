@@ -34,6 +34,9 @@
     const log = Symbol('log');
 
     /**
+     * A DiceRoller handles dice rolling functionality,
+     * keeps track of rolls and can output logs etc.
+     *
      * @param {{}=} data
      */
     class DiceRoller{
