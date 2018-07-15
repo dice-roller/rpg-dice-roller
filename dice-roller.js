@@ -55,12 +55,12 @@
     };
 
     /**
-     * Returns the roll notation in the format of:
+     * Returns the roll notation and rolls in the format of:
      * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
-    this.getNotation = function(){
+    this.getOutput = function(){
         // return the log as a joined string
       return lib.getLog().join('; ');
     };
@@ -163,7 +163,7 @@
      *
      * @returns {string}
      */
-    this.toString = this.getNotation;
+    this.toString = this.getOutput;
 
     // initialise the object
     init(data);
@@ -807,12 +807,12 @@
 
 
     /**
-     * Returns the roll notation in the format of:
+     * Returns the roll notation and rolls in the format of:
      * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
-    this.getNotation = function(){
+    this.getOutput = function(){
       var output  = this.notation + ': ';
 
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
@@ -981,7 +981,7 @@
      *
      * @returns {string}
      */
-    this.toString = this.getNotation;
+    this.toString = this.getOutput;
 
     // initialise the object
     init(notation);

@@ -444,7 +444,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import full data from Base64', function(){
@@ -454,7 +454,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import from Object', function(){
@@ -464,7 +464,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import from Object with DiceRolls', function(){
@@ -479,7 +479,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     describe('empty rolls', function(){
@@ -490,7 +490,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.getNotation()).toEqual('');
+        expect(imported.getOutput()).toEqual('');
       });
 
       it('should import with falsey rolls', function(){
@@ -500,7 +500,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.getNotation()).toEqual('');
+        expect(imported.getOutput()).toEqual('');
       });
     });
 
@@ -511,7 +511,7 @@
 
       expect(imported).toHaveLogLength(0);
 
-      expect(imported.getNotation()).toEqual('');
+      expect(imported.getOutput()).toEqual('');
     });
 
     it('should throw error if no import data', function(){
@@ -617,7 +617,7 @@
         expect(imported).toHaveLogLength(crntLogLength);
 
         // compare the notation
-        expect(imported.getNotation()).toEqual(crntNotation);
+        expect(imported.getOutput()).toEqual(crntNotation);
       });
     });
 
@@ -628,7 +628,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
 
     it('should import an exported log', function(){
@@ -641,7 +641,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getNotation()).toEqual(notations.join('; '));
+      expect(imported.getOutput()).toEqual(notations.join('; '));
     });
   });
 }());
