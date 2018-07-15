@@ -185,37 +185,38 @@ You can use `DiceRoller` like so:
 
 ```js
 // create a new instance of the DiceRoller
-var roller  = new DiceRoller();
+const roller = new DiceRoller();
 
 // roll the dice
 roller.roll('4d20-L');
 
 // get the latest dice rolls from the log
-var latestRoll  = roller.log.shift();
+let latestRoll = roller.log.shift();
 
 // output the latest roll - it has a toString method for nice output when converted to a string
 document.write(latestRoll);
 
 
 // roll several notations all at once, and store their DiceRoll objects
-var rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
+const rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
 
 
 // roll a single notation without saving it to the log
-var diceRoll = new DiceRoll('2d6-L');
+const diceRoll = new DiceRoll('2d6-L');
 
 // export the dice roll as JSON
-var exportedData = diceRoll.export(DiceRoller.exportFormats.JSON);
+let exportedData = diceRoll.export(DiceRoller.exportFormats.JSON);
 
 // we can also import data either from a previous export, or built up manually
 // Note that here we're calling `import` on the `DiceRoll` class, not an existing object
-var importedDiceRoll = DiceRoll.import(exportedData);
+let importedDiceRoll = DiceRoll.import(exportedData);
 
 
 // importing into a DiceRoller is just as easy
 roller.import(exportedData); // appends roll data to the end of existing roll log
 
-var roller2 = DiceRoller.import(exportedData); // creates a new DiceRoller and stores the roll data
+// creates a new DiceRoller and stores the roll data
+const roller2 = DiceRoller.import(exportedData);
 ```
 
 
@@ -230,13 +231,13 @@ Here is the above example in Node.js:
 const dr = require("./dice-roller.js");
 
 // create a new instance of the DiceRoller
-var diceRoller  = new dr.DiceRoller();
+const diceRoller = new dr.DiceRoller();
 
 // roll the dice
 diceRoller.roll('4d20-L');
 
 // get the latest dice rolls from the log
-var latestRoll = diceRoller.log.shift();
+let latestRoll = diceRoller.log.shift();
 
 // output the latest roll - it has a toString method for nice output
 console.log(latestRoll + '');
@@ -249,10 +250,10 @@ The Dice Roller provides a global `DiceRoller` class, of which you can have mult
 
 ```js
 // my first DiceRoller
-var roller1 = new DiceRoller();
+const roller1 = new DiceRoller();
 
 // my second DiceRoller
-var roller2 = new DiceRoller();
+const roller2 = new DiceRoller();
 ```
 
 Each instance keeps it's own log of dice rolls, so it's handy if you're rolling for several completely unrelated things.
@@ -278,7 +279,7 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 Static properties can be called on the class itself, without instantiating an object, like so:
 
 ```js
-var diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance with the given data
+const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance with the given data
 ```
 
 | Property           | type                          | description                                                                                                                                          |
@@ -298,9 +299,9 @@ A `DiceRoll` object takes a notation and parses it in to rolls.
 It can be created like so:
 
 ```js
-var notation  = '4d10';
+const notation = '4d10';
 
-var roll      = new DiceRoll(notation);
+const roll = new DiceRoll(notation);
 ```
 
 | Property       | type                                          | description                                                                                                        |
@@ -321,7 +322,7 @@ var roll      = new DiceRoll(notation);
 Static properties can be called on the class itself, without instantiating an object, like so:
 
 ```js
-var diceRoll = DiceRoll.import(data);
+const diceRoll = DiceRoll.import(data);
 ```
 
 | Property        | type                     | description                                                            |
@@ -331,7 +332,7 @@ var diceRoll = DiceRoll.import(data);
 
 ## Browser support
 
-This dice roller only works on the latest browsers and will **not** work in versions of IE older than 10.
+This dice roller only works in the latest browsers, including Microsoft Edge, but will **not** work in IE 11 or less without using an ES6 compiler.
 
 
 ### Demo
