@@ -73,13 +73,13 @@
       }
 
       /**
-       * Use `this.notation` property instead
+       * Use `this.output` property instead
        *
        * @deprecated
        * @returns {string}
        */
       getNotation(){
-        return this.notation;
+        return this.output;
       }
 
       /**
@@ -957,6 +957,17 @@
         }
 
         return output;
+      }
+
+
+      /**
+       * Use `this.output` property instead
+       *
+       * @deprecated
+       * @returns {string}
+       */
+      getNotation(){
+        return this.output;
       }
 
       /**

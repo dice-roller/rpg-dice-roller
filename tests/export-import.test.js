@@ -501,7 +501,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
 
     it('should import full data from Base64', () => {
@@ -511,7 +511,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
 
     it('should import from Object', () => {
@@ -521,7 +521,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
 
     it('should import from Object with DiceRolls', () => {
@@ -534,7 +534,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
 
     describe('empty rolls', () => {
@@ -545,7 +545,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.getOutput()).toEqual('');
+        expect(imported.output).toEqual('');
       });
 
       it('should import with falsey rolls', () => {
@@ -555,7 +555,7 @@
 
         expect(imported).toHaveLogLength(0);
 
-        expect(imported.getOutput()).toEqual('');
+        expect(imported.output).toEqual('');
       });
     });
 
@@ -566,7 +566,7 @@
 
       expect(imported).toHaveLogLength(0);
 
-      expect(imported.getOutput()).toEqual('');
+      expect(imported.output).toEqual('');
     });
 
     it('should throw error if no import data', () => {
@@ -630,7 +630,7 @@
                     ]
                   }
                 ],
-                notations: '1d6: [3] = 3; 10d5-H: [1,4,3,3,2,5,3,1,5,2]-H = 24; 4d6*2: [6,2,1,4]*2 = 26'
+                output: '1d6: [3] = 3; 10d5-H: [1,4,3,3,2,5,3,1,5,2]-H = 24; 4d6*2: [6,2,1,4]*2 = 26'
               },
               {
                 log: [
@@ -647,7 +647,7 @@
                     ]
                   }
                 ],
-                notations: '2d10: [2,7] = 9; 5d6: [4,3,6,3,1] = 17'
+                output: '2d10: [2,7] = 9; 5d6: [4,3,6,3,1] = 17'
               },
               {
                 log: [
@@ -664,10 +664,10 @@
                     ]
                   }
                 ],
-                notations: '2dF: [1,0] = 1; 2d%-L: [23,65]-L = 65'
+                output: '2dF: [1,0] = 1; 2d%-L: [23,65]-L = 65'
               }
             ];
-      let crntNotation = notations.join('; '),
+      let crntOutput = notations.join('; '),
           crntLogLength = importData.log.length;
 
       // start by importing some rolls using the static `DiceRoller.import()` method
@@ -676,7 +676,7 @@
       // now that we have a DiceRoller object with rolls, import some more rolls
       rolls.forEach(roll => {
         // add the current roll notations to the string
-        crntNotation += '; ' + roll.notations;
+        crntOutput += '; ' + roll.output;
         crntLogLength += roll.log.length;
 
         // import the roll
@@ -688,7 +688,7 @@
         expect(imported).toHaveLogLength(crntLogLength);
 
         // compare the notation
-        expect(imported.getOutput()).toEqual(crntNotation);
+        expect(imported.output).toEqual(crntOutput);
       });
     });
 
@@ -699,7 +699,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
 
     it('should import an exported log', () => {
@@ -712,7 +712,7 @@
 
       expect(imported).toHaveLogLength(importData.log.length);
 
-      expect(imported.getOutput()).toEqual(notations.join('; '));
+      expect(imported.output).toEqual(notations.join('; '));
     });
   });
 })();
