@@ -584,7 +584,7 @@
          * @param {boolean=} matchWhole
          * @returns {RegExp}
          */
-        get: (name, flags, matchWhole = false) => {
+        get(name, flags, matchWhole = false){
           const cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
 
           if(!name){
