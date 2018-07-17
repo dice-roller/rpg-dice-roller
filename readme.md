@@ -272,8 +272,8 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                 |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                              |
-| ~~`getLog`~~       | ~~`function()`~~                              | ~~**Deprecated** use `log` property instead.~~                                                                                             |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated** use `output` property instead.~~                                                                                          |
+| ~~`getLog`~~       | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `log` property instead.~~                                                                         |
+| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
 
 
 ##### Static properties
@@ -317,9 +317,9 @@ const roll = new DiceRoll(notation);
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoll` is passed to `JSON.stringify`. Returns `Object`           |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroll + ''`). Returns `String`        |
 | `total`            | `Number`                                      | The roll total generated from `roll()`.                                                                            |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated** use `output` property instead.~~                                                                  |
-| ~~`getSuccesses`~~ | ~~`function()`~~                              | ~~**Deprecated** use `successes` property instead.~~                                                               |
-| ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated** use `total` property instead.~~                                                                   |
+| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                              |
+| ~~`getSuccesses`~~ | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `successes` property instead.~~                                           |
+| ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `total` property instead.~~                                               |
 
 
 ##### Static properties

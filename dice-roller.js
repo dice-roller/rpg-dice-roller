@@ -73,16 +73,6 @@
       }
 
       /**
-       * Use `this.output` property instead
-       *
-       * @deprecated
-       * @returns {string}
-       */
-      getNotation(){
-        return this.output;
-      }
-
-      /**
        * Rolls the given dice notation.
        * Returns a list of results
        *
@@ -131,16 +121,6 @@
        */
       get log(){
         return this[_log] || [];
-      }
-
-      /**
-       * Use `this.log` property instead
-       *
-       * @deprecated
-       * @returns {Array}
-       */
-      getLog(){
-        return this.log;
       }
 
       /**
@@ -963,17 +943,6 @@
         return output;
       }
 
-
-      /**
-       * Use `this.output` property instead
-       *
-       * @deprecated
-       * @returns {string}
-       */
-      getNotation(){
-        return this.output;
-      }
-
       /**
        * The dice notation
        *
@@ -1005,16 +974,6 @@
         }
 
         return this[_successes] || 0;
-      }
-
-      /**
-       * Use `this.successes` property instead
-       *
-       * @deprecated
-       * @returns {number}
-       */
-      getSuccesses(){
-        return this.successes;
       }
 
       /**
@@ -1088,16 +1047,6 @@
 
         // return the total
         return this[_total] || 0;
-      }
-
-      /**
-       * Use `this.total` property instead
-       *
-       * @deprecated
-       * @returns {number}
-       */
-      getTotal(){
-        return this.total;
       }
 
       /**
