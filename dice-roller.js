@@ -351,22 +351,22 @@
        * @param val
        * @returns {boolean}
        */
-      isNumeric(val) {
+      isNumeric(val){
         return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
       },
-      isBase64(val) {
-        try {
+      isBase64(val){
+        try{
           return !!(val && (btoa(atob(val)) === val));
-        } catch (e) {
+        }catch(e){
           return false;
         }
       },
-      isJson(val) {
-        try {
+      isJson(val){
+        try{
           let parsed = val ? JSON.parse(val) : false;
 
           return !!(parsed && (typeof parsed === 'object'));
-        } catch (e) {
+        }catch(e){
           return false;
         }
       },
@@ -378,11 +378,11 @@
        * @param {number|string} max
        * @returns {*}
        */
-      generateNumber(min, max) {
+      generateNumber(min, max){
         min = min ? parseInt(min, 10) : 1;
         max = max ? parseInt(max, 10) : min;
 
-        if (max <= min) {
+        if(max <= min){
           return min;
         }
 
@@ -391,7 +391,7 @@
       /**
        * @returns {function(Array): number}
        */
-      get sumArray() {
+      get sumArray(){
         /**
          * Takes an array of numbers and adds them together,
          * returning the result
@@ -408,7 +408,7 @@
       /**
        * @returns {function(number, number, string=): number}
        */
-      get equateNumbers() {
+      get equateNumbers(){
         /**
          * Takes two numbers and runs a
          * mathematical equation on them,
@@ -425,7 +425,7 @@
           b = this.isNumeric(b) ? parseFloat(b) : 0;
 
           // only carry out operation if we have both values
-          switch (operator) {
+          switch(operator){
             case '*':
               // multiply the value
               a *= b;
@@ -456,13 +456,13 @@
        * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
        * @returns {boolean}
        */
-      compareNumbers(a, b, operator) {
+      compareNumbers(a, b, operator){
         let result;
 
         a = parseFloat(a);
         b = parseFloat(b);
 
-        switch (operator) {
+        switch(operator){
           case '=':
           case '==':
             result = a === b;
@@ -587,7 +587,11 @@
         get: (name, flags, matchWhole = false) => {
           const cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
 
-          if(!regExp[cacheName]){
+          if(!name){
+            throw new Error('DiceRoller: Notation pattern name not defined');
+          }else if((typeof name !== 'string') || !strings[name]){
+            throw new Error(`DiceRoller: Notation pattern name not found: ${name}`);
+          }else if(!regExp[cacheName]){
             // no cached version - create it
             regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
           }
