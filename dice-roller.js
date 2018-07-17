@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version v1.5.2
+ * @version v1.6.0
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
@@ -55,12 +55,12 @@
     };
 
     /**
-     * Returns the roll notation in the format of:
+     * Returns the roll notation and rolls in the format of:
      * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
      * @returns {string}
      */
-    this.getNotation = function(){
+    this.getOutput = function(){
         // return the log as a joined string
       return lib.getLog().join('; ');
     };
@@ -73,18 +73,32 @@
      * @returns {DiceRoll}
      */
     this.roll     = function(notation){
-      var diceRoll;
+      var diceRoll = new DiceRoll(notation);
 
-      // only continue if a notation was passed
-      if(notation){
-        diceRoll = new DiceRoll(notation);
-
-        // add the roll log to our global log
-        log.push(diceRoll);
-      }
+      // add the roll log to our global log
+      log.push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;
+    };
+
+    /**
+     * Rolls the given list of dice notations
+     * and returns a list of the DiceRolls
+     *
+     * @param {Array} notations
+     * @returns {Array}
+     */
+    this.rollMany = function(notations){
+      if(!notations){
+        throw new Error('DiceRoller: No notations specified');
+      }else if(!Array.isArray(notations)){
+        throw new Error('DiceRoller: Notations are not valid');
+      }else{
+        return notations.map(function(notation){
+          lib.roll(notation);
+        });
+      }
     };
 
     /**
@@ -149,7 +163,7 @@
      *
      * @returns {string}
      */
-    this.toString = this.getNotation;
+    this.toString = this.getOutput;
 
     // initialise the object
     init(data);
@@ -394,7 +408,12 @@
        */
       get: function(name, flags, matchWhole){
         var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-        if(!regExp[cacheName]){
+
+        if(!name) {
+          throw new Error('DiceRoller: Notation pattern name not defined');
+        }else if((typeof name !== 'string') || !strings[name]){
+          throw new Error('DiceRoller: Notation pattern name not found: ' + name);
+        }else if(!regExp[cacheName]){
           regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
         }
 
@@ -630,18 +649,18 @@
         // validate object
         if(!notation.notation){
           // object doesn't contain a notation property
-          throw new Error('Object has no notation: ' + notation);
+          throw new Error('DiceRoll: Object has no notation: ' + notation);
         }else if(notation.rolls){
           // we have rolls - validate them
           if(!Array.isArray(notation.rolls)){
             // rolls is not an array
-            throw new Error('Rolls must be an Array: ' + notation.rolls);
+            throw new Error('DiceRoll: Rolls must be an Array: ' + notation.rolls);
           }else{
             // loop through each rolls, make sure they're valid
             notation.rolls.forEach(function(roll, i){
               if(!Array.isArray(roll) || roll.some(isNaN)){
                 // not all rolls are valid
-                throw new Error('Rolls are invalid at index [' + i + ']: ' + roll);
+                throw new Error('DiceRoll: Rolls are invalid at index [' + i + ']: ' + roll);
               }
             });
           }
@@ -654,7 +673,7 @@
 
         // parse the notation
         parsedDice = DiceRoller.parseNotation(lib.notation);
-      }else{
+      }else if(typeof notation === 'string'){
         // store the notation
         lib.notation = notation;
         // empty the current rolls
@@ -665,6 +684,8 @@
 
         // roll the dice
         lib.roll();
+      }else{
+        throw new Error('DiceRoll: Notation is not valid');
       }
     };
 
@@ -791,12 +812,12 @@
 
 
     /**
-     * Returns the roll notation in the format of:
+     * Returns the roll notation and rolls in the format of:
      * 2d20+1d6: [20,2]+[2] = 24
      *
      * @returns {string}
      */
-    this.getNotation = function(){
+    this.getOutput = function(){
       var output  = this.notation + ': ';
 
       if(parsedDice && Array.isArray(this.rolls) && this.rolls.length){
@@ -965,7 +986,7 @@
      *
      * @returns {string}
      */
-    this.toString = this.getNotation;
+    this.toString = this.getOutput;
 
     // initialise the object
     init(notation);
