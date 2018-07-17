@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version v1.5.2
+ * @version v1.6.0
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
@@ -408,7 +408,12 @@
        */
       get: function(name, flags, matchWhole){
         var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-        if(!regExp[cacheName]){
+
+        if(!name) {
+          throw new Error('DiceRoller: Notation pattern name not defined');
+        }else if((typeof name !== 'string') || !strings[name]){
+          throw new Error('DiceRoller: Notation pattern name not found: ' + name);
+        }else if(!regExp[cacheName]){
           regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
         }
 
