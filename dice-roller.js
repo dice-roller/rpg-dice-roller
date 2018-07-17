@@ -408,7 +408,12 @@
        */
       get: function(name, flags, matchWhole){
         var cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-        if(!regExp[cacheName]){
+
+        if(!name) {
+          throw new Error('DiceRoller: Notation pattern name not defined');
+        }else if((typeof name !== 'string') || !strings[name]){
+          throw new Error('DiceRoller: Notation pattern name not found: ' + name);
+        }else if(!regExp[cacheName]){
           regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
         }
 
