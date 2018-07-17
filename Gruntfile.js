@@ -1,8 +1,8 @@
 /*global module, require*/
-module.exports = function(grunt){
+module.exports = grunt => {
   'use strict';
 
-  var gruntConfig = {
+  const gruntConfig = {
     pkg: grunt.file.readJSON('package.json')
   };
 
@@ -13,7 +13,10 @@ module.exports = function(grunt){
     all: [
       'Gruntfile.js',
       'dice-roller.js'
-    ]
+    ],
+    options: {
+      jshintrc: true
+    }
   };
   grunt.registerTask('lint', 'jshint');
 
