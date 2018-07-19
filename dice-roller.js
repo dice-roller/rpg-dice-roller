@@ -66,6 +66,12 @@
     };
 
     /**
+     * @deprecated Use `getOutput()` instead
+     * @returns {string}
+     */
+    this.getNotation = this.getOutput;
+
+    /**
      * Rolls the given dice notation.
      * Returns a list of results
      *
@@ -889,6 +895,13 @@
 
       return output;
     };
+
+
+    /**
+     * @deprecated Use `getOutput()` instead
+     * @returns {string}
+     */
+    this.getNotation = this.getOutput;
 
     /**
      * Returns the count of successes for the roll
