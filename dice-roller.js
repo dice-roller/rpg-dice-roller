@@ -2,7 +2,7 @@
  * A JS based dice roller that uses dice notation, as described here:
  * https://en.m.wikipedia.org/wiki/Dice_notation
  *
- * @version v1.6.0
+ * @version v1.6.1
  * @author GreenImp - greenimp.co.uk
  * @link https://github.com/GreenImp/rpg-dice-roller
  */
@@ -64,6 +64,12 @@
         // return the log as a joined string
       return lib.getLog().join('; ');
     };
+
+    /**
+     * @deprecated Use `getOutput()` instead
+     * @returns {string}
+     */
+    this.getNotation = this.getOutput;
 
     /**
      * Rolls the given dice notation.
@@ -889,6 +895,13 @@
 
       return output;
     };
+
+
+    /**
+     * @deprecated Use `getOutput()` instead
+     * @returns {string}
+     */
+    this.getNotation = this.getOutput;
 
     /**
      * Returns the count of successes for the roll
