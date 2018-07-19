@@ -76,25 +76,25 @@
     describe('get notation patterns', function(){
       Object.keys(strings).forEach(function(name){
         it('should return the notation pattern for "' + name + '"', function(){
-          var pattern = DiceRoller.notationPatterns.get(name);
+          var pattern = DiceRoll.notationPatterns.get(name);
 
           expect(pattern.toString()).toEqual('/' + strings[name] + '/');
         });
 
         it('should return the notation pattern with flags for "' + name + '"', function(){
-          var pattern = DiceRoller.notationPatterns.get(name, 'g');
+          var pattern = DiceRoll.notationPatterns.get(name, 'g');
 
           expect(pattern.toString()).toEqual('/' + strings[name] + '/g');
         });
 
         it('should return the notation pattern matching whole string for "' + name + '"', function(){
-          var pattern = DiceRoller.notationPatterns.get(name, null, true);
+          var pattern = DiceRoll.notationPatterns.get(name, null, true);
 
           expect(pattern.toString()).toEqual('/^' + strings[name] + '$/');
         });
 
         it('should return the notation pattern with flags and matching whole string for "' + name + '"', function(){
-          var pattern = DiceRoller.notationPatterns.get(name, 'g', true);
+          var pattern = DiceRoll.notationPatterns.get(name, 'g', true);
 
           expect(pattern.toString()).toEqual('/^' + strings[name] + '$/g');
         });
@@ -104,41 +104,41 @@
     describe('invalid patterns', function(){
       it('should throw error if pattern name is empty', function(){
         expect(function(){
-          DiceRoller.notationPatterns.get();
+          DiceRoll.notationPatterns.get();
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(null);
+          DiceRoll.notationPatterns.get(null);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(undefined);
+          DiceRoll.notationPatterns.get(undefined);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(false);
+          DiceRoll.notationPatterns.get(false);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(0);
+          DiceRoll.notationPatterns.get(0);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
       });
 
       it('should throw error if pattern name is invalid', function(){
         expect(function(){
-          DiceRoller.notationPatterns.get('foo');
+          DiceRoll.notationPatterns.get('foo');
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get([]);
+          DiceRoll.notationPatterns.get([]);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(['notation']);
+          DiceRoll.notationPatterns.get(['notation']);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(function(){
-          DiceRoller.notationPatterns.get(1);
+          DiceRoll.notationPatterns.get(1);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
       });
     });

@@ -285,14 +285,14 @@ Static properties can be called on the class itself, without instantiating an ob
 const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance with the given data
 ```
 
-| Property           | type                          | description                                                                                                                                          |
-| ------------------ | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `exportFormats`    | `Object`                      | List of available export / import formats                                                                                                            |
-| `import`           | `function({mixed} data)`      | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
-| `notationPatterns` | `Object`                      | An object that contains a single `get(name)` method, which returns the regular expression for matching dice notation.                                |
-| `parseDie`         | `function({String} notation)` | Parses the given notation for a single die and returns a parsed object (Same as `parseNotation`, but with only 1 result). Returns `object`           |
-| `parseNotation`    | `function({String} notation)` | Parses the given notation and returns a parsed object (Used internally by the `DiceRoll` object). Returns `Array`                                    |
-| `utils`            | `Object`                      | A collection of helpful utility methods.                                                                                                             |
+| Property               | type                              | description                                                                                                                                          |
+| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `exportFormats`        | `Object`                          | List of available export / import formats                                                                                                            |
+| `import`               | `function({mixed} data)`          | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
+| `utils`                | `Object`                          | A collection of helpful utility methods.                                                                                                             |
+| ~~`notationPatterns`~~ | `Object`                          | ~~**Deprecated**~~ use `DiceRoll.notationPatterns` property instead.                                                                                 |
+| ~~`parseDie`~~         | ~~`function({String} notation)`~~ | ~~**Deprecated**~~ use `DiceRoll.parseNotation()` method instead.                                                                                    |
+| ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated**~~ use `DiceRoll.parseNotation()` method instead.                                                                                    |
 
 
 #### `DiceRoll` object
@@ -311,6 +311,7 @@ const roll = new DiceRoll(notation);
 | ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `export`           | `function({DiceRoller.exportFormats} format)` | Exports the `DiceRoll` object to the specified format. Returns `mixed`                                             |
 | `notation`         | `String`                                      | The dice notation passed                                                                                           |
+| `notationPatterns` | `Object`                                      | An object that contains a `get()` method, which returns the regular expression for matching dice notation.         |
 | `output`           | `String`                                      | The roll notation in the format of: `2d20+1d6: [20,2]+[2] = 24`.                                                   |
 | `rolls`            | `Array`                                       | Roll log for the notation                                                                                          |
 | `roll`             | `function()`                                  | Rolls the dice for the existing notation and returns the rolls. Returns `Array`                                    |
@@ -332,9 +333,10 @@ Static properties can be called on the class itself, without instantiating an ob
 const diceRoll = DiceRoll.import(data);
 ```
 
-| Property        | type                     | description                                                            |
-| --------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `import`        | `function({mixed} data)` | Imports the given data and creates a new dice roll. Returns `DiceRoll` |
+| Property        | type                          | description                                                                  |
+| --------------- | ----------------------------- | ---------------------------------------------------------------------------- |
+| `import`        | `function({mixed} data)`      | Imports the given data and creates a new dice roll. Returns `DiceRoll`       |
+| `parseNotation` | `function({String} notation)` | Parses the given notation and returns a list of parsed data. Returns `Array` |
 
 
 ## Browser support
