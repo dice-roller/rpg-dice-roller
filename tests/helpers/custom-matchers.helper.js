@@ -356,7 +356,7 @@ beforeEach(() => {
         compare(methodName, args, response){
           let result = {};
 
-          result.pass = DiceRoller.utils[methodName](...args) === response;
+          result.pass = diceUtils[methodName](...args) === response;
 
           if(result.pass){
             result.message = `Expected "${methodName}(${args.join(',')})" to NOT equal ${response}`;

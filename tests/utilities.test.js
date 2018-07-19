@@ -136,7 +136,7 @@
     it('should return between 1 and 5', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber(1, 5);
+        const value = diceUtils.generateNumber(1, 5);
 
         expect(value).toBeWithinRange({min: 1, max: 5});
       }
@@ -145,7 +145,7 @@
     it('should return between -100 and 10', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber(-100, 10);
+        const value = diceUtils.generateNumber(-100, 10);
 
         expect(value).toBeWithinRange({min: -100, max: 10});
       }
@@ -154,7 +154,7 @@
     it('should return min value if greater than max', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber(2, 1);
+        const value = diceUtils.generateNumber(2, 1);
 
         expect(value).toEqual(2);
       }
@@ -163,7 +163,7 @@
     it('should return min value if equal to max', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber(2, 2);
+        const value = diceUtils.generateNumber(2, 2);
 
         expect(value).toEqual(2);
       }
@@ -172,7 +172,7 @@
     it('should return 1 if no min or max defined', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber();
+        const value = diceUtils.generateNumber();
 
         expect(value).toEqual(1);
       }
@@ -181,7 +181,7 @@
     it('should return min if no max defined', () => {
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
-        const value = DiceRoller.utils.generateNumber(5);
+        const value = diceUtils.generateNumber(5);
 
         expect(value).toEqual(5);
       }

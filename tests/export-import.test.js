@@ -1,4 +1,4 @@
-/*global beforeEach, describe, DiceRoll, DiceRoller, expect, jasmine, it, utils */
+/*global beforeEach, describe, DiceRoll, DiceRoller, exportFormats, expect, jasmine, it, utils */
 ;(() => {
   'use strict';
 
@@ -14,13 +14,13 @@
     });
 
     it('should export as JSON', () => {
-      exported = diceRoll.export(DiceRoller.exportFormats.JSON);
+      exported = diceRoll.export(exportFormats.JSON);
 
       expect(exported).toBeJson();
     });
 
     it('should default export format to JSON', () => {
-      const jsonExported = diceRoll.export(DiceRoller.exportFormats.JSON);
+      const jsonExported = diceRoll.export(exportFormats.JSON);
 
       exported = diceRoll.export();
 
@@ -30,9 +30,9 @@
     });
 
     it('should export as base64', () => {
-      const jsonExported = diceRoll.export(DiceRoller.exportFormats.JSON);
+      const jsonExported = diceRoll.export(exportFormats.JSON);
 
-      exported = diceRoll.export(DiceRoller.exportFormats.BASE_64);
+      exported = diceRoll.export(exportFormats.BASE_64);
 
       expect(exported).toBeBase64();
 
@@ -42,7 +42,7 @@
     });
 
     it('should export as Object', () => {
-      exported = diceRoll.export(DiceRoller.exportFormats.OBJECT);
+      exported = diceRoll.export(exportFormats.OBJECT);
 
       expect(exported).toEqual(jasmine.any(Object));
 
@@ -348,10 +348,10 @@
             // export the roll and re-import as a new roll for each format type
             importedRolls = [
               DiceRoll.import(
-                diceRoll.export(DiceRoller.exportFormats.JSON)
+                diceRoll.export(exportFormats.JSON)
               ),
               DiceRoll.import(
-                diceRoll.export(DiceRoller.exportFormats.BASE_64)
+                diceRoll.export(exportFormats.BASE_64)
               )
             ];
 
@@ -398,14 +398,14 @@
     });
 
     it('should export as JSON', () => {
-      const exported = diceRoller.export(DiceRoller.exportFormats.JSON);
+      const exported = diceRoller.export(exportFormats.JSON);
 
       expect(exported).toBeJson();
     });
 
     it('should export as base64', () => {
-      const exported = diceRoller.export(DiceRoller.exportFormats.BASE_64),
-            jsonExported = diceRoller.export(DiceRoller.exportFormats.JSON);
+      const exported = diceRoller.export(exportFormats.BASE_64),
+            jsonExported = diceRoller.export(exportFormats.JSON);
 
       expect(exported).toBeBase64();
 
@@ -416,7 +416,7 @@
 
     it('should default export format to JSON', () => {
       const exported = diceRoller.export(),
-            jsonExported = diceRoller.export(DiceRoller.exportFormats.JSON);
+            jsonExported = diceRoller.export(exportFormats.JSON);
 
       expect(exported).toBeJson();
 
