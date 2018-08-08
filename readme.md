@@ -289,10 +289,10 @@ const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance
 | ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `exportFormats`        | `Object`                          | List of available export / import formats                                                                                                            |
 | `import`               | `function({mixed} data)`          | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
-| ~~`utils`~~            | ~~`Object`~~                      | ~~**Deprecated**~~ use `diceUtils` instead.                                                                                                          |
-| ~~`notationPatterns`~~ | ~~`Object`~~                      | ~~**Deprecated**~~ use `DiceRoll.notationPatterns` property instead.                                                                                 |
-| ~~`parseDie`~~         | ~~`function({String} notation)`~~ | ~~**Deprecated**~~ use `DiceRoll.parseNotation()` method instead.                                                                                    |
-| ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated**~~ use `DiceRoll.parseNotation()` method instead.                                                                                    |
+| ~~`utils`~~            | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use global `diceUtils` instead.                                                                               |
+| ~~`notationPatterns`~~ | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.notationPatterns` property instead.                                                             |
+| ~~`parseDie`~~         | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
+| ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
 
 
 #### `DiceRoll` object
