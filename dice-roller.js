@@ -617,7 +617,7 @@
           this[_rolls] = notation.rolls || [];
 
           // parse the notation
-          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+          this[_parsedDice] = DiceRoll.parseNotation(this.notation);
         }else if(typeof notation === 'string'){
           // store the notation
           this[_notation] = notation;
@@ -625,7 +625,7 @@
           this[_rolls] = [];
 
           // parse the notation
-          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+          this[_parsedDice] = DiceRoll.parseNotation(this.notation);
 
           // roll the dice
           this.roll();
