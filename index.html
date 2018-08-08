@@ -164,7 +164,7 @@
 
       diceRoller.roll(value);
 
-      document.getElementById('output').value = diceRoller.getOutput();
+      document.getElementById('output').value = diceRoller.output;
 
       // stop event propagation
       return false;
@@ -173,7 +173,7 @@
     function clearLog(){
       diceRoller.clearLog();
 
-      document.getElementById('output').value = diceRoller.getOutput();
+      document.getElementById('output').value = diceRoller.output;
 
       // stop event propagation
       return false;

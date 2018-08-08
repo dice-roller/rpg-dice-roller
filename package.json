@@ -2,7 +2,7 @@
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts typical dice notation",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk",
-  "version": "1.6.1",
+  "version": "2.0.0",
   "license": "MIT",
   "main": "dice-roller.js",
   "repository": {
@@ -27,9 +27,12 @@
     "grunt-cli": "^1.2.0",
     "grunt-contrib-jasmine": "^2.0.1",
     "grunt-contrib-jshint": "^1.1.0",
-    "jshint": "^2.9.5"
+    "jshint": "^2.9.6"
   },
   "scripts": {
     "test": "grunt ci"
+  },
+  "jshintConfig": {
+    "esversion": 6
   }
 }

@@ -1,32 +1,28 @@
 /*global beforeEach, describe, DiceRoller, DiceRoll, expect, jasmine, it, utils */
-;(function(){
+;(() => {
   'use strict';
 
-  describe('basic dice', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller,
-        dice = [4, 6, 10, 20, '%'],
-        loopCount = 1000,
-        i, j;
+  const loopCount = 1000;
 
-    beforeEach(function(){
+  describe('basic dice', () => {
+    const dice = [4, 6, 10, 20, '%'];
+    let diceRoller;
+
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
-      i = 0;
-      j = 0;
     });
 
     // loop through and run the tests for the dice
-    for(i = 0; i < dice.length; i++){
-      var die = dice[i],
-          sides = die === '%' ? 100 : die,
-          notation = 'd' + die;
+    for(let i = 0; i < dice.length; i++){
+      const die = dice[i],
+            sides = die === '%' ? 100 : die,
+            notation = 'd' + die;
 
-      it('should return between 1 and ' + sides + ' for `' + notation + '`', function(){
-        var roll;
-
+      it(`should return between 1 and ${sides} for \`${notation}\``, () => {
         // run the tests multiple times for consistency
-        for(j = 0; j < loopCount; j++){
-          roll = diceRoller.roll(notation);
+        for(let j = 0; j < loopCount; j++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -47,31 +43,25 @@
     }
   });
 
-  describe('fudge dice', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller,
-        dice = ['dF', 'dF.2', 'dF.1'],
-        loopCount = 1000,
-        i, j;
+  describe('fudge dice', () => {
+    const dice = ['dF', 'dF.2', 'dF.1'];
+    let diceRoller;
 
-    beforeEach(function(){
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
-      i = 0;
-      j = 0;
     });
 
     // loop through and run the tests for the dice
-    for(i = 0; i < dice.length; i++){
-      var die = dice[i],
-          notation = die;
+    for(let i = 0; i < dice.length; i++){
+      const die = dice[i],
+            notation = die;
 
       // Fudge dice always provide a value between -1 and 1
-      it('should be between -1 and 1 for `' + notation + '`', function(){
-        var roll;
-
+      it(`should be between -1 and 1 for \`${notation}\``, () => {
         // run the tests multiple times for consistency
-        for(j = 0; j < loopCount; j++){
-          roll = diceRoller.roll(notation);
+        for(let j = 0; j < loopCount; j++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -92,33 +82,27 @@
     }
   });
 
-  describe('multiple dice', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller,
-        dice = [
-          {sides: 6, rolls: 4},
-          {sides: 10, rolls: 8},
-          {sides: 20, rolls: 5}
-        ],
-        loopCount = 1000,
-        i, j;
+  describe('multiple dice', () => {
+    const dice = [
+      {sides: 6, rolls: 4},
+      {sides: 10, rolls: 8},
+      {sides: 20, rolls: 5}
+    ];
+    let diceRoller;
 
-    beforeEach(function(){
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
-      i = 0;
-      j = 0;
     });
 
-    for(i = 0; i < dice.length; i++){
-      var die = dice[i],
-          notation = die.rolls + 'd' + die.sides;
+    for(let i = 0; i < dice.length; i++){
+      const die = dice[i],
+            notation = `${die.rolls}d${die.sides}`;
 
-      it('should roll a ' + die.sides + ' sided die ' + die.rolls + ' times', function(){
-        var roll;
-
+      it(`should roll a ${die.sides} sided die ${die.rolls} times`, () => {
         // run the tests multiple times for consistency
-        for(j = 0; j < loopCount; j++){
-          roll = diceRoller.roll(notation);
+        for(let j = 0; j < loopCount; j++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -138,10 +122,10 @@
       });
     }
 
-    it('should compute multiple dice rolls for `1d6+2d10`', function(){
-      var notation = '1d6+2d10',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should compute multiple dice rolls for `1d6+2d10`', () => {
+      const notation = '1d6+2d10',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -157,13 +141,17 @@
       expect(roll.rolls).toArraySumEqualTo(total);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']+[' + roll.rolls[1].join(',') + ']', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]+[${roll.rolls[1].join(',')}]`,
+        total: total,
+      });
     });
 
-    it('should compute multiple dice rolls for `3d6*2d10-L`', function(){
-      var notation = '3d6*2d10-L',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should compute multiple dice rolls for `3d6*2d10-L`', () => {
+      const notation = '3d6*2d10-L',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -179,13 +167,17 @@
       expect(utils.reduceArray(roll.rolls[0]) * (utils.reduceArray(roll.rolls[1]) - utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']*[' + roll.rolls[1].join(',') + ']-L', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]*[${roll.rolls[1].join(',')}]-L`,
+        total: total,
+      });
     });
 
-    it('should compute multiple dice rolls for `4d6/2d3`', function(){
-      var notation = '4d6/2d3',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should compute multiple dice rolls for `4d6/2d3`', () => {
+      const notation = '4d6/2d3',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -201,30 +193,30 @@
       expect(utils.reduceArray(roll.rolls[0]) / utils.reduceArray(roll.rolls[1])).toArraySumEqualTo(total);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join(',') + ']/[' + roll.rolls[1].join(',') + ']', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]/[${roll.rolls[1].join(',')}]`,
+        total: total,
+      });
     });
   });
 
-  describe('exploding, compounding, and penetrating', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller,
-        loopCount = 1000,
-        i;
+  describe('exploding, compounding, and penetrating', () => {
+    let diceRoller;
 
-    beforeEach(function(){
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
-      i = 0;
     });
 
-    it('should explode for `1d2!`', function(){
-      var notation = '1d2!',
-          hasExploded = false,
-          roll, total;
+    it('should explode for `1d2!`', () => {
+      const notation = '1d2!';
+      let hasExploded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -238,7 +230,11 @@
         expect(roll.rolls[0]).toExplode({min: 1, max: 2});
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -248,15 +244,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should compound explode for `1d2!!`', function(){
-      var notation = '1d2!!',
-          hasCompounded = false,
-          roll, total;
+    it('should compound explode for `1d2!!`', () => {
+      const notation = '1d2!!';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -268,7 +263,11 @@
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
+          total: total,
+        });
 
         // determine whether this roll compounded by checking the value of the roll
         hasCompounded = hasCompounded || (total > 2);
@@ -278,15 +277,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should penetrate for `1d2!p`', function(){
-      var notation = '1d2!p',
-          hasExploded = false,
-          roll, total;
+    it('should penetrate for `1d2!p`', () => {
+      const notation = '1d2!p';
+      let hasExploded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++) {
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++) {
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -300,7 +298,11 @@
         expect(roll.rolls[0]).toExplode({min: 1, max: 2, penetrate: true});
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!p,')}]`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -310,15 +312,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should penetrate compound for `1d2!!p`', function(){
-      var notation = '1d2!!p',
-          hasCompounded = false,
-          roll, total;
+    it('should penetrate compound for `1d2!!p`', () => {
+      const notation = '1d2!!p';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -330,7 +331,11 @@
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (check for total >= 2, as penetrating subtracts 1, so a second roll of one, would be zero)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!p' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${total}${(total >= 2) ? '!!p' : ''}]`,
+          total: total,
+        });
 
         // determine whether this roll compounded by checking the value of the roll
         hasCompounded = hasCompounded || (total >= 2);
@@ -340,15 +345,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should penetrate compound for `2d2!!p', function(){
-      var notation = '2d2!!p',
-          hasCompounded = false,
-          roll, total;
+    it('should penetrate compound for `2d2!!p', () => {
+      const notation = '2d2!!p';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -369,15 +373,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should explode if higher than 1 for `1d6!>1`', function(){
-      var notation = '1d6!>1',
-          hasExploded = false,
-          roll, total;
+    it('should explode if higher than 1 for `1d6!>1`', () => {
+      const notation = '1d6!>1';
+      let hasExploded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -388,10 +391,21 @@
         expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
-        expect(roll.rolls[0]).toExplode({min: 1, max: 6, comparePoint: {operator: '>', value: 1}});
+        expect(roll.rolls[0]).toExplode({
+          min: 1,
+          max: 6,
+          comparePoint: {
+            operator: '>',
+            value: 1,
+          },
+        });
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -401,15 +415,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should explode if less than 2 for `1d2!<2`', function(){
-      var notation = '1d2!<2',
-          hasExploded = false,
-          roll, total;
+    it('should explode if less than 2 for `1d2!<2`', () => {
+      const notation = '1d2!<2';
+      let hasExploded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -420,10 +433,21 @@
         expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
-        expect(roll.rolls[0]).toExplode({min: 1, max: 2, comparePoint: {operator: '<', value: 2}});
+        expect(roll.rolls[0]).toExplode({
+          min: 1,
+          max: 2,
+          comparePoint: {
+            operator: '<',
+            value: 2,
+          },
+        });
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -433,15 +457,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should explode if equal to 2 for `1d3!=2`', function(){
-      var notation = '1d3!=2',
-          hasExploded = false,
-          roll, total;
+    it('should explode if equal to 2 for `1d3!=2`', () => {
+      const notation = '1d3!=2';
+      let hasExploded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -452,10 +475,21 @@
         expect(roll).toHaveRolls({rolls: ['*']});
         expect(roll.rolls).toArraySumEqualTo(total);
 
-        expect(roll.rolls[0]).toExplode({min: 1, max: 3, comparePoint: {operator: '=', value: 2}});
+        expect(roll.rolls[0]).toExplode({
+          min: 1,
+          max: 3,
+          comparePoint: {
+            operator: '=',
+            value: 2,
+          },
+        });
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -465,15 +499,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should compound if higher than 1 for `1d6!!>1`', function(){
-      var notation = '1d6!!>1',
-          hasCompounded = false,
-          roll, total;
+    it('should compound if higher than 1 for `1d6!!>1`', () => {
+      const notation = '1d6!!>1';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -485,7 +518,11 @@
         expect(roll.rolls).toArraySumEqualTo(total);
 
         // check the output string (Compounds if over 1, so any total of 2 or more means that it must have compounded)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total >= 2) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${total}${(total >= 2) ? '!!' : ''}]`,
+          total: total,
+        });
 
         // determine whether this roll compounded by checking the value of the roll
         hasCompounded = hasCompounded || (total >= 2);
@@ -495,15 +532,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should compound if less than 2 for `1d2!!<2`', function(){
-      var notation = '1d2!!<2',
-          hasCompounded = false,
-          roll, total;
+    it('should compound if less than 2 for `1d2!!<2`', () => {
+      const notation = '1d2!!<2';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -516,7 +552,11 @@
 
         // check the output string (Compounds only on a roll of 1 - if we roll a 1, we roll again;
         // if we then roll a 2, we get a total of 3, if we roll a 1 we get 2 and roll again - so a minimum of 3 if compounding)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
+          total: total,
+        });
 
         // determine whether this roll compounded by checking the value of the roll
         hasCompounded = hasCompounded || (total > 2);
@@ -526,15 +566,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should compound if equal to 2 for `1d2!!=2`', function(){
-      var notation = '1d2!!=2',
-          hasCompounded = false,
-          roll, total;
+    it('should compound if equal to 2 for `1d2!!=2`', () => {
+      const notation = '1d2!!=2';
+      let hasCompounded = false;
 
       // loop this roll for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -547,7 +586,11 @@
 
         // check the output string (Compounds only on a roll of 2 - if we roll a 2, we roll again;
         // if we then roll a 1, we get a total of 3, if we roll a 2 we get 4 and roll again - so a minimum of 5 if compounding)
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + total + ((total > 2) ? '!!' : '') + ']', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${total}${(total > 2) ? '!!' : ''}]`,
+          total: total,
+        });
 
         // determine whether this roll compounded by checking the value of the roll
         hasCompounded = hasCompounded || (total > 2);
@@ -558,18 +601,18 @@
     });
   });
 
-  describe('basic equations', function(){
-    // create a new instance of the DiceRoller
-    var diceRoller;
+  describe('basic equations', () => {
+    let diceRoller;
 
-    beforeEach(function(){
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
     });
 
-    it('should return between 3 and 8 for `1d6+2`', function(){
-      var notation = '1d6+2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should return between 3 and 8 for `1d6+2`', () => {
+      const notation = '1d6+2',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -581,13 +624,17 @@
       expect(roll.rolls).toArraySumEqualTo(total-2);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total-2) + ']+2', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total-2}]+2`,
+        total: total,
+      });
     });
 
-    it('should return between -1 and 2 for `1d4-2`', function(){
-      var notation = '1d4-2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should return between -1 and 2 for `1d4-2`', () => {
+      const notation = '1d4-2',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -599,13 +646,17 @@
       expect(roll.rolls).toArraySumEqualTo(total+2);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total+2) + ']-2', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total+2}]-2`,
+        total: total,
+      });
     });
 
-    it('should return between 2 and 20 for `1d10*2`', function(){
-      var notation = '1d10*2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should return between 2 and 20 for `1d10*2`', () => {
+      const notation = '1d10*2',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -617,13 +668,17 @@
       expect(roll.rolls).toArraySumEqualTo(total/2);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total/2) + ']*2', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total/2}]*2`,
+        total: total,
+      });
     });
 
-    it('should return between 0.5 and 4 for `1d8/2`', function(){
-      var notation = '1d8/2',
-          roll = diceRoller.roll(notation),
-          total = roll.getTotal();
+    it('should return between 0.5 and 4 for `1d8/2`', () => {
+      const notation = '1d8/2',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -635,13 +690,17 @@
       expect(roll.rolls).toArraySumEqualTo(total*2);
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (total*2) + ']/2', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total*2}]/2`,
+        total: total,
+      });
     });
 
-    it('should subtract the LOWEST roll for `4d6-L', function(){
-      var notation = '4d6-L',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should subtract the LOWEST roll for `4d6-L', () => {
+      const notation = '4d6-L',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -654,13 +713,17 @@
       expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-L', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]-L`,
+        total: total,
+      });
     });
 
-    it('should add the LOWEST roll for `4d6+L', function(){
-      var notation = '4d6+L',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should add the LOWEST roll for `4d6+L', () => {
+      const notation = '4d6+L',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -673,13 +736,17 @@
       expect(roll.rolls).toArraySumEqualTo(total - utils.getMin(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+L', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]+L`,
+        total: total,
+      });
     });
 
-    it('should multiply by the LOWEST roll for `4d6*L', function(){
-      var notation = '4d6*L',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should multiply by the LOWEST roll for `4d6*L', () => {
+      const notation = '4d6*L',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -692,13 +759,17 @@
       expect(roll.rolls).toArraySumEqualTo(total / utils.getMin(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*L', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]*L`,
+        total: total,
+      });
     });
 
-    it('should divide by the LOWEST roll for `4d6/L', function(){
-      var notation = '4d6/L',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should divide by the LOWEST roll for `4d6/L', () => {
+      const notation = '4d6/L',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -711,13 +782,17 @@
       expect(roll.rolls).toArraySumEqualTo(total * utils.getMin(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/L', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]/L`,
+        total: total,
+      });
     });
 
-    it('should subtract the HIGHEST roll for `4d6-H', function(){
-      var notation = '4d6-H',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should subtract the HIGHEST roll for `4d6-H', () => {
+      const notation = '4d6-H',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -730,13 +805,17 @@
       expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']-H', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]-H`,
+        total: total,
+      });
     });
 
-    it('should add the HIGHEST roll for `4d6+H', function(){
-      var notation = '4d6+H',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should add the HIGHEST roll for `4d6+H', () => {
+      const notation = '4d6+H',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -749,13 +828,17 @@
       expect(roll.rolls).toArraySumEqualTo(total - utils.getMax(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']+H', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]+H`,
+        total: total,
+      });
     });
 
-    it('should multiply by the HIGHEST roll for `4d6*H', function(){
-      var notation = '4d6*H',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should multiply by the HIGHEST roll for `4d6*H', () => {
+      const notation = '4d6*H',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -768,13 +851,17 @@
       expect(roll.rolls).toArraySumEqualTo(total / utils.getMax(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']*H', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]*H`,
+        total: total,
+      });
     });
 
-    it('should divide by the HIGHEST roll for `4d6/H', function(){
-      var notation = '4d6/H',
-        roll = diceRoller.roll(notation),
-        total = roll.getTotal();
+    it('should divide by the HIGHEST roll for `4d6/H', () => {
+      const notation = '4d6/H',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
 
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -787,19 +874,21 @@
       expect(roll.rolls).toArraySumEqualTo(total * utils.getMax(roll.rolls[0]));
 
       // check the output string
-      expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + (roll.rolls[0].join(',')) + ']/H', total: total});
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${roll.rolls[0].join(',')}]/H`,
+        total: total,
+      });
     });
 
-    it('should subtract the LOWEST explode roll for `d6!-L`', function(){
-      var notation = 'd6!-L',
-        hasExploded = false,
-        loopCount = 1000,
-        i, roll, total;
+    it('should subtract the LOWEST explode roll for `d6!-L`', () => {
+      const notation = 'd6!-L';
+      let hasExploded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -810,7 +899,11 @@
         expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-L', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]-L`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -820,16 +913,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the Highest explode roll for `d6!-H`', function(){
-      var notation = 'd6!-H',
-        hasExploded = false,
-        loopCount = 1000,
-        i, roll, total;
+    it('should subtract the Highest explode roll for `d6!-H`', () => {
+      const notation = 'd6!-H';
+      let hasExploded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -840,7 +931,11 @@
         expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!,') + ']-H', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!,')}]-H`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -850,17 +945,15 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the LOWEST compound roll for `d6!!-L`', function(){
-      var notation = 'd6!!-L',
-        hasCompounded = false,
-        loopCount = 1000,
-        i, roll, total, rollsTotal;
+    it('should subtract the LOWEST compound roll for `d6!!-L`', () => {
+      const notation = 'd6!!-L';
+      let hasCompounded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
-        rollsTotal = utils.reduceArray(roll.rolls);
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total,
+              rollsTotal = utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -871,7 +964,11 @@
         expect(rollsTotal).toBeGreaterThan(0);
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-L', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${rollsTotal}${rollsTotal > 6 ? '!!' : ''}]-L`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking if the value is greater than the max
         hasCompounded = hasCompounded || (rollsTotal > 6);
@@ -881,17 +978,15 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should subtract the HIGHEST compound roll for `d6!!-H`', function(){
-      var notation = 'd6!!-H',
-        hasCompounded = false,
-        loopCount = 1000,
-        i, roll, total, rollsTotal;
+    it('should subtract the HIGHEST compound roll for `d6!!-H`', () => {
+      const notation = 'd6!!-H';
+      let hasCompounded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
-        rollsTotal = utils.reduceArray(roll.rolls);
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total,
+              rollsTotal = utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -902,7 +997,11 @@
         expect(rollsTotal).toBeGreaterThan(0);
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + rollsTotal + (rollsTotal > 6 ? '!!' : '') + ']-H', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${rollsTotal}${rollsTotal > 6 ? '!!' : ''}]-H`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking if the value is greater than the max
         hasCompounded = hasCompounded || (rollsTotal > 6);
@@ -912,16 +1011,14 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should subtract the LOWEST penetrating roll for `d6!p-L`', function(){
-      var notation = 'd6!p-L',
-        hasExploded = false,
-        loopCount = 1000,
-        i, roll, total;
+    it('should subtract the LOWEST penetrating roll for `d6!p-L`', () => {
+      const notation = 'd6!p-L';
+      let hasExploded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -932,7 +1029,11 @@
         expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-L', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!p,')}]-L`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -942,16 +1043,14 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the HIGHEST penetrating roll for `d6!p-H`', function(){
-      var notation = 'd6!p-H',
-        hasExploded = false,
-        loopCount = 1000,
-        i, roll, total;
+    it('should subtract the HIGHEST penetrating roll for `d6!p-H`', () => {
+      const notation = 'd6!p-H';
+      let hasExploded = false;
 
       // loop this roll for consistency (We need it to have exploded at least once)
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        total = roll.getTotal();
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              total = roll.total;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -962,7 +1061,11 @@
         expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
 
         // check the output string
-        expect(roll).toMatchParsedNotation({notation: notation, rolls: '[' + roll.rolls[0].join('!p,') + ']-H', total: total});
+        expect(roll).toMatchParsedNotation({
+          notation: notation,
+          rolls: `[${roll.rolls[0].join('!p,')}]-H`,
+          total: total,
+        });
 
         // determine whether this roll exploded by checking the amount of rolls
         hasExploded = hasExploded || (roll.rolls[0].length > 1);
@@ -973,33 +1076,25 @@
     });
   });
 
-  describe('pool dice', function(){
-    var diceRoller,
-        loopCount = 1000,
+  describe('pool dice', () => {
+    let diceRoller,
         expectedSuccesses,
-        hasSucceeded = false,
-        i;
+        hasSucceeded = false;
 
-    beforeEach(function(){
+    beforeEach(() => {
       diceRoller = new DiceRoller();
-      i = 0;
       hasSucceeded = false;
     });
 
-    it('should return number of successes for `4d6=6`', function(){
-      var notation = '4d6=6',
-        roll,
-        rollNote;
+    it('should return number of successes for `4d6=6`', () => {
+      const notation = '4d6=6';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num === 6;
-        }).length;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num === 6 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num === 6 ? '*' : '')).join(',');
+
+        expectedSuccesses = roll.rolls[0].filter(num => num === 6).length;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1011,7 +1106,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1022,20 +1117,15 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `4d6<3`', function(){
-      var notation = '4d6<3',
-        roll,
-        rollNote;
+    it('should return number of successes for `4d6<3`', () => {
+      const notation = '4d6<3';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num < 3;
-        }).length;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num < 3 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num < 3 ? '*' : '')).join(',');
+
+        expectedSuccesses = roll.rolls[0].filter(num => num < 3).length;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1047,7 +1137,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1058,20 +1148,15 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `4d6>=4`', function(){
-      var notation = '4d6>=4',
-        roll,
-        rollNote;
+    it('should return number of successes for `4d6>=4`', () => {
+      const notation = '4d6>=4';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num >= 4;
-        }).length;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num >= 4 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num >= 4 ? '*' : '')).join(',');
+
+        expectedSuccesses = roll.rolls[0].filter(num => num >= 4).length;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1083,7 +1168,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1094,20 +1179,15 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `13d10>=5`', function(){
-      var notation = '13d10>=5',
-        roll,
-        rollNote;
+    it('should return number of successes for `13d10>=5`', () => {
+      const notation = '13d10>=5';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num >= 5;
-        }).length;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num >= 5 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num >= 5 ? '*' : '')).join(',');
+
+        expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1119,7 +1199,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']',
+          rolls: `[${rollNote}]`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1130,20 +1210,16 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `13d10>=5-H`', function(){
-      var notation = '13d10>=5-H',
-          roll,
-          rollNote;
+    it('should return number of successes for `13d10>=5-H`', () => {
+      const notation = '13d10>=5-H';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num >= 5;
-        }).length - (Math.max.apply(window, roll.rolls[0]) >= 5 ? 1 : 0);
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num >= 5 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num >= 5 ? '*' : '')).join(',');
+        let hSuccessVal = Math.max(...roll.rolls[0]) >= 5 ? 1 : 0;
+
+        expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length - hSuccessVal;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1155,7 +1231,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']-H',
+          rolls: `[${rollNote}]-H`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1166,20 +1242,15 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `6d10>=5*2`', function(){
-      var notation = '6d10>=5*2',
-          roll,
-          rollNote;
+    it('should return number of successes for `6d10>=5*2`', () => {
+      const notation = '6d10>=5*2';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num >= 5;
-        }).length * 2;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num >= 5 ? '*' : '');
-        }).join(',');
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num >= 5 ? '*' : '')).join(',');
+
+        expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length * 2;
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1191,7 +1262,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']*2',
+          rolls: `[${rollNote}]*2`,
           total: (expectedSuccesses || 0)
         });
 
@@ -1202,25 +1273,18 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes + value for `2d10>=5+3d6`', function(){
-      var notation = '2d10>=5+3d6',
-          roll,
-          rollNote;
+    it('should return number of successes + value for `2d10>=5+3d6`', () => {
+      const notation = '2d10>=5+3d6';
 
       // run the tests multiple times for consistency
-      for(i = 0; i < loopCount; i++){
-        var total = 0;
+      for(let i = 0; i < loopCount; i++){
+        const roll = diceRoller.roll(notation),
+              rollNote = roll.rolls[0].map(num => num + (num >= 5 ? '*' : '')).join(',');
 
-        roll = diceRoller.roll(notation);
-        expectedSuccesses = roll.rolls[0].filter(function(num){
-          return num >= 5;
-        }).length;
-        rollNote = roll.rolls[0].map(function(num){
-          return num + (num >= 5 ? '*' : '');
-        }).join(',');
+        expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length;
 
         // calculate expected totals
-        total = expectedSuccesses + DiceRoller.utils.sumArray(roll.rolls[1]);
+        const total = expectedSuccesses + diceUtils.sumArray(roll.rolls[1]);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1232,7 +1296,7 @@
         // check the output string
         expect(roll).toMatchParsedNotation({
           notation: notation,
-          rolls: '[' + rollNote + ']+[' + roll.rolls[1] + ']',
+          rolls: `[${rollNote}]+[${roll.rolls[1]}]`,
           total: total
         });
 
@@ -1243,14 +1307,13 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    describe('non-pool dice rolls', function(){
-      it('should return no successes for `4d6`', function(){
-        var notation = '4d6',
-          roll;
+    describe('non-pool dice rolls', () => {
+      it('should return no successes for `4d6`', () => {
+        const notation = '4d6';
 
         // run the tests multiple times for consistency
-        for(i = 0; i < loopCount; i++){
-          roll = diceRoller.roll(notation);
+        for(let i = 0; i < loopCount; i++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).not.toHaveSuccesses();
           // explicitly check against zero, just be be certain
@@ -1258,13 +1321,12 @@
         }
       });
 
-      it('should return no successes for `5d10!`', function(){
-        var notation = '5d10!',
-          roll;
+      it('should return no successes for `5d10!`', () => {
+        const notation = '5d10!';
 
         // run the tests multiple times for consistency
-        for(i = 0; i < loopCount; i++){
-          roll = diceRoller.roll(notation);
+        for(let i = 0; i < loopCount; i++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).not.toHaveSuccesses();
           // explicitly check against zero, just be be certain
@@ -1272,13 +1334,12 @@
         }
       });
 
-      it('should return no successes for `2d6!!`', function(){
-        var notation = '2d6!!',
-          roll;
+      it('should return no successes for `2d6!!`', () => {
+        const notation = '2d6!!';
 
         // run the tests multiple times for consistency
-        for(i = 0; i < loopCount; i++){
-          roll = diceRoller.roll(notation);
+        for(let i = 0; i < loopCount; i++){
+          const roll = diceRoller.roll(notation);
 
           expect(roll).not.toHaveSuccesses();
           // explicitly check against zero, just be be certain
@@ -1288,47 +1349,47 @@
     });
   });
 
-  describe('roll log', function(){
-    var diceRoller;
+  describe('roll log', () => {
+    let diceRoller;
 
-    beforeEach(function(){
+    beforeEach(() => {
       // create a new instance of the DiceRoller
       diceRoller = new DiceRoller();
     });
 
-    it('should be no dice rolled', function(){
+    it('should be no dice rolled', () => {
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getOutput()).toEqual('');
+      expect(diceRoller.output).toEqual('');
     });
 
-    it('should have 1 dice rolled', function(){
+    it('should have 1 dice rolled', () => {
       diceRoller.roll('d6');
 
       expect(diceRoller).toHaveLogLength(1);
     });
 
-    it('should be cleared log', function(){
+    it('should be cleared log', () => {
       diceRoller.roll('d6');
       diceRoller.clearLog();
 
       expect(diceRoller).not.toHaveLogLength();
-      expect(diceRoller.getOutput()).toEqual('');
+      expect(diceRoller.output).toEqual('');
     });
 
-    it('should have 2 dice rolled', function(){
+    it('should have 2 dice rolled', () => {
       diceRoller.roll('1d6');
       diceRoller.roll('d10');
 
       expect(diceRoller).toHaveLogLength(2);
     });
 
-    it('should contain DiceRolls', function(){
+    it('should contain DiceRolls', () => {
       diceRoller.roll('1d6');
       diceRoller.roll('8d10');
       diceRoller.roll('dF');
 
       // loop through and check that each item in the log is actually a DiceRoll
-      diceRoller.getLog().forEach(function(roll){
+      diceRoller.log.forEach(roll => {
         expect(roll).toEqual(jasmine.any(DiceRoll));
       });
     });
@@ -1445,4 +1506,4 @@
       expect(diceRoller).toHaveLogLength(1);
     });
   });
-}());
+})();
