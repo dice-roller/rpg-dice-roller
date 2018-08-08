@@ -25,6 +25,166 @@
 })(this, exports => {
   "use strict";
 
+  /**
+   * Utility helper functions
+   *
+   * @type {{isNumeric: (function(*=): boolean), isBase64: isBase64, isJson: isJson, generateNumber: generateNumber, sumArray: (function(Array): *), equateNumbers: (function(number, number, string): number), compareNumbers: (function(number, number, string): boolean)}}
+   */
+  const diceUtils = Object.freeze({
+    /**
+     * Checks if the given val is a valid number
+     *
+     * @param val
+     * @returns {boolean}
+     */
+    isNumeric(val){
+      return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
+    },
+    isBase64(val){
+      try{
+        return !!(val && (btoa(atob(val)) === val));
+      }catch(e){
+        return false;
+      }
+    },
+    isJson(val){
+      try{
+        let parsed = val ? JSON.parse(val) : false;
+
+        return !!(parsed && (typeof parsed === 'object'));
+      }catch(e){
+        return false;
+      }
+    },
+    /**
+     * Generates a random number between the
+     * min and max, inclusive
+     *
+     * @param {number|string} min
+     * @param {number|string} max
+     * @returns {*}
+     */
+    generateNumber(min, max){
+      min = min ? parseInt(min, 10) : 1;
+      max = max ? parseInt(max, 10) : min;
+
+      if(max <= min){
+        return min;
+      }
+
+      return Math.floor(Math.random() * (max - min + 1) + min);
+    },
+    /**
+     * @returns {function(Array): number}
+     */
+    get sumArray(){
+      /**
+       * Takes an array of numbers and adds them together,
+       * returning the result
+       *
+       * @param {Array} numbers
+       * @returns {number}
+       */
+      return numbers => (
+        !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => (
+          prev + (this.isNumeric(current) ? parseFloat(current) : 0)
+        ), 0)
+      );
+    },
+    /**
+     * @returns {function(number, number, string=): number}
+     */
+    get equateNumbers(){
+      /**
+       * Takes two numbers and runs a
+       * mathematical equation on them,
+       * using the given operator
+       *
+       * @param {number} a
+       * @param {number} b
+       * @param {string=} operator A valid arithmetic operator (+, -, /, *)
+       * @returns {number}
+       */
+      return (a, b, operator = '+') => {
+        // ensure values are numeric
+        a = this.isNumeric(a) ? parseFloat(a) : 0;
+        b = this.isNumeric(b) ? parseFloat(b) : 0;
+
+        // only carry out operation if we have both values
+        switch(operator){
+          case '*':
+            // multiply the value
+            a *= b;
+            break;
+          case '/':
+            // divide the value (Handle division by zero)
+            a = b ? a / b : 0;
+            break;
+          case '-':
+            // subtract from the value
+            a -= b;
+            break;
+          default:
+            // add to the value
+            a += b;
+            break;
+        }
+
+        return a;
+      };
+    },
+    /**
+     * Checks if `a` is comparative to `b` with the given operator.
+     * Returns true or false.
+     *
+     * @param {number} a
+     * @param {number} b
+     * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
+     * @returns {boolean}
+     */
+    compareNumbers(a, b, operator){
+      let result;
+
+      a = parseFloat(a);
+      b = parseFloat(b);
+
+      switch(operator){
+        case '=':
+        case '==':
+          result = a === b;
+          break;
+        case '<':
+          result = a < b;
+          break;
+        case '>':
+          result = a > b;
+          break;
+        case '<=':
+          result = a <= b;
+          break;
+        case '>=':
+          result = a >= b;
+          break;
+        case '!':
+        case '!=':
+          result = a !== b;
+          break;
+        default:
+          result = false;
+          break;
+      }
+
+      return result;
+    }
+  });
+
+  const exportFormats = Object.freeze({
+    JSON: 0,
+    BASE_64: 1,
+    OBJECT: 2
+  });
+
+
   const DiceRoller = (() => {
     /**
      * history of log rolls
@@ -128,15 +288,15 @@
        * If no format is specified, JSON is returned.
        *
        * @throws Error
-       * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+       * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
        * @returns {string|null}
        */
       export(format){
-        switch (format || DiceRoller.exportFormats.JSON){
-          case DiceRoller.exportFormats.BASE_64:
+        switch (format || exportFormats.JSON){
+          case exportFormats.BASE_64:
             // JSON encode, then base64
-            return btoa(this.export(DiceRoller.exportFormats.JSON));
-          case DiceRoller.exportFormats.JSON:
+            return btoa(this.export(exportFormats.JSON));
+          case exportFormats.JSON:
             return JSON.stringify(this);
           default:
             throw new Error('DiceRoller: Unrecognised export format specified: ' + format);
@@ -156,10 +316,10 @@
       import(data){
         if(!data){
           throw new Error('DiceRoller: No data to import');
-        }else if(DiceRoller.utils.isJson(data)){
+        }else if(diceUtils.isJson(data)){
           // data is JSON - parse and import
           return this.import(JSON.parse(data));
-        }else if(DiceRoller.utils.isBase64(data)){
+        }else if(diceUtils.isBase64(data)){
           // data is base64 encoded - decode an import
           return this.import(atob(data));
         }else if(typeof data === 'object'){
@@ -206,91 +366,13 @@
         };
       }
 
-
       /**
-       * Parses the given dice notation
-       * and returns a list of dice found
-       *
-       * @link https://en.m.wikipedia.org/wiki/Dice_notation
+       * @deprecated Use `DiceRoll.parseNotation()` instead
        * @param {string} notation
        * @returns {Array}
        */
       static parseNotation(notation){
-        const parsed = [];
-
-        // only continue if a notation was passed
-        if(notation){
-          // parse the notation and find each valid dice (and any attributes)
-          const pattern = this.notationPatterns.get('notation', 'g');
-          let match;
-          while((match = pattern.exec(notation)) !== null){
-            const die = {
-              operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
-              qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-              sides: this.utils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
-              fudge: false,                                                    // if fudge die this is set to the fudge notation match
-              explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
-              penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
-              compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
-              comparePoint: false,                                                    // the compare point for exploding/penetrating dice
-              additions: []                                                        // any additions (ie. +2, -L)
-            };
-
-            // check if it's a fudge die
-            if(typeof die.sides === 'string'){
-              die.fudge = die.sides.match(this.notationPatterns.get('fudge', null, true)) || false;
-            }
-
-            // check if we have a compare point
-            if(match[6]){
-              die.comparePoint = {
-                operator: match[6],
-                value: parseInt(match[7], 10)
-              };
-            }else if(die.explode){
-              // we are exploding the dice so we need a compare point, but none has been defined
-              die.comparePoint = {
-                operator: '=',
-                value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
-              };
-            }
-
-            // check if we have additions
-            if(match[8]){
-              // we have additions (ie. +2, -L)
-              let additionMatch;
-              while((additionMatch = this.notationPatterns.get('addition', 'g').exec(match[8]))){
-                // add the addition to the list
-                die.additions.push({
-                  operator: additionMatch[1],             // addition operator for concatenating with the dice (+, -, /, *)
-                  value: this.utils.isNumeric(additionMatch[2]) ? // addition value - either numerical or string 'L' or 'H'
-                    parseFloat(additionMatch[2])
-                    :
-                    additionMatch[2]
-                });
-              }
-            }
-
-            parsed.push(die);
-          }
-        }
-
-        // return the parsed dice
-        return parsed;
-      }
-
-      /**
-       * Parses the given notation for a single die
-       * and returns the number of die sides, required
-       * quantity, etc.
-       *
-       * @param {string} notation
-       * @returns {object|undefined}
-       */
-      static parseDie(notation){
-        // parse the notation and only return the first result
-        // (There should only be one result anyway, but it will be in an array and we want the raw result)
-        return this.parseNotation(notation).shift();
+        return DiceRoll.parseNotation(notation);
       }
 
       /**
@@ -312,274 +394,6 @@
         return diceRoller;
       }
     }
-
-    DiceRoller.exportFormats = Object.freeze({
-      JSON: 0,
-      BASE_64: 1,
-      OBJECT: 2
-    });
-
-    /**
-     * Utility helper functions
-     *
-     * @type {{isNumeric: (function(*=): boolean), isBase64: isBase64, isJson: isJson, generateNumber: generateNumber, sumArray: (function(Array): *), equateNumbers: (function(number, number, string): number), compareNumbers: (function(number, number, string): boolean)}}
-     */
-    DiceRoller.utils = {
-      /**
-       * Checks if the given val is a valid number
-       *
-       * @param val
-       * @returns {boolean}
-       */
-      isNumeric(val){
-        return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
-      },
-      isBase64(val){
-        try{
-          return !!(val && (btoa(atob(val)) === val));
-        }catch(e){
-          return false;
-        }
-      },
-      isJson(val){
-        try{
-          let parsed = val ? JSON.parse(val) : false;
-
-          return !!(parsed && (typeof parsed === 'object'));
-        }catch(e){
-          return false;
-        }
-      },
-      /**
-       * Generates a random number between the
-       * min and max, inclusive
-       *
-       * @param {number|string} min
-       * @param {number|string} max
-       * @returns {*}
-       */
-      generateNumber(min, max){
-        min = min ? parseInt(min, 10) : 1;
-        max = max ? parseInt(max, 10) : min;
-
-        if(max <= min){
-          return min;
-        }
-
-        return Math.floor(Math.random() * (max - min + 1) + min);
-      },
-      /**
-       * @returns {function(Array): number}
-       */
-      get sumArray(){
-        /**
-         * Takes an array of numbers and adds them together,
-         * returning the result
-         *
-         * @param {Array} numbers
-         * @returns {number}
-         */
-        return numbers => (
-          !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => (
-            prev + (this.isNumeric(current) ? parseFloat(current) : 0)
-          ), 0)
-        );
-      },
-      /**
-       * @returns {function(number, number, string=): number}
-       */
-      get equateNumbers(){
-        /**
-         * Takes two numbers and runs a
-         * mathematical equation on them,
-         * using the given operator
-         *
-         * @param {number} a
-         * @param {number} b
-         * @param {string=} operator A valid arithmetic operator (+, -, /, *)
-         * @returns {number}
-         */
-        return (a, b, operator = '+') => {
-          // ensure values are numeric
-          a = this.isNumeric(a) ? parseFloat(a) : 0;
-          b = this.isNumeric(b) ? parseFloat(b) : 0;
-
-          // only carry out operation if we have both values
-          switch(operator){
-            case '*':
-              // multiply the value
-              a *= b;
-              break;
-            case '/':
-              // divide the value (Handle division by zero)
-              a = b ? a / b : 0;
-              break;
-            case '-':
-              // subtract from the value
-              a -= b;
-              break;
-            default:
-              // add to the value
-              a += b;
-              break;
-          }
-
-          return a;
-        };
-      },
-      /**
-       * Checks if `a` is comparative to `b` with the given operator.
-       * Returns true or false.
-       *
-       * @param {number} a
-       * @param {number} b
-       * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
-       * @returns {boolean}
-       */
-      compareNumbers(a, b, operator){
-        let result;
-
-        a = parseFloat(a);
-        b = parseFloat(b);
-
-        switch(operator){
-          case '=':
-          case '==':
-            result = a === b;
-            break;
-          case '<':
-            result = a < b;
-            break;
-          case '>':
-            result = a > b;
-            break;
-          case '<=':
-            result = a <= b;
-            break;
-          case '>=':
-            result = a >= b;
-            break;
-          case '!':
-          case '!=':
-            result = a !== b;
-            break;
-          default:
-            result = false;
-            break;
-        }
-
-        return result;
-      }
-    };
-
-    /**
-     * Stores a list of regular expression
-     * patterns for dice notations.
-     * They can be retrieved, by name, using
-     * the `get(name)` method
-     *
-     * @type {{get}}
-     */
-    DiceRoller.notationPatterns = (() => {
-      const strings = {
-        /**
-         * Matches a basic arithmetic operator
-         *
-         * @type {string}
-         */
-        arithmeticOperator: '[+\\-*\\/]',
-        /**
-         * Matches a basic comparison operator
-         *
-         * @type {string}
-         */
-        comparisonOperators: '[<>!]?={1,3}|[<>]',
-        /**
-         * Matches the numbers for a 'fudge' die (ie. F, F.2)
-         *
-         * @type {string}
-         */
-        fudge: 'F(?:\\.([12]))?',
-        /**
-         * Matches a number comparison (ie. <=4, =5, >3, !=1)
-         *
-         * @type {string}
-         */
-        get numberComparison() {
-          return '(' + this.comparisonOperators + ')([0-9]+)';
-        },
-        /**
-         * Matches exploding/penetrating dice notation
-         *
-         * @type {string}
-         */
-        explode: '(!{1,2}p?)',
-        /**
-         * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
-         *
-         * @returns {string}
-         */
-        get dice() {
-          return '([1-9][0-9]*)?d([1-9][0-9]*|%|' + this.fudge + ')';
-        },
-        /**
-         * Matches a dice, optional exploding/penetrating notation and roll comparison
-         *
-         * @type {string}
-         */
-        get diceFull() {
-          return this.dice + this.explode + '?(?:' + this.numberComparison + ')?';
-        },
-        /**
-         * Matches the addition to a dice (ie. +4, -10, *2, -L)
-         *
-         * @type {string}
-         */
-        get addition() {
-          return '(' + this.arithmeticOperator + ')([1-9]+0?(?![0-9]*d)|H|L)';
-        },
-        /**
-         * Matches a standard dice notation. i.e;
-         * 3d10-2
-         * 4d20-L
-         * 2d7/4
-         * 3d8*2
-         * 2d3+4-1
-         * 2d10-H*1d6/2
-         *
-         * @type {string}
-         */
-        get notation() {
-          return '(' + this.arithmeticOperator + ')?' + this.diceFull + '((?:' + this.addition + ')*)';
-        },
-      };
-
-      // list of cached patterns
-      const regExp = {};
-
-      return {
-        /**
-         * @param {string} name
-         * @param {string=} flags
-         * @param {boolean=} matchWhole
-         * @returns {RegExp}
-         */
-        get(name, flags, matchWhole = false){
-          const cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
-
-          if(!name){
-            throw new Error('DiceRoller: Notation pattern name not defined');
-          }else if((typeof name !== 'string') || !strings[name]){
-            throw new Error(`DiceRoller: Notation pattern name not found: ${name}`);
-          }else if(!regExp[cacheName]){
-            // no cached version - create it
-            regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
-          }
-
-          return regExp[cacheName];
-        }
-      };
-    })();
 
     return DiceRoller;
   })();
@@ -632,7 +446,7 @@
        * @returns {*}
        */
       default(sides){
-        return DiceRoller.utils.generateNumber(1, sides);
+        return diceUtils.generateNumber(1, sides);
       },
       /**
        * Rolls a fudge die
@@ -645,11 +459,11 @@
 
         if(numNonBlanks === 2){
           // default fudge (2 of each non-blank) = 1d3 - 2
-          total = DiceRoller.utils.generateNumber(1, 3) - 2;
+          total = diceUtils.generateNumber(1, 3) - 2;
         }else if(numNonBlanks === 1){
           // only 1 of each non-blank
           // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
-          const num = DiceRoller.utils.generateNumber(1, 6);
+          const num = diceUtils.generateNumber(1, 6);
           if(num === 1){
             total = -1;
           }else if(num === 6){
@@ -669,7 +483,7 @@
      * @returns {boolean}
      */
     const isComparePoint = (comparePoint, value) => {
-      return comparePoint ? DiceRoller.utils.compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
+      return comparePoint ? diceUtils.compareNumbers(value, comparePoint.value, comparePoint.operator) : false;
     };
 
     /**
@@ -706,7 +520,7 @@
         // we have a fudge dice - define the callback to return the `fudge` roll method
         callback = diceRollMethods.fudge;
         // set the `sides` to the correct value for the fudge type
-        sides = DiceRoller.utils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1], 10) : 2;
+        sides = diceUtils.isNumeric(die.fudge[1]) ? parseInt(die.fudge[1], 10) : 2;
       }else if(typeof die.sides === 'string'){
         if(die.sides === '%'){
           // convert percentile to 100 sided die
@@ -803,7 +617,7 @@
           this[_rolls] = notation.rolls || [];
 
           // parse the notation
-          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+          this[_parsedDice] = DiceRoll.parseNotation(this.notation);
         }else if(typeof notation === 'string'){
           // store the notation
           this[_notation] = notation;
@@ -811,7 +625,7 @@
           this[_rolls] = [];
 
           // parse the notation
-          this[_parsedDice] = DiceRoller.parseNotation(this.notation);
+          this[_parsedDice] = DiceRoll.parseNotation(this.notation);
 
           // roll the dice
           this.roll();
@@ -1003,7 +817,7 @@
             }
 
             // add all the rolls together to get the total
-            dieTotal = DiceRoller.utils.sumArray(rolls);
+            dieTotal = diceUtils.sumArray(rolls);
 
 
             if(item.additions.length){
@@ -1031,16 +845,16 @@
                 }
 
                 // run the actual mathematical equation
-                dieTotal = DiceRoller.utils.equateNumbers(dieTotal, value, aItem.operator);
+                dieTotal = diceUtils.equateNumbers(dieTotal, value, aItem.operator);
               });
             }
 
             // total the value
-            this[_total] = DiceRoller.utils.equateNumbers(this[_total], dieTotal, item.operator);
+            this[_total] = diceUtils.equateNumbers(this[_total], dieTotal, item.operator);
 
             // if this is a pool dice, add it's success count to the count
             if(isPool) {
-              this[_successes] = DiceRoller.utils.equateNumbers(this[_successes], dieTotal, item.operator);
+              this[_successes] = diceUtils.equateNumbers(this[_successes], dieTotal, item.operator);
             }
           });
         }
@@ -1054,18 +868,18 @@
        * If no format is specified, JSON is returned.
        *
        * @throws Error
-       * @param {DiceRoller.exportFormats=} format The format to export the data as (ie. JSON, base64)
+       * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
        * @returns {string|null}
        */
-      export(format = DiceRoller.exportFormats.JSON){
+      export(format = exportFormats.JSON){
         switch(format){
-          case DiceRoller.exportFormats.BASE_64:
+          case exportFormats.BASE_64:
             // JSON encode, then base64, otherwise it exports the string representation of the roll output
-            return btoa(this.export(DiceRoller.exportFormats.JSON));
-          case DiceRoller.exportFormats.JSON:
+            return btoa(this.export(exportFormats.JSON));
+          case exportFormats.JSON:
             return JSON.stringify(this);
-          case DiceRoller.exportFormats.OBJECT:
-            return JSON.parse(this.export(DiceRoller.exportFormats.JSON));
+          case exportFormats.OBJECT:
+            return JSON.parse(this.export(exportFormats.JSON));
           default:
             throw new Error('DiceRoll: Unrecognised export format specified: ' + format);
         }
@@ -1109,10 +923,10 @@
       static import(data){
         if(!data){
           throw new Error('DiceRoll: No data to import');
-        }else if(DiceRoller.utils.isJson(data)){
+        }else if(diceUtils.isJson(data)){
           // data is JSON format - parse and import
           return DiceRoll.import(JSON.parse(data));
-        }else if(DiceRoller.utils.isBase64(data)) {
+        }else if(diceUtils.isBase64(data)) {
           // data is base64 encoded - decode and import
           return DiceRoll.import(atob(data));
         }else if(typeof data === 'object'){
@@ -1126,12 +940,196 @@
           throw new Error('DiceRoll: Unrecognised import format for data: ' + data);
         }
       }
+
+      /**
+       * Parses the given dice notation
+       * and returns a list of dice found
+       *
+       * @link https://en.m.wikipedia.org/wiki/Dice_notation
+       * @param {string} notation
+       * @returns {Array}
+       */
+      static parseNotation(notation){
+        const parsed = [];
+
+        // only continue if a notation was passed
+        if(notation){
+          // parse the notation and find each valid dice (and any attributes)
+          const pattern = this.notationPatterns.get('notation', 'g');
+          let match;
+          while((match = pattern.exec(notation)) !== null){
+            const die = {
+              operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
+              qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+              sides: diceUtils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+              fudge: false,                                                    // if fudge die this is set to the fudge notation match
+              explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
+              penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+              compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
+              comparePoint: false,                                                    // the compare point for exploding/penetrating dice
+              additions: []                                                        // any additions (ie. +2, -L)
+            };
+
+            // check if it's a fudge die
+            if(typeof die.sides === 'string'){
+              die.fudge = die.sides.match(this.notationPatterns.get('fudge', null, true)) || false;
+            }
+
+            // check if we have a compare point
+            if(match[6]){
+              die.comparePoint = {
+                operator: match[6],
+                value: parseInt(match[7], 10)
+              };
+            }else if(die.explode){
+              // we are exploding the dice so we need a compare point, but none has been defined
+              die.comparePoint = {
+                operator: '=',
+                value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
+              };
+            }
+
+            // check if we have additions
+            if(match[8]){
+              // we have additions (ie. +2, -L)
+              let additionMatch;
+              while((additionMatch = this.notationPatterns.get('addition', 'g').exec(match[8]))){
+                // add the addition to the list
+                die.additions.push({
+                  // addition operator for concatenating with the dice (+, -, /, *)
+                  operator: additionMatch[1],
+                  // addition value - either numerical or string 'L' or 'H'
+                  value: diceUtils.isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2],
+                });
+              }
+            }
+
+            parsed.push(die);
+          }
+        }
+
+        // return the parsed dice
+        return parsed;
+      }
     }
+
+
+    /**
+     * Stores a list of regular expression
+     * patterns for dice notations.
+     * They can be retrieved, by name, using
+     * the `get(name)` method
+     *
+     * @type {{get}}
+     */
+    DiceRoll.notationPatterns = (() => {
+      const strings = {
+        /**
+         * Matches a basic arithmetic operator
+         *
+         * @type {string}
+         */
+        arithmeticOperator: '[+\\-*\\/]',
+        /**
+         * Matches a basic comparison operator
+         *
+         * @type {string}
+         */
+        comparisonOperators: '[<>!]?={1,3}|[<>]',
+        /**
+         * Matches the numbers for a 'fudge' die (ie. F, F.2)
+         *
+         * @type {string}
+         */
+        fudge: 'F(?:\\.([12]))?',
+        /**
+         * Matches a number comparison (ie. <=4, =5, >3, !=1)
+         *
+         * @type {string}
+         */
+        get numberComparison() {
+          return '(' + this.comparisonOperators + ')([0-9]+)';
+        },
+        /**
+         * Matches exploding/penetrating dice notation
+         *
+         * @type {string}
+         */
+        explode: '(!{1,2}p?)',
+        /**
+         * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+         *
+         * @returns {string}
+         */
+        get dice() {
+          return '([1-9][0-9]*)?d([1-9][0-9]*|%|' + this.fudge + ')';
+        },
+        /**
+         * Matches a dice, optional exploding/penetrating notation and roll comparison
+         *
+         * @type {string}
+         */
+        get diceFull() {
+          return this.dice + this.explode + '?(?:' + this.numberComparison + ')?';
+        },
+        /**
+         * Matches the addition to a dice (ie. +4, -10, *2, -L)
+         *
+         * @type {string}
+         */
+        get addition() {
+          return '(' + this.arithmeticOperator + ')([1-9]+0?(?![0-9]*d)|H|L)';
+        },
+        /**
+         * Matches a standard dice notation. i.e;
+         * 3d10-2
+         * 4d20-L
+         * 2d7/4
+         * 3d8*2
+         * 2d3+4-1
+         * 2d10-H*1d6/2
+         *
+         * @type {string}
+         */
+        get notation() {
+          return '(' + this.arithmeticOperator + ')?' + this.diceFull + '((?:' + this.addition + ')*)';
+        },
+      };
+
+      // list of cached patterns
+      const regExp = {};
+
+      return {
+        /**
+         * @param {string} name
+         * @param {string=} flags
+         * @param {boolean=} matchWhole
+         * @returns {RegExp}
+         */
+        get(name, flags, matchWhole = false){
+          const cacheName = name + '_' + flags + '_' + (matchWhole ? 't' : 'f');
+
+          if(!name){
+            throw new Error('DiceRoller: Notation pattern name not defined');
+          }else if((typeof name !== 'string') || !strings[name]){
+            throw new Error(`DiceRoller: Notation pattern name not found: ${name}`);
+          }else if(!regExp[cacheName]){
+            // no cached version - create it
+            regExp[cacheName] = new RegExp((matchWhole ? '^' : '') + strings[name] + (matchWhole ? '$' : ''), flags || undefined);
+          }
+
+          return regExp[cacheName];
+        }
+      };
+    })();
+
 
     return DiceRoll;
   })();
 
 
+  exports.diceUtils = diceUtils;
+  exports.exportFormats = exportFormats;
   exports.DiceRoller = DiceRoller;
   exports.DiceRoll = DiceRoll;
 });

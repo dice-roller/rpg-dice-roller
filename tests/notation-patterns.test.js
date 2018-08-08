@@ -79,25 +79,25 @@
     describe('get notation patterns', () => {
       Object.keys(strings).forEach(name => {
         it(`should return the notation pattern for "${name}"`, () => {
-          const pattern = DiceRoller.notationPatterns.get(name);
+          const pattern = DiceRoll.notationPatterns.get(name);
 
           expect(pattern + '').toEqual(`/${strings[name]}/`);
         });
 
         it(`should return the notation pattern with flags for "${name}"`, () => {
-          const pattern = DiceRoller.notationPatterns.get(name, 'g');
+          const pattern = DiceRoll.notationPatterns.get(name, 'g');
 
           expect(pattern + '').toEqual(`/${strings[name]}/g`);
         });
 
         it(`should return the notation pattern matching whole string for "${name}"`, () => {
-          const pattern = DiceRoller.notationPatterns.get(name, null, true);
+          const pattern = DiceRoll.notationPatterns.get(name, null, true);
 
           expect(pattern + '').toEqual(`/^${strings[name]}$/`);
         });
 
         it(`should return the notation pattern with flags and matching whole string for "${name}"`, () => {
-          const pattern = DiceRoller.notationPatterns.get(name, 'g', true);
+          const pattern = DiceRoll.notationPatterns.get(name, 'g', true);
 
           expect(pattern.toString()).toEqual(`/^${strings[name]}$/g`);
         });
@@ -107,41 +107,41 @@
     describe('invalid patterns', () => {
       it('should throw error if pattern name is empty', () => {
         expect(() => {
-          DiceRoller.notationPatterns.get();
+          DiceRoll.notationPatterns.get();
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(null);
+          DiceRoll.notationPatterns.get(null);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(undefined);
+          DiceRoll.notationPatterns.get(undefined);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(false);
+          DiceRoll.notationPatterns.get(false);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(0);
+          DiceRoll.notationPatterns.get(0);
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
       });
 
       it('should throw error if pattern name is invalid', () => {
         expect(() => {
-          DiceRoller.notationPatterns.get('foo');
+          DiceRoll.notationPatterns.get('foo');
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get([]);
+          DiceRoll.notationPatterns.get([]);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(['notation']);
+          DiceRoll.notationPatterns.get(['notation']);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
 
         expect(() => {
-          DiceRoller.notationPatterns.get(1);
+          DiceRoll.notationPatterns.get(1);
         }).toThrowError(/DiceRoller: Notation pattern name not found/);
       });
     });

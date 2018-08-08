@@ -1284,7 +1284,7 @@
         expectedSuccesses = roll.rolls[0].filter(num => num >= 5).length;
 
         // calculate expected totals
-        const total = expectedSuccesses + DiceRoller.utils.sumArray(roll.rolls[1]);
+        const total = expectedSuccesses + diceUtils.sumArray(roll.rolls[1]);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
