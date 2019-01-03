@@ -631,6 +631,28 @@
       });
     });
 
+    it('should return between 103 and 108 for `1d6+102', () => {
+      const notation = '1d6+102',
+            roll = diceRoller.roll(notation),
+            total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 103, max: 108});
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(total-102);
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total-102}]+102`,
+        total: total,
+      });
+    });
+
     it('should return between -1 and 2 for `1d4-2`', () => {
       const notation = '1d4-2',
             roll = diceRoller.roll(notation),
