@@ -58,7 +58,7 @@
        * @type {string}
        */
       get addition() {
-        return '(' + this.arithmeticOperator + ')([1-9]+0?(?![0-9]*d)|H|L)';
+        return '(' + this.arithmeticOperator + ')([0-9]+(?![0-9]*d)|H|L)';
       },
       /**
        * Matches a standard dice notation. i.e;
