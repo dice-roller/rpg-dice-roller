@@ -190,7 +190,7 @@
       expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
       expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 3});
 
-      expect(utils.reduceArray(roll.rolls[0]) / utils.reduceArray(roll.rolls[1])).toArraySumEqualTo(total);
+      expect(utils.reduceArray(roll.rolls[0]) / utils.reduceArray(roll.rolls[1])).toBeCloseTo(total, 2);
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -801,7 +801,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by lowest) is equal to the total, multiplied by the lowest
-      expect(roll.rolls).toArraySumEqualTo(total * utils.getMin(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total * utils.getMin(roll.rolls[0])));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -893,7 +893,8 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by highest) is equal to the total, multiplied by the highest
-      expect(roll.rolls).toArraySumEqualTo(total * utils.getMax(roll.rolls[0]));
+      // we need to round the comparison total because the `roll.rolls` doesn't include decimal points
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total * utils.getMax(roll.rolls[0])));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -1095,6 +1096,81 @@
 
       // if we run many rolls, we should expect at least one to have exploded
       expect(hasExploded).toBeTruthy();
+    });
+
+    it('should return between 3.4 and 8.4 for `1d6+2.4`', () => {
+      const notation = '1d6+2.4',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 3.4, max: 8.4});
+
+      // check value ends in `.4`
+      expect(total).toMatch(/^[3-8]\.4$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total-2.4));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${Math.round(total-2.4)}]+2.4`,
+        total: total,
+      });
+    });
+
+    it('should return between -1.1 and 1.9 for `1d4-2.1`', () => {
+      const notation = '1d4-2.1',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: -1.1, max: 1.9});
+
+      // check value ends in `.1` or `.9`
+      expect(total).toMatch(/^-?[01]\.[19]$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(parseFloat((total+2.1).toFixed(1)));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total+2.1}]-2.1`,
+        total: total,
+      });
+    });
+
+    it('should return between 0.22 and 2.21 for `1d10/4.52`', () => {
+      const notation = '1d10/4.52',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 0.22, max: 2.21});
+
+      // check value ends in a decimal place
+      expect(total).toMatch(/^[0-2]\.\d{2}$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total*4.52));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${Math.round(total*4.52)}]/4.52`,
+        total: total,
+      });
     });
   });
 
