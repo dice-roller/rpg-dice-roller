@@ -175,6 +175,23 @@
       }
 
       return result;
+    },
+    /**
+     * Rounds a number to the given number of decimal places,
+     * removing any trailing zeros after the decimal point.
+     *
+     * `toFixed(1.236, 2) == 1.24`
+     * `toFixed(30.1, 2) == 30.1`
+     * `toFixed(4.0000000004, 3) == 4`
+     *
+     * @param {number} num
+     * @param {number=} decPlaces
+     * @returns {number}
+     */
+    toFixed(num, decPlaces){
+      // round to the specified decimal places, then convert back to
+      // a number to remove trailing zeroes after the decimal point
+      return parseFloat(num.toFixed(decPlaces || 0));
     }
   });
 
@@ -857,6 +874,11 @@
               this[_successes] = diceUtils.equateNumbers(this[_successes], dieTotal, item.operator);
             }
           });
+
+          // if a total has been calculated round it to 2 decimal places
+          if(this[_total]){
+            this[_total] = diceUtils.toFixed(this[_total], 2);
+          }
         }
 
         // return the total
@@ -1043,12 +1065,12 @@
          */
         fudge: 'F(?:\\.([12]))?',
         /**
-         * Matches a number comparison (ie. <=4, =5, >3, !=1)
+         * Matches a number comparison (ie. <=4, =5, >3, !=1, < 2.6)
          *
          * @type {string}
          */
         get numberComparison() {
-          return '(' + this.comparisonOperators + ')([0-9]+)';
+          return `(${this.comparisonOperators})(${this.numberDecimal})`;
         },
         /**
          * Matches exploding/penetrating dice notation
@@ -1062,7 +1084,7 @@
          * @returns {string}
          */
         get dice() {
-          return '([1-9][0-9]*)?d([1-9][0-9]*|%|' + this.fudge + ')';
+          return `([1-9]\\d*)?d([1-9]\\d*|%|${this.fudge})`;
         },
         /**
          * Matches a dice, optional exploding/penetrating notation and roll comparison
@@ -1070,7 +1092,7 @@
          * @type {string}
          */
         get diceFull() {
-          return this.dice + this.explode + '?(?:' + this.numberComparison + ')?';
+          return `${this.dice}${this.explode}?(?:${this.numberComparison})?`;
         },
         /**
          * Matches the addition to a dice (ie. +4, -10, *2, -L)
@@ -1078,7 +1100,7 @@
          * @type {string}
          */
         get addition() {
-          return '(' + this.arithmeticOperator + ')([0-9]+(?![0-9]*d)|H|L)';
+          return `(${this.arithmeticOperator})(${this.numberDecimal}(?!\\d*d)|H|L)`;
         },
         /**
          * Matches a standard dice notation. i.e;
@@ -1092,8 +1114,9 @@
          * @type {string}
          */
         get notation() {
-          return '(' + this.arithmeticOperator + ')?' + this.diceFull + '((?:' + this.addition + ')*)';
+          return `(${this.arithmeticOperator})?${this.diceFull}((?:${this.addition})*)`;
         },
+        numberDecimal: '\\d+(?:\\.\\d+)?',
       };
 
       // list of cached patterns

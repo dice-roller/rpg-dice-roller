@@ -23,12 +23,12 @@
        */
       fudge: 'F(?:\\.([12]))?',
       /**
-       * Matches a number comparison (ie. <=4, =5, >3, !=1)
+       * Matches a number comparison (ie. <=4, =5, >3, !=1, < 2.6)
        *
        * @type {string}
        */
       get numberComparison() {
-        return '(' + this.comparisonOperators + ')([0-9]+)';
+        return `(${this.comparisonOperators})(${this.numberDecimal})`;
       },
       /**
        * Matches exploding/penetrating dice notation
@@ -42,7 +42,7 @@
        * @returns {string}
        */
       get dice() {
-        return '([1-9][0-9]*)?d([1-9][0-9]*|%|' + this.fudge + ')';
+        return `([1-9]\\d*)?d([1-9]\\d*|%|${this.fudge})`;
       },
       /**
        * Matches a dice, optional exploding/penetrating notation and roll comparison
@@ -50,7 +50,7 @@
        * @type {string}
        */
       get diceFull() {
-        return this.dice + this.explode + '?(?:' + this.numberComparison + ')?';
+        return `${this.dice}${this.explode}?(?:${this.numberComparison})?`;
       },
       /**
        * Matches the addition to a dice (ie. +4, -10, *2, -L)
@@ -58,7 +58,7 @@
        * @type {string}
        */
       get addition() {
-        return '(' + this.arithmeticOperator + ')([0-9]+(?![0-9]*d)|H|L)';
+        return `(${this.arithmeticOperator})(${this.numberDecimal}(?!\\d*d)|H|L)`;
       },
       /**
        * Matches a standard dice notation. i.e;
@@ -72,8 +72,9 @@
        * @type {string}
        */
       get notation() {
-        return '(' + this.arithmeticOperator + ')?' + this.diceFull + '((?:' + this.addition + ')*)';
+        return `(${this.arithmeticOperator})?${this.diceFull}((?:${this.addition})*)`;
       },
+      numberDecimal: '\\d+(?:\\.\\d+)?',
     };
 
     describe('get notation patterns', () => {
