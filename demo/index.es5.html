@@ -27,7 +27,7 @@
       font-size: .75em;
       background: #eee;
     }
-    
+
     input, textarea, button{
       margin-bottom: 1em;
     }
@@ -46,26 +46,6 @@
       font-size: 1em;
     }
   </style>
-
-  <script type="module">
-    import { DiceRoller } from './lib/index.js';
-
-    const diceRoller = new DiceRoller();
-
-    window.roll = () => {
-      const value = document.getElementById('input').value;
-
-      diceRoller.roll(value);
-
-      document.getElementById('output').value = diceRoller.output;
-    };
-
-    window.clearLog = () => {
-      diceRoller.clearLog();
-
-      document.getElementById('output').value = diceRoller.output;
-    };
-  </script>
 </head>
 
 <body>
@@ -174,5 +154,24 @@
     Copyright &copy; 2015 - 2019 GreenImp ltd. (MIT) -
     <a href="https://github.com/GreenImp/rpg-dice-roller" target="_blank">GitHub</a>
   </footer>
+
+  <script src="/lib/es5/bundle.js"></script>
+  <script>
+    const diceRoller = new Roller.DiceRoller();
+
+    window.roll = () => {
+      const value = document.getElementById('input').value;
+
+      diceRoller.roll(value);
+
+      document.getElementById('output').value = diceRoller.output;
+    };
+
+    window.clearLog = () => {
+      diceRoller.clearLog();
+
+      document.getElementById('output').value = diceRoller.output;
+    };
+  </script>
 </body>
 </html>

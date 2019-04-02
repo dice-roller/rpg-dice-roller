@@ -4,7 +4,7 @@
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk",
   "version": "2.0.1",
   "license": "MIT",
-  "main": "dice-roller.js",
+  "main": "lib/index.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -23,14 +23,21 @@
     "d&d"
   ],
   "devDependencies": {
-    "grunt": "^1.0.4",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-jasmine": "^2.0.3",
-    "grunt-contrib-jshint": "^1.1.0",
-    "jshint": "^2.9.6"
+    "@babel/core": "^7.4.3",
+    "@babel/preset-env": "^7.4.3",
+    "babel-loader": "^8.0.5",
+    "jshint": "^2.10.2",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0",
+    "webpack-dev-server": "^3.2.1"
   },
   "scripts": {
-    "test": "grunt ci"
+    "build": "webpack --mode production",
+    "build:dev": "webpack --mode development",
+    "start:dev": "webpack-dev-server --color --progress",
+    "watch": "webpack --watch",
+    "watch:dev": "webpack --mode development --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "jshintConfig": {
     "esversion": 6
