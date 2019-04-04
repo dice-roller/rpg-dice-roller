@@ -39,15 +39,6 @@ module.exports = grunt => {
   };
   grunt.registerTask('test', 'jasmine:src');
 
-  // watch
-  /*grunt.loadNpmTasks('grunt-contrib-watch');
-  gruntConfig.watch = {
-    scripts: {
-      files: ['dice-roller.js'],
-      tasks: ['lint', 'test']
-    }
-  };*/
-
   // grunt
   grunt.initConfig(gruntConfig);
 

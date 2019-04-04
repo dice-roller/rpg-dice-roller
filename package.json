@@ -27,6 +27,7 @@
     "@babel/preset-env": "^7.4.3",
     "babel-loader": "^8.0.5",
     "jshint": "^2.10.2",
+    "jshint-loader": "git+https://github.com/webpack-contrib/jshint-loader.git",
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.2.1"
@@ -37,9 +38,6 @@
     "start:dev": "webpack-dev-server --color --progress",
     "watch": "webpack --watch",
     "watch:dev": "webpack --mode development --watch",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "jshintConfig": {
-    "esversion": 6
+    "test": "jshint lib/ --exclude lib/es5/"
   }
 }

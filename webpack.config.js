@@ -18,13 +18,24 @@ module.exports = {
     rules: [
       {
         test: /lib\/.+\.js$/,
-        exclude: /(node_modules)/,
-        use: {
-          loader: 'babel-loader',
-          options: {
-            babelrc: true,
+        exclude: /node_modules/,
+        use: [
+          /**
+           * lint the JS
+           */
+          {
+            loader: 'jshint-loader',
           },
-        },
+          /**
+           * Compile the JS
+           */
+          {
+            loader: 'babel-loader',
+            options: {
+              babelrc: true,
+            },
+          },
+        ],
       },
     ],
   },
