@@ -25,7 +25,9 @@
   "devDependencies": {
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
+    "abab": "^2.0.0",
     "babel-loader": "^8.0.5",
+    "jasmine": "^3.4.0",
     "jshint": "^2.10.2",
     "jshint-loader": "git+https://github.com/webpack-contrib/jshint-loader.git",
     "webpack": "^4.29.6",
@@ -35,9 +37,8 @@
   "scripts": {
     "build": "webpack --mode production",
     "build:dev": "webpack --mode development",
-    "start:dev": "webpack-dev-server --color --progress",
-    "watch": "webpack --watch",
-    "watch:dev": "webpack --mode development --watch",
-    "test": "jshint lib/ --exclude lib/es5/"
+    "start": "webpack-dev-server --color --progress",
+    "watch": "webpack --mode development --watch",
+    "test": "jshint lib/ --exclude lib/es5/ & jasmine"
   }
 }

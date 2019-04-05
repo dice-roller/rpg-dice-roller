@@ -1,6 +1,10 @@
-/*global beforeEach, console, DiceRoller, jasmine */
-beforeEach(() => {
+/*global beforeEach, jasmine */
+beforeEach(function(){
   'use strict';
+
+  const lib = this;
+  // require the dice-roller library
+  const { diceUtils } = require('../../lib/es5/bundle.js');
 
   const customMatchers = {
     toBeWithinRange(util, customEqualityTesters){
@@ -48,7 +52,7 @@ beforeEach(() => {
     toArraySumEqualTo(util, customEqualityTesters){
       return {
         compare(actual, expected){
-          const sum = utils.reduceArray(actual);
+          const sum = lib.utils.reduceArray(actual);
           let result = {};
 
           if (sum !== expected) {
@@ -322,7 +326,7 @@ beforeEach(() => {
         compare(actual){
           let result = {};
 
-          result.pass = utils.isJSON(actual);
+          result.pass = lib.utils.isJSON(actual);
 
           if(result.pass){
             result.message = `Expected "${actual}" to NOT be valid JSON`;
@@ -339,7 +343,7 @@ beforeEach(() => {
         compare(actual){
           let result = {};
 
-          result.pass = utils.isBase64Encoded(actual);
+          result.pass = lib.utils.isBase64Encoded(actual);
 
           if(result.pass){
             result.message = `Expected "${actual}" to NOT be base64 encoded`;
@@ -373,7 +377,7 @@ beforeEach(() => {
   // add matchers globally
   jasmine.addMatchers(customMatchers);
 
-  window.utils = {
+  lib.utils = {
     /**
      * Reduces an array to a single value
      *
@@ -382,7 +386,7 @@ beforeEach(() => {
      */
     reduceArray(obj){
       if(Array.isArray(obj)){
-        return obj.reduce((a, b) => utils.reduceArray(a) + utils.reduceArray(b), 0);
+        return obj.reduce((a, b) => this.reduceArray(a) + this.reduceArray(b), 0);
       }else{
         return obj;
       }
@@ -414,4 +418,9 @@ beforeEach(() => {
       }
     }
   };
+
+  // fix for lack of base64 handling in nodeJS
+  var { btoa, atob } = require('abab');
+  global.btoa = btoa;
+  global.atob = atob;
 });
