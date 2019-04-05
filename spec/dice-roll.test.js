@@ -1,6 +1,9 @@
-/*global beforeEach, describe, DiceRoller, DiceRoll, expect, jasmine, it, utils */
+/*global beforeEach, describe, expect, jasmine, it */
 ;(() => {
   'use strict';
+
+  // require the dice-roller library
+  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/es5/bundle.js');
 
   const loopCount = 1000;
 
@@ -19,7 +22,7 @@
             sides = die === '%' ? 100 : die,
             notation = 'd' + die;
 
-      it(`should return between 1 and ${sides} for \`${notation}\``, () => {
+      it(`should return between 1 and ${sides} for \`${notation}\``, function(){
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -58,7 +61,7 @@
             notation = die;
 
       // Fudge dice always provide a value between -1 and 1
-      it(`should be between -1 and 1 for \`${notation}\``, () => {
+      it(`should be between -1 and 1 for \`${notation}\``, function(){
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -99,7 +102,7 @@
       const die = dice[i],
             notation = `${die.rolls}d${die.sides}`;
 
-      it(`should roll a ${die.sides} sided die ${die.rolls} times`, () => {
+      it(`should roll a ${die.sides} sided die ${die.rolls} times`, function(){
         // run the tests multiple times for consistency
         for(let j = 0; j < loopCount; j++){
           const roll = diceRoller.roll(notation);
@@ -122,7 +125,7 @@
       });
     }
 
-    it('should compute multiple dice rolls for `1d6+2d10`', () => {
+    it('should compute multiple dice rolls for `1d6+2d10`', function(){
       const notation = '1d6+2d10',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -148,7 +151,7 @@
       });
     });
 
-    it('should compute multiple dice rolls for `3d6*2d10-L`', () => {
+    it('should compute multiple dice rolls for `3d6*2d10-L`', function(){
       const notation = '3d6*2d10-L',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -164,7 +167,7 @@
       expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
       expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 10});
 
-      expect(utils.reduceArray(roll.rolls[0]) * (utils.reduceArray(roll.rolls[1]) - utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
+      expect(this.utils.reduceArray(roll.rolls[0]) * (this.utils.reduceArray(roll.rolls[1]) - this.utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -174,7 +177,7 @@
       });
     });
 
-    it('should compute multiple dice rolls for `4d6/2d3`', () => {
+    it('should compute multiple dice rolls for `4d6/2d3`', function(){
       const notation = '4d6/2d3',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -190,7 +193,7 @@
       expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
       expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 3});
 
-      expect(utils.reduceArray(roll.rolls[0]) / utils.reduceArray(roll.rolls[1])).toArraySumEqualTo(total);
+      expect(this.utils.reduceArray(roll.rolls[0]) / this.utils.reduceArray(roll.rolls[1])).toBeCloseTo(total, 2);
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -209,7 +212,7 @@
       diceRoller = new DiceRoller();
     });
 
-    it('should explode for `1d2!`', () => {
+    it('should explode for `1d2!`', function(){
       const notation = '1d2!';
       let hasExploded = false;
 
@@ -244,7 +247,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should compound explode for `1d2!!`', () => {
+    it('should compound explode for `1d2!!`', function(){
       const notation = '1d2!!';
       let hasCompounded = false;
 
@@ -277,7 +280,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should penetrate for `1d2!p`', () => {
+    it('should penetrate for `1d2!p`', function(){
       const notation = '1d2!p';
       let hasExploded = false;
 
@@ -312,7 +315,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should penetrate compound for `1d2!!p`', () => {
+    it('should penetrate compound for `1d2!!p`', function(){
       const notation = '1d2!!p';
       let hasCompounded = false;
 
@@ -345,7 +348,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should penetrate compound for `2d2!!p', () => {
+    it('should penetrate compound for `2d2!!p', function(){
       const notation = '2d2!!p';
       let hasCompounded = false;
 
@@ -373,7 +376,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should explode if higher than 1 for `1d6!>1`', () => {
+    it('should explode if higher than 1 for `1d6!>1`', function(){
       const notation = '1d6!>1';
       let hasExploded = false;
 
@@ -415,7 +418,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should explode if less than 2 for `1d2!<2`', () => {
+    it('should explode if less than 2 for `1d2!<2`', function(){
       const notation = '1d2!<2';
       let hasExploded = false;
 
@@ -457,7 +460,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should explode if equal to 2 for `1d3!=2`', () => {
+    it('should explode if equal to 2 for `1d3!=2`', function(){
       const notation = '1d3!=2';
       let hasExploded = false;
 
@@ -499,7 +502,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should compound if higher than 1 for `1d6!!>1`', () => {
+    it('should compound if higher than 1 for `1d6!!>1`', function(){
       const notation = '1d6!!>1';
       let hasCompounded = false;
 
@@ -532,7 +535,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should compound if less than 2 for `1d2!!<2`', () => {
+    it('should compound if less than 2 for `1d2!!<2`', function(){
       const notation = '1d2!!<2';
       let hasCompounded = false;
 
@@ -566,7 +569,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should compound if equal to 2 for `1d2!!=2`', () => {
+    it('should compound if equal to 2 for `1d2!!=2`', function(){
       const notation = '1d2!!=2';
       let hasCompounded = false;
 
@@ -609,7 +612,7 @@
       diceRoller = new DiceRoller();
     });
 
-    it('should return between 3 and 8 for `1d6+2`', () => {
+    it('should return between 3 and 8 for `1d6+2`', function(){
       const notation = '1d6+2',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -631,7 +634,7 @@
       });
     });
 
-    it('should return between 103 and 108 for `1d6+102', () => {
+    it('should return between 103 and 108 for `1d6+102', function(){
       const notation = '1d6+102',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -653,7 +656,7 @@
       });
     });
 
-    it('should return between -1 and 2 for `1d4-2`', () => {
+    it('should return between -1 and 2 for `1d4-2`', function(){
       const notation = '1d4-2',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -675,7 +678,7 @@
       });
     });
 
-    it('should return between 2 and 20 for `1d10*2`', () => {
+    it('should return between 2 and 20 for `1d10*2`', function(){
       const notation = '1d10*2',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -697,7 +700,7 @@
       });
     });
 
-    it('should return between 0.5 and 4 for `1d8/2`', () => {
+    it('should return between 0.5 and 4 for `1d8/2`', function(){
       const notation = '1d8/2',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -719,7 +722,7 @@
       });
     });
 
-    it('should subtract the LOWEST roll for `4d6-L', () => {
+    it('should subtract the LOWEST roll for `4d6-L', function(){
       const notation = '4d6-L',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -732,7 +735,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-      expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -742,7 +745,7 @@
       });
     });
 
-    it('should add the LOWEST roll for `4d6+L', () => {
+    it('should add the LOWEST roll for `4d6+L', function(){
       const notation = '4d6+L',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -755,7 +758,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before lowest is added) is equal to the total, with the lowest subtracted
-      expect(roll.rolls).toArraySumEqualTo(total - utils.getMin(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total - this.utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -765,7 +768,7 @@
       });
     });
 
-    it('should multiply by the LOWEST roll for `4d6*L', () => {
+    it('should multiply by the LOWEST roll for `4d6*L', function(){
       const notation = '4d6*L',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -778,7 +781,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before multiplied by lowest) is equal to the total, divided by the lowest
-      expect(roll.rolls).toArraySumEqualTo(total / utils.getMin(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total / this.utils.getMin(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -788,7 +791,7 @@
       });
     });
 
-    it('should divide by the LOWEST roll for `4d6/L', () => {
+    it('should divide by the LOWEST roll for `4d6/L', function(){
       const notation = '4d6/L',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -801,7 +804,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by lowest) is equal to the total, multiplied by the lowest
-      expect(roll.rolls).toArraySumEqualTo(total * utils.getMin(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total * this.utils.getMin(roll.rolls[0])));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -811,7 +814,7 @@
       });
     });
 
-    it('should subtract the HIGHEST roll for `4d6-H', () => {
+    it('should subtract the HIGHEST roll for `4d6-H', function(){
       const notation = '4d6-H',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -824,7 +827,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before highest is subtracted) is equal to the total, with the highest added
-      expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -834,7 +837,7 @@
       });
     });
 
-    it('should add the HIGHEST roll for `4d6+H', () => {
+    it('should add the HIGHEST roll for `4d6+H', function(){
       const notation = '4d6+H',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -847,7 +850,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before highest is added) is equal to the total, with the highest subtracted
-      expect(roll.rolls).toArraySumEqualTo(total - utils.getMax(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total - this.utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -857,7 +860,7 @@
       });
     });
 
-    it('should multiply by the HIGHEST roll for `4d6*H', () => {
+    it('should multiply by the HIGHEST roll for `4d6*H', function(){
       const notation = '4d6*H',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -870,7 +873,7 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before multiplied by highest) is equal to the total, divided by the highest
-      expect(roll.rolls).toArraySumEqualTo(total / utils.getMax(roll.rolls[0]));
+      expect(roll.rolls).toArraySumEqualTo(total / this.utils.getMax(roll.rolls[0]));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -880,7 +883,7 @@
       });
     });
 
-    it('should divide by the HIGHEST roll for `4d6/H', () => {
+    it('should divide by the HIGHEST roll for `4d6/H', function(){
       const notation = '4d6/H',
             roll = diceRoller.roll(notation),
             total = roll.total;
@@ -893,7 +896,8 @@
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [4]});
       // check if the sum of the rolls (before divided by highest) is equal to the total, multiplied by the highest
-      expect(roll.rolls).toArraySumEqualTo(total * utils.getMax(roll.rolls[0]));
+      // we need to round the comparison total because the `roll.rolls` doesn't include decimal points
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total * this.utils.getMax(roll.rolls[0])));
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -903,7 +907,7 @@
       });
     });
 
-    it('should subtract the LOWEST explode roll for `d6!-L`', () => {
+    it('should subtract the LOWEST explode roll for `d6!-L`', function(){
       const notation = 'd6!-L';
       let hasExploded = false;
 
@@ -918,7 +922,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMin(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({
@@ -935,7 +939,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the Highest explode roll for `d6!-H`', () => {
+    it('should subtract the Highest explode roll for `d6!-H`', function(){
       const notation = 'd6!-H';
       let hasExploded = false;
 
@@ -950,7 +954,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMax(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({
@@ -967,7 +971,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the LOWEST compound roll for `d6!!-L`', () => {
+    it('should subtract the LOWEST compound roll for `d6!!-L`', function(){
       const notation = 'd6!!-L';
       let hasCompounded = false;
 
@@ -975,7 +979,7 @@
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
               total = roll.total,
-              rollsTotal = utils.reduceArray(roll.rolls);
+              rollsTotal = this.utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1000,7 +1004,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should subtract the HIGHEST compound roll for `d6!!-H`', () => {
+    it('should subtract the HIGHEST compound roll for `d6!!-H`', function(){
       const notation = 'd6!!-H';
       let hasCompounded = false;
 
@@ -1008,7 +1012,7 @@
       for(let i = 0; i < loopCount; i++){
         const roll = diceRoller.roll(notation),
               total = roll.total,
-              rollsTotal = utils.reduceArray(roll.rolls);
+              rollsTotal = this.utils.reduceArray(roll.rolls);
 
         expect(roll).toEqual(jasmine.any(DiceRoll));
 
@@ -1033,7 +1037,7 @@
       expect(hasCompounded).toBeTruthy();
     });
 
-    it('should subtract the LOWEST penetrating roll for `d6!p-L`', () => {
+    it('should subtract the LOWEST penetrating roll for `d6!p-L`', function(){
       const notation = 'd6!p-L';
       let hasExploded = false;
 
@@ -1048,7 +1052,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + utils.getMin(roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMin(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({
@@ -1065,7 +1069,7 @@
       expect(hasExploded).toBeTruthy();
     });
 
-    it('should subtract the HIGHEST penetrating roll for `d6!p-H`', () => {
+    it('should subtract the HIGHEST penetrating roll for `d6!p-H`', function(){
       const notation = 'd6!p-H';
       let hasExploded = false;
 
@@ -1080,7 +1084,7 @@
         expect(total).toBeGreaterThan(-1);
 
         // check if the sum of the rolls (before lowest is subtracted) is equal to the total, with the lowest added
-        expect(roll.rolls).toArraySumEqualTo(total + utils.getMax(roll.rolls[0]));
+        expect(roll.rolls).toArraySumEqualTo(total + this.utils.getMax(roll.rolls[0]));
 
         // check the output string
         expect(roll).toMatchParsedNotation({
@@ -1096,6 +1100,81 @@
       // if we run many rolls, we should expect at least one to have exploded
       expect(hasExploded).toBeTruthy();
     });
+
+    it('should return between 3.4 and 8.4 for `1d6+2.4`', function(){
+      const notation = '1d6+2.4',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 3.4, max: 8.4});
+
+      // check value ends in `.4`
+      expect(total).toMatch(/^[3-8]\.4$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total-2.4));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${Math.round(total-2.4)}]+2.4`,
+        total: total,
+      });
+    });
+
+    it('should return between -1.1 and 1.9 for `1d4-2.1`', function(){
+      const notation = '1d4-2.1',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: -1.1, max: 1.9});
+
+      // check value ends in `.1` or `.9`
+      expect(total).toMatch(/^-?[01]\.[19]$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(parseFloat((total+2.1).toFixed(1)));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${total+2.1}]-2.1`,
+        total: total,
+      });
+    });
+
+    it('should return between 0.22 and 2.21 for `1d10/4.52`', function(){
+      const notation = '1d10/4.52',
+        roll = diceRoller.roll(notation),
+        total = roll.total;
+
+      expect(roll).toEqual(jasmine.any(DiceRoll));
+
+      // check value is within allowed range
+      expect(total).toBeWithinRange({min: 0.22, max: 2.21});
+
+      // check value ends in a decimal place
+      expect(total).toMatch(/^[0-2]\.\d{2}$/);
+
+      // check the rolls list is correct
+      expect(roll).toHaveRolls({rolls: [1]});
+      expect(roll.rolls).toArraySumEqualTo(Math.round(total*4.52));
+
+      // check the output string
+      expect(roll).toMatchParsedNotation({
+        notation: notation,
+        rolls: `[${Math.round(total*4.52)}]/4.52`,
+        total: total,
+      });
+    });
   });
 
   describe('pool dice', () => {
@@ -1108,7 +1187,7 @@
       hasSucceeded = false;
     });
 
-    it('should return number of successes for `4d6=6`', () => {
+    it('should return number of successes for `4d6=6`', function(){
       const notation = '4d6=6';
 
       // run the tests multiple times for consistency
@@ -1139,7 +1218,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `4d6<3`', () => {
+    it('should return number of successes for `4d6<3`', function(){
       const notation = '4d6<3';
 
       // run the tests multiple times for consistency
@@ -1170,7 +1249,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `4d6>=4`', () => {
+    it('should return number of successes for `4d6>=4`', function(){
       const notation = '4d6>=4';
 
       // run the tests multiple times for consistency
@@ -1201,7 +1280,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `13d10>=5`', () => {
+    it('should return number of successes for `13d10>=5`', function(){
       const notation = '13d10>=5';
 
       // run the tests multiple times for consistency
@@ -1232,7 +1311,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `13d10>=5-H`', () => {
+    it('should return number of successes for `13d10>=5-H`', function(){
       const notation = '13d10>=5-H';
 
       // run the tests multiple times for consistency
@@ -1264,7 +1343,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes for `6d10>=5*2`', () => {
+    it('should return number of successes for `6d10>=5*2`', function(){
       const notation = '6d10>=5*2';
 
       // run the tests multiple times for consistency
@@ -1295,7 +1374,7 @@
       expect(hasSucceeded).toBeTruthy();
     });
 
-    it('should return number of successes + value for `2d10>=5+3d6`', () => {
+    it('should return number of successes + value for `2d10>=5+3d6`', function(){
       const notation = '2d10>=5+3d6';
 
       // run the tests multiple times for consistency
@@ -1330,7 +1409,7 @@
     });
 
     describe('non-pool dice rolls', () => {
-      it('should return no successes for `4d6`', () => {
+      it('should return no successes for `4d6`', function(){
         const notation = '4d6';
 
         // run the tests multiple times for consistency
@@ -1343,7 +1422,7 @@
         }
       });
 
-      it('should return no successes for `5d10!`', () => {
+      it('should return no successes for `5d10!`', function(){
         const notation = '5d10!';
 
         // run the tests multiple times for consistency
@@ -1356,7 +1435,7 @@
         }
       });
 
-      it('should return no successes for `2d6!!`', () => {
+      it('should return no successes for `2d6!!`', function(){
         const notation = '2d6!!';
 
         // run the tests multiple times for consistency
@@ -1379,18 +1458,18 @@
       diceRoller = new DiceRoller();
     });
 
-    it('should be no dice rolled', () => {
+    it('should be no dice rolled', function(){
       expect(diceRoller).not.toHaveLogLength();
       expect(diceRoller.output).toEqual('');
     });
 
-    it('should have 1 dice rolled', () => {
+    it('should have 1 dice rolled', function(){
       diceRoller.roll('d6');
 
       expect(diceRoller).toHaveLogLength(1);
     });
 
-    it('should be cleared log', () => {
+    it('should be cleared log', function(){
       diceRoller.roll('d6');
       diceRoller.clearLog();
 
@@ -1398,14 +1477,14 @@
       expect(diceRoller.output).toEqual('');
     });
 
-    it('should have 2 dice rolled', () => {
+    it('should have 2 dice rolled', function(){
       diceRoller.roll('1d6');
       diceRoller.roll('d10');
 
       expect(diceRoller).toHaveLogLength(2);
     });
 
-    it('should contain DiceRolls', () => {
+    it('should contain DiceRolls', function(){
       diceRoller.roll('1d6');
       diceRoller.roll('8d10');
       diceRoller.roll('dF');

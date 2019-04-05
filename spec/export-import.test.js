@@ -1,6 +1,9 @@
-/*global beforeEach, describe, DiceRoll, DiceRoller, exportFormats, expect, jasmine, it, utils */
+/*global beforeEach, describe, expect, jasmine, it */
 ;(() => {
   'use strict';
+
+  // require the dice-roller library
+  const { DiceRoller, DiceRoll, exportFormats } = require('../lib/es5/bundle.js');
 
   describe('export dice roll', () => {
     let notation, diceRoll, exported;
@@ -13,13 +16,13 @@
       exported = undefined;
     });
 
-    it('should export as JSON', () => {
+    it('should export as JSON', function(){
       exported = diceRoll.export(exportFormats.JSON);
 
       expect(exported).toBeJson();
     });
 
-    it('should default export format to JSON', () => {
+    it('should default export format to JSON', function(){
       const jsonExported = diceRoll.export(exportFormats.JSON);
 
       exported = diceRoll.export();
@@ -29,7 +32,7 @@
       expect(exported).toEqual(jsonExported);
     });
 
-    it('should export as base64', () => {
+    it('should export as base64', function(){
       const jsonExported = diceRoll.export(exportFormats.JSON);
 
       exported = diceRoll.export(exportFormats.BASE_64);
@@ -41,7 +44,7 @@
       expect(atob(exported)).toEqual(jsonExported);
     });
 
-    it('should export as Object', () => {
+    it('should export as Object', function(){
       exported = diceRoll.export(exportFormats.OBJECT);
 
       expect(exported).toEqual(jasmine.any(Object));
@@ -51,7 +54,7 @@
       expect(exported.rolls).toArraySumEqualTo(diceRoll.total-2);
     });
 
-    it('should throw error for invalid export formats', () => {
+    it('should throw error for invalid export formats', function(){
       expect(() => {
         diceRoll.export('foo');
       }).toThrowError(/Unrecognised export format specified/);
@@ -73,7 +76,7 @@
       imported = undefined;
     });
 
-    it('should import from JSON', () => {
+    it('should import from JSON', function(){
       imported = DiceRoll.import(
         JSON.stringify({
           notation: notation,
@@ -100,7 +103,7 @@
       });
     });
 
-    it('should import from base64', () => {
+    it('should import from base64', function(){
       imported = DiceRoll.import(
         btoa(JSON.stringify({
           notation: notation,
@@ -127,7 +130,7 @@
       });
     });
 
-    it('should import from Object', () => {
+    it('should import from Object', function(){
       imported = DiceRoll.import(
         {
           notation: notation,
@@ -154,7 +157,7 @@
       });
     });
 
-    it('should import from DiceRoll', () => {
+    it('should import from DiceRoll', function(){
       imported = DiceRoll.import(new DiceRoll(notation));
 
       // check if response is a DiceRoll object
@@ -175,9 +178,9 @@
     });
 
     describe('exploding, compounding, and penetrating', () => {
-      it('should import compounding dice', () => {
+      it('should import compounding dice', function(){
         const rollVals = [4,6,1],
-              total = utils.reduceArray(rollVals);
+              total = this.utils.reduceArray(rollVals);
 
         notation = '1d6!!>3';
 
@@ -205,9 +208,9 @@
         });
       });
 
-      it('should import exploding dice', () => {
+      it('should import exploding dice', function(){
         const rollVals = [2,2,1],
-              total = utils.reduceArray(rollVals);
+              total = this.utils.reduceArray(rollVals);
 
         notation = '1d2!';
 
@@ -240,9 +243,9 @@
         });
       });
 
-      it('should import penetrating dice', () => {
+      it('should import penetrating dice', function(){
         const rollVals = [2,1,1,0],
-              total = utils.reduceArray(rollVals);
+              total = this.utils.reduceArray(rollVals);
 
         notation = '1d2!p';
 
@@ -273,7 +276,7 @@
       });
     });
 
-    it('should import with empty rolls', () => {
+    it('should import with empty rolls', function(){
       imported = DiceRoll.import(
         JSON.stringify({
           notation: notation
@@ -296,7 +299,7 @@
       });
     });
 
-    it('should throw error if no import data', () => {
+    it('should throw error if no import data', function(){
       expect(() => {
         DiceRoll.import();
       }).toThrowError('DiceRoll: No data to import');
@@ -310,7 +313,7 @@
       }).toThrowError('DiceRoll: No data to import');
     });
 
-    it('should throw error if import data is invalid', () => {
+    it('should throw error if import data is invalid', function(){
       // importing invalid format (String)
       expect(() => {
         DiceRoll.import('foo');
@@ -340,7 +343,7 @@
       }).toThrowError(/Rolls are invalid at index/);
     });
 
-    it('should import from exported data', () => {
+    it('should import from exported data', function(){
       notation = '2d6+2';
 
             // roll the dice
@@ -397,13 +400,13 @@
       });
     });
 
-    it('should export as JSON', () => {
+    it('should export as JSON', function(){
       const exported = diceRoller.export(exportFormats.JSON);
 
       expect(exported).toBeJson();
     });
 
-    it('should export as base64', () => {
+    it('should export as base64', function(){
       const exported = diceRoller.export(exportFormats.BASE_64),
             jsonExported = diceRoller.export(exportFormats.JSON);
 
@@ -414,7 +417,7 @@
       expect(atob(exported)).toEqual(jsonExported);
     });
 
-    it('should default export format to JSON', () => {
+    it('should default export format to JSON', function(){
       const exported = diceRoller.export(),
             jsonExported = diceRoller.export(exportFormats.JSON);
 
@@ -423,7 +426,7 @@
       expect(exported).toEqual(jsonExported);
     });
 
-    it('should throw error for invalid export formats', () => {
+    it('should throw error for invalid export formats', function(){
       expect(() => {
         diceRoller.export('foo');
       }).toThrowError('DiceRoller: Unrecognised export format specified: foo');
@@ -494,7 +497,7 @@
       imported = undefined;
     });
 
-    it('should import full data from JSON', () => {
+    it('should import full data from JSON', function(){
       imported = DiceRoller.import(JSON.stringify(importData));
 
       expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -504,7 +507,7 @@
       expect(imported.output).toEqual(notations.join('; '));
     });
 
-    it('should import full data from Base64', () => {
+    it('should import full data from Base64', function(){
       imported = DiceRoller.import(btoa(JSON.stringify(importData)));
 
       expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -514,7 +517,7 @@
       expect(imported.output).toEqual(notations.join('; '));
     });
 
-    it('should import from Object', () => {
+    it('should import from Object', function(){
       imported = DiceRoller.import(importData);
 
       expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -524,7 +527,7 @@
       expect(imported.output).toEqual(notations.join('; '));
     });
 
-    it('should import from Object with DiceRolls', () => {
+    it('should import from Object with DiceRolls', function(){
       // import, but convert all log entries to a DiceRoll object first
       imported = DiceRoller.import({
         log: importData.log.map(roll => DiceRoll.import(roll))
@@ -538,7 +541,7 @@
     });
 
     describe('empty rolls', () => {
-      it('should import with empty roll array', () => {
+      it('should import with empty roll array', function(){
         imported = DiceRoller.import({log: []});
 
         expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -548,7 +551,7 @@
         expect(imported.output).toEqual('');
       });
 
-      it('should import with falsey rolls', () => {
+      it('should import with falsey rolls', function(){
         imported = DiceRoller.import({log: null});
 
         expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -559,7 +562,7 @@
       });
     });
 
-    it('should import with no roll array', () => {
+    it('should import with no roll array', function(){
       imported = DiceRoller.import({});
 
       expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -569,7 +572,7 @@
       expect(imported.output).toEqual('');
     });
 
-    it('should throw error if no import data', () => {
+    it('should throw error if no import data', function(){
       expect(() => {
         DiceRoller.import();
       }).toThrowError('DiceRoller: No data to import');
@@ -583,7 +586,7 @@
       }).toThrowError('DiceRoller: No data to import');
     });
 
-    it('should throw error if import data is invalid', () => {
+    it('should throw error if import data is invalid', function(){
       // importing invalid format (String)
       expect(() => {
         DiceRoller.import('foo');
@@ -607,7 +610,7 @@
       }).toThrowError(/Unrecognised import format for data/);
     });
 
-    it('should import to existing roll log', () => {
+    it('should import to existing roll log', function(){
       const rolls = [
               {
                 log: [
@@ -692,7 +695,7 @@
       });
     });
 
-    it('should import without `log` property', () => {
+    it('should import without `log` property', function(){
       imported = DiceRoller.import(importData.log);
 
       expect(imported).toEqual(jasmine.any(DiceRoller));
@@ -702,7 +705,7 @@
       expect(imported.output).toEqual(notations.join('; '));
     });
 
-    it('should import an exported log', () => {
+    it('should import an exported log', function(){
       // import manual data that we know works, then export it, so we can re-import
       const exported = DiceRoller.import(importData).export();
 

@@ -37,10 +37,13 @@ nbproject
 .idea
 
 
-# Project specific
+# Package Managers
 
-.grunt
 node_modules
 bower_components
 
+
+# Project specific
+
+.grunt
 output/testresults

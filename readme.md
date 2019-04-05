@@ -2,7 +2,7 @@
 
 A basic JS based dice roller that accepts typical dice notation.
 
-[![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
+[![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
 
 
 ## Supported notation
@@ -175,15 +175,15 @@ However, if the roll is just dice pool, and does not contain any other additions
 
 ## Usage
 
-You only need to include the `dice-roller.js` file in your project:
+* **Using NodeJS or other non-native module support?** check the [NodeJS](#nodejs-and-module-loaders) section.
+* **No ES6 or ES6 module support?** read the [Older Browsers](#older-browsers) section below.
 
-```html
-<script src="dice-roller.js"></script>
-```
-
-You can use `DiceRoller` like so:
+You can import the dice roller and use it in your application like so:
 
 ```js
+// import only the DiceRoller class
+import { DiceRoller } from 'lib/index.js';
+
 // create a new instance of the DiceRoller
 const roller = new DiceRoller();
 
@@ -199,7 +199,12 @@ document.write(latestRoll);
 
 // roll several notations all at once, and store their DiceRoll objects
 const rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
+```
 
+If you need to manually create `DiceRoll` objects, you need to import it:
+```js
+// import the DiceRoller and DiceRoll classes
+import { DiceRoller, DiceRoll } from 'lib/index.js';
 
 // roll a single notation without saving it to the log
 const diceRoll = new DiceRoll('2d6-L');
@@ -213,25 +218,40 @@ let importedDiceRoll = DiceRoll.import(exportedData);
 
 
 // importing into a DiceRoller is just as easy
+const roller = new DiceRoller();
 roller.import(exportedData); // appends roll data to the end of existing roll log
 
 // creates a new DiceRoller and stores the roll data
 const roller2 = DiceRoller.import(exportedData);
 ```
 
+Rather than specifying the individual components, you can import everything like so:
+```js
+// import the everything and store on the `Roller` scope
+import * as Roller from 'lib/index.js';
 
-### UMD
+// create a DiceRoller
+const roller = new Roller.DiceRoller();
 
-You can also load the library using AMD and CommonJS.
+// create a DiceRoll
+const roll = new Roller.DiceRoll('2d6');
+```
 
-Here is the above example in Node.js:
+
+### NodeJS And Module Loaders
+
+You can also load the library using AMD, CommonJS, etc.
+
+Instead of the `lib/index.js` file, you must require the `lib/es5/bundle.js` file.
+
+Here is an example in Node.js:
 
 ```js
 // require the dice-roller library
-const dr = require("./dice-roller.js");
+const Roller = require('./lib/es5/bundle.js');
 
 // create a new instance of the DiceRoller
-const diceRoller = new dr.DiceRoller();
+const diceRoller = new Roller.DiceRoller();
 
 // roll the dice
 diceRoller.roll('4d20-L');
@@ -244,9 +264,34 @@ console.log(latestRoll + '');
 ```
 
 
-### API
+### Older Browsers
 
-The Dice Roller provides a global `DiceRoller` class, of which you can have multiple instances:
+We also support older browsers without ES6 or native Module support.
+
+Instead of the `lib/index.js` file, you must use the `lib/es5/bundle.js` file.
+
+Also, all uses of the library classes and objects must be accessed from the `Roller` namespace.
+
+```html
+<script src="lib/es5/bundle.js"></script>
+
+<script>
+  // create a new instance of the DiceRoller
+  var roller = new Roller.DiceRoller();
+
+  // roll the dice
+  diceRoller.roll('4d20-L');
+  
+  
+  // create a new instance of a DiceRoll
+  var roll = new Roller.DiceRoll('2d6');
+</script>
+```
+
+
+## API
+
+The Dice Roller provides a `DiceRoller` class, of which you can have multiple instances:
 
 ```js
 // my first DiceRoller
@@ -259,7 +304,7 @@ const roller2 = new DiceRoller();
 Each instance keeps it's own log of dice rolls, so it's handy if you're rolling for several completely unrelated things.
 
 
-#### `DiceRoller` object
+### `DiceRoller` object
 
 | Property           | type                                          | description                                                                                                                                |
 | ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -277,7 +322,7 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
 
 
-##### Static properties
+#### Static properties
 
 Static properties can be called on the class itself, without instantiating an object, like so:
 
@@ -295,16 +340,14 @@ const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance
 | ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
 
 
-#### `DiceRoll` object
+### `DiceRoll` object
 
 A `DiceRoll` object takes a notation and parses it in to rolls.
 
 It can be created like so:
 
 ```js
-const notation = '4d10';
-
-const roll = new DiceRoll(notation);
+const roll = new DiceRoll('4d10');
 ```
 
 | Property           | type                                          | description                                                                                                        |
@@ -325,7 +368,7 @@ const roll = new DiceRoll(notation);
 | ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `total` property instead.~~                                               |
 
 
-##### Static properties
+#### Static properties
 
 Static properties can be called on the class itself, without instantiating an object, like so:
 
@@ -341,10 +384,14 @@ const diceRoll = DiceRoll.import(data);
 
 ## Browser support
 
-This dice roller only works in the latest browsers, including Microsoft Edge, but will **not** work in IE 11 or less without using an ES6 compiler.
+This dice roller uses modern JS and native JS modules, which work in all the latest browsers.
+
+* For older browsers check out the [Older Browsers](#older-browsers) section.  
+  _Note: This library is built with a modern approach and will **not** work in all older browsers_
+* For NodeJs check out the [NodeJS](#nodejs-and-module-loaders)
 
 
-### Demo
+## Demo
 
 View the demo here: http://rpg.greenimp.co.uk/dice-roller
 
@@ -360,4 +407,4 @@ If the licence terminology in the licence.txt is confusing, check out this: http
 
 ## Reference
 
-Further information can be found here: https://en.wikipedia.org/wiki/Dice_notation
+Further information on the basic dice notation can be found here: https://en.wikipedia.org/wiki/Dice_notation
