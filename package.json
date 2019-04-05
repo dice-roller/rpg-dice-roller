@@ -2,7 +2,7 @@
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts standard dice notation",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "license": "MIT",
   "main": "lib/index.js",
   "repository": {
