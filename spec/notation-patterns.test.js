@@ -1,6 +1,9 @@
-/*global beforeEach, describe, DiceRoller, expect, jasmine, it */
+/*global beforeEach, describe, expect, jasmine, it */
 ;(() => {
   'use strict';
+
+  // require the dice-roller library
+  const { DiceRoll } = require('../lib/es5/bundle.js');
 
   describe('notation patterns', () => {
     const strings = {
@@ -106,7 +109,7 @@
     });
 
     describe('invalid patterns', () => {
-      it('should throw error if pattern name is empty', () => {
+      it('should throw error if pattern name is empty', function(){
         expect(() => {
           DiceRoll.notationPatterns.get();
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
@@ -128,7 +131,7 @@
         }).toThrowError(/DiceRoller: Notation pattern name not defined/);
       });
 
-      it('should throw error if pattern name is invalid', () => {
+      it('should throw error if pattern name is invalid', function(){
         expect(() => {
           DiceRoll.notationPatterns.get('foo');
         }).toThrowError(/DiceRoller: Notation pattern name not found/);

@@ -1,11 +1,14 @@
-/*global beforeEach, describe, DiceRoll, DiceRoller, expect, jasmine, it, utils */
+/*global beforeEach, describe, expect, jasmine, it */
 ;(() => {
   'use strict';
+
+  // require the dice-roller library
+  const { diceUtils } = require('../lib/es5/bundle.js');
 
   const loopCount = 1000;
 
   describe('isNumeric utility', () => {
-    it('should be numeric', () => {
+    it('should be numeric', function(){
       expect('isNumeric').toWorkAsUtility([1], true);
 
       expect('isNumeric').toWorkAsUtility([23], true);
@@ -15,7 +18,7 @@
       expect('isNumeric').toWorkAsUtility(['-10'], true);
     });
 
-    it('should not be numeric', () => {
+    it('should not be numeric', function(){
       expect('isNumeric').toWorkAsUtility([undefined], false);
 
       expect('isNumeric').toWorkAsUtility([null], false);
@@ -41,7 +44,7 @@
   });
 
   describe('isBase64 utility', () => {
-    it('should be base 64', () => {
+    it('should be base 64', function(){
       expect('isBase64').toWorkAsUtility([btoa('foo')], true);
 
       expect('isBase64').toWorkAsUtility([btoa(['foo', 'bar'])], true);
@@ -49,7 +52,7 @@
       expect('isBase64').toWorkAsUtility(['YWJjZGVmZ2hpamtsbW5vcHFyc3R1dnd4eXo='], true);
     });
 
-    it('should not be base 64', () => {
+    it('should not be base 64', function(){
       expect('isBase64').toWorkAsUtility([undefined], false);
 
       expect('isBase64').toWorkAsUtility([null], false);
@@ -77,7 +80,7 @@
   });
 
   describe('isJson utility', () => {
-    it('should be JSON', () => {
+    it('should be JSON', function(){
       expect('isJson').toWorkAsUtility([JSON.stringify({})], true);
 
       expect('isJson').toWorkAsUtility([JSON.stringify([])], true);
@@ -97,7 +100,7 @@
       expect('isJson').toWorkAsUtility([JSON.stringify({foo: 'bar', baz: 'boz'})], true);
     });
 
-    it('should not be JSON', () => {
+    it('should not be JSON', function(){
       expect('isJson').toWorkAsUtility([undefined], false);
 
       expect('isJson').toWorkAsUtility([null], false);
@@ -133,7 +136,7 @@
   });
 
   describe('generateNumber utility', () => {
-    it('should return between 1 and 5', () => {
+    it('should return between 1 and 5', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber(1, 5);
@@ -142,7 +145,7 @@
       }
     });
 
-    it('should return between -100 and 10', () => {
+    it('should return between -100 and 10', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber(-100, 10);
@@ -151,7 +154,7 @@
       }
     });
 
-    it('should return min value if greater than max', () => {
+    it('should return min value if greater than max', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber(2, 1);
@@ -160,7 +163,7 @@
       }
     });
 
-    it('should return min value if equal to max', () => {
+    it('should return min value if equal to max', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber(2, 2);
@@ -169,7 +172,7 @@
       }
     });
 
-    it('should return 1 if no min or max defined', () => {
+    it('should return 1 if no min or max defined', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber();
@@ -178,7 +181,7 @@
       }
     });
 
-    it('should return min if no max defined', () => {
+    it('should return min if no max defined', function(){
       // run the tests multiple times for consistency
       for(let i = 0; i < loopCount; i++){
         const value = diceUtils.generateNumber(5);
@@ -189,7 +192,7 @@
   });
 
   describe('sumArray utility', () => {
-    it('should sum the array values', () => {
+    it('should sum the array values', function(){
       expect('sumArray').toWorkAsUtility(
         [[
           1, 2, 3, 4, 5,
@@ -205,7 +208,7 @@
       );
     });
 
-    it('should ignore "empty" values (null, false, undefined, etc.)', () => {
+    it('should ignore "empty" values (null, false, undefined, etc.)', function(){
       expect('sumArray').toWorkAsUtility(
         [[
           10, null, false, undefined, 20
@@ -214,7 +217,7 @@
       );
     });
 
-    it('should ignore non-numeric values', () => {
+    it('should ignore non-numeric values', function(){
       expect('sumArray').toWorkAsUtility(
         [[
           10, 'e', 'foo', {foo: 'bar'}, [1, 2], true, 20
@@ -225,7 +228,7 @@
   });
 
   describe('equateNumbers utility', () => {
-    it('should add numbers', () => {
+    it('should add numbers', function(){
       expect('equateNumbers').toWorkAsUtility(
         [
           10, 20, '+'
@@ -248,7 +251,7 @@
       );
     });
 
-    it('should multiply numbers', () => {
+    it('should multiply numbers', function(){
       expect('equateNumbers').toWorkAsUtility(
         [
           10, 20, '*'
@@ -271,7 +274,7 @@
       );
     });
 
-    it('should divide numbers', () => {
+    it('should divide numbers', function(){
       expect('equateNumbers').toWorkAsUtility(
         [
           10, 20, '/'
@@ -315,7 +318,7 @@
       );
     });
 
-    it('should subtract numbers', () => {
+    it('should subtract numbers', function(){
       expect('equateNumbers').toWorkAsUtility(
         [
           10, 20, '-'
@@ -359,7 +362,7 @@
       );
     });
 
-    it('should add numbers by default', () => {
+    it('should add numbers by default', function(){
       expect('equateNumbers').toWorkAsUtility(
         [
           10, 20
@@ -382,11 +385,11 @@
       );
     });
 
-    it('should return zero if numbers are invalid', () => {
+    it('should return zero if numbers are invalid', function(){
       expect('equateNumbers').toWorkAsUtility(['foo', 'bar'], 0);
     });
 
-    it('should work if first number is 0', () => {
+    it('should work if first number is 0', function(){
       expect('equateNumbers').toWorkAsUtility([0, 20], 20);
 
       expect('equateNumbers').toWorkAsUtility([0, 20, '-'], -20);
@@ -396,7 +399,7 @@
       expect('equateNumbers').toWorkAsUtility([0, 20, '/'], 0);
     });
 
-    it('should work if second number is 0', () => {
+    it('should work if second number is 0', function(){
       expect('equateNumbers').toWorkAsUtility([10, 0], 10);
 
       expect('equateNumbers').toWorkAsUtility([10, 0, '-'], 10);
@@ -406,7 +409,7 @@
       expect('equateNumbers').toWorkAsUtility([10, 0, '/'], 0);
     });
 
-    it('should work if first number is invalid', () => {
+    it('should work if first number is invalid', function(){
       expect('equateNumbers').toWorkAsUtility(['foo', 20], 20);
 
       expect('equateNumbers').toWorkAsUtility(['foo', 20, '-'], -20);
@@ -416,7 +419,7 @@
       expect('equateNumbers').toWorkAsUtility(['foo', 20, '/'], 0);
     });
 
-    it('should work if second number is invalid', () => {
+    it('should work if second number is invalid', function(){
       expect('equateNumbers').toWorkAsUtility([10, 'bar'], 10);
 
       expect('equateNumbers').toWorkAsUtility([10, 'bar', '-'], 10);
@@ -429,7 +432,7 @@
 
   describe('compareNumbers utility', () => {
     describe('= and ==', () => {
-      it('should be equal', () => {
+      it('should be equal', function(){
         expect('compareNumbers').toWorkAsUtility([1, 1, '='], true);
 
         expect('compareNumbers').toWorkAsUtility([1, 1, '=='], true);
@@ -445,7 +448,7 @@
         expect('compareNumbers').toWorkAsUtility([1, '1', '='], true);
       });
 
-      it('should not be equal', () => {
+      it('should not be equal', function(){
         expect('compareNumbers').toWorkAsUtility([1, 2, '='], false);
 
         expect('compareNumbers').toWorkAsUtility([1, 1.01, '='], false);
@@ -473,7 +476,7 @@
     });
 
     describe('<', () => {
-      it('should be less than', () => {
+      it('should be less than', function(){
         expect('compareNumbers').toWorkAsUtility([1, 2, '<'], true);
 
         expect('compareNumbers').toWorkAsUtility([1, 1.01, '<'], true);
@@ -481,7 +484,7 @@
         expect('compareNumbers').toWorkAsUtility(['1', '2', '<'], true);
       });
 
-      it('should not be less than', () => {
+      it('should not be less than', function(){
         expect('compareNumbers').toWorkAsUtility([1, 1, '<'], false);
 
         expect('compareNumbers').toWorkAsUtility([2, 1, '<'], false);
@@ -493,7 +496,7 @@
     });
 
     describe('>', () => {
-      it('should be greater than', () => {
+      it('should be greater than', function(){
         expect('compareNumbers').toWorkAsUtility([2, 1, '>'], true);
 
         expect('compareNumbers').toWorkAsUtility([1.01, 1, '>'], true);
@@ -501,7 +504,7 @@
         expect('compareNumbers').toWorkAsUtility(['2', '1', '>'], true);
       });
 
-      it('should not be greater than', () => {
+      it('should not be greater than', function(){
         expect('compareNumbers').toWorkAsUtility([1, 1, '>'], false);
 
         expect('compareNumbers').toWorkAsUtility([1, 2, '>'], false);
@@ -515,7 +518,7 @@
     });
 
     describe('<=', () => {
-      it('should be less than or equal to', () => {
+      it('should be less than or equal to', function(){
         expect('compareNumbers').toWorkAsUtility([1, 2, '<='], true);
 
         expect('compareNumbers').toWorkAsUtility([1, 1.01, '<='], true);
@@ -527,7 +530,7 @@
         expect('compareNumbers').toWorkAsUtility(['2', '2', '<='], true);
       });
 
-      it('should not be less than or equal to', () => {
+      it('should not be less than or equal to', function(){
         expect('compareNumbers').toWorkAsUtility([2, 1, '<='], false);
 
         expect('compareNumbers').toWorkAsUtility([1.01, 1, '<='], false);
@@ -537,7 +540,7 @@
     });
 
     describe('>=', () => {
-      it('should be greater than', () => {
+      it('should be greater than', function(){
         expect('compareNumbers').toWorkAsUtility([1, 1, '>='], true);
 
         expect('compareNumbers').toWorkAsUtility([2, 1, '>='], true);
@@ -549,7 +552,7 @@
         expect('compareNumbers').toWorkAsUtility(['2', '2', '>='], true);
       });
 
-      it('should not be greater than', () => {
+      it('should not be greater than', function(){
         expect('compareNumbers').toWorkAsUtility([1, 2, '>='], false);
 
         expect('compareNumbers').toWorkAsUtility([1, 1.01, '>='], false);
@@ -559,7 +562,7 @@
     });
 
     describe('! and !=', () => {
-      it('should not be equal', () => {
+      it('should not be equal', function(){
         expect('compareNumbers').toWorkAsUtility([1, 2, '!'], true);
 
         expect('compareNumbers').toWorkAsUtility([1, 1.01, '!='], true);
@@ -583,7 +586,7 @@
         expect('compareNumbers').toWorkAsUtility([true, true, '!'], true);
       });
 
-      it('should be equal', () => {
+      it('should be equal', function(){
         expect('compareNumbers').toWorkAsUtility([1, 1, '!'], false);
 
         expect('compareNumbers').toWorkAsUtility([1, 1, '!='], false);
@@ -600,7 +603,7 @@
       });
     });
 
-    it('should return false if no operator defined', () => {
+    it('should return false if no operator defined', function(){
       expect('compareNumbers').toWorkAsUtility([1, 1], false);
 
       expect('compareNumbers').toWorkAsUtility([1, 2], false);

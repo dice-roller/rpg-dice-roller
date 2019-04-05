@@ -27,7 +27,7 @@
       font-size: .75em;
       background: #eee;
     }
-    
+
     input, textarea, button{
       margin-bottom: 1em;
     }
@@ -54,7 +54,7 @@
   </header>
 
   <main>
-    <form action="" onsubmit="return roll();">
+    <form action="" onsubmit="roll(); return false;">
       <label for="input">Notation</label>
       <input type="text" placeholder="eg. 1d6+2d20" autofocus id="input">
       <button type="submit">Roll</button>
@@ -67,7 +67,7 @@
         <textarea rows="1" id="output" readonly placeholder="No dice rolled"></textarea>
       </div>
 
-      <button onclick="clearLog()">Clear log</button>
+      <button onclick="clearLog(); return false;">Clear log</button>
     </div>
 
     <hr>
@@ -155,29 +155,23 @@
     <a href="https://github.com/GreenImp/rpg-dice-roller" target="_blank">GitHub</a>
   </footer>
 
-  <script src="dice-roller.js"></script>
+  <script src="/lib/es5/bundle.js"></script>
   <script>
-    var diceRoller  = new DiceRoller();
+    const diceRoller = new Roller.DiceRoller();
 
-    function roll(){
-      var value = document.getElementById('input').value;
+    window.roll = () => {
+      const value = document.getElementById('input').value;
 
       diceRoller.roll(value);
 
       document.getElementById('output').value = diceRoller.output;
+    };
 
-      // stop event propagation
-      return false;
-    }
-
-    function clearLog(){
+    window.clearLog = () => {
       diceRoller.clearLog();
 
       document.getElementById('output').value = diceRoller.output;
-
-      // stop event propagation
-      return false;
-    }
+    };
   </script>
 </body>
 </html>
