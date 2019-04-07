@@ -1607,4 +1607,53 @@
       expect(diceRoller).toHaveLogLength(1);
     });
   });
+
+  describe('totals', () => {
+    let diceRoller;
+
+    beforeEach(function(){
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('`DiceRoller.total` should return `0` if no rolls', function(){
+      expect(diceRoller.total).toEqual(0);
+    });
+
+    it('`DiceRoller.successes` should return `0` if no rolls', function(){
+      expect(diceRoller.successes).toEqual(0);
+    });
+
+    it('`DiceRoller.total` should return the total for all rolls in the log', function(){
+      diceRoller.rollMany(['1d6', 'd10', '2d6*2']);
+
+      const totals = this.utils.reduceArray(diceRoller.log.map(roll => roll.total));
+
+      expect(diceRoller.total).toEqual(totals);
+    });
+
+    it('`DiceRoller.total` should return the total successes for all rolls in the log, when only pool dice', function(){
+      diceRoller.rollMany(['5d10>=8', '4d3>1']);
+
+      const sucesses = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.total).toEqual(sucesses);
+    });
+
+    it('`DiceRoller.successes` should return the total successes for all rolls in the log, when only pool dice', function(){
+      diceRoller.rollMany(['5d10>=8', '4d3>1']);
+
+      const successes = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.successes).toEqual(successes);
+    });
+
+    it('`DiceRoller.successes` should return the total successes for all rolls in the log, when NOT only pool dice', function(){
+      diceRoller.rollMany(['2d6', '5d10>=8', '4d3>1', '5d4+5']);
+
+      const successes = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.successes).toEqual(successes);
+    });
+  });
 })();
