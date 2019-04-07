@@ -227,14 +227,14 @@ const roller2 = DiceRoller.import(exportedData);
 
 Rather than specifying the individual components, you can import everything like so:
 ```js
-// import the everything and store on the `Roller` scope
-import * as Roller from 'lib/index.js';
+// import the everything and store on the `rpgDiceRoller` scope
+import * as rpgDiceRoller from 'lib/index.js';
 
 // create a DiceRoller
-const roller = new Roller.DiceRoller();
+const roller = new rpgDiceRoller.DiceRoller();
 
 // create a DiceRoll
-const roll = new Roller.DiceRoll('2d6');
+const roll = new rpgDiceRoller.DiceRoll('2d6');
 ```
 
 
@@ -248,10 +248,10 @@ Here is an example in Node.js:
 
 ```js
 // require the dice-roller library
-const Roller = require('./lib/es5/bundle.js');
+const rpgDiceRoller = require('./lib/es5/bundle.js');
 
 // create a new instance of the DiceRoller
-const diceRoller = new Roller.DiceRoller();
+const diceRoller = new rpgDiceRoller.DiceRoller();
 
 // roll the dice
 diceRoller.roll('4d20-L');
@@ -270,21 +270,21 @@ We also support older browsers without ES6 or native Module support.
 
 Instead of the `lib/index.js` file, you must use the `lib/es5/bundle.js` file.
 
-Also, all uses of the library classes and objects must be accessed from the `Roller` namespace.
+Also, all uses of the library classes and objects must be accessed from the `rpgDiceRoller` namespace.
 
 ```html
 <script src="lib/es5/bundle.js"></script>
 
 <script>
   // create a new instance of the DiceRoller
-  var roller = new Roller.DiceRoller();
+  var roller = new rpgDiceRoller.DiceRoller();
 
   // roll the dice
   diceRoller.roll('4d20-L');
   
   
   // create a new instance of a DiceRoll
-  var roll = new Roller.DiceRoll('2d6');
+  var roll = new rpgDiceRoller.DiceRoll('2d6');
 </script>
 ```
 

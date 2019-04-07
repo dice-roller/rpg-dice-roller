@@ -5,7 +5,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'lib/es5'),
     filename: 'bundle.js',
-    library: 'Roller',
+    library: 'rpgDiceRoller',
     libraryTarget: 'umd',
     umdNamedDefine: true,
     /**
