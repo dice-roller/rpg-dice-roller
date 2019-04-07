@@ -240,18 +240,18 @@ const roll = new rpgDiceRoller.DiceRoll('2d6');
 
 ### NodeJS And Module Loaders
 
-You can also load the library using AMD, CommonJS, etc.
+You can also load the library using CommonJS, AMD, etc.
 
-Instead of the `lib/index.js` file, you must require the `lib/es5/bundle.js` file.
+Instead of the `lib/index.js` file, node should use the `lib/es5/bundle.js` file, as defined in the package.json `main` property.
 
 Here is an example in Node.js:
 
 ```js
 // require the dice-roller library
-const rpgDiceRoller = require('./lib/es5/bundle.js');
+const { DiceRoller } = require('rpg-dice-roller');
 
 // create a new instance of the DiceRoller
-const diceRoller = new rpgDiceRoller.DiceRoller();
+const diceRoller = new DiceRoller();
 
 // roll the dice
 diceRoller.roll('4d20-L');
@@ -274,14 +274,12 @@ Also, all uses of the library classes and objects must be accessed from the `rpg
 
 ```html
 <script src="lib/es5/bundle.js"></script>
-
 <script>
   // create a new instance of the DiceRoller
   var roller = new rpgDiceRoller.DiceRoller();
 
   // roll the dice
   diceRoller.roll('4d20-L');
-  
   
   // create a new instance of a DiceRoll
   var roll = new rpgDiceRoller.DiceRoll('2d6');
