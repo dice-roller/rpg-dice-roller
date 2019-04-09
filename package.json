@@ -5,6 +5,8 @@
   "version": "3.0.1",
   "license": "MIT",
   "main": "lib/es5/bundle.js",
+  "module": "src/index.js",
+  "browser": "lib/es5/bundle.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -34,11 +36,16 @@
     "webpack-cli": "^3.3.0",
     "webpack-dev-server": "^3.2.1"
   },
+  "dependencies": {
+    "xregexp": "^4.2.4"
+  },
   "scripts": {
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development",
+    "build": "npm run build:umd && npm run build:es",
+    "build:umd": "webpack --config-name umd",
+    "build:es": "webpack --config-name es",
+    "build:dev": "webpack --env.development --config-name es",
     "start": "webpack-dev-server --color --progress",
-    "watch": "webpack --mode development --watch",
-    "test": "jshint lib/ --exclude lib/es5/ & jasmine"
+    "watch": "webpack --env.development --config-name es --watch",
+    "test": "jshint src/ & jasmine"
   }
 }
