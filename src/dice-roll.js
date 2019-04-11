@@ -1,4 +1,5 @@
 import {diceUtils, exportFormats} from './utils.js';
+import '../node_modules/xregexp/xregexp-all.js';
 
 /**
  * A DiceRoll object, which takes a notation
@@ -104,6 +105,66 @@ const DiceRoll = (() => {
    */
   const getSuccessStateValue = (value, comparePoint) => {
     return isComparePoint(comparePoint, value) ? 1 : 0;
+  };
+
+  const parseDie = (notation) => {
+    const parsed = [];
+
+    // parse the notation and find each valid dice (and any attributes)
+    const pattern = DiceRoll.notationPatterns.get('notation', 'g');
+
+    let match;
+    while((match = pattern.exec(notation)) !== null){
+      const die = {
+        operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
+        qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+        sides: diceUtils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+        fudge: false,                                                    // if fudge die this is set to the fudge notation match
+        explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
+        penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+        compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
+        comparePoint: false,                                                    // the compare point for exploding/penetrating dice
+        additions: []                                                        // any additions (ie. +2, -L)
+      };
+
+      // check if it's a fudge die
+      if(typeof die.sides === 'string'){
+        die.fudge = die.sides.match(DiceRoll.notationPatterns.get('fudge', null, true)) || false;
+      }
+
+      // check if we have a compare point
+      if(match[6]){
+        die.comparePoint = {
+          operator: match[6],
+          value: parseInt(match[7], 10)
+        };
+      }else if(die.explode){
+        // we are exploding the dice so we need a compare point, but none has been defined
+        die.comparePoint = {
+          operator: '=',
+          value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
+        };
+      }
+
+      // check if we have additions
+      if(match[8]){
+        // we have additions (ie. +2, -L)
+        let additionMatch;
+        while(!!(additionMatch = DiceRoll.notationPatterns.get('addition', 'g').exec(match[8]))){
+          // add the addition to the list
+          die.additions.push({
+            // addition operator for concatenating with the dice (+, -, /, *)
+            operator: additionMatch[1],
+            // addition value - either numerical or string 'L' or 'H'
+            value: diceUtils.isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2],
+          });
+        }
+      }
+
+      parsed.push(die);
+    }
+
+    return parsed;
   };
 
   /**
@@ -272,11 +333,28 @@ const DiceRoll = (() => {
       // reset the cached total
       this[_resetTotals]();
 
-      // loop through each die and roll it
-      this[_parsedDice].forEach(elm => {
-        // Roll the dice and add it to the log
-        this[_rolls].push(rollDie(elm));
-      });
+      /**
+       * Recursively loops through the parsed dice groups and rolls the dice,
+       * flattening the results so they're no longer grouped
+       *
+       * @param group
+       * @returns {Array[]|any[]}
+       */
+      const rollGroups = group => {
+        if(Array.isArray(group)){
+          // recursively loop through each parenthesis group and roll them
+          // flatten the result so rolls aren't grouped - we only care about numerical position
+          return group.flatMap(elm => {
+            return rollGroups(elm);
+          }).filter(Boolean);
+        }else if(typeof group === 'object'){
+          // roll the dice and return it
+          return [rollDie(group)];
+        }
+      };
+
+      // saved the rolls to the log
+      this[_rolls] = rollGroups(this[_parsedDice]);
 
       // return the rolls;
       return this[_rolls];
@@ -565,59 +643,54 @@ const DiceRoll = (() => {
       const parsed = [];
 
       // only continue if a notation was passed
-      if(notation){
-        // parse the notation and find each valid dice (and any attributes)
-        const pattern = this.notationPatterns.get('notation', 'g');
-        let match;
-        while((match = pattern.exec(notation)) !== null){
-          const die = {
-            operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
-            qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-            sides: diceUtils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
-            fudge: false,                                                    // if fudge die this is set to the fudge notation match
-            explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
-            penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
-            compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
-            comparePoint: false,                                                    // the compare point for exploding/penetrating dice
-            additions: []                                                        // any additions (ie. +2, -L)
-          };
+      if(notation) {
+        // build the regex for matching a die (including exploding and pool dice etc. notation)
+        const dieRegex = DiceRoll.notationPatterns.get('dieFull', 'g');
 
-          // check if it's a fudge die
-          if(typeof die.sides === 'string'){
-            die.fudge = die.sides.match(this.notationPatterns.get('fudge', null, true)) || false;
+        // split the notation into its parenthesis groupings
+        const groups = XRegExp.matchRecursive(
+          notation,
+          '\\(', '\\)',
+          'g',
+          {
+            valueNames: [
+              'between', 'left', 'match', 'right',
+            ],
           }
+        );
 
-          // check if we have a compare point
-          if(match[6]){
-            die.comparePoint = {
-              operator: match[6],
-              value: parseInt(match[7], 10)
-            };
-          }else if(die.explode){
-            // we are exploding the dice so we need a compare point, but none has been defined
-            die.comparePoint = {
-              operator: '=',
-              value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
-            };
+        // loop through each group and parse it
+        groups.forEach(group => {
+          if (group.name === 'match') {
+            // this is a match within the parenthesis group (ie. `3d6+2` in `(3d6+2)*4`
+            // recursively parse it in case it has nested parenthesis
+            parsed.push(DiceRoll.parseNotation(group.value));
+          } else if (group.name === 'between') {
+            // this is a match outside of a parenthesis group (ie. the `+2` in `(3d6)+2`, or `d6` in `(2d4+2)*d6`)
+            // or it could be that no parenthesis group exists (ie. the whole notation in `3d6+2`)
+            // this also happens when recursively parsing down to a level with no parenthesis
+
+            // split the notation by operator (include operators in the returned segments)
+            const segments = group.value.split(/([+\-\/*])/).filter(Boolean);
+
+            // loop through each segment and determine what it is
+            segments.map(segment => {
+              // determine if the segment is a die or not
+              if (XRegExp.test(segment, dieRegex)) {
+                // this is a die - parse it into an object and add to the list
+                parsed.push(...parseDie(segment));
+              } else {
+                // not a die (ie. number, operator)
+                if(diceUtils.isNumeric(segment)){
+                  segment = parseFloat(segment);
+                }
+
+                // add to the list
+                parsed.push(segment);
+              }
+            });
           }
-
-          // check if we have additions
-          if(match[8]){
-            // we have additions (ie. +2, -L)
-            let additionMatch;
-            while(!!(additionMatch = this.notationPatterns.get('addition', 'g').exec(match[8]))){
-              // add the addition to the list
-              die.additions.push({
-                // addition operator for concatenating with the dice (+, -, /, *)
-                operator: additionMatch[1],
-                // addition value - either numerical or string 'L' or 'H'
-                value: diceUtils.isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2],
-              });
-            }
-          }
-
-          parsed.push(die);
-        }
+        });
       }
 
       // return the parsed dice

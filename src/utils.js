@@ -55,7 +55,7 @@ const diceUtils = Object.freeze({
      * Takes an array of numbers and adds them together,
      * returning the result
      *
-     * @param {Array} numbers
+     * @param {Number[]} numbers
      * @returns {number}
      */
     return numbers => (
