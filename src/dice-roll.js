@@ -124,7 +124,7 @@ const DiceRoll = (() => {
         penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
         compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
         comparePoint: false,                                                    // the compare point for exploding/penetrating dice
-        additions: []                                                        // any additions (ie. +2, -L)
+        operations: []                                                        // any operations (ie. +2, -L)
       };
 
       // check if it's a fudge die
@@ -146,17 +146,17 @@ const DiceRoll = (() => {
         };
       }
 
-      // check if we have additions
+      // check if we have operations
       if(match[8]){
-        // we have additions (ie. +2, -L)
-        let additionMatch;
-        while(!!(additionMatch = DiceRoll.notationPatterns.get('addition', 'g').exec(match[8]))){
-          // add the addition to the list
-          die.additions.push({
-            // addition operator for concatenating with the dice (+, -, /, *)
-            operator: additionMatch[1],
-            // addition value - either numerical or string 'L' or 'H'
-            value: diceUtils.isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2],
+        // we have operations (ie. +2, -L)
+        let operationMatch;
+        while(!!(operationMatch = DiceRoll.notationPatterns.get('operation', 'g').exec(match[8]))){
+          // add the operation to the list
+          die.operations.push({
+            // operation symbol for concatenating with the dice (+, -, /, *)
+            operator: operationMatch[1],
+            // operation value - either numerical or string 'L' or 'H'
+            value: diceUtils.isNumeric(operationMatch[2]) ? parseFloat(operationMatch[2]) : operationMatch[2],
           });
         }
       }
@@ -425,9 +425,9 @@ const DiceRoll = (() => {
 
           output += ']';
 
-          // add any additions
-          if(item.additions.length){
-            output += item.additions.reduce((prev, current) => (
+          // add any operations
+          if(item.operations.length){
+            output += item.operations.reduce((prev, current) => (
               prev + current.operator + current.value
             ), '');
           }
@@ -452,7 +452,7 @@ const DiceRoll = (() => {
     }
 
     /**
-     * Rolls for the notation
+     * The dice rolled for the notation
      *
      * @returns {Array}
      */
@@ -505,22 +505,22 @@ const DiceRoll = (() => {
           dieTotal = diceUtils.sumArray(rolls);
 
 
-          if(item.additions.length){
-            // loop through the additions and handle them
-            item.additions.forEach(aItem => {
+          if(item.operations.length){
+            // loop through the operations and handle them
+            item.operations.forEach(aItem => {
               let value = aItem.value,
                 isPoolModifier = false;
 
-              // run any necessary addition value modifications
+              // run any necessary operation value modifications
               if(value === 'H'){
                 // 'H' is equivalent to the highest roll
                 value = Math.max(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
+                // flag that this value needs to be modified to a success/failure value
                 isPoolModifier = true;
               }else if(value === 'L'){
                 // 'L' is equivalent to the lowest roll
                 value = Math.min(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
+                // flag that this value needs to be modified to a success/failure value
                 isPoolModifier = true;
               }
 
@@ -742,27 +742,27 @@ const DiceRoll = (() => {
        */
       explode: '(!{1,2}p?)',
       /**
-       * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+       * Matches a die (ie. 2d6, d10, d%, dF, dF.2)
        *
        * @returns {string}
        */
-      get dice() {
+      get die() {
         return `([1-9]\\d*)?d([1-9]\\d*|%|${this.fudge})`;
       },
       /**
-       * Matches a dice, optional exploding/penetrating notation and roll comparison
+       * Matches a die, optional exploding/penetrating notation and roll comparison
        *
        * @type {string}
        */
-      get diceFull() {
-        return `${this.dice}${this.explode}?(?:${this.numberComparison})?`;
+      get dieFull() {
+        return `${this.die}${this.explode}?(?:${this.numberComparison})?`;
       },
       /**
-       * Matches the addition to a dice (ie. +4, -10, *2, -L)
+       * Matches the operation to a die (ie. +4, -10, *2, -L)
        *
        * @type {string}
        */
-      get addition() {
+      get operation() {
         return `(${this.arithmeticOperator})(${this.numberDecimal}(?!\\d*d)|H|L)`;
       },
       /**
@@ -777,7 +777,7 @@ const DiceRoll = (() => {
        * @type {string}
        */
       get notation() {
-        return `(${this.arithmeticOperator})?${this.diceFull}((?:${this.addition})*)`;
+        return `(${this.arithmeticOperator})?${this.dieFull}((?:${this.operation})*)`;
       },
       numberDecimal: '\\d+(?:\\.\\d+)?',
     };
