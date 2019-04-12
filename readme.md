@@ -123,7 +123,7 @@ This will actually tell it to compound if you roll a 4. Solutions are currently 
 
 Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
 
-You can also use it in conjunction with other operators and additions.
+You can also use it in conjunction with other operators.
 
 Examples:
 
@@ -163,14 +163,14 @@ You can mix pool dice with other dice types or equations, and it will use the nu
 
 ```
 2d6>4+3d5: [4,5*]+[3,1,1] = 6   // 1 success + the raw values of the other rolls
-2d6>4*d6!: [6*,5*]*[6!,4] = 20  // 1 success * raw values of the other rolls
+2d6>4*d6!: [6*,5*]*[6!,4] = 20  // 2 successes * raw values of the other rolls
 2d6>4+2: [3,5*]+2 = 3           // 1 success + 2
-2d6>4+H: [3,5*]+H = 2           // Highest roll is 5, which is a success, so value of 1
-2d6<4+H: [3*,5]+H = 1           // Highest roll is 5, which is a failure, so value of 0
+2d6>4+H: [3,5*]+H = 2           // Highest roll is 5, which is a success, so `H` has a value of 1
+2d6<4+H: [3*,5]+H = 1           // Highest roll is 5, which is a failure, so `H` has a value of 0
 ```
 
 The `successes` property on the `DiceRoll` object will provide the number of successes for a roll.  
-However, if the roll is just dice pool, and does not contain any other additions, or dice rolls, then the value provided will be the same as the `totals` property.
+However, if the roll is just dice pool, and does not contain any other operations, or dice rolls, then the value provided will be the same as the `totals` property.
 
 
 ## Usage
