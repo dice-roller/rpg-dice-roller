@@ -164,7 +164,7 @@ const diceUtils = Object.freeze({
   toFixed(num, decPlaces){
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
-    return parseFloat(num.toFixed(decPlaces || 0));
+    return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
   }
 });
 

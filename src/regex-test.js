@@ -11,19 +11,12 @@ import DiceRoll from './dice-roll.js';
 import {diceUtils, exportFormats} from './utils.js';
 import '../node_modules/xregexp/xregexp-all.js';
 
-/*const dateReg = XRegExp(
-  `(?<year>[0-9]{4})-? # year
-           (?<month>[0-9]{2})-? # month
-           (?<day>[0-9]{2}) # day`,
-  'x'
-);*/
-let notation = `2d4+(2d6+3d4)-(10d4-L+(d6*2))+2`;
-//notation = '10d4+(d6*2)';
+let notation = `3+2d4!!+(2d6+3d4)-(10d4-L+(d6*2))+2`;
+//notation = '2d6>3+H+d4';
 
 console.log('Notation:', notation);
 const diceRoller = new DiceRoller();
-diceRoller.roll(notation);
-console.log(diceRoller.log);
-console.log(diceRoller.total);
+const roll = diceRoller.roll(notation);
+console.log(roll.total, roll.successes);
 
 export { DiceRoller, DiceRoll, diceUtils, exportFormats };
