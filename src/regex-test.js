@@ -18,5 +18,6 @@ console.log('Notation:', notation);
 const diceRoller = new DiceRoller();
 const roll = diceRoller.roll(notation);
 console.log(roll.total, roll.successes);
+console.log(diceRoller+'');
 
 export { DiceRoller, DiceRoll, diceUtils, exportFormats };

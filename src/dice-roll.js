@@ -497,74 +497,84 @@ const DiceRoll = (() => {
      * @returns {string}
      */
     get output(){
-      let output  = this.notation + ': ';
+      let rollIndex = 0;
+      let output  = `${this.notation}: `;
 
       if(this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
-        // loop through and build the string for die rolled
-        this[_parsedDice].forEach((item, index) => {
-          const rolls = this.rolls[index] || [],
-            hasComparePoint = item.comparePoint;
+        // recursively loop through and build the string for dice rolled
+        const outputRecursive = (parsedDiceI) => {
+          return parsedDiceI.map(item => {
+            if(Array.isArray(item)){
+              // this is a parenthesis group - loop recursively
+              return `(${outputRecursive(item)})`;
+            }else if(typeof item === 'object'){
+              const rolls = this.rolls[rollIndex] || [],
+                hasComparePoint = item.comparePoint;
+              let rollOutput = '';
 
-          // current roll total - used for totalling compounding rolls
-          let currentRoll = 0;
+              // current roll total - used for totalling compounding rolls
+              let currentRoll = 0;
 
-          output += ((index > 0) ? item.operator : '') + '[';
+              rollOutput += '[';
 
-          // output the rolls
-          rolls.forEach((roll, rIndex, array) => {
-            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-            const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
-              hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
+              // output the rolls
+              rolls.forEach((roll, rIndex, array) => {
+                // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+                const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
+                  hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
 
-            let delimit = rIndex !== array.length-1;
+                let delimit = rIndex !== array.length-1;
 
-            if(item.explode && hasMatchedCP){
-              // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
+                if(item.explode && hasMatchedCP){
+                  // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
 
-              // add the current roll to the roll total
-              currentRoll += roll;
+                  // add the current roll to the roll total
+                  currentRoll += roll;
 
-              if(item.compound){
-                // do NOT add the delimiter after this roll as we're not outputting it
-                delimit = false;
-              }else{
-                // not compounding
-                output += roll + '!' + (item.penetrate ? 'p' : '');
-              }
-            }else if(hasMatchedCP){
-              // not exploding but we've matched a compare point - this is a pool dice (success or failure)
-              output += roll + '*';
-            }else if(item.compound && currentRoll) {
-              // last roll in a compounding set (This one didn't compound)
-              output += (roll + currentRoll) + '!!' + (item.penetrate ? 'p' : '');
+                  if(item.compound){
+                    // Compounding - do NOT add the delimiter after this roll as we're not outputting it
+                    delimit = false;
+                  }else{
+                    // exploding but not compounding
+                    rollOutput += `${roll}!${(item.penetrate ? 'p' : '')}`;
+                  }
+                }else if(hasMatchedCP){
+                  // not exploding but we've matched a compare point - this is a pool dice (success or failure)
+                  rollOutput += `${roll}*`;
+                }else if(item.compound && currentRoll) {
+                  // last roll in a compounding set (This one didn't compound)
+                  rollOutput += `${roll + currentRoll}!!${item.penetrate ? 'p' : ''}`;
 
-              // reset current roll total
-              currentRoll = 0;
+                  // reset current roll total
+                  currentRoll = 0;
+                }else{
+                  // just a normal roll
+                  rollOutput += roll;
+
+                  // reset current roll total
+                  currentRoll = 0;
+                }
+
+                if(delimit){
+                  rollOutput += ',';
+                }
+              });
+
+              rollOutput += ']';
+
+
+              // increment the roll index
+              rollIndex++;
+
+              return rollOutput;
             }else{
-              // just a normal roll
-              output += roll;
-
-              // reset current roll total
-              currentRoll = 0;
+              return item;
             }
-
-            if(delimit){
-              output += ',';
-            }
-          });
-
-          output += ']';
-
-          // add any operations
-          if(item.operations.length){
-            output += item.operations.reduce((prev, current) => (
-              prev + current.operator + current.value
-            ), '');
-          }
-        });
+          }).join('');
+        };
 
         // add the total
-        output += ' = ' + this.total;
+        output += `${outputRecursive(this[_parsedDice])} = ${this.total}`;
       }else{
         output += 'No dice rolled';
       }
