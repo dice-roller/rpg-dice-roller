@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/umd/bundle.js');
+  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/umd/bundle.min.js');
 
   const loopCount = 1000;
 
@@ -167,7 +167,8 @@
       expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
       expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 10});
 
-      expect(this.utils.reduceArray(roll.rolls[0]) * (this.utils.reduceArray(roll.rolls[1]) - this.utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
+      expect(this.utils.reduceArray(roll.rolls[0]) * this.utils.reduceArray(roll.rolls[1]) - this.utils.getMin(roll.rolls[1]))
+        .toArraySumEqualTo(total);
 
       // check the output string
       expect(roll).toMatchParsedNotation({
