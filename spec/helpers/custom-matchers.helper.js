@@ -4,7 +4,7 @@ beforeEach(function(){
 
   const lib = this;
   // require the dice-roller library
-  const { diceUtils } = require('../../lib/es5/bundle.js');
+  const { diceUtils } = require('../../lib/umd/bundle.js');
 
   const customMatchers = {
     toBeWithinRange(util, customEqualityTesters){

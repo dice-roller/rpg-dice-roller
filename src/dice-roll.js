@@ -1,5 +1,5 @@
 import {diceUtils, exportFormats} from './utils.js';
-import '../node_modules/xregexp/xregexp-all.js';
+import XRegExp from 'xregexp';
 
 /**
  * A DiceRoll object, which takes a notation
@@ -131,7 +131,7 @@ const DiceRoll = (() => {
          */
         get pool(){
           // check if this is a pool die (If we have a compare point, but aren't exploding)
-          return !!(!this.explode && this.comparePoint)
+          return !!(!this.explode && this.comparePoint);
         },
       };
 

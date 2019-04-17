@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoll } = require('../lib/es5/bundle.js');
+  const { DiceRoll } = require('../lib/umd/bundle.js');
 
   describe('notation patterns', () => {
     const strings = {

@@ -242,7 +242,7 @@ const roll = new rpgDiceRoller.DiceRoll('2d6');
 
 You can also load the library using CommonJS, AMD, etc.
 
-Instead of the `lib/index.js` file, node should use the `lib/es5/bundle.js` file, as defined in the package.json `main` property.
+Instead of the `lib/index.js` file, node should use the `lib/umd/bundle.js` file, as defined in the package.json `main` property.
 
 Here is an example in Node.js:
 
@@ -268,12 +268,12 @@ console.log(latestRoll + '');
 
 We also support older browsers without ES6 or native Module support.
 
-Instead of the `lib/index.js` file, you must use the `lib/es5/bundle.js` file.
+Instead of the `lib/index.js` file, you must use the `lib/umd/bundle.js` file.
 
 Also, all uses of the library classes and objects must be accessed from the `rpgDiceRoller` namespace.
 
 ```html
-<script src="lib/es5/bundle.js"></script>
+<script src="lib/umd/bundle.js"></script>
 <script>
   // create a new instance of the DiceRoller
   var roller = new rpgDiceRoller.DiceRoller();
