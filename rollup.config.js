@@ -3,6 +3,8 @@ import resolve from 'rollup-plugin-node-resolve';
 const { terser } = require('rollup-plugin-terser');
 const { eslint } = require('rollup-plugin-eslint');
 import babel from 'rollup-plugin-babel';
+import banner from 'rollup-plugin-banner';
+const path = require('path');
 
 const format = process.env.FORMAT || 'esm';
 const production = !process.env.BUILD || (process.env.BUILD === 'prod');
@@ -27,5 +29,8 @@ export default {
     }) : null,
     // minify for production
     production ? terser() : null,
+    banner({
+      file: path.join(__dirname, 'banner.txt')
+    }),
   ],
 };

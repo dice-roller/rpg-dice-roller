@@ -193,7 +193,7 @@ Install through:
     [![](https://data.jsdelivr.com/v1/package/npm/rpg-dice-roller/badge)](https://www.jsdelivr.com/package/npm/rpg-dice-roller)
     
     ```html
-    <script src="https://cdn.jsdelivr.net/npm/rpg-dice-roller@3.0.1/lib/umd/bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/rpg-dice-roller@VERSION/lib/umd/bundle.min.js"></script>
     ```
 
 
