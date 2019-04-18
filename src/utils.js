@@ -55,7 +55,7 @@ const diceUtils = Object.freeze({
      * Takes an array of numbers and adds them together,
      * returning the result
      *
-     * @param {Array} numbers
+     * @param {Number[]} numbers
      * @returns {number}
      */
     return numbers => (
@@ -164,7 +164,7 @@ const diceUtils = Object.freeze({
   toFixed(num, decPlaces){
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
-    return parseFloat(num.toFixed(decPlaces || 0));
+    return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
   }
 });
 

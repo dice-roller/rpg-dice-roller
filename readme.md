@@ -173,16 +173,40 @@ The `successes` property on the `DiceRoll` object will provide the number of suc
 However, if the roll is just dice pool, and does not contain any other operations, or dice rolls, then the value provided will be the same as the `totals` property.
 
 
-## Usage
+## Get Started
 
-* **Using NodeJS or other non-native module support?** check the [NodeJS](#nodejs-and-module-loaders) section.
-* **No ES6 or ES6 module support?** read the [Older Browsers](#older-browsers) section below.
+### Setup
 
-You can import the dice roller and use it in your application like so:
+Install through:
+
+* NPM:
+
+    ```
+    $ npm install rpg-dice-roller
+    ```
+* Yarn:
+    
+    ```
+    yarn add rpg-dice-roller
+    ```
+* CDN
+    [![](https://data.jsdelivr.com/v1/package/npm/rpg-dice-roller/badge)](https://www.jsdelivr.com/package/npm/rpg-dice-roller)
+    
+    ```html
+    <script src="https://cdn.jsdelivr.net/npm/rpg-dice-roller@3.0.1/lib/umd/bundle.min.js"></script>
+    ```
+
+
+### Usage
+
+* **Using NodeJS/commonJS/AMD etc.?** check the [NodeJS](#nodejs-and-module-loaders) section.
+* **No ES6 module support?** read the [Older Browsers](#older-browsers) section below.
+
+You can import the dice roller and use it in your application, using ES standard modules like so:
 
 ```js
 // import only the DiceRoller class
-import { DiceRoller } from 'lib/index.js';
+import { DiceRoller } from 'lib/esm/bundle.min.js';
 
 // create a new instance of the DiceRoller
 const roller = new DiceRoller();
@@ -201,10 +225,10 @@ document.write(latestRoll);
 const rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
 ```
 
-If you need to manually create `DiceRoll` objects, you need to import it:
+If you need to manually create `DiceRoll` objects, you need to import the module:
 ```js
 // import the DiceRoller and DiceRoll classes
-import { DiceRoller, DiceRoll } from 'lib/index.js';
+import { DiceRoller, DiceRoll } from 'lib/esm/bundle.min.js';
 
 // roll a single notation without saving it to the log
 const diceRoll = new DiceRoll('2d6-L');
@@ -228,7 +252,7 @@ const roller2 = DiceRoller.import(exportedData);
 Rather than specifying the individual components, you can import everything like so:
 ```js
 // import the everything and store on the `rpgDiceRoller` scope
-import * as rpgDiceRoller from 'lib/index.js';
+import * as rpgDiceRoller from 'lib/esm/bundle.min.js';
 
 // create a DiceRoller
 const roller = new rpgDiceRoller.DiceRoller();
@@ -242,7 +266,7 @@ const roll = new rpgDiceRoller.DiceRoll('2d6');
 
 You can also load the library using CommonJS, AMD, etc.
 
-Instead of the `lib/index.js` file, node should use the `lib/es5/bundle.js` file, as defined in the package.json `main` property.
+Instead of the `lib/esm/bundle.min.js` file, node should use the `lib/umd/bundle.min.js` file, as defined in the package.json `main` property.
 
 Here is an example in Node.js:
 
@@ -266,23 +290,23 @@ console.log(latestRoll + '');
 
 ### Older Browsers
 
-We also support older browsers without ES6 or native Module support.
+We support _some_ older browsers without ES6 or native Module support.
 
-Instead of the `lib/index.js` file, you must use the `lib/es5/bundle.js` file.
+Instead of the `lib/esm/bundle.min.js` file, you must use the `lib/umd/bundle.min.js` file.
 
-Also, all uses of the library classes and objects must be accessed from the `rpgDiceRoller` namespace.
+All uses of the library classes and objects must be accessed from the `rpgDiceRoller` namespace.
 
 ```html
-<script src="lib/es5/bundle.js"></script>
+<script src="lib/umd/bundle.min.js"></script>
 <script>
   // create a new instance of the DiceRoller
-  var roller = new rpgDiceRoller.DiceRoller();
+  var diceRoller = new rpgDiceRoller.DiceRoller();
 
   // roll the dice
   diceRoller.roll('4d20-L');
   
   // create a new instance of a DiceRoll
-  var roll = new rpgDiceRoller.DiceRoll('2d6');
+  var diceRoll = new rpgDiceRoller.DiceRoll('2d6');
 </script>
 ```
 
@@ -317,9 +341,6 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                 |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                              |
 | `total`            | `Number`                                      | The sum of all the rolls in the `log`.                                                                                                     |
-| ~~`getLog`~~       | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `log` property instead.~~                                                                         |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
-| ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
 
 
 #### Static properties
@@ -334,10 +355,6 @@ const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance
 | ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `exportFormats`        | `Object`                          | List of available export / import formats                                                                                                            |
 | `import`               | `function({mixed} data)`          | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
-| ~~`utils`~~            | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use global `diceUtils` instead.                                                                               |
-| ~~`notationPatterns`~~ | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.notationPatterns` property instead.                                                             |
-| ~~`parseDie`~~         | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
-| ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
 
 
 ### `DiceRoll` object
@@ -362,10 +379,6 @@ const roll = new DiceRoll('4d10');
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoll` is passed to `JSON.stringify`. Returns `Object`           |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroll + ''`). Returns `String`        |
 | `total`            | `Number`                                      | The roll total generated from `roll()`.                                                                            |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                              |
-| ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                              |
-| ~~`getSuccesses`~~ | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `successes` property instead.~~                                           |
-| ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `total` property instead.~~                                               |
 
 
 #### Static properties
