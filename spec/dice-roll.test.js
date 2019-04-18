@@ -1657,4 +1657,20 @@
       expect(diceRoller.successes).toEqual(successes);
     });
   });
+
+  describe('whitespace', function(){
+    const notations = {
+      '1 d 6 -    7   * 2': '1d6-7*2',
+      '3    + d3  -H/ L': '3+d3-H/L',
+      '  ( 5 +  2)   *     3   ': '(5+2)*3',
+    };
+
+    it('should strip whitespace from the notation', function(){
+      Object.entries(notations).forEach(([notation, trimmed]) => {
+        const diceRoll = new DiceRoll(notation);
+
+        expect(diceRoll.notation).toEqual(trimmed);
+      });
+    });
+  });
 })();

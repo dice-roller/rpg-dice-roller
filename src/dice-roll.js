@@ -281,7 +281,7 @@ const DiceRoll = (() => {
         this[_parsedDice] = DiceRoll.parseNotation(this.notation);
       }else if(typeof notation === 'string'){
         // store the notation
-        this[_notation] = notation;
+        this[_notation] = notation.replace(/\s+/g,'');
         // empty the current rolls
         this[_rolls] = [];
 
