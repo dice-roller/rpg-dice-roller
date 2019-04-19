@@ -165,7 +165,17 @@ const diceUtils = Object.freeze({
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
     return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
-  }
+  },
+  /**
+   * Trims operators from the end of the string.
+   * ie. `3+4*` becomes `3+4`
+   *
+   * @param formula
+   * @returns {*}
+   */
+  trimOperator(formula){
+    return formula.replace(/[+\-\/*]+$/, '');
+  },
 });
 
 /**

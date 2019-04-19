@@ -13,8 +13,7 @@ ie. `4d6-L` (A roll of 4 six-sided dice, dropping the lowest result)
 
 ### Operators
 
-You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.  
-However, the use of the mathematical symbols `×` and `÷` do not currently work, but are planned.
+You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.
 
 
 ### Percentile dice (d%)
@@ -171,6 +170,27 @@ You can mix pool dice with other dice types or equations, and it will use the nu
 
 The `successes` property on the `DiceRoll` object will provide the number of successes for a roll.  
 However, if the roll is just dice pool, and does not contain any other operations, or dice rolls, then the value provided will be the same as the `totals` property.
+
+
+### Maths
+
+Parenthesis are recognised anywhere in notations to group sections and define the order of operations:
+
+```
+1d6+2*3: [4]+2*3 = 10
+(1d6+2)*3: ([4]+2)*3 = 18
+```
+
+You can also use an array of mathematical formulas and functions.
+Internally it uses [Math.Js](https://mathjs.org), so you should be able to use any of its built in [arithmetic functions](https://mathjs.org/docs/reference/functions.html#arithmetic-functions).
+
+Some examples:
+
+```
+round(4d10/3): round([3,6,1,1]/3) = 3.7  // round the result to the nearest whole number
+floor(4d10/3): round([3,6,1,1]/3) = 3.6  // round the result down to the nearest whole number
+ceil(4d10/3): round([3,6,1,1]/3) = 3.7   // round the result up to the nearest whole number
+```
 
 
 ## Get Started
