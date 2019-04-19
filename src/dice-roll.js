@@ -1,5 +1,6 @@
 import {diceUtils, exportFormats} from './utils.js';
 import XRegExp from 'xregexp';
+import  math from 'mathjs';
 
 /**
  * A DiceRoll object, which takes a notation
@@ -303,46 +304,33 @@ const DiceRoll = (() => {
      */
     [_calculateTotal](){
       let rollIndex = 0,
-        prevRolls,
-        prevOperator = '+';
+        prevRolls;
 
-      // reset the totals
+      // reset the totals and successes
       this[_resetTotals]();
 
       /**
-       * Calculates the sum of the given formula
+       * Recursively loops through the dice and builds
+       * a formula string using the roll values instead
+       * of the notation
        *
-       * @param formula
-       * @returns {Number}
+       * @param parsedDiceI
        */
-      const equate = formula => {
-        const totals = formula.split(/([+\-\/*])/)
-          .filter(Boolean);
-
-        if((totals.length === 2) && (totals[0] === '-')){
-          // total is just a single negative number - don't equate it
-          return parseFloat(totals.join(''));
-        }
-
-        // loop through and total values
-        // get the first value to start, then assume every other value is an operator
-        // this is only temporary until we build in proper equation parsing
-        let total = totals.shift();
-        for(let i = 0; i < totals.length; i = i+2){
-          total = diceUtils.equateNumbers(total, totals[i+1], totals[i]);
-        }
-
-        return total;
-      };
-
-      const calculateRecursive = (parsedDiceI) => {
-        const parsedValues = [];
+      const buildFormulas = parsedDiceI => {
+        const formulas = {
+          total: '',
+          successes: '',
+        };
 
         // loop through each roll and calculate the totals
         parsedDiceI.forEach(item => {
           if(Array.isArray(item)){
             // this is a parenthesis group - loop recursively
-            parsedValues.push(equate(calculateRecursive(item)));
+            const segmentFormulas = buildFormulas(item),
+              successFormula = diceUtils.trimOperator(segmentFormulas.successes);
+
+            formulas.total += segmentFormulas.total ? `(${segmentFormulas.total})`: '';
+            formulas.successes += successFormula ? `(${successFormula})` : '';
           }else if(typeof item === 'object'){
             // item is a die
             let rolls = this.rolls[rollIndex] || [],
@@ -362,11 +350,11 @@ const DiceRoll = (() => {
 
             // if this is a pool dice, add it's successes to the success count
             if(item.pool) {
-              this[_successes] += dieTotal;
+              formulas.successes += dieTotal;
             }
 
             // add the total to the list
-            parsedValues.push(dieTotal);
+            formulas.total += dieTotal;
 
             // increment the roll index and store the previous rolls / parsed die
             rollIndex++;
@@ -401,9 +389,9 @@ const DiceRoll = (() => {
 
               // flag that this value needs to be modified to a success/failure value
               isPoolModifier = true;
-            }else if(DiceRoll.notationPatterns.get('arithmeticOperator', '', true).test(value)){
+            }else if(isPool && DiceRoll.notationPatterns.get('arithmeticOperator', '', true).test(value)){
               // value is an operator - store it for reference
-              prevOperator = value;
+              formulas.successes += value;
             }
 
             if(isPool && (isPoolModifier || diceUtils.isNumeric(value))){
@@ -412,24 +400,31 @@ const DiceRoll = (() => {
                 value = getSuccessStateValue(value, prevRolls.parsedDice.comparePoint);
               }
 
-              // equate the pool dice
-              this[_successes] = diceUtils.equateNumbers(this[_successes], value, prevOperator);
+              // add the pool dice modifier
+              formulas.successes += value;
             }
 
             // add the value to the list
-            parsedValues.push(value);
+            formulas.total += value;
           }
         });
 
-        return parsedValues.join('');
+        // ensure successes string doesn't end in an operator (ie. `3+5*`)
+        formulas.successes = diceUtils.trimOperator(formulas.successes);
+
+        return formulas;
       };
 
       // calculate the total recursively (looping through parenthesis groups)
-      let total = equate(calculateRecursive(this[_parsedDice], this.rolls));
+      let formulas = buildFormulas(this[_parsedDice]);
 
-      // if a total has been calculated round it to max 2 decimal places
-      if(total){
-        this[_total] = diceUtils.toFixed(total, 2);
+      // if a total formula has been produced, evaluate it and round it to max 2 decimal places
+      if(formulas.total){
+        this[_total] = diceUtils.toFixed(math.eval(formulas.total), 2);
+      }
+      // if a success formula has been produced, evaluate it and round tit to a max 2 decimal places
+      if(formulas.successes){
+        this[_successes] = diceUtils.toFixed(math.eval(formulas.successes), 2);
       }
 
       return this[_total];

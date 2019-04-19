@@ -159,7 +159,7 @@
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
-      expect(total).toBeWithinRange({min: 3, max: 180});
+      expect(total).toBeWithinRange({min: 5, max: 350});
 
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [3,2]});
@@ -1175,6 +1175,51 @@
         rolls: `[${Math.round(total*4.52)}]/4.52`,
         total: total,
       });
+    });
+  });
+
+  describe('order of operation', function(){
+    let diceRoller;
+
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('should calculate the operations in the correct order for `1d6+2*3', function(){
+      const notation = '1d6+2*3',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual(rollVal + 2 * 3);
+    });
+
+    it('should calculate the operations in the correct order for `(1d6+2)*3', function(){
+      const notation = '(1d6+2)*3',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual((rollVal + 2) * 3);
+    });
+
+    it('should calculate the operations in the correct order for `1d6+2*3/4', function(){
+      const notation = '1d6+2*3/4',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual(rollVal + 2 * 3 / 4);
+    });
+
+    it('should calculate the operations in the correct order for `(1d6+(2*3))/4', function(){
+      const notation = '(1d6+(2*3))/4',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual((rollVal + (2 * 3)) / 4);
     });
   });
 
