@@ -14,11 +14,21 @@
       box-sizing: border-box;
     }
 
+    html{
+      height: 100%;
+    }
+
     body{
+      display: flex;
+      margin: 0;
+      padding: 0;
+      min-height: 100%;
       color: #222;
       font-family: Helvetica, Arial, sans-serif;
       font-size: 16px;
-      background-color: #fcfcfc;
+      background-color: #CBB599;
+      flex-direction: column;
+      justify-content: space-between;
     }
 
     code{
@@ -30,15 +40,70 @@
 
     input, textarea, button{
       margin-bottom: 1em;
+      border-radius: 4px;
+    }
+
+    input, textarea{
+      padding: .5em;
+      background: #eee;
+      border: 1px solid #aaa;
+    }
+
+    button{
+      padding: .5rem 1.5rem;
+      color: #ffffff;
+      background-color: #5E6448;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover,
+    button:focus{
+      background: #7C8061;
+    }
+
+    a{
+      color: #5E6448;
+    }
+
+    a:hover,
+    a:focus{
+      color: #7C8061;
+    }
+
+
+    #header{
+      padding: 1rem;
+      color: #dfdfdf;
+      background: #8A4E36;
+    }
+
+    #header h1{
+      margin: 0;
     }
 
     #footer{
+      padding: 1rem;
+      color: #dfdfdf;
       font-size: .75em;
+      background: #8B664F;
+    }
+
+    #footer a{
+      color: #fff;
+    }
+
+    #footer a:hover,
+    #footer a:focus{
+      color: #B8B283;
+    }
+
+    #main{
+      padding: 1rem;
     }
 
 
     #output{
-      padding: .5em;
       width: 100%;
       max-width: 100%;
       min-width: 100%;
@@ -46,14 +111,14 @@
       font-size: 1em;
     }
   </style>
-</head>
+ </head>
 
 <body>
-  <header>
+  <header id="header">
     <h1>RPG Dice Roller</h1>
   </header>
 
-  <main>
+  <main id="main">
     <form action="" onsubmit="roll(); return false;">
       <label for="input">Notation</label>
       <input type="text" placeholder="eg. 1d6+2d20" autofocus id="input">
@@ -96,6 +161,13 @@
       </li>
 
       <li>
+        <code>(2d10+4)*2</code>
+        <small>
+          (Parenthesis to specify order of operations)
+        </small>
+      </li>
+
+      <li>
         <code>d%</code> <small>(A percentile die - equivalent to <code>d100</code>)</small>
       </li>
 
@@ -133,6 +205,16 @@
           (Dice pool - anything greater than a 4 is a success. Count the number of successes as the total)
         </small>
       </li>
+
+      <li>
+        <code>floor(2d6/3)</code>,
+        <code>round(2d6/3)</code>,
+        <code>ceil(2d6/3)</code>
+
+        <small>
+          (Rounding functions)
+        </small>
+      </li>
     </ul>
 
     <p>
@@ -155,9 +237,9 @@
     <a href="https://github.com/GreenImp/rpg-dice-roller" target="_blank">GitHub</a>
   </footer>
 
-  <script src="/lib/es5/bundle.js"></script>
+  <script src="../lib/umd/bundle.js"></script>
   <script>
-    const diceRoller = new Roller.DiceRoller();
+    const diceRoller = new rpgDiceRoller.DiceRoller();
 
     window.roll = () => {
       const value = document.getElementById('input').value;

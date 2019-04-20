@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoll } = require('../lib/es5/bundle.js');
+  const { DiceRoll } = require('../lib/umd/bundle.min.js');
 
   describe('notation patterns', () => {
     const strings = {
@@ -40,27 +40,27 @@
        */
       explode: '(!{1,2}p?)',
       /**
-       * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+       * Matches a die (ie. 2d6, d10, d%, dF, dF.2)
        *
        * @returns {string}
        */
-      get dice() {
+      get die() {
         return `([1-9]\\d*)?d([1-9]\\d*|%|${this.fudge})`;
       },
       /**
-       * Matches a dice, optional exploding/penetrating notation and roll comparison
+       * Matches a die, optional exploding/penetrating notation and roll comparison
        *
        * @type {string}
        */
-      get diceFull() {
-        return `${this.dice}${this.explode}?(?:${this.numberComparison})?`;
+      get dieFull() {
+        return `${this.die}${this.explode}?(?:${this.numberComparison})?`;
       },
       /**
-       * Matches the addition to a dice (ie. +4, -10, *2, -L)
+       * Matches the operation to a die (ie. +4, -10, *2, -L)
        *
        * @type {string}
        */
-      get addition() {
+      get operation() {
         return `(${this.arithmeticOperator})(${this.numberDecimal}(?!\\d*d)|H|L)`;
       },
       /**
@@ -75,7 +75,7 @@
        * @type {string}
        */
       get notation() {
-        return `(${this.arithmeticOperator})?${this.diceFull}((?:${this.addition})*)`;
+        return `(${this.arithmeticOperator})?${this.dieFull}((?:${this.operation})*)`;
       },
       numberDecimal: '\\d+(?:\\.\\d+)?',
     };

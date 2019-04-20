@@ -1,4 +1,6 @@
 import {diceUtils, exportFormats} from './utils.js';
+import XRegExp from 'xregexp';
+import  math from 'mathjs';
 
 /**
  * A DiceRoll object, which takes a notation
@@ -7,6 +9,8 @@ import {diceUtils, exportFormats} from './utils.js';
  * @type {DiceRoll}
  */
 const DiceRoll = (() => {
+  const _calculateTotal = Symbol('calculateTotals');
+
   /**
    * The dice notation
    *
@@ -106,6 +110,57 @@ const DiceRoll = (() => {
     return isComparePoint(comparePoint, value) ? 1 : 0;
   };
 
+  const parseDie = (notation) => {
+    const parsed = [];
+
+    // parse the notation and find each valid dice (and any attributes)
+    const pattern = DiceRoll.notationPatterns.get('notation', 'g');
+
+    let match;
+    while((match = pattern.exec(notation)) !== null){
+      const die = {
+        qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
+        sides: diceUtils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
+        fudge: false,                                                    // if fudge die this is set to the fudge notation match
+        explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
+        penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
+        compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
+        comparePoint: false,                                                    // the compare point for exploding/penetrating dice
+        /**
+         * flag - whether it's a pool die or not
+         * @returns {boolean}
+         */
+        get pool(){
+          // check if this is a pool die (If we have a compare point, but aren't exploding)
+          return !!(!this.explode && this.comparePoint);
+        },
+      };
+
+      // check if it's a fudge die
+      if(typeof die.sides === 'string'){
+        die.fudge = die.sides.match(DiceRoll.notationPatterns.get('fudge', null, true)) || false;
+      }
+
+      // check if we have a compare point
+      if(match[6]){
+        die.comparePoint = {
+          operator: match[6],
+          value: parseInt(match[7], 10)
+        };
+      }else if(die.explode){
+        // we are exploding the dice so we need a compare point, but none has been defined
+        die.comparePoint = {
+          operator: '=',
+          value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
+        };
+      }
+
+      parsed.push(die);
+    }
+
+    return parsed;
+  };
+
   /**
    * Rolls a single die for its quantity
    * and returns an array of the results
@@ -152,7 +207,7 @@ const DiceRoll = (() => {
           index = reRolls.length;
 
           // get the total rolled on this die
-          roll = callback.call(this, sides);
+          roll = callback.call(die, sides);
 
           // add the roll to our list
           reRolls[index] = (reRolls[index] || 0) + roll;
@@ -227,7 +282,7 @@ const DiceRoll = (() => {
         this[_parsedDice] = DiceRoll.parseNotation(this.notation);
       }else if(typeof notation === 'string'){
         // store the notation
-        this[_notation] = notation;
+        this[_notation] = notation.replace(/\s+/g,'');
         // empty the current rolls
         this[_rolls] = [];
 
@@ -243,6 +298,137 @@ const DiceRoll = (() => {
 
 
     /** Private methods **/
+
+    /**
+     * @returns {Number}
+     */
+    [_calculateTotal](){
+      let rollIndex = 0,
+        prevRolls;
+
+      // reset the totals and successes
+      this[_resetTotals]();
+
+      /**
+       * Recursively loops through the dice and builds
+       * a formula string using the roll values instead
+       * of the notation
+       *
+       * @param parsedDiceI
+       */
+      const buildFormulas = parsedDiceI => {
+        const formulas = {
+          total: '',
+          successes: '',
+        };
+
+        // loop through each roll and calculate the totals
+        parsedDiceI.forEach(item => {
+          if(Array.isArray(item)){
+            // this is a parenthesis group - loop recursively
+            const segmentFormulas = buildFormulas(item),
+              successFormula = diceUtils.trimOperator(segmentFormulas.successes);
+
+            formulas.total += segmentFormulas.total ? `(${segmentFormulas.total})`: '';
+            formulas.successes += successFormula ? `(${successFormula})` : '';
+          }else if(typeof item === 'object'){
+            // item is a die
+            let rolls = this.rolls[rollIndex] || [],
+              rollValues = [],
+              dieTotal;
+
+            if(item.pool){
+              // pool dice are success/failure so we don't want the actual dice roll
+              // we need to convert each roll to 1 (success) or 0 (failure)
+              rollValues = rolls.map(value => getSuccessStateValue(value, item.comparePoint));
+            } else {
+              rollValues = rolls;
+            }
+
+            // add all the rolls together to get the total
+            dieTotal = diceUtils.sumArray(rollValues);
+
+            // if this is a pool dice, add it's successes to the success count
+            if(item.pool) {
+              formulas.successes += dieTotal;
+            }
+
+            // add the total to the list
+            formulas.total += dieTotal;
+
+            // increment the roll index and store the previous rolls / parsed die
+            rollIndex++;
+            prevRolls = {
+              parsedDice: item,
+              rolls: rolls,
+            };
+          }else{
+            let prevRollsValues = [],
+              value = item,
+              isPool = false,
+              isPoolModifier = false;
+
+            // determine the previous roll details for handling things like H/L modifiers
+            if(prevRolls){
+              isPool = prevRolls.parsedDice && prevRolls.parsedDice.pool;
+
+              if(prevRolls.rolls){
+                prevRollsValues = (prevRolls.parsedDice && prevRolls.parsedDice.compound) ? [diceUtils.sumArray(prevRolls.rolls)] : prevRolls.rolls;
+              }
+            }
+
+            if(item === 'H'){
+              // 'H' is equivalent to the highest roll
+              value = Math.max(...prevRollsValues);
+
+              // flag that this value needs to be modified to a success/failure value
+              isPoolModifier = true;
+            }else if(value === 'L'){
+              // 'L' is equivalent to the lowest roll
+              value = Math.min(...prevRollsValues);
+
+              // flag that this value needs to be modified to a success/failure value
+              isPoolModifier = true;
+            }else if(isPool && DiceRoll.notationPatterns.get('arithmeticOperator', '', true).test(value)){
+              // value is an operator - store it for reference
+              formulas.successes += value;
+            }
+
+            if(isPool && (isPoolModifier || diceUtils.isNumeric(value))){
+              if(isPoolModifier){
+                // pool dice are either success or failure, so value is converted to 1 or 0
+                value = getSuccessStateValue(value, prevRolls.parsedDice.comparePoint);
+              }
+
+              // add the pool dice modifier
+              formulas.successes += value;
+            }
+
+            // add the value to the list
+            formulas.total += value;
+          }
+        });
+
+        // ensure successes string doesn't end in an operator (ie. `3+5*`)
+        formulas.successes = diceUtils.trimOperator(formulas.successes);
+
+        return formulas;
+      };
+
+      // calculate the total recursively (looping through parenthesis groups)
+      let formulas = buildFormulas(this[_parsedDice]);
+
+      // if a total formula has been produced, evaluate it and round it to max 2 decimal places
+      if(formulas.total){
+        this[_total] = diceUtils.toFixed(math.eval(formulas.total), 2);
+      }
+      // if a success formula has been produced, evaluate it and round tit to a max 2 decimal places
+      if(formulas.successes){
+        this[_successes] = diceUtils.toFixed(math.eval(formulas.successes), 2);
+      }
+
+      return this[_total];
+    }
 
     /**
      * Resets the current total and success count
@@ -272,11 +458,28 @@ const DiceRoll = (() => {
       // reset the cached total
       this[_resetTotals]();
 
-      // loop through each die and roll it
-      this[_parsedDice].forEach(elm => {
-        // Roll the dice and add it to the log
-        this[_rolls].push(rollDie(elm));
-      });
+      /**
+       * Recursively loops through the parsed dice groups and rolls the dice,
+       * flattening the results so they're no longer grouped
+       *
+       * @param group
+       * @returns {Array[]|any[]}
+       */
+      const rollGroups = group => {
+        if(Array.isArray(group)){
+          // recursively loop through each parenthesis group and roll them
+          // flatten the result so rolls aren't grouped - we only care about numerical position
+          return group.flatMap(elm => {
+            return rollGroups(elm);
+          }).filter(Boolean);
+        }else if(typeof group === 'object'){
+          // roll the dice and return it
+          return [rollDie(group)];
+        }
+      };
+
+      // saved the rolls to the log
+      this[_rolls] = rollGroups(this[_parsedDice]);
 
       // return the rolls;
       return this[_rolls];
@@ -289,74 +492,84 @@ const DiceRoll = (() => {
      * @returns {string}
      */
     get output(){
-      let output  = this.notation + ': ';
+      let rollIndex = 0;
+      let output  = `${this.notation}: `;
 
       if(this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
-        // loop through and build the string for die rolled
-        this[_parsedDice].forEach((item, index) => {
-          const rolls = this.rolls[index] || [],
-            hasComparePoint = item.comparePoint;
+        // recursively loop through and build the string for dice rolled
+        const outputRecursive = (parsedDiceI) => {
+          return parsedDiceI.map(item => {
+            if(Array.isArray(item)){
+              // this is a parenthesis group - loop recursively
+              return `(${outputRecursive(item)})`;
+            }else if(typeof item === 'object'){
+              const rolls = this.rolls[rollIndex] || [],
+                hasComparePoint = item.comparePoint;
+              let rollOutput = '';
 
-          // current roll total - used for totalling compounding rolls
-          let currentRoll = 0;
+              // current roll total - used for totalling compounding rolls
+              let currentRoll = 0;
 
-          output += ((index > 0) ? item.operator : '') + '[';
+              rollOutput += '[';
 
-          // output the rolls
-          rolls.forEach((roll, rIndex, array) => {
-            // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-            const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
-              hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
+              // output the rolls
+              rolls.forEach((roll, rIndex, array) => {
+                // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
+                const rollVal = (item.penetrate && currentRoll) ? roll + 1 : roll,
+                  hasMatchedCP = hasComparePoint && isComparePoint(item.comparePoint, rollVal);
 
-            let delimit = rIndex !== array.length-1;
+                let delimit = rIndex !== array.length-1;
 
-            if(item.explode && hasMatchedCP){
-              // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
+                if(item.explode && hasMatchedCP){
+                  // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
 
-              // add the current roll to the roll total
-              currentRoll += roll;
+                  // add the current roll to the roll total
+                  currentRoll += roll;
 
-              if(item.compound){
-                // do NOT add the delimiter after this roll as we're not outputting it
-                delimit = false;
-              }else{
-                // not compounding
-                output += roll + '!' + (item.penetrate ? 'p' : '');
-              }
-            }else if(hasMatchedCP){
-              // not exploding but we've matched a compare point - this is a pool dice (success or failure)
-              output += roll + '*';
-            }else if(item.compound && currentRoll) {
-              // last roll in a compounding set (This one didn't compound)
-              output += (roll + currentRoll) + '!!' + (item.penetrate ? 'p' : '');
+                  if(item.compound){
+                    // Compounding - do NOT add the delimiter after this roll as we're not outputting it
+                    delimit = false;
+                  }else{
+                    // exploding but not compounding
+                    rollOutput += `${roll}!${(item.penetrate ? 'p' : '')}`;
+                  }
+                }else if(hasMatchedCP){
+                  // not exploding but we've matched a compare point - this is a pool dice (success or failure)
+                  rollOutput += `${roll}*`;
+                }else if(item.compound && currentRoll) {
+                  // last roll in a compounding set (This one didn't compound)
+                  rollOutput += `${roll + currentRoll}!!${item.penetrate ? 'p' : ''}`;
 
-              // reset current roll total
-              currentRoll = 0;
+                  // reset current roll total
+                  currentRoll = 0;
+                }else{
+                  // just a normal roll
+                  rollOutput += roll;
+
+                  // reset current roll total
+                  currentRoll = 0;
+                }
+
+                if(delimit){
+                  rollOutput += ',';
+                }
+              });
+
+              rollOutput += ']';
+
+
+              // increment the roll index
+              rollIndex++;
+
+              return rollOutput;
             }else{
-              // just a normal roll
-              output += roll;
-
-              // reset current roll total
-              currentRoll = 0;
+              return item;
             }
-
-            if(delimit){
-              output += ',';
-            }
-          });
-
-          output += ']';
-
-          // add any additions
-          if(item.additions.length){
-            output += item.additions.reduce((prev, current) => (
-              prev + current.operator + current.value
-            ), '');
-          }
-        });
+          }).join('');
+        };
 
         // add the total
-        output += ' = ' + this.total;
+        output += `${outputRecursive(this[_parsedDice])} = ${this.total}`;
       }else{
         output += 'No dice rolled';
       }
@@ -374,7 +587,7 @@ const DiceRoll = (() => {
     }
 
     /**
-     * Rolls for the notation
+     * The dice rolled for the notation
      *
      * @returns {Array}
      */
@@ -391,7 +604,7 @@ const DiceRoll = (() => {
       if(!this[_successes]){
         // no successes found - calculate the totals, which also calculates the successes
         // calling the `total` property calculates the total
-        let total = this.total;
+        this[_calculateTotal]();
       }
 
       return this[_successes] || 0;
@@ -405,70 +618,7 @@ const DiceRoll = (() => {
     get total(){
       // only calculate the total if it has not already been done
       if(!this[_total] && this[_parsedDice] && Array.isArray(this.rolls) && this.rolls.length){
-        // reset the success count
-        this[_successes] = 0;
-
-        // loop through each roll and calculate the totals
-        this[_parsedDice].forEach((item, index) => {
-          let rolls = this.rolls[index] || [],
-            dieTotal = 0;
-
-          // actual values of the rolls for the purposes of L/H modifiers
-          const rollsValues = item.compound ? [rolls.reduce((a, b) => a + b, 0)] : rolls,
-            isPool = !item.explode && item.comparePoint;
-
-          if(isPool){
-            // pool dice are success/failure so we don't want the actual dice roll
-            // we need to convert each roll to 1 (success) or 0 (failure)
-            rolls = rolls.map(value => getSuccessStateValue(value, item.comparePoint));
-          }
-
-          // add all the rolls together to get the total
-          dieTotal = diceUtils.sumArray(rolls);
-
-
-          if(item.additions.length){
-            // loop through the additions and handle them
-            item.additions.forEach(aItem => {
-              let value = aItem.value,
-                isPoolModifier = false;
-
-              // run any necessary addition value modifications
-              if(value === 'H'){
-                // 'H' is equivalent to the highest roll
-                value = Math.max(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
-                isPoolModifier = true;
-              }else if(value === 'L'){
-                // 'L' is equivalent to the lowest roll
-                value = Math.min(...rollsValues);
-                // flag that this value needs to eb modified to a success/failure value
-                isPoolModifier = true;
-              }
-
-              if(isPool && isPoolModifier){
-                // pool dice are either success or failure, so value is converted to 1 or 0
-                value = getSuccessStateValue(value, item.comparePoint);
-              }
-
-              // run the actual mathematical equation
-              dieTotal = diceUtils.equateNumbers(dieTotal, value, aItem.operator);
-            });
-          }
-
-          // total the value
-          this[_total] = diceUtils.equateNumbers(this[_total], dieTotal, item.operator);
-
-          // if this is a pool dice, add it's success count to the count
-          if(isPool) {
-            this[_successes] = diceUtils.equateNumbers(this[_successes], dieTotal, item.operator);
-          }
-        });
-
-        // if a total has been calculated round it to 2 decimal places
-        if(this[_total]){
-          this[_total] = diceUtils.toFixed(this[_total], 2);
-        }
+        this[_calculateTotal]();
       }
 
       // return the total
@@ -565,59 +715,54 @@ const DiceRoll = (() => {
       const parsed = [];
 
       // only continue if a notation was passed
-      if(notation){
-        // parse the notation and find each valid dice (and any attributes)
-        const pattern = this.notationPatterns.get('notation', 'g');
-        let match;
-        while((match = pattern.exec(notation)) !== null){
-          const die = {
-            operator: match[1] || '+',                                          // dice operator for concatenating with previous rolls (+, -, /, *)
-            qty: match[2] ? parseInt(match[2], 10) : 1,                    // number of times to roll the die
-            sides: diceUtils.isNumeric(match[3]) ? parseInt(match[3], 10) : match[3],  // how many sides the die has - only parse numerical values to Int
-            fudge: false,                                                    // if fudge die this is set to the fudge notation match
-            explode: !!match[5],                                               // flag - whether to explode the dice rolls or not
-            penetrate: (match[5] === '!p') || (match[5] === '!!p'),              // flag - whether to penetrate the dice rolls or not
-            compound: (match[5] === '!!') || (match[5] === '!!p'),              // flag - whether to compound exploding dice or not
-            comparePoint: false,                                                    // the compare point for exploding/penetrating dice
-            additions: []                                                        // any additions (ie. +2, -L)
-          };
+      if(notation) {
+        // build the regex for matching a die (including exploding and pool dice etc. notation)
+        const dieRegex = DiceRoll.notationPatterns.get('dieFull', 'g');
 
-          // check if it's a fudge die
-          if(typeof die.sides === 'string'){
-            die.fudge = die.sides.match(this.notationPatterns.get('fudge', null, true)) || false;
+        // split the notation into its parenthesis groupings
+        const groups = XRegExp.matchRecursive(
+          notation,
+          '\\(', '\\)',
+          'g',
+          {
+            valueNames: [
+              'between', 'left', 'match', 'right',
+            ],
           }
+        );
 
-          // check if we have a compare point
-          if(match[6]){
-            die.comparePoint = {
-              operator: match[6],
-              value: parseInt(match[7], 10)
-            };
-          }else if(die.explode){
-            // we are exploding the dice so we need a compare point, but none has been defined
-            die.comparePoint = {
-              operator: '=',
-              value: die.fudge ? 1 : ((die.sides === '%') ? 100 : die.sides)
-            };
+        // loop through each group and parse it
+        groups.forEach(group => {
+          if (group.name === 'match') {
+            // this is a match within the parenthesis group (ie. `3d6+2` in `(3d6+2)*4`
+            // recursively parse it in case it has nested parenthesis
+            parsed.push(DiceRoll.parseNotation(group.value));
+          } else if (group.name === 'between') {
+            // this is a match outside of a parenthesis group (ie. the `+2` in `(3d6)+2`, or `d6` in `(2d4+2)*d6`)
+            // or it could be that no parenthesis group exists (ie. the whole notation in `3d6+2`)
+            // this also happens when recursively parsing down to a level with no parenthesis
+
+            // split the notation by operator (include operators in the returned segments)
+            const segments = group.value.split(/([+\-\/*])/).filter(Boolean);
+
+            // loop through each segment and determine what it is
+            segments.map(segment => {
+              // determine if the segment is a die or not
+              if (XRegExp.test(segment, dieRegex)) {
+                // this is a die - parse it into an object and add to the list
+                parsed.push(...parseDie(segment));
+              } else {
+                // not a die (ie. number, operator)
+                if(diceUtils.isNumeric(segment)){
+                  segment = parseFloat(segment);
+                }
+
+                // add to the list
+                parsed.push(segment);
+              }
+            });
           }
-
-          // check if we have additions
-          if(match[8]){
-            // we have additions (ie. +2, -L)
-            let additionMatch;
-            while(!!(additionMatch = this.notationPatterns.get('addition', 'g').exec(match[8]))){
-              // add the addition to the list
-              die.additions.push({
-                // addition operator for concatenating with the dice (+, -, /, *)
-                operator: additionMatch[1],
-                // addition value - either numerical or string 'L' or 'H'
-                value: diceUtils.isNumeric(additionMatch[2]) ? parseFloat(additionMatch[2]) : additionMatch[2],
-              });
-            }
-          }
-
-          parsed.push(die);
-        }
+        });
       }
 
       // return the parsed dice
@@ -669,27 +814,27 @@ const DiceRoll = (() => {
        */
       explode: '(!{1,2}p?)',
       /**
-       * Matches a dice (ie. 2d6, d10, d%, dF, dF.2)
+       * Matches a die (ie. 2d6, d10, d%, dF, dF.2)
        *
        * @returns {string}
        */
-      get dice() {
+      get die() {
         return `([1-9]\\d*)?d([1-9]\\d*|%|${this.fudge})`;
       },
       /**
-       * Matches a dice, optional exploding/penetrating notation and roll comparison
+       * Matches a die, optional exploding/penetrating notation and roll comparison
        *
        * @type {string}
        */
-      get diceFull() {
-        return `${this.dice}${this.explode}?(?:${this.numberComparison})?`;
+      get dieFull() {
+        return `${this.die}${this.explode}?(?:${this.numberComparison})?`;
       },
       /**
-       * Matches the addition to a dice (ie. +4, -10, *2, -L)
+       * Matches the operation to a die (ie. +4, -10, *2, -L)
        *
        * @type {string}
        */
-      get addition() {
+      get operation() {
         return `(${this.arithmeticOperator})(${this.numberDecimal}(?!\\d*d)|H|L)`;
       },
       /**
@@ -704,7 +849,7 @@ const DiceRoll = (() => {
        * @type {string}
        */
       get notation() {
-        return `(${this.arithmeticOperator})?${this.diceFull}((?:${this.addition})*)`;
+        return `(${this.arithmeticOperator})?${this.dieFull}((?:${this.operation})*)`;
       },
       numberDecimal: '\\d+(?:\\.\\d+)?',
     };

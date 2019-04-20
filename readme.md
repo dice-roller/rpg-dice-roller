@@ -13,8 +13,7 @@ ie. `4d6-L` (A roll of 4 six-sided dice, dropping the lowest result)
 
 ### Operators
 
-You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.  
-However, the use of the mathematical symbols `×` and `÷` do not currently work, but are planned.
+You can also use multiply and divide mathematical operators; `1d6*5` or `2d10/d20`.
 
 
 ### Percentile dice (d%)
@@ -123,7 +122,7 @@ This will actually tell it to compound if you roll a 4. Solutions are currently 
 
 Fudge notation is also supported. It allows both `dF.2` and less common `dF.1`.
 
-You can also use it in conjunction with other operators and additions.
+You can also use it in conjunction with other operators.
 
 Examples:
 
@@ -163,26 +162,71 @@ You can mix pool dice with other dice types or equations, and it will use the nu
 
 ```
 2d6>4+3d5: [4,5*]+[3,1,1] = 6   // 1 success + the raw values of the other rolls
-2d6>4*d6!: [6*,5*]*[6!,4] = 20  // 1 success * raw values of the other rolls
+2d6>4*d6!: [6*,5*]*[6!,4] = 20  // 2 successes * raw values of the other rolls
 2d6>4+2: [3,5*]+2 = 3           // 1 success + 2
-2d6>4+H: [3,5*]+H = 2           // Highest roll is 5, which is a success, so value of 1
-2d6<4+H: [3*,5]+H = 1           // Highest roll is 5, which is a failure, so value of 0
+2d6>4+H: [3,5*]+H = 2           // Highest roll is 5, which is a success, so `H` has a value of 1
+2d6<4+H: [3*,5]+H = 1           // Highest roll is 5, which is a failure, so `H` has a value of 0
 ```
 
 The `successes` property on the `DiceRoll` object will provide the number of successes for a roll.  
-However, if the roll is just dice pool, and does not contain any other additions, or dice rolls, then the value provided will be the same as the `totals` property.
+However, if the roll is just dice pool, and does not contain any other operations, or dice rolls, then the value provided will be the same as the `totals` property.
 
 
-## Usage
+### Maths
 
-* **Using NodeJS or other non-native module support?** check the [NodeJS](#nodejs-and-module-loaders) section.
-* **No ES6 or ES6 module support?** read the [Older Browsers](#older-browsers) section below.
+Parenthesis are recognised anywhere in notations to group sections and define the order of operations:
 
-You can import the dice roller and use it in your application like so:
+```
+1d6+2*3: [4]+2*3 = 10
+(1d6+2)*3: ([4]+2)*3 = 18
+```
+
+You can also use an array of mathematical formulas and functions.
+Internally it uses [Math.Js](https://mathjs.org), so you should be able to use any of its built in [arithmetic functions](https://mathjs.org/docs/reference/functions.html#arithmetic-functions).
+
+Some examples:
+
+```
+round(4d10/3): round([3,6,1,1]/3) = 3.7  // round the result to the nearest whole number
+floor(4d10/3): round([3,6,1,1]/3) = 3.6  // round the result down to the nearest whole number
+ceil(4d10/3): round([3,6,1,1]/3) = 3.7   // round the result up to the nearest whole number
+```
+
+
+## Get Started
+
+### Setup
+
+Install through:
+
+* NPM:
+
+    ```
+    $ npm install rpg-dice-roller
+    ```
+* Yarn:
+    
+    ```
+    yarn add rpg-dice-roller
+    ```
+* CDN
+    [![](https://data.jsdelivr.com/v1/package/npm/rpg-dice-roller/badge)](https://www.jsdelivr.com/package/npm/rpg-dice-roller)
+    
+    ```html
+    <script src="https://cdn.jsdelivr.net/npm/rpg-dice-roller@VERSION/lib/umd/bundle.min.js"></script>
+    ```
+
+
+### Usage
+
+* **Using NodeJS/commonJS/AMD etc.?** check the [NodeJS](#nodejs-and-module-loaders) section.
+* **No ES6 module support?** read the [Older Browsers](#older-browsers) section below.
+
+You can import the dice roller and use it in your application, using ES standard modules like so:
 
 ```js
 // import only the DiceRoller class
-import { DiceRoller } from 'lib/index.js';
+import { DiceRoller } from 'lib/esm/bundle.min.js';
 
 // create a new instance of the DiceRoller
 const roller = new DiceRoller();
@@ -201,10 +245,10 @@ document.write(latestRoll);
 const rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
 ```
 
-If you need to manually create `DiceRoll` objects, you need to import it:
+If you need to manually create `DiceRoll` objects, you need to import the module:
 ```js
 // import the DiceRoller and DiceRoll classes
-import { DiceRoller, DiceRoll } from 'lib/index.js';
+import { DiceRoller, DiceRoll } from 'lib/esm/bundle.min.js';
 
 // roll a single notation without saving it to the log
 const diceRoll = new DiceRoll('2d6-L');
@@ -227,31 +271,31 @@ const roller2 = DiceRoller.import(exportedData);
 
 Rather than specifying the individual components, you can import everything like so:
 ```js
-// import the everything and store on the `Roller` scope
-import * as Roller from 'lib/index.js';
+// import the everything and store on the `rpgDiceRoller` scope
+import * as rpgDiceRoller from 'lib/esm/bundle.min.js';
 
 // create a DiceRoller
-const roller = new Roller.DiceRoller();
+const roller = new rpgDiceRoller.DiceRoller();
 
 // create a DiceRoll
-const roll = new Roller.DiceRoll('2d6');
+const roll = new rpgDiceRoller.DiceRoll('2d6');
 ```
 
 
 ### NodeJS And Module Loaders
 
-You can also load the library using AMD, CommonJS, etc.
+You can also load the library using CommonJS, AMD, etc.
 
-Instead of the `lib/index.js` file, you must require the `lib/es5/bundle.js` file.
+Instead of the `lib/esm/bundle.min.js` file, node should use the `lib/umd/bundle.min.js` file, as defined in the package.json `main` property.
 
 Here is an example in Node.js:
 
 ```js
 // require the dice-roller library
-const Roller = require('./lib/es5/bundle.js');
+const { DiceRoller } = require('rpg-dice-roller');
 
 // create a new instance of the DiceRoller
-const diceRoller = new Roller.DiceRoller();
+const diceRoller = new DiceRoller();
 
 // roll the dice
 diceRoller.roll('4d20-L');
@@ -266,25 +310,23 @@ console.log(latestRoll + '');
 
 ### Older Browsers
 
-We also support older browsers without ES6 or native Module support.
+We support _some_ older browsers without ES6 or native Module support.
 
-Instead of the `lib/index.js` file, you must use the `lib/es5/bundle.js` file.
+Instead of the `lib/esm/bundle.min.js` file, you must use the `lib/umd/bundle.min.js` file.
 
-Also, all uses of the library classes and objects must be accessed from the `Roller` namespace.
+All uses of the library classes and objects must be accessed from the `rpgDiceRoller` namespace.
 
 ```html
-<script src="lib/es5/bundle.js"></script>
-
+<script src="lib/umd/bundle.min.js"></script>
 <script>
   // create a new instance of the DiceRoller
-  var roller = new Roller.DiceRoller();
+  var diceRoller = new rpgDiceRoller.DiceRoller();
 
   // roll the dice
   diceRoller.roll('4d20-L');
   
-  
   // create a new instance of a DiceRoll
-  var roll = new Roller.DiceRoll('2d6');
+  var diceRoll = new rpgDiceRoller.DiceRoll('2d6');
 </script>
 ```
 
@@ -315,11 +357,10 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 | `output`           | `String`                                      | String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`.                                          |
 | `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
 | `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
+| `successes`        | `Number`                                      | The total number of successes for all the rolls in the `log`, if using pool dice.                                                          |
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                 |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                              |
-| ~~`getLog`~~       | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `log` property instead.~~                                                                         |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
-| ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                                                      |
+| `total`            | `Number`                                      | The sum of all the rolls in the `log`.                                                                                                     |
 
 
 #### Static properties
@@ -334,10 +375,6 @@ const diceRoller = DiceRoller.import(data); // returns a new DiceRoller instance
 | ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `exportFormats`        | `Object`                          | List of available export / import formats                                                                                                            |
 | `import`               | `function({mixed} data)`          | Imports the given data and creates a new dice roll. Note: This is called on the `DiceRoller` class, not an instantiated object. Returns `DiceRoller` |
-| ~~`utils`~~            | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use global `diceUtils` instead.                                                                               |
-| ~~`notationPatterns`~~ | ~~`Object`~~                      | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.notationPatterns` property instead.                                                             |
-| ~~`parseDie`~~         | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
-| ~~`parseNotation`~~    | ~~`function({String} notation)`~~ | ~~**Deprecated (Removed in v2.0.0)**~~ use `DiceRoll.parseNotation()` method instead.                                                                |
 
 
 ### `DiceRoll` object
@@ -362,10 +399,6 @@ const roll = new DiceRoll('4d10');
 | `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoll` is passed to `JSON.stringify`. Returns `Object`           |
 | `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroll + ''`). Returns `String`        |
 | `total`            | `Number`                                      | The roll total generated from `roll()`.                                                                            |
-| ~~`getOutput`~~    | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                              |
-| ~~`getNotation`~~  | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `output` property instead.~~                                              |
-| ~~`getSuccesses`~~ | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `successes` property instead.~~                                           |
-| ~~`getTotal`~~     | ~~`function()`~~                              | ~~**Deprecated (Removed in v2.0.0)** use `total` property instead.~~                                               |
 
 
 #### Static properties

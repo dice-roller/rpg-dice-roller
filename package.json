@@ -1,10 +1,12 @@
 {
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts standard dice notation",
-  "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk",
-  "version": "3.0.1",
+  "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
+  "version": "3.1.0",
   "license": "MIT",
-  "main": "lib/es5/bundle.js",
+  "main": "lib/umd/bundle.js",
+  "module": "lib/esm/bundle.js",
+  "browser": "lib/umd/bundle.js",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -26,19 +28,33 @@
     "@babel/core": "^7.4.3",
     "@babel/preset-env": "^7.4.3",
     "abab": "^2.0.0",
-    "babel-loader": "^8.0.5",
+    "eslint": "^5.16.0",
     "jasmine": "^3.4.0",
-    "jshint": "^2.10.2",
-    "jshint-loader": "git+https://github.com/webpack-contrib/jshint-loader.git",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0",
-    "webpack-dev-server": "^3.2.1"
+    "rollup": "^1.10.0",
+    "rollup-plugin-babel": "^4.3.2",
+    "rollup-plugin-banner": "^0.2.0",
+    "rollup-plugin-commonjs": "^9.3.4",
+    "rollup-plugin-eslint": "^5.1.0",
+    "rollup-plugin-node-resolve": "^4.2.3",
+    "rollup-plugin-terser": "^4.0.4"
+  },
+  "dependencies": {
+    "xregexp": "^4.2.4",
+    "mathjs": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=11.0"
   },
   "scripts": {
-    "build": "webpack --mode production",
-    "build:dev": "webpack --mode development",
-    "start": "webpack-dev-server --color --progress",
-    "watch": "webpack --mode development --watch",
-    "test": "jshint lib/ --exclude lib/es5/ & jasmine"
+    "build": "npm run build:prod",
+    "build:prod": "npm run build:umd -- --environment BUILD:prod && npm run build:esm -- --environment BUILD:prod",
+    "build:umd": "rollup --c --environment FORMAT:umd",
+    "build:esm": "rollup --c --environment FORMAT:esm",
+    "build:dev": "npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
+    "watch": "npm run build:esm -- --environment BUILD:dev -w",
+    "lint": "eslint src/**",
+    "test": "npm run lint && jasmine",
+    "prepublishOnly": "npm run test",
+    "install": "npm run build"
   }
 }

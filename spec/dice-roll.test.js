@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/es5/bundle.js');
+  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/umd/bundle.min.js');
 
   const loopCount = 1000;
 
@@ -159,7 +159,7 @@
       expect(roll).toEqual(jasmine.any(DiceRoll));
 
       // check value is within allowed range
-      expect(total).toBeWithinRange({min: 3, max: 180});
+      expect(total).toBeWithinRange({min: 5, max: 350});
 
       // check the rolls list is correct
       expect(roll).toHaveRolls({rolls: [3,2]});
@@ -167,7 +167,8 @@
       expect(roll.rolls[0]).toHaveValuesWithinRange({min: 1, max: 6});
       expect(roll.rolls[1]).toHaveValuesWithinRange({min: 1, max: 10});
 
-      expect(this.utils.reduceArray(roll.rolls[0]) * (this.utils.reduceArray(roll.rolls[1]) - this.utils.getMin(roll.rolls[1]))).toArraySumEqualTo(total);
+      expect(this.utils.reduceArray(roll.rolls[0]) * this.utils.reduceArray(roll.rolls[1]) - this.utils.getMin(roll.rolls[1]))
+        .toArraySumEqualTo(total);
 
       // check the output string
       expect(roll).toMatchParsedNotation({
@@ -1177,6 +1178,51 @@
     });
   });
 
+  describe('order of operation', function(){
+    let diceRoller;
+
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('should calculate the operations in the correct order for `1d6+2*3', function(){
+      const notation = '1d6+2*3',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual(rollVal + 2 * 3);
+    });
+
+    it('should calculate the operations in the correct order for `(1d6+2)*3', function(){
+      const notation = '(1d6+2)*3',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual((rollVal + 2) * 3);
+    });
+
+    it('should calculate the operations in the correct order for `1d6+2*3/4', function(){
+      const notation = '1d6+2*3/4',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual(rollVal + 2 * 3 / 4);
+    });
+
+    it('should calculate the operations in the correct order for `(1d6+(2*3))/4', function(){
+      const notation = '(1d6+(2*3))/4',
+        roll = diceRoller.roll(notation),
+        total = roll.total,
+        rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+      expect(total).toEqual((rollVal + (2 * 3)) / 4);
+    });
+  });
+
   describe('pool dice', () => {
     let diceRoller,
         expectedSuccesses,
@@ -1605,6 +1651,71 @@
       diceRoller.rollMany(['1d6']);
 
       expect(diceRoller).toHaveLogLength(1);
+    });
+  });
+
+  describe('totals', () => {
+    let diceRoller;
+
+    beforeEach(function(){
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('`DiceRoller.total` should return `0` if no rolls', function(){
+      expect(diceRoller.total).toEqual(0);
+    });
+
+    it('`DiceRoller.successes` should return `0` if no rolls', function(){
+      expect(diceRoller.successes).toEqual(0);
+    });
+
+    it('`DiceRoller.total` should return the total for all rolls in the log', function(){
+      diceRoller.rollMany(['1d6', 'd10', '2d6*2']);
+
+      const totals = this.utils.reduceArray(diceRoller.log.map(roll => roll.total));
+
+      expect(diceRoller.total).toEqual(totals);
+    });
+
+    it('`DiceRoller.total` should return the total successes for all rolls in the log, when only pool dice', function(){
+      diceRoller.rollMany(['5d10>=8', '4d3>1']);
+
+      const sucesses = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.total).toEqual(sucesses);
+    });
+
+    it('`DiceRoller.successes` should return the total successes for all rolls in the log, when only pool dice', function(){
+      diceRoller.rollMany(['5d10>=8', '4d3>1']);
+
+      const successes = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.successes).toEqual(successes);
+    });
+
+    it('`DiceRoller.successes` should return the total successes for all rolls in the log, when NOT only pool dice', function(){
+      diceRoller.rollMany(['2d6', '5d10>=8', '4d3>1', '5d4+5']);
+
+      const successes = this.utils.reduceArray(diceRoller.log.map(roll => roll.successes));
+
+      expect(diceRoller.successes).toEqual(successes);
+    });
+  });
+
+  describe('whitespace', function(){
+    const notations = {
+      '1 d 6 -    7   * 2': '1d6-7*2',
+      '3    + d3  -H/ L': '3+d3-H/L',
+      '  ( 5 +  2)   *     3   ': '(5+2)*3',
+    };
+
+    it('should strip whitespace from the notation', function(){
+      Object.entries(notations).forEach(([notation, trimmed]) => {
+        const diceRoll = new DiceRoll(notation);
+
+        expect(diceRoll.notation).toEqual(trimmed);
+      });
     });
   });
 })();

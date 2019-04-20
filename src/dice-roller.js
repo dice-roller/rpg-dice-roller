@@ -75,8 +75,8 @@ const DiceRoller = (() => {
      * Rolls the given list of dice notations
      * and returns a list of the DiceRolls
      *
-     * @param {Array} notations
-     * @returns {Array}
+     * @param {string[]} notations
+     * @returns {DiceRoll[]}
      */
     rollMany(notations){
       if(!notations){
@@ -99,10 +99,32 @@ const DiceRoller = (() => {
     /**
      * Returns the current roll log
      *
-     * @returns {Array}
+     * @returns {DiceRoll[]}
      */
     get log(){
       return this[_log] || [];
+    }
+
+    /**
+     * Returns the total count of successes for all the rolls
+     *
+     * @returns {number}
+     */
+    get successes(){
+      return this.log.reduce((prev, current) => (
+        prev+current.successes
+      ), 0);
+    }
+
+    /**
+     * Returns the total for all the rolls
+     *
+     * @returns {number}
+     */
+    get total(){
+      return this.log.reduce((prev, current) => (
+        prev + current.total
+      ), 0);
     }
 
     /**
@@ -132,8 +154,8 @@ const DiceRoller = (() => {
      * Returns the roll log.
      *
      * @throws Error
-     * @param data
-     * @returns {array}
+     * @param {*} data
+     * @returns {DiceRoll[]}
      */
     import(data){
       if(!data){

@@ -4,7 +4,7 @@ beforeEach(function(){
 
   const lib = this;
   // require the dice-roller library
-  const { diceUtils } = require('../../lib/es5/bundle.js');
+  const { diceUtils } = require('../../lib/umd/bundle.min.js');
 
   const customMatchers = {
     toBeWithinRange(util, customEqualityTesters){
@@ -113,7 +113,7 @@ beforeEach(function(){
           const successCount = actual.successes;
           let result = {
                 pass: true,
-                message: `Expected "${actual}" Not to have ${(expected ? expected + ' ' : '')}success${(!expected || (expected > 1) ? 'es' : '')}`,
+                message: `Expected "${actual}" (${successCount}) Not to have ${(expected ? expected + ' ' : '')}success${(!expected || (expected > 1) ? 'es' : '')}`,
               };
 
           if((expected === null) || (typeof expected === 'undefined')){
@@ -125,7 +125,7 @@ beforeEach(function(){
           }else if(expected !== successCount){
             // number of successes doesn't match expected
             result.pass = false;
-            result.message = `Expected "${actual}" to have ${expected} success${(!expected || (expected > 1) ? 'es' : '')}`;
+            result.message = `Expected "${actual}" (${successCount}) to have ${expected} success${(!expected || (expected > 1) ? 'es' : '')}`;
           }
 
           return result;
