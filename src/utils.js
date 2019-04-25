@@ -1,4 +1,14 @@
 /**
+ * Polyfill for Array flatMap
+ * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
+ */
+if (!Array.prototype.flatMap) {
+  Array.prototype.flatMap = function() {
+    return Array.prototype.map.apply(this, arguments).flat(1);
+  };
+}
+
+/**
  * Utility helper functions
  *
  * @type {Readonly<{compareNumbers(number, number, string): boolean, toFixed(number, number=): number, generateNumber((number|string), (number|string)): *, isNumeric(*=): boolean, isJson(*=): (*|boolean|undefined), sumArray(Array): number, equateNumbers(number, number, string=): number, isBase64(*=): (*|boolean|undefined)}>}
