@@ -53,8 +53,8 @@
     "build:dev": "npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
     "watch": "npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/**",
+    "pretest": "npm run build:umd -- --environment BUILD:dev",
     "test": "npm run lint && jasmine",
-    "prepublishOnly": "npm run test",
-    "install": "npm run build"
+    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
   }
 }

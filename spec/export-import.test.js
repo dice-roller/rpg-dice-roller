@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoller, DiceRoll, exportFormats } = require('../lib/umd/bundle.min.js');
+  const { DiceRoller, DiceRoll, exportFormats } = require('../lib/umd/bundle.js');
 
   describe('export dice roll', () => {
     let notation, diceRoll, exported;
