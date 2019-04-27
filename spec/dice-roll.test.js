@@ -3,7 +3,7 @@
   'use strict';
 
   // require the dice-roller library
-  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/umd/bundle.min.js');
+  const { DiceRoller, DiceRoll, diceUtils } = require('../lib/umd/bundle.js');
 
   const loopCount = 1000;
 

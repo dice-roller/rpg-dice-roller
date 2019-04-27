@@ -46,4 +46,4 @@ bower_components
 
 # Project specific
 
-lib/
+/lib
