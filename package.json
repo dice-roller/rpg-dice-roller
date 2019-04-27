@@ -2,7 +2,7 @@
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts standard dice notation",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
-  "version": "3.1.2",
+  "version": "3.1.3",
   "license": "MIT",
   "main": "lib/umd/bundle.js",
   "module": "lib/esm/bundle.js",
@@ -53,8 +53,8 @@
     "build:dev": "npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
     "watch": "npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/**",
+    "pretest": "npm run build:umd -- --environment BUILD:dev",
     "test": "npm run lint && jasmine",
-    "prepublishOnly": "npm run test",
-    "install": "npm run build"
+    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
   }
 }
