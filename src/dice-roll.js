@@ -1,6 +1,6 @@
 import {diceUtils, exportFormats} from './utils.js';
 import XRegExp from 'xregexp';
-import  math from 'mathjs';
+var Parser = require('expr-eval').Parser;
 
 /**
  * A DiceRoll object, which takes a notation
@@ -418,13 +418,17 @@ const DiceRoll = (() => {
       // calculate the total recursively (looping through parenthesis groups)
       let formulas = buildFormulas(this[_parsedDice]);
 
+      var parser = new Parser();
+
       // if a total formula has been produced, evaluate it and round it to max 2 decimal places
       if(formulas.total){
-        this[_total] = diceUtils.toFixed(math.eval(formulas.total), 2);
+        const expr = parser.parse(formulas.total);
+        this[_total] = diceUtils.toFixed(expr.evaluate({}), 2);
       }
       // if a success formula has been produced, evaluate it and round tit to a max 2 decimal places
       if(formulas.successes){
-        this[_successes] = diceUtils.toFixed(math.eval(formulas.successes), 2);
+        const expr = parser.parse(formulas.successes);
+        this[_successes] = diceUtils.toFixed(expr.evaluate({}), 2);
       }
 
       return this[_total];

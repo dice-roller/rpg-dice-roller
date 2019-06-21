@@ -39,8 +39,8 @@
     "rollup-plugin-terser": "^4.0.4"
   },
   "dependencies": {
-    "xregexp": "^4.2.4",
-    "mathjs": "^5.9.0"
+    "expr-eval": "^1.2.2",
+    "xregexp": "^4.2.4"
   },
   "engines": {
     "node": ">=11.0"
