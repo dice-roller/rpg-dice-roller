@@ -1,6 +1,6 @@
 import {diceUtils, exportFormats} from './utils.js';
 import XRegExp from 'xregexp';
-import  math from 'mathjs';
+import math from 'mathjs-expression-parser';
 
 /**
  * A DiceRoll object, which takes a notation
