@@ -1223,6 +1223,54 @@
     });
   });
 
+  describe('mathematical functions', function(){
+    let diceRoller;
+
+    beforeEach(() => {
+      // create a new instance of the DiceRoller
+      diceRoller = new DiceRoller();
+    });
+
+    it('should round the value for `round(2d6/3)`', function(){
+      const notation = 'round(2d6/3)';
+
+      // run the tests multiple times for consistency
+      for(let j = 0; j < loopCount; j++){
+        const roll = diceRoller.roll(notation),
+          total = roll.total,
+          rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+        expect(total).toEqual(Math.round(rollVal / 3));
+      }
+    });
+
+    it('should floor the value for `floor(2d6/3)`', function(){
+      const notation = 'floor(2d6/3)';
+
+      // run the tests multiple times for consistency
+      for(let j = 0; j < loopCount; j++){
+        const roll = diceRoller.roll(notation),
+          total = roll.total,
+          rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+        expect(total).toEqual(Math.floor(rollVal / 3));
+      }
+    });
+
+    it('should floor the value for `ceil(2d6/3)`', function(){
+      const notation = 'ceil(2d6/3)';
+
+      // run the tests multiple times for consistency
+      for(let j = 0; j < loopCount; j++){
+        const roll = diceRoller.roll(notation),
+          total = roll.total,
+          rollVal = this.utils.reduceArray(roll.rolls[0]);
+
+        expect(total).toEqual(Math.ceil(rollVal / 3));
+      }
+    });
+  });
+
   describe('pool dice', () => {
     let diceRoller,
         expectedSuccesses,
