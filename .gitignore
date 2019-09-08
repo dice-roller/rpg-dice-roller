@@ -47,3 +47,4 @@ bower_components
 # Project specific
 
 /lib
+/src/parser/grammars/grammar.js

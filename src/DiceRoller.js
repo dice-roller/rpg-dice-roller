@@ -1,5 +1,5 @@
-import DiceRoll from './dice-roll.js';
-import {diceUtils, exportFormats} from './utils.js';
+import DiceRoll from './DiceRoll.js';
+import {diceUtils, exportFormats} from './utilities/utils.js';
 
 /**
  * A DiceRoller handles dice rolling functionality,
@@ -44,59 +44,6 @@ const DiceRoller = (() => {
     }
 
     /**
-     * Returns the roll notation and rolls in the format of:
-     * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
-     *
-     * @returns {string}
-     */
-    get output(){
-      // return the log as a joined string
-      return this.log.join('; ');
-    }
-
-    /**
-     * Rolls the given dice notation.
-     * Returns a list of results
-     *
-     * @param {string} notation
-     * @returns {DiceRoll}
-     */
-    roll(notation){
-      let diceRoll = new DiceRoll(notation);
-
-      // add the roll log to our global log
-      this[_log].push(diceRoll);
-
-      // return the current DiceRoll
-      return diceRoll;
-    }
-
-    /**
-     * Rolls the given list of dice notations
-     * and returns a list of the DiceRolls
-     *
-     * @param {string[]} notations
-     * @returns {DiceRoll[]}
-     */
-    rollMany(notations){
-      if(!notations){
-        throw new Error('DiceRoller: No notations specified');
-      }else if(!Array.isArray(notations)){
-        throw new Error('DiceRoller: Notations are not valid');
-      }else{
-        // loop through and roll each notation, add it to the log and return it
-        return notations.map(notation => this.roll(notation));
-      }
-    }
-
-    /**
-     * Clears the roll history log
-     */
-    clearLog(){
-      this[_log].length = 0;
-    }
-
-    /**
      * Returns the current roll log
      *
      * @returns {DiceRoll[]}
@@ -106,14 +53,14 @@ const DiceRoller = (() => {
     }
 
     /**
-     * Returns the total count of successes for all the rolls
+     * Returns the roll notation and rolls in the format of:
+     * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
      *
-     * @returns {number}
+     * @returns {string}
      */
-    get successes(){
-      return this.log.reduce((prev, current) => (
-        prev+current.successes
-      ), 0);
+    get output(){
+      // return the log as a joined string
+      return this.log.join('; ');
     }
 
     /**
@@ -128,86 +75,14 @@ const DiceRoller = (() => {
     }
 
     /**
-     * Exports the roll log in the given format.
-     * If no format is specified, JSON is returned.
+     * Returns the total count of successes for all the rolls
      *
-     * @throws Error
-     * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
-     * @returns {string|null}
+     * @returns {number}
      */
-    export(format){
-      switch (format || exportFormats.JSON){
-        case exportFormats.BASE_64:
-          // JSON encode, then base64
-          return btoa(this.export(exportFormats.JSON));
-        case exportFormats.JSON:
-          return JSON.stringify(this);
-        default:
-          throw new Error('DiceRoller: Unrecognised export format specified: ' + format);
-      }
-    }
-
-    /**
-     * Takes the given roll data and imports it into
-     * the existing DiceRoller, appending the rolls
-     * to the current roll log.
-     * Returns the roll log.
-     *
-     * @throws Error
-     * @param {*} data
-     * @returns {DiceRoll[]}
-     */
-    import(data){
-      if(!data){
-        throw new Error('DiceRoller: No data to import');
-      }else if(diceUtils.isJson(data)){
-        // data is JSON - parse and import
-        return this.import(JSON.parse(data));
-      }else if(diceUtils.isBase64(data)){
-        // data is base64 encoded - decode an import
-        return this.import(atob(data));
-      }else if(typeof data === 'object'){
-        // if `log` is not defined, but data is an array, use it as the list of logs
-        if(!data.log && Array.isArray(data) && data.length){
-          data = {log: data};
-        }
-
-        if(data.log && Array.isArray(data.log)){
-          // loop through each log entry and import it
-          data.log.forEach(roll => {
-            this[_log].push(DiceRoll.import(roll));
-          });
-        }else if(data.log){
-          throw new Error('DiceRoller: Roll log must be an Array');
-        }
-
-        return this.log;
-      }else{
-        throw new Error('DiceRoller: Unrecognised import format for data: ' + data);
-      }
-    }
-
-    /**
-     * Returns the String representation
-     * of the object as the roll notations
-     *
-     * @returns {string}
-     */
-    toString(){
-      return this.output;
-    }
-
-    /**
-     * Returns an object for JSON serialising
-     *
-     * @returns {{}}
-     */
-    toJSON(){
-      const {log,} = this;
-
-      return {
-        log,
-      };
+    get successes(){
+      return this.log.reduce((prev, current) => (
+        prev+current.successes
+      ), 0);
     }
 
     /**
@@ -227,6 +102,144 @@ const DiceRoller = (() => {
 
       // return the DiceRoller
       return diceRoller;
+    }
+
+    /**
+     * Clears the roll history log
+     */
+    clearLog(){
+      this[_log].length = 0;
+    }
+
+    /**
+     * Exports the roll log in the given format.
+     * If no format is specified, JSON is returned.
+     *
+     * @throws Error
+     * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
+     * @returns {string|null}
+     */
+    export(format){
+      switch (format || exportFormats.JSON){
+        case exportFormats.BASE_64:
+          // JSON encode, then base64
+          return btoa(this.export(exportFormats.JSON));
+        case exportFormats.JSON:
+          return JSON.stringify(this);
+        case exportFormats.OBJECT:
+          return JSON.parse(this.export(exportFormats.JSON));
+        default:
+          throw new Error('Unrecognised export format: ' + format);
+      }
+    }
+
+    /**
+     * Takes the given roll data and imports it into
+     * the existing DiceRoller, appending the rolls
+     * to the current roll log.
+     * Returns the roll log.
+     *
+     * @param {*} data
+     *
+     * @throws Error
+     *
+     * @returns {DiceRoll[]}
+     */
+    import(data){
+      if(!data){
+        throw new Error('No data to import');
+      }else if(diceUtils.isJson(data)){
+        // data is JSON - parse and import
+        return this.import(JSON.parse(data));
+      }else if(diceUtils.isBase64(data)){
+        // data is base64 encoded - decode an import
+        return this.import(atob(data));
+      }else if(typeof data === 'object'){
+        // if `log` is not defined, but data is an array, use it as the list of logs
+        if(!data.log && Array.isArray(data) && data.length){
+          data = {log: data};
+        }
+
+        if(data.log && Array.isArray(data.log)){
+          // loop through each log entry and import it
+          data.log.forEach(roll => {
+            this[_log].push(DiceRoll.import(roll));
+          });
+        }else if(data.log){
+          throw new Error('Roll log must be an Array');
+        }
+
+        return this.log;
+      }else{
+        throw new Error('Unrecognised import format for data: ' + data);
+      }
+    }
+
+    /**
+     * Returns an object for JSON serialising
+     *
+     * @returns {{}}
+     */
+    toJSON(){
+      const {log,} = this;
+
+      return {
+        log,
+        type: 'dice-roller',
+      };
+    }
+
+    /**
+     * Returns the String representation
+     * of the object as the roll notations
+     *
+     * @returns {string}
+     */
+    toString(){
+      return this.output;
+    }
+
+    /**
+     * Rolls the given dice notation(s) and returns them.
+     *
+     * You can roll multiple, separate notations at once by
+     * passing them as separate arguments like:
+     * ```
+     * roll('2d6', '4d10', 'd8');
+     * ```
+     *
+     * If only a single notation is passed, a single DiceRoll
+     * object will be returned, if multiple are provided then
+     * it will return an array of DiceRoll objects.
+     *
+     * @param {string[]} notations
+     *
+     * @returns {DiceRoll|DiceRoll[]}
+     */
+    roll(...notations){
+      if (!notations || !notations.length) {
+        throw new Error('No notations specified');
+      }
+
+      // remove any empty/falsey notations
+      const filteredNotations = notations.filter(Boolean);
+
+      // ensure we still have notations
+      if (!filteredNotations.length) {
+        throw new Error('No notations specified');
+      }
+
+      const rolls = filteredNotations.map(notation => {
+        let diceRoll = new DiceRoll(notation);
+
+        // add the roll log to our global log
+        this[_log].push(diceRoll);
+
+        // return the current DiceRoll
+        return diceRoll;
+      });
+
+      return (rolls.length > 1) ? rolls : rolls[0];
     }
   }
 

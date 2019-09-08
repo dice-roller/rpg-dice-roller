@@ -242,7 +242,7 @@ document.write(latestRoll);
 
 
 // roll several notations all at once, and store their DiceRoll objects
-const rolls = roller.rollMany(['1d6', '2d4-H', '5d10!!']);
+const rolls = roller.roll('1d6', '2d4-H', '5d10!!');
 ```
 
 If you need to manually create `DiceRoll` objects, you need to import the module:
@@ -348,19 +348,19 @@ Each instance keeps it's own log of dice rolls, so it's handy if you're rolling 
 
 ### `DiceRoller` object
 
-| Property           | type                                          | description                                                                                                                                |
-| ------------------ | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `clearLog`         | `function()`                                  | Clears the roll history log.                                                                                                               |
-| `export`           | `function({exportFormats} format)`            | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                   |
-| `import`           | `function({mixed} data)`                      | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array<DiceRoll>`                        |
-| `log`              | `Array<DiceRoll>`                             | A list of the current roll logs.                                                                                                           |
-| `output`           | `String`                                      | String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`.                                          |
-| `roll`             | `function({String} notation)`                 | Rolls the given dice notation and returns the rolls. Returns `DiceRoll`                                                                    |
-| `rollMany`         | `function({Array<String>} notations)`         | Rolls the given list of dice notations and returns them. Returns `Array<DiceRoll>`                                                         |
-| `successes`        | `Number`                                      | The total number of successes for all the rolls in the `log`, if using pool dice.                                                          |
-| `toJSON`           | `function()`                                  | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                 |
-| `toString`         | `function()`                                  | Returns the `output` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                              |
-| `total`            | `Number`                                      | The sum of all the rolls in the `log`.                                                                                                     |
+| Property       | type                                      | description                                                                                                                                   |
+| -------------- | ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `clearLog`     | `function()`                              | Clears the roll history log.                                                                                                                  |
+| `export`       | `function({exportFormats} format)`        | Exports the `DiceRoller` object to the specified format. Returns `mixed`                                                                      |
+| `import`       | `function({mixed} data)`                  | Imports the given data and appends it to the current roll log, returning the updated log. Returns `Array<DiceRoll>`                           |
+| `log`          | `Array<DiceRoll>`                         | A list of the current roll logs.                                                                                                              |
+| `output`       | `String`                                  | String representation of the object, in the format of: `2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6`.                                             |
+| `roll`         | `function({String} ...notation)`          | Rolls the dice notation returning the rolls. You can pass in multiple notations (i.e `roll('d6', '2d8')`). Returns `DiceRoll|Array<DiceRoll>` |
+| `successes`    | `Number`                                  | The total number of successes for all the rolls in the `log`, if using pool dice.                                                             |
+| `toJSON`       | `function()`                              | Returns the JSON serializable object when the `DiceRoller` is passed to `JSON.stringify`. Returns `Object`                                    |
+| `toString`     | `function()`                              | Returns the `output` property when the object is parsed as a string (ie. `diceroller + ''`). Returns `String`                                 |
+| `total`        | `Number`                                  | The sum of all the rolls in the `log`.                                                                                                        |
+| ~~`rollMany`~~ | ~~`function({Array<String>} notations)`~~ | ~~**Deprecated (Removed in v4.0.0)** use `roll()` method instead.~~                                                                           |
 
 
 #### Static properties
