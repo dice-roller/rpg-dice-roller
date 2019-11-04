@@ -67,6 +67,24 @@ const StandardDice = (() => {
     }
 
     /**
+     * The maximum value that can be rolled om the die
+     *
+     * @returns {number}
+     */
+    get max(){
+      return this.sides;
+    }
+
+    /**
+     * Returns the minimum value that can be rolled on the die
+     *
+     * @returns {number}
+     */
+    get min(){
+      return 1;
+    }
+
+    /**
      * Returns the name for the dice
      *
      * @returns {*}
@@ -132,7 +150,7 @@ const StandardDice = (() => {
      * @returns {RollResult}
      */
     rollOnce(){
-      return new RollResult(diceUtils.generateNumber(1, this.sides));
+      return new RollResult(diceUtils.generateNumber(this.min, this.max));
     }
 
     /**
@@ -141,9 +159,11 @@ const StandardDice = (() => {
      * @returns {{}}
      */
     toJSON(){
-      const {modifiers, name, notation, qty, sides} = this;
+      const {max, min, modifiers, name, notation, qty, sides} = this;
 
       return {
+        max,
+        min,
         modifiers,
         name,
         notation,

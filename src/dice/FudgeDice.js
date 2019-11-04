@@ -14,6 +14,24 @@ const FudgeDice = (() => {
       super(notation, parseInt(nonBlanks, 10), qty, modifiers);
     }
 
+    /**
+     * The maximum value that can be rolled om the die
+     *
+     * @returns {number}
+     */
+    get max(){
+      return 1;
+    }
+
+    /**
+     * Returns the minimum value that can be rolled on the die
+     *
+     * @returns {number}
+     */
+    get min(){
+      return -1;
+    }
+
     get nonBlanks(){
       return super.sides;
     }

@@ -49,6 +49,11 @@ const ExplodeModifier = (() => {
      * @returns {RollResults}
      */
     run(results, dice){
+      // ensure that the dice can explode without going into an infinite loop
+      if (dice.min === dice.max) {
+        throw new Error(`Die must have more than 1 side to explode: ${dice}`);
+      }
+
       results.rolls = results.rolls
         .map(roll => {
           const subRolls = [roll];

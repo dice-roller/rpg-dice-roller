@@ -1,6 +1,4 @@
-import RollResult from '../results/RollResult.js';
 import StandardDice from "./StandardDice.js";
-import {diceUtils} from "../utilities/utils.js";
 
 const PercentileDice = (() => {
   class PercentileDice extends StandardDice{
@@ -8,17 +6,17 @@ const PercentileDice = (() => {
       super(notation, 100, qty, modifiers);
     }
 
-    get sides(){
-      return '%';
+    /**
+     * The maximum value that can be rolled om the die
+     *
+     * @returns {number}
+     */
+    get max(){
+      return 100;
     }
 
-    /**
-     * Rolls a single die and returns the output value
-     *
-     * @returns {RollResult}
-     */
-    rollOnce(){
-      return new RollResult(diceUtils.generateNumber(1, 100));
+    get sides(){
+      return '%';
     }
   }
 
