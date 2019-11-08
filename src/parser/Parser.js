@@ -89,10 +89,14 @@ const Parser = (() => {
             // @todo reroll modifier
             break;
           case 'critical-success':
-            // @todo critical success modifier
+            expression.comparePoint = parseExpression(expression.comparePoint);
+
+            return new Modifiers.CriticalSuccessModifier(expression.notation, expression.comparePoint);
             break;
           case 'critical-failure':
-            // @todo critical failure modifier
+            expression.comparePoint = parseExpression(expression.comparePoint);
+
+            return new Modifiers.CriticalFailureModifier(expression.notation, expression.comparePoint);
             break;
           case 'sort':
             // @todo sort modifier

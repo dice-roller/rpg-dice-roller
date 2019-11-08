@@ -88,6 +88,12 @@ const RollResult = (() => {
           case 'explode':
             flag = '!';
             break;
+          case 'critical-failure':
+            flag = '__';
+            break;
+          case 'critical-success':
+            flag = '**';
+            break;
           case 'penetrate':
             flag = 'p';
             break;
