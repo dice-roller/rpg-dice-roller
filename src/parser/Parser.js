@@ -101,7 +101,7 @@ const Parser = (() => {
             return new Modifiers.CriticalFailureModifier(expression.notation, expression.comparePoint);
             break;
           case 'sort':
-            // @todo sort modifier
+            return new Modifiers.SortingModifier(expression.notation, expression.direction);
             break;
         }
       } else if (expression.type === 'compare-point') {

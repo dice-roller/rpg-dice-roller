@@ -5,6 +5,7 @@ import DropModifier from './modifiers/DropModifier.js';
 import ExplodeModifier from './modifiers/ExplodeModifier.js';
 import KeepModifier from './modifiers/KeepModifier.js';
 import ReRollModifier from './modifiers/ReRollModifier.js';
+import SortingModifier from './modifiers/SortingModifier.js';
 import TargetModifier from './modifiers/TargetModifier.js';
 
 export {
@@ -15,5 +16,6 @@ export {
   ExplodeModifier,
   KeepModifier,
   ReRollModifier,
+  SortingModifier,
   TargetModifier,
 };
