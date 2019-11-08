@@ -3,6 +3,7 @@ import ExplodeModifier from "../modifiers/ExplodeModifier.js";
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import ComparePoint from '../ComparePoint.js';
+import ReRollModifier from "../modifiers/ReRollModifier.js";
 
 /**
  *
@@ -48,9 +49,11 @@ const StandardDice = (() => {
         this[_modifiers] = Object.assign({}, ...Object.keys(modifiers).map(k => {
           const modifier = modifiers[k];
           if ((modifier instanceof ExplodeModifier) && !modifier.comparePoint) {
-            modifier.comparePoint = new ComparePoint('=', sides);
+            modifier.comparePoint = new ComparePoint('=', this.max);
           }
-          // @todo handle re-roll compare point (Defaults to lowest possible die value, which is usually 1, but fudge dice is -1
+          if ((modifier instanceof ReRollModifier) && !modifier.comparePoint) {
+            modifier.comparePoint = new ComparePoint('=', this.min);
+          }
 
           return {[k]: modifier };
         }));

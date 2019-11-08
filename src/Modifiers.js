@@ -4,6 +4,7 @@ import CriticalSuccessModifier from './modifiers/CriticalSuccessModifier.js';
 import DropModifier from './modifiers/DropModifier.js';
 import ExplodeModifier from './modifiers/ExplodeModifier.js';
 import KeepModifier from './modifiers/KeepModifier.js';
+import ReRollModifier from './modifiers/ReRollModifier.js';
 import TargetModifier from './modifiers/TargetModifier.js';
 
 export {
@@ -13,5 +14,6 @@ export {
   DropModifier,
   ExplodeModifier,
   KeepModifier,
+  ReRollModifier,
   TargetModifier,
 };

@@ -97,6 +97,12 @@ const RollResult = (() => {
           case 'penetrate':
             flag = 'p';
             break;
+          case 're-roll':
+            flag = 'r';
+            break;
+          case 're-roll-once':
+            flag = 'ro';
+            break;
           case 'target-failure':
             flag = '_';
             break;

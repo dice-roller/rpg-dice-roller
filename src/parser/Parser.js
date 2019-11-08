@@ -85,8 +85,10 @@ const Parser = (() => {
 
             return new Modifiers.TargetModifier(expression.notation, expression.successCP, expression.failureCP);
             break;
-          case 'reroll':
-            // @todo reroll modifier
+          case 're-roll':
+            expression.comparePoint = parseExpression(expression.comparePoint);
+
+            return new Modifiers.ReRollModifier(expression.notation, expression.once, expression.comparePoint);
             break;
           case 'critical-success':
             expression.comparePoint = parseExpression(expression.comparePoint);
