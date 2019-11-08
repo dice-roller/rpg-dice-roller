@@ -14,11 +14,8 @@ const TargetModifier = (() => {
     constructor(notation, successCP, failureCP){
       super(notation, successCP);
 
-      if (!failureCP && !(failureCP instanceof ComparePoint)) {
-        throw new TypeError('Failure Compare Point must be a ComparePoint or null');
-      }
-
-      this[_failureCP] = failureCP;
+      // set the failure compare point
+      this.failureComparePoint = failureCP;
     }
 
     /**
@@ -31,12 +28,34 @@ const TargetModifier = (() => {
     }
 
     /**
+     * Sets the compare point
+     *
+     * @param comparePoint
+     */
+    set failureComparePoint(comparePoint){
+      if (comparePoint && !(comparePoint instanceof ComparePoint)) {
+        throw TypeError('failure comparePoint must be instance of ComparePoint or null');
+      }
+
+      this[_failureCP] = comparePoint || null;
+    }
+
+    /**
      * Returns the success compare point for the modifier
      *
      * @returns {ComparePoint}
      */
     get successComparePoint(){
       return this.comparePoint;
+    }
+
+    /**
+     * Sets the success compare point for the modifier
+     *
+     * @param value
+     */
+    set successComparePoint(value){
+      super.comparePoint = value;
     }
 
     /**
@@ -90,6 +109,34 @@ const TargetModifier = (() => {
      */
     isSuccess(value){
       return this.isComparePoint(value);
+    }
+
+    /**
+     * Runs the modifier on the rolls
+     *
+     * @param {RollResults} results
+     * @param {StandardDice} dice
+     *
+     * @returns {RollResults}
+     */
+    run(results, dice){
+      // loop through each roll and see if it matches the target
+      results.rolls
+        .map(roll => {
+          // add the modifier flag
+          if (this.isSuccess(roll.value)) {
+            roll.modifiers.push('target-success');
+          } else if (this.isFailure(roll)) {
+            roll.modifiers.push('target-failure');
+          }
+
+          // set the value to the success state value
+          roll.calculationValue = this.getStateValue(roll.value);
+
+          return roll;
+        });
+
+      return results;
     }
 
     /**

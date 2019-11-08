@@ -91,6 +91,12 @@ const RollResult = (() => {
           case 'penetrate':
             flag = 'p';
             break;
+          case 'target-failure':
+            flag = '_';
+            break;
+          case 'target-success':
+            flag = '*';
+            break;
         }
 
         return acc+flag
