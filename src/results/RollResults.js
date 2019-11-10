@@ -55,7 +55,7 @@ const RollResults = (() => {
      * @returns {number}
      */
     get value(){
-      return this.rolls.reduce((v, roll) => v+roll.calculationValue, 0);
+      return this.rolls.reduce((v, roll) => v+(roll.useInTotal ? roll.calculationValue : 0), 0);
     }
 
     /**

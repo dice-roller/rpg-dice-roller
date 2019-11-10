@@ -4,6 +4,7 @@ const RollResult = (() => {
   const _calculationValue = Symbol('calculation-value');
   const _modifiers = Symbol('modifiers');
   const _initialValue = Symbol('initial-value');
+  const _useInTotal = Symbol('use-in-total');
   const _value = Symbol('value');
 
   class RollResult{
@@ -11,8 +12,9 @@ const RollResult = (() => {
      *
      * @param {number|{value: Number, initialValue: number}} value The value rolled
      * @param {string[]=} modifiers List of modifier names that affect this roll
+     * @param {boolean=} useInTotal Whether to include the roll value when calculating totals
      */
-    constructor(value, modifiers){
+    constructor(value, modifiers, useInTotal = true){
       if (diceUtils.isNumeric(value)) {
         this[_initialValue] = parseInt(value, 10);
       } else if (value && (typeof value === 'object') && !Array.isArray(value)) {
@@ -35,11 +37,16 @@ const RollResult = (() => {
         if (Array.isArray(value.modifiers) && value.modifiers.length){
           modifiers = value.modifiers;
         }
+
+        if (typeof value.useInTotal === 'boolean') {
+          useInTotal = value.useInTotal;
+        }
       } else {
         throw new Error(`Result value is invalid: ${value}`);
       }
 
       this.modifiers = modifiers || [];
+      this.useInTotal = useInTotal;
     }
 
     /**
@@ -94,6 +101,9 @@ const RollResult = (() => {
           case 'critical-success':
             flag = '**';
             break;
+          case 'drop':
+            flag = 'd';
+            break;
           case 'penetrate':
             flag = 'p';
             break;
@@ -138,6 +148,24 @@ const RollResult = (() => {
     }
 
     /**
+     * Returns the useInTotal flag
+     *
+     * @returns {boolean}
+     */
+    get useInTotal(){
+      return !!this[_useInTotal];
+    }
+
+    /**
+     * Sets the useInTotal flag
+     *
+     * @param {boolean} value
+     */
+    set useInTotal(value){
+      this[_useInTotal] = !!value;
+    }
+
+    /**
      * Roll value after modifiers have affected it
      *
      * @returns {number}
@@ -165,7 +193,7 @@ const RollResult = (() => {
      * @returns {{}}
      */
     toJSON(){
-      const {calculationValue, initialValue, modifierFlags, modifiers, value} = this;
+      const {calculationValue, initialValue, modifierFlags, modifiers, useInTotal, value} = this;
 
       return {
         calculationValue,
@@ -173,6 +201,7 @@ const RollResult = (() => {
         modifierFlags,
         modifiers,
         type: 'result',
+        useInTotal,
         value,
       };
     }
