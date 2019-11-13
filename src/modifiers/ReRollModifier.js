@@ -14,7 +14,10 @@ const ReRollModifier = (() => {
     constructor(notation, once = false, comparePoint = null){
       super(notation, comparePoint);
 
-      this.once = once;
+      this.once = !!once;
+
+      // set the modifier's sort order
+      this.order = 2;
     }
 
     /**

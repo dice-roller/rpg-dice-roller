@@ -2,6 +2,13 @@ import ComparisonModifier from "./ComparisonModifier.js";
 
 const CriticalSuccessModifier = (() => {
   class CriticalSuccessModifier extends ComparisonModifier{
+    constructor(notation, comparePoint){
+      super(notation, comparePoint);
+
+      // set the modifier's sort order
+      this.order = 6;
+    }
+
     /**
      * Runs the modifier on the rolls
      *

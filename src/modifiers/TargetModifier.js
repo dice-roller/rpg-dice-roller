@@ -16,6 +16,9 @@ const TargetModifier = (() => {
 
       // set the failure compare point
       this.failureComparePoint = failureCP;
+
+      // set the modifier's sort order
+      this.order = 5;
     }
 
     /**

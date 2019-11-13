@@ -20,6 +20,9 @@ const ExplodeModifier = (() => {
 
       this[_compound] = !!compound;
       this[_penetrate] = !!penetrate;
+
+      // set the modifier's sort order
+      this.order = 1;
     }
 
     /**

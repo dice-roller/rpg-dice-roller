@@ -9,7 +9,11 @@ const Modifier = (() => {
         throw new Error('Notation is required');
       }
 
+      // set the modifier's notation
       this.notation = notation;
+
+      // set the modifier's sort order
+      this.order = 999;
     }
 
     /**

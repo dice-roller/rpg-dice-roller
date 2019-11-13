@@ -13,6 +13,9 @@ const SortingModifier = (() => {
       super(notation);
 
       this.direction = direction || 'a';
+
+      // set the modifier's sort order
+      this.order = 8;
     }
 
     /**
