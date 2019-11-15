@@ -69,20 +69,7 @@ const DiceRoller = (() => {
      * @returns {number}
      */
     get total(){
-      return this.log.reduce((prev, current) => (
-        prev + current.total
-      ), 0);
-    }
-
-    /**
-     * Returns the total count of successes for all the rolls
-     *
-     * @returns {number}
-     */
-    get successes(){
-      return this.log.reduce((prev, current) => (
-        prev+current.successes
-      ), 0);
+      return this.log.reduce((prev, current) => prev + current.total, 0);
     }
 
     /**
@@ -181,10 +168,12 @@ const DiceRoller = (() => {
      * @returns {{}}
      */
     toJSON(){
-      const {log,} = this;
+      const {log, output, total} = this;
 
       return {
         log,
+        output,
+        total,
         type: 'dice-roller',
       };
     }

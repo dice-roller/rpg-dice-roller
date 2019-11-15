@@ -1,13 +1,18 @@
 import {diceUtils, exportFormats} from "./utilities/utils.js";
-import * as Modifiers from './Modifiers.js';
 import Parser from "./parser/Parser.js";
 import RollGroup from './RollGroup.js';
 import StandardDice from './dice/StandardDice.js';
 import math from "mathjs-expression-parser";
 import RollResults from "./results/RollResults";
-import RollResult from "./results/RollResult";
 
 const DiceRoll = (() => {
+  /**
+   * @type {symbol}
+   *
+   * @private
+   */
+  const _calculateTotal = Symbol('calculateTotals');
+
   /**
    * The notation
    *
@@ -35,12 +40,6 @@ const DiceRoll = (() => {
    */
   const _rolls = Symbol('rolls');
 
-
-  // @todo determine which of these are still needed during refactoring
-  const _calculateTotal = Symbol('calculateTotals');
-
-  const _resetTotals = Symbol('resetTotals');
-
   /**
    * The roll total
    *
@@ -61,9 +60,6 @@ const DiceRoll = (() => {
       if (!notation) {
         throw new Error('Notation is required');
       }
-
-      // zero the current total
-      this[_resetTotals]();
 
       // initialise the parsed dice array
       this[_parsedNotation] = [];
@@ -176,12 +172,67 @@ const DiceRoll = (() => {
     }
 
     /**
+     * Returns the roll notation and rolls in the format of:
+     * 2d20+1d6: [20,2]+[2] = 24
+     *
+     * @returns {string}
+     */
+    get output(){
+      let rollIndex = 0;
+      let output  = `${this.notation}: `;
+
+      if(this.hasRolls()){
+        output += this[_parsedNotation]
+          .map(item => {
+            if (item instanceof StandardDice) {
+              const rollResults = this.rolls[rollIndex] || null;
+
+              // increment the roll index
+              rollIndex++;
+
+              return rollResults;
+            } else if (item instanceof RollGroup) {
+              // @todo handle roll groups
+            }
+
+            return item;
+          })
+          // remove any empty values
+          .filter(Boolean)
+          // join into a single string
+          .join('');
+
+        // add the total
+        output += ` = ${this.total}`;
+      }else{
+        output += 'No dice rolled';
+      }
+
+      return output;
+    }
+
+    /**
      * The dice rolled for the notation
      *
      * @returns {RollResults[]}
      */
     get rolls(){
       return this[_rolls] || [];
+    }
+
+    /**
+     * Returns the roll total
+     *
+     * @returns {number}
+     */
+    get total(){
+      // only calculate the total if it has not already been done
+      if(!this[_total] && this.hasRolls()){
+        this[_total] = this[_calculateTotal]();
+      }
+
+      // return the total
+      return this[_total] || 0;
     }
 
 
@@ -233,7 +284,7 @@ const DiceRoll = (() => {
       this[_rolls] = [];
 
       // reset the cached total
-      this[_resetTotals]();
+      this[_total] = 0;
 
       // saved the rolls to the log
       this[_rolls] = this[_parsedNotation].map(item => {
@@ -253,11 +304,13 @@ const DiceRoll = (() => {
      * @returns {{}}
      */
     toJSON(){
-      const {notation, rolls,} = this;
+      const {notation, output, rolls, total} = this;
 
       return {
         notation,
+        output,
         rolls,
+        total,
         type: 'dice-roll',
       };
     }
@@ -274,7 +327,7 @@ const DiceRoll = (() => {
 
 
     /*************************
-     * INCOMPLETE / NEEDS REFACTORING
+     * Private Methods
      *************************/
 
     /**
@@ -283,40 +336,17 @@ const DiceRoll = (() => {
      * @returns {Number}
      */
     [_calculateTotal](){
+      let formula = '';
       let rollIndex = 0;
 
-      // reset the totals and successes
-      this[_resetTotals]();
-
-      /**
-       * Recursively loops through the dice and builds
-       * a formula string using the roll values instead
-       * of the notation
-       *
-       * @param parsedItem
-       */
-      const buildFormulas = parsedItem => {
-        let formula = '';
-
+      if (this.hasRolls()) {
         // loop through each roll and calculate the totals
-        parsedItem.forEach(item => {
-          if (Array.isArray(item)) {
-            // this is a parenthesis group - loop recursively
-            formula += buildFormulas(item);
-          } else if (item instanceof StandardDice) {
+        this[_parsedNotation].forEach(item => {
+          // @todo need to handle roll groups
+          if (item instanceof StandardDice) {
             // @todo should roll results be stored on their relevant parsed object?
-            // item is a die - get the rolls for it
-            let results = this.rolls[rollIndex] || [];
-
-            // @todo success/failure modifier should be handled within the RollResult(s) object
-            const successModifier = item.modifiers['TargetModifier'] || null;
-            if (successModifier) {
-              // pool dice are success/failure so we don't want the actual dice roll
-              // we need to convert each roll to 1 (success), -1 (failure), or 0 (neither)
-              formula += diceUtils.sumArray(results.rolls.map(value => successModifier.getStateValue(value)));
-            } else {
-              formula += results.value;
-            }
+            // item is a die - total the rolls for it
+            formula += this.rolls[rollIndex] ? this.rolls[rollIndex].value : 0;
 
             // increment the roll index and store the previous rolls / parsed die
             rollIndex++;
@@ -324,149 +354,10 @@ const DiceRoll = (() => {
             formula += item;
           }
         });
-
-        return formula;
-      };
-
-      // calculate the total recursively (looping through parenthesis groups)
-      let formula = this.hasRolls() ? buildFormulas(this[_parsedNotation]) : null;
+      }
 
       // if a total formula has been produced, evaluate it and round it to max 2 decimal places
-      if (formula) {
-        this[_total] = diceUtils.toFixed(math.eval(formula), 2);
-      }
-
-      return this[_total];
-    }
-
-    /**
-     * Resets the current total and success count
-     *
-     * @private
-     */
-    [_resetTotals](){
-      this[_total] = 0;
-    }
-
-    /**
-     * Returns the roll notation and rolls in the format of:
-     * 2d20+1d6: [20,2]+[2] = 24
-     *
-     * @returns {string}
-     */
-    get output(){
-      let rollIndex = 0;
-      let output  = `${this.notation}: `;
-
-      if(this.hasRolls()){
-        output += this[_parsedNotation]
-          .map(item => {
-            if (item instanceof StandardDice) {
-              const rollResults = this.rolls[rollIndex] || null;
-
-              // @todo handle modifier flags on output
-              /*let rollOutput = '';
-
-              let explode = false;
-              let penetrate = false;
-              let comparePoint = null;
-              let compound = false;
-              item.modifiers.forEach(modifier => {
-                if (modifier instanceof Modifiers.ComparisonModifier) {
-                  comparePoint = modifier;
-                }
-
-                if (modifier instanceof Modifiers.ExplodeModifier) {
-                  explode = true;
-                  compound = modifier.compound;
-                  penetrate = modifier.penetrate;
-                }
-              });
-
-              // current roll total - used for totalling compounding rolls
-              let currentRoll = 0;
-
-              // output the rolls
-              rolls.forEach((roll, rIndex, array) => {
-                // get the roll value to compare to (If penetrating and not the first roll, add 1, to compensate for the penetration)
-                const rollVal = (penetrate && currentRoll) ? roll + 1 : roll,
-                  hasMatchedCP = comparePoint && comparePoint.isComparePoint(rollVal);
-
-                let delimit = rIndex !== array.length - 1;
-
-                if (explode && hasMatchedCP) {
-                  // this die roll exploded (Either matched the explode value or is greater than the max - exploded and compounded)
-
-                  // add the current roll to the roll total
-                  currentRoll += roll;
-
-                  if (compound) {
-                    // Compounding - do NOT add the delimiter after this roll as we're not outputting it
-                    delimit = false;
-                  } else {
-                    // exploding but not compounding
-                    rollOutput += `${roll}!${(penetrate ? 'p' : '')}`;
-                  }
-                } else if (hasMatchedCP) {
-                  // not exploding but we've matched a compare point - this is a pool dice (success or failure)
-                  rollOutput += `${roll}*`;
-                } else if (compound && currentRoll) {
-                  // last roll in a compounding set (This one didn't compound)
-                  rollOutput += `${roll + currentRoll}!!${penetrate ? 'p' : ''}`;
-
-                  // reset current roll total
-                  currentRoll = 0;
-                } else {
-                  // just a normal roll
-                  rollOutput += roll;
-
-                  // reset current roll total
-                  currentRoll = 0;
-                }
-
-                if (delimit) {
-                  rollOutput += ',';
-                }
-              });*/
-
-              // increment the roll index
-              rollIndex++;
-
-              return rollResults;
-            } else if (item instanceof RollGroup) {
-              // @todo handle roll groups
-            }
-
-            return item;
-          })
-          // remove any empty values
-          .filter(Boolean)
-          // join into a single string
-          .join('');
-
-        // add the total
-        // @todo calculate total
-        output += ` = ${this.total}`;
-      }else{
-        output += 'No dice rolled';
-      }
-
-      return output;
-    }
-
-    /**
-     * Returns the roll total
-     *
-     * @returns {number}
-     */
-    get total(){
-      // only calculate the total if it has not already been done
-      if(!this[_total] && this.hasRolls()){
-        this[_calculateTotal]();
-      }
-
-      // return the total
-      return this[_total] || 0;
+      return formula ? diceUtils.toFixed(math.eval(formula), 2) : 0;
     }
   }
 
