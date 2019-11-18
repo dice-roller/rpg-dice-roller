@@ -48,3 +48,8 @@ bower_components
 
 /lib
 /src/parser/grammars/grammar.js
+
+
+## Testing
+
+/coverage
