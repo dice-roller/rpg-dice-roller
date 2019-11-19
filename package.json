@@ -57,7 +57,7 @@
     "lint": "eslint src/**",
     "pretest": "npm run prebuild && npm run build:umd -- --environment BUILD:dev",
     "test": "npm run lint && jest /tests/",
-    "test:watch": "npm run lint && jest /tests/ --watchAll",
+    "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
     "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
   },
   "type": "module"

@@ -7,7 +7,7 @@ const PercentileDice = (() => {
     }
 
     /**
-     * The maximum value that can be rolled om the die
+     * The maximum value that can be rolled on the die
      *
      * @returns {number}
      */
@@ -15,6 +15,11 @@ const PercentileDice = (() => {
       return 100;
     }
 
+    /**
+     * The number of sides the dice has
+     *
+     * @returns {string}s
+     */
     get sides(){
       return '%';
     }
