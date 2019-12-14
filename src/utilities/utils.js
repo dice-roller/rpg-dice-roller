@@ -27,7 +27,7 @@ if (!Array.prototype.flat) {
 
 /**
  * Polyfill for Array.prototype.flatMap
- * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
  */
 if (!Array.prototype.flatMap) {
   Array.prototype.flatMap = function() {
@@ -38,7 +38,7 @@ if (!Array.prototype.flatMap) {
 /**
  * Utility helper functions
  *
- * @type {Readonly<{compareNumbers(number, number, string): boolean, toFixed(number, number=): number, generateNumber((number|string), (number|string)): *, isNumeric(*=): boolean, isJson(*=): (*|boolean|undefined), sumArray(Array): number, equateNumbers(number, number, string=): number, isBase64(*=): (*|boolean|undefined)}>}
+ * @type {Readonly<{compareNumbers(number, number, string): boolean, toFixed(number, number=): number, generateNumber((number|string), (number|string)): *, isNumeric(*=): boolean, isJson(*=): (*|boolean|undefined), sumArray(Array): number, isBase64(*=): (*|boolean|undefined)}>}
  */
 const diceUtils = Object.freeze({
   /**
@@ -102,48 +102,6 @@ const diceUtils = Object.freeze({
     );
   },
   /**
-   * @returns {function(number, number, string=): number}
-   */
-  get equateNumbers(){
-    /**
-     * Takes two numbers and runs a
-     * mathematical equation on them,
-     * using the given operator
-     *
-     * @param {number} a
-     * @param {number} b
-     * @param {string=} operator A valid arithmetic operator (+, -, /, *)
-     * @returns {number}
-     */
-    return (a, b, operator = '+') => {
-      // ensure values are numeric
-      a = this.isNumeric(a) ? parseFloat(a) : 0;
-      b = this.isNumeric(b) ? parseFloat(b) : 0;
-
-      // only carry out operation if we have both values
-      switch(operator){
-        case '*':
-          // multiply the value
-          a *= b;
-          break;
-        case '/':
-          // divide the value (Handle division by zero)
-          a = b ? a / b : 0;
-          break;
-        case '-':
-          // subtract from the value
-          a -= b;
-          break;
-        default:
-          // add to the value
-          a += b;
-          break;
-      }
-
-      return a;
-    };
-  },
-  /**
    * Checks if `a` is comparative to `b` with the given operator.
    * Returns true or false.
    *
@@ -202,16 +160,6 @@ const diceUtils = Object.freeze({
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
     return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
-  },
-  /**
-   * Trims operators from the end of the string.
-   * ie. `3+4*` becomes `3+4`
-   *
-   * @param formula
-   * @returns {*}
-   */
-  trimOperator(formula){
-    return formula.replace(/[+\-\/*]+$/, '');
   },
 });
 
