@@ -161,7 +161,7 @@ describe('RollResults', () => {
       expect(results.value).toEqual(37);
     });
 
-    test('ignores roles flagged as `useInTotal = false`', () => {
+    test('ignores rolls flagged as `useInTotal = false`', () => {
       const results = new RollResults();
 
       // flag a roll as ignored

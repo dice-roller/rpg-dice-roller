@@ -1,6 +1,6 @@
 # rpg-dice-roller
 
-A JS based dice roller that can role various types of dice and modifiers, along with mathematical equations.
+A JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.
 
 [![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
 
@@ -200,7 +200,7 @@ Each exploded die shows as a separate roll in the list, like so:
 2d6!: [4, 6!, 6!, 2] = 18
 ```
 
-The second die rolled the highest value, and so it exploded - we roll again. The re-rolled die also exploded, so we roll a fourth time. The fourth role, however, did not explode, so we stop rolling.
+The second die rolled the highest value, and so it exploded - we roll again. The re-rolled die also exploded, so we roll a fourth time. The fourth roll, however, did not explode, so we stop rolling.
 
 If you want to change the number that a dice will explode on, you can use a [Compare Point](#Compare Point):
 
