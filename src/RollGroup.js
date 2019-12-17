@@ -45,6 +45,18 @@ class RollGroup{
     return this[_expressions];
   }
 
+  roll(){
+    const rollResult = new RollResult();
+
+    this.expressions.forEach(expression => {
+      if (typeof expression.roll === 'function') {
+        expression.roll();
+      }
+    });
+
+    return rollResult;
+  }
+
   /**
    * Returns an object for JSON serialising
    *
