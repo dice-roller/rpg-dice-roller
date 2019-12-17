@@ -177,7 +177,7 @@
       </li>
 
       <li>
-        <code>2d10+4+2d20-L</code> <small>(Roll two 10 sided dice add four, and roll two 20 sided die, taking away the lowest of the two)</small>
+        <code>2d10+4+2d20dl1</code> <small>(Roll two 10 sided dice add four, and roll two 20 sided die, taking away the lowest of the two)</small>
       </li>
 
       <li>
@@ -220,9 +220,9 @@
       </li>
 
       <li>
-        <code>2d6>4</code>
+        <code>2d6>4f<=3</code>
         <small>
-          (Dice pool - anything greater than a 4 is a success. Count the number of successes as the total)
+          (Dice pool - anything greater than a 4 is a success, less than or equal to 3 is a fail. Count the number of successes, minus failures, as the total)
         </small>
       </li>
 
@@ -238,7 +238,7 @@
     </ul>
 
     <p>
-      The following arithmetic operators can be used: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>
+      The following arithmetic operators can be used: <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>^</code>, <code>%</code>
     </p>
 
     <p>
