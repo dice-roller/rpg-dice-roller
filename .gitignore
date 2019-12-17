@@ -46,7 +46,10 @@ bower_components
 
 # Project specific
 
-/lib
+## Compiled scripts
+
+/lib/*.js
+/lib/**/*.js
 /src/parser/grammars/grammar.js
 
 

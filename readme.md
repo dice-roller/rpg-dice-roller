@@ -39,6 +39,8 @@ You can import the dice roller and use it in your application, using ES standard
 ```js
 // import only the DiceRoller class
 import { DiceRoller } from 'lib/esm/bundle.min.js';
+// or in nodeJS using ES modules
+import { DiceRoller } from 'rpg-dice-roller';
 
 // create a new instance of the DiceRoller
 const roller = new DiceRoller();
@@ -46,8 +48,10 @@ const roller = new DiceRoller();
 
 Rather than specifying the individual components, you can import everything like so:
 ```js
-// import the everything and store on the `rpgDiceRoller` scope
+// import everything and store it on the `rpgDiceRoller` scope
 import * as rpgDiceRoller from 'lib/esm/bundle.min.js';
+// or in nodeJS using ES modules
+import * as rpgDiceRoller from 'rpg-dice-roller';
 
 // create a DiceRoller
 const roller = new rpgDiceRoller.DiceRoller();
@@ -57,7 +61,9 @@ const roll = new rpgDiceRoller.DiceRoll('2d6');
 ```
 
 
-#### NodeJS v12< And Module Loaders
+#### NodeJS And Module Loaders
+
+_Note: if you're using NodeJS v12 or greater and are using [ES modules](https://nodejs.org/docs/latest-v13.x/api/esm.html) (`import`) instead of CommonJS (`require`) follow the [ES modules](#es-modules) examples above._
 
 You can also load the library using CommonJS, AMD, etc.
 
@@ -67,10 +73,19 @@ Here is an example in Node.js:
 
 ```js
 // require the dice-roller library
-const { DiceRoller } = require('rpg-dice-roller');
+const { DiceRoller } = require('rpg-dice-roller/lib/umd/bundle.min.js');
 
 // create a new instance of the DiceRoller
 const diceRoller = new DiceRoller();
+```
+
+Rather than specifying the individual components, you can import everything like so:
+```js
+// import everything and store it on the `rpgDiceRoller` scope
+const rpgDiceRoller = require('rpg-dice-roller/lib/umd/bundle.js');
+
+// create a DiceRoller
+const roller = new rpgDiceRoller.DiceRoller();
 ```
 
 
