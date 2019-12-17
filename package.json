@@ -51,7 +51,7 @@
     "build:dev": "npm run prebuild && npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
     "build:umd": "rollup --c --environment FORMAT:umd",
     "build:esm": "rollup --c --environment FORMAT:esm",
-    "build:grammars": "pegjs src/parser/grammars/grammar.pegjs",
+    "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
     "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/**",
