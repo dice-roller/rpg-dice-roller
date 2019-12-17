@@ -4,7 +4,7 @@
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
   "version": "4.0.0",
   "license": "MIT",
-  "main": "lib/umd/bundle.js",
+  "main": "lib/esm/bundle.js",
   "module": "lib/esm/bundle.js",
   "browser": "lib/umd/bundle.js",
   "repository": {
