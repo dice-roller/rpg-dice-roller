@@ -55,7 +55,7 @@
     "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/**",
-    "pretest": "npm run prebuild && npm run build:umd -- --environment BUILD:dev",
+    "pretest": "npm run prebuild",
     "test": "npm run lint && jest /tests/",
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
     "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
