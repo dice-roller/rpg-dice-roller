@@ -16,7 +16,7 @@ DiceGroup
         ...exprs.map(v => v[3])
       ],
       modifiers: Object.assign({}, ...modifiers.map(item => {
-        return {[item.subType]: item};
+        return {[item.constructor.name]: item};
       })),
     };
   }
@@ -24,48 +24,28 @@ DiceGroup
 
 // Dice
 
-Dice = die:Die modifiers:Modifier* {
-  return Object.assign(die, {
-    modifiers: Object.assign({}, ...modifiers.map(item => {
-      return {[item.subType]: item};
-    })),
-  });
-}
+Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
+  die.modifiers = Object.assign({}, ...modifiers.map(item => {
+    return {[item.constructor.name]: item};
+  }));
 
-Die = die:(StandardDie / PercentileDie / FudgeDie) { return Object.assign(die, {notation: text()}) }
+  return die;
+}
 
 // @todo sides should total the formula so we have a simple number
 StandardDie
-  = qty:DieQty? d:"d" sides:IntegerOrExpression {
-    return {
-      type: 'dice',
-      subType: 'standard',
-      qty: qty || 1,
-      d,
-      sides,
-    }
+  = qty:DieQty? "d" sides:IntegerOrExpression {
+    return new Dice.StandardDice(text(), sides, qty || 1)
   }
 
 PercentileDie
-  = qty:DieQty? d:"d" sides:"%" {
-    return  {
-      type: 'dice',
-      subType: 'percentile',
-      qty: qty || 1,
-      d,
-      sides: 100,
-    }
+  = qty:DieQty? "d%" {
+    return new Dice.PercentileDice(text(), qty || 1);
   }
 
 FudgeDie
-  = qty:DieQty? d:"dF" sides:("." [12])? {
-    return  {
-      type: 'dice',
-      subType: 'fudge',
-      qty: qty || 1,
-      d,
-      sides: sides ? parseInt(sides[1], 10) : 2,
-    }
+  = qty:DieQty? "dF" sides:("." [12])? {
+    return new Dice.FudgeDice(text(), sides ? parseInt(sides[1], 10) : 2, qty || 1);
   }
 
 // Die quantity
@@ -75,93 +55,55 @@ DieQty = IntegerOrExpression
 
 // Modifiers
 
-Modifier = modifier:(ExplodeModifier / TargetModifier / DropModifier / KeepModifier / RerollModifier / CriticalSuccessModifier / CriticalFailModifier / SortingModifier) { return Object.assign(modifier, {notation: text()}) }
+Modifier = ExplodeModifier / TargetModifier / DropModifier / KeepModifier / ReRollModifier / CriticalSuccessModifier / CriticalFailureModifier / SortingModifier
 
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
   = "!" compound:"!"? penetrate:"p"? comparePoint:ComparePoint? {
-    return {
-      type: 'modifier',
-      subType: 'explode',
-      penetrate: !!penetrate,
-      compound: !!compound,
-      comparePoint,
-    }
+    return new Modifiers.ExplodeModifier(text(), comparePoint, !!compound, !!penetrate);
   }
 
 // Target / Success and Failure modifier
 TargetModifier
   = successCP:ComparePoint failureCP:FailComparePoint? {
-    return {
-      type: 'modifier',
-      subType: 'target',
-      successCP,
-      failureCP,
-    }
+    return new Modifiers.TargetModifier(text(), successCP, failureCP);
   }
 
 // Drop lowest/highest dice) - needs alternative syntax of `"-" ("h" | "l")`
 DropModifier
   = "d" end:[lh]? qty:IntegerNumber {
-    return {
-      type: 'modifier',
-      subType: 'drop',
-      end: end || 'l',
-      qty,
-    }
+    return new Modifiers.DropModifier(text(), end || 'l', qty);
   }
 
 // Keep lowest/highest dice) - needs alternative syntax of `"+" ("h" | "l")`
 KeepModifier
   = "k" end:[lh]? qty:IntegerNumber {
-    return {
-      type: 'modifier',
-      subType: 'keep',
-      end: end || 'h',
-      qty,
-    }
+    return new Modifiers.KeepModifier(text(), end || 'h', qty);
   }
 
 // Re-rolling Dice (Including Re-roll Once)
-RerollModifier
+ReRollModifier
   = "r" once:"o"? comparePoint:ComparePoint? {
-    return {
-      type: 'modifier',
-      subType: 're-roll',
-      once: !!once,
-      comparePoint,
-    }
+    return new Modifiers.ReRollModifier(text(), !!once, comparePoint);
   }
 
 // Critical success setting
 CriticalSuccessModifier
   = "cs" comparePoint:ComparePoint {
-    return {
-      type: 'modifier',
-      subType: 'critical-success',
-      comparePoint,
-    }
+    return new Modifiers.CriticalSuccessModifier(text(), comparePoint);
   }
 
 // Critical failure setting
-CriticalFailModifier
+CriticalFailureModifier
   = "cf" comparePoint:ComparePoint {
-    return {
-      type: 'modifier',
-      subType: 'critical-failure',
-      comparePoint,
-    }
+    return new Modifiers.CriticalFailureModifier(text(), comparePoint);
   }
 
 // Sort rolls when outputting
 SortingModifier
- = "s" dir:("a" / "d")? {
-   return {
-     type: 'modifier',
-     subType: 'sort',
-     direction: dir || 'a',
-   }
- }
+  = "s" dir:("a" / "d")? {
+    return new Modifiers.SortingModifier(text(), dir || 'a');
+  }
 
 
 // Number comparisons
@@ -171,11 +113,7 @@ FailComparePoint
 
 ComparePoint
   = operator:CompareOperator value:FloatNumber {
-    return {
-      type: 'compare-point',
-      operator,
-      value,
-    }
+    return new ComparePoint(operator, value);
   }
 
 CompareOperator
@@ -188,7 +126,8 @@ CompareOperator
 
 // Either a positive integer or an expression within parenthesis (Handy for dice qty or sides)
 IntegerOrExpression
-  = IntegerNumber / l:"(" _ expr:Expression _ r:")" { return [l, ...expr, r] }
+  = IntegerNumber
+  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return math.eval(text()) }
 
 // Generic expression
 Expression

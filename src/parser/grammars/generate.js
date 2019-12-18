@@ -14,6 +14,7 @@ let output = `import * as Dice from '../../Dice.js';
 import * as Modifiers from '../../Modifiers.js';
 import ComparePoint from '../../ComparePoint.js';
 import RollGroup from '../../RollGroup.js';
+import math from 'mathjs-expression-parser';
 
 const parser = ${parser};
 

@@ -213,9 +213,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(8);
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('critical-failure')).toBe(true);
+          expect(parsed[0].modifiers.has('CriticalFailureModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('critical-failure');
+          const mod = parsed[0].modifiers.get('CriticalFailureModifier');
           expect(mod).toBeInstanceOf(CriticalFailureModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'cf<4',
@@ -237,9 +237,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(3);
 
-          expect(parsed[0].modifiers.has('critical-failure')).toBe(true);
+          expect(parsed[0].modifiers.has('CriticalFailureModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('critical-failure');
+          const mod = parsed[0].modifiers.get('CriticalFailureModifier');
           expect(mod).toBeInstanceOf(CriticalFailureModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'cf>8',
@@ -269,9 +269,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(45);
           expect(parsed[0].qty).toEqual(8);
 
-          expect(parsed[0].modifiers.has('critical-success')).toBe(true);
+          expect(parsed[0].modifiers.has('CriticalSuccessModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('critical-success');
+          const mod = parsed[0].modifiers.get('CriticalSuccessModifier');
           expect(mod).toBeInstanceOf(CriticalSuccessModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'cs=12',
@@ -293,9 +293,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(152);
           expect(parsed[0].qty).toEqual(36);
 
-          expect(parsed[0].modifiers.has('critical-success')).toBe(true);
+          expect(parsed[0].modifiers.has('CriticalSuccessModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('critical-success');
+          const mod = parsed[0].modifiers.get('CriticalSuccessModifier');
           expect(mod).toBeInstanceOf(CriticalSuccessModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'cs!=45',
@@ -325,9 +325,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(23);
           expect(parsed[0].qty).toEqual(19);
 
-          expect(parsed[0].modifiers.has('drop')).toBe(true);
+          expect(parsed[0].modifiers.has('DropModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('drop');
+          const mod = parsed[0].modifiers.get('DropModifier');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'd1',
@@ -347,9 +347,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(4);
 
-          expect(parsed[0].modifiers.has('drop')).toBe(true);
+          expect(parsed[0].modifiers.has('DropModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('drop');
+          const mod = parsed[0].modifiers.get('DropModifier');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'dl1',
@@ -369,9 +369,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(7);
 
-          expect(parsed[0].modifiers.has('drop')).toBe(true);
+          expect(parsed[0].modifiers.has('DropModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('drop');
+          const mod = parsed[0].modifiers.get('DropModifier');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'd3',
@@ -391,9 +391,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(4);
 
-          expect(parsed[0].modifiers.has('drop')).toBe(true);
+          expect(parsed[0].modifiers.has('DropModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('drop');
+          const mod = parsed[0].modifiers.get('DropModifier');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'dh2',
@@ -425,9 +425,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!',
@@ -451,9 +451,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(7);
           expect(parsed[0].qty).toEqual(2);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!!',
@@ -477,9 +477,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(5);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!p',
@@ -503,9 +503,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!!p',
@@ -529,9 +529,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(4);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!>=0',
@@ -555,9 +555,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!!<=1',
@@ -581,9 +581,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(360);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!!p<50',
@@ -609,9 +609,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(40601);
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('keep')).toBe(true);
+          expect(parsed[0].modifiers.has('KeepModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('keep');
+          const mod = parsed[0].modifiers.get('KeepModifier');
           expect(mod).toBeInstanceOf(KeepModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'k1',
@@ -631,9 +631,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(2);
           expect(parsed[0].qty).toEqual(23017);
 
-          expect(parsed[0].modifiers.has('keep')).toBe(true);
+          expect(parsed[0].modifiers.has('KeepModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('keep');
+          const mod = parsed[0].modifiers.get('KeepModifier');
           expect(mod).toBeInstanceOf(KeepModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'kh1',
@@ -653,9 +653,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(5);
 
-          expect(parsed[0].modifiers.has('keep')).toBe(true);
+          expect(parsed[0].modifiers.has('KeepModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('keep');
+          const mod = parsed[0].modifiers.get('KeepModifier');
           expect(mod).toBeInstanceOf(KeepModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'k4',
@@ -675,9 +675,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(10);
 
-          expect(parsed[0].modifiers.has('keep')).toBe(true);
+          expect(parsed[0].modifiers.has('KeepModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('keep');
+          const mod = parsed[0].modifiers.get('KeepModifier');
           expect(mod).toBeInstanceOf(KeepModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'kl3',
@@ -699,9 +699,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(5);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
+          const mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'r',
@@ -724,9 +724,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(12);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
+          const mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'r',
@@ -749,9 +749,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(2);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
+          const mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'r>80',
@@ -774,9 +774,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(35);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
+          const mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'ro',
@@ -799,9 +799,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(64);
           expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
+          const mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'ro<=35',
@@ -826,9 +826,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(5);
           expect(parsed[0].qty).toEqual(10);
 
-          expect(parsed[0].modifiers.has('sort')).toBe(true);
+          expect(parsed[0].modifiers.has('SortingModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('sort');
+          const mod = parsed[0].modifiers.get('SortingModifier');
           expect(mod).toBeInstanceOf(SortingModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 's',
@@ -847,9 +847,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(23);
 
-          expect(parsed[0].modifiers.has('sort')).toBe(true);
+          expect(parsed[0].modifiers.has('SortingModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('sort');
+          const mod = parsed[0].modifiers.get('SortingModifier');
           expect(mod).toBeInstanceOf(SortingModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'sa',
@@ -868,9 +868,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(14);
 
-          expect(parsed[0].modifiers.has('sort')).toBe(true);
+          expect(parsed[0].modifiers.has('SortingModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('sort');
+          const mod = parsed[0].modifiers.get('SortingModifier');
           expect(mod).toBeInstanceOf(SortingModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'sd',
@@ -892,9 +892,9 @@ describe('Parser', () => {
             expect(parsed[0].sides).toEqual(45);
             expect(parsed[0].qty).toEqual(8);
 
-            expect(parsed[0].modifiers.has('target')).toBe(true);
+            expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-            const mod = parsed[0].modifiers.get('target');
+            const mod = parsed[0].modifiers.get('TargetModifier');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
               notation: '=21',
@@ -917,9 +917,9 @@ describe('Parser', () => {
             expect(parsed[0].sides).toEqual('F.2');
             expect(parsed[0].qty).toEqual(1);
 
-            expect(parsed[0].modifiers.has('target')).toBe(true);
+            expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-            const mod = parsed[0].modifiers.get('target');
+            const mod = parsed[0].modifiers.get('TargetModifier');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
               notation: '>=0',
@@ -944,9 +944,9 @@ describe('Parser', () => {
             expect(parsed[0].sides).toEqual('%');
             expect(parsed[0].qty).toEqual(4);
 
-            expect(parsed[0].modifiers.has('target')).toBe(true);
+            expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-            const mod = parsed[0].modifiers.get('target');
+            const mod = parsed[0].modifiers.get('TargetModifier');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
               notation: '>50f<40',
@@ -972,9 +972,9 @@ describe('Parser', () => {
             expect(parsed[0].sides).toEqual('F.1');
             expect(parsed[0].qty).toEqual(450);
 
-            expect(parsed[0].modifiers.has('target')).toBe(true);
+            expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-            const mod = parsed[0].modifiers.get('target');
+            const mod = parsed[0].modifiers.get('TargetModifier');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
               notation: '>0f!=1',
@@ -1015,9 +1015,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(6);
 
-          expect(parsed[0].modifiers.has('target')).toBe(true);
+          expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-          let mod = parsed[0].modifiers.get('target');
+          let mod = parsed[0].modifiers.get('TargetModifier');
           expect(mod).toBeInstanceOf(TargetModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '>=8',
@@ -1028,9 +1028,9 @@ describe('Parser', () => {
             failureComparePoint: null,
           }));
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          mod = parsed[0].modifiers.get('explode');
+          mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!>=9',
@@ -1055,9 +1055,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(6);
 
-          expect(parsed[0].modifiers.has('target')).toBe(true);
+          expect(parsed[0].modifiers.has('TargetModifier')).toBe(true);
 
-          let mod = parsed[0].modifiers.get('target');
+          let mod = parsed[0].modifiers.get('TargetModifier');
           expect(mod).toBeInstanceOf(TargetModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '>=8',
@@ -1068,9 +1068,9 @@ describe('Parser', () => {
             failureComparePoint: null,
           }));
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          mod = parsed[0].modifiers.get('explode');
+          mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!>=9',
@@ -1095,9 +1095,9 @@ describe('Parser', () => {
           expect(parsed[0].qty).toEqual(10);
 
 
-          expect(parsed[0].modifiers.has('drop')).toBe(true);
+          expect(parsed[0].modifiers.has('DropModifier')).toBe(true);
 
-          let mod = parsed[0].modifiers.get('drop');
+          let mod = parsed[0].modifiers.get('DropModifier');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'dh2',
@@ -1106,9 +1106,9 @@ describe('Parser', () => {
           }));
 
 
-          expect(parsed[0].modifiers.has('keep')).toBe(true);
+          expect(parsed[0].modifiers.has('KeepModifier')).toBe(true);
 
-          mod = parsed[0].modifiers.get('keep');
+          mod = parsed[0].modifiers.get('KeepModifier');
           expect(mod).toBeInstanceOf(KeepModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'kl3',
@@ -1117,9 +1117,9 @@ describe('Parser', () => {
           }));
 
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+          expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
-          mod = parsed[0].modifiers.get('re-roll');
+          mod = parsed[0].modifiers.get('ReRollModifier');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: 'r!=5',
@@ -1142,9 +1142,9 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(2);
           expect(parsed[0].qty).toEqual(42);
 
-          expect(parsed[0].modifiers.has('explode')).toBe(true);
+          expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('explode');
+          const mod = parsed[0].modifiers.get('ExplodeModifier');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             notation: '!p<5',
@@ -1443,9 +1443,9 @@ describe('Parser', () => {
           qty: 4,
         }));
 
-        expect(parsed[0].modifiers.has('explode')).toBe(true);
+        expect(parsed[0].modifiers.has('ExplodeModifier')).toBe(true);
 
-        let mod = parsed[0].modifiers.get('explode');
+        let mod = parsed[0].modifiers.get('ExplodeModifier');
         expect(mod).toBeInstanceOf(ExplodeModifier);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
           notation: '!!p',
@@ -1469,9 +1469,9 @@ describe('Parser', () => {
           qty: 1,
         }));
 
-        expect(parsed[5].modifiers.has('re-roll')).toBe(true);
+        expect(parsed[5].modifiers.has('ReRollModifier')).toBe(true);
 
-        mod = parsed[5].modifiers.get('re-roll');
+        mod = parsed[5].modifiers.get('ReRollModifier');
         expect(mod).toBeInstanceOf(ReRollModifier);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
           notation: 'r',
