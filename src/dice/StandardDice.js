@@ -33,30 +33,7 @@ class StandardDice{
     this[_sides] = sides;
 
     if (modifiers) {
-      if (modifiers instanceof Map) {
-        this[_modifiers] = modifiers;
-      } else if (Array.isArray(modifiers)) {
-        // loop through and get the modifier name of each item and use it as the map key
-        this[_modifiers] = new Map(modifiers.map(modifier => [modifier.name, modifier]));
-      } else if (typeof modifiers === 'object') {
-        this[_modifiers] = new Map(Object.entries(modifiers));
-      } else {
-        throw new Error('modifiers should be a Map or an Object');
-      }
-
-      if (this[_modifiers].size && [...this[_modifiers].entries()].some(entry => !(entry[1] instanceof Modifier))) {
-        throw new Error('modifiers is invalid. List must only contain Modifier instances');
-      }
-
-      // loop through each modifier and ensure that those that require it have compare points
-      // @todo find a better way of defining compare point on modifiers that don't have them
-      this[_modifiers].forEach((modifier) => {
-        if ((modifier instanceof ExplodeModifier) && !modifier.comparePoint) {
-          modifier.comparePoint = new ComparePoint('=', this.max);
-        } else if ((modifier instanceof ReRollModifier) && !modifier.comparePoint) {
-          modifier.comparePoint = new ComparePoint('=', this.min);
-        }
-      });
+      this.modifiers = modifiers;
     }
   }
 
@@ -68,6 +45,36 @@ class StandardDice{
   get modifiers(){
     // ensure modifiers are ordered correctly
     return this[_modifiers] ? new Map([...this[_modifiers]].sort((a, b) => a[1].order - b[1].order)) : null;
+  }
+
+  set modifiers(value){
+    let modifiers;
+    if (value instanceof Map) {
+      modifiers = value;
+    } else if (Array.isArray(value)) {
+      // loop through and get the modifier name of each item and use it as the map key
+      modifiers = new Map(value.map(modifier => [modifier.name, modifier]));
+    } else if (typeof value === 'object') {
+      modifiers = new Map(Object.entries(value));
+    } else {
+      throw new Error('modifiers should be a Map or an Object');
+    }
+
+    if (modifiers.size && [...modifiers.entries()].some(entry => !(entry[1] instanceof Modifier))) {
+      throw new Error('modifiers is invalid. List must only contain Modifier instances');
+    }
+
+    this[_modifiers] = modifiers;
+
+    // loop through each modifier and ensure that those that require it have compare points
+    // @todo find a better way of defining compare point on modifiers that don't have them
+    this[_modifiers].forEach((modifier) => {
+      if ((modifier instanceof ExplodeModifier) && !modifier.comparePoint) {
+        modifier.comparePoint = new ComparePoint('=', this.max);
+      } else if ((modifier instanceof ReRollModifier) && !modifier.comparePoint) {
+        modifier.comparePoint = new ComparePoint('=', this.min);
+      }
+    });
   }
 
   /**

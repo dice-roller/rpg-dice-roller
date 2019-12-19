@@ -109,9 +109,23 @@ describe('StandardDice', () => {
   });
 
   describe('Modifiers', () => {
+    test('setting modifiers in constructor calls setter', () => {
+      const spy = jest.spyOn(StandardDice.prototype, 'modifiers', 'set');
+      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+
+      new StandardDice('4d6', 6, 8, modifiers);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
     test('can set modifiers with Map', () => {
       const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
-      const die = new StandardDice('4d6', 6, 8, modifiers);
+      const die = new StandardDice('4d6', 6, 8);
+
+      die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers).toEqual(modifiers);
@@ -119,7 +133,9 @@ describe('StandardDice', () => {
 
     test('can set modifiers with Object', () => {
       const modifier = new Modifier('m');
-      const die = new StandardDice('4d6', 6, 8, {foo: modifier});
+      const die = new StandardDice('4d6', 6, 8);
+
+      die.modifiers = {foo: modifier};
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('foo')).toEqual(modifier);
@@ -127,7 +143,9 @@ describe('StandardDice', () => {
 
     test('can set modifiers with Array', () => {
       const modifiers = [new Modifier('m')];
-      const die = new StandardDice('4d6', 6, 8, modifiers);
+      const die = new StandardDice('4d6', 6, 8);
+
+      die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('Modifier')).toEqual(modifiers[0]);
@@ -170,7 +188,9 @@ describe('StandardDice', () => {
       mod4.order = 2;
 
       // create the dice instance
-      const die = new StandardDice('4d6', 6, 8, {mod1, mod2, mod3, mod4,});
+      const die = new StandardDice('4d6', 6, 8);
+
+      die.modifiers = {mod1, mod2, mod3, mod4,};
 
       // get the modifier keys
       const modKeys = [...die.modifiers.keys()];
@@ -179,15 +199,6 @@ describe('StandardDice', () => {
       expect(modKeys[1]).toEqual('mod4');
       expect(modKeys[2]).toEqual('mod2');
       expect(modKeys[3]).toEqual('mod1');
-    });
-
-    test('cannot change modifiers', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
-      const die = new StandardDice('4d6', 6, 8);
-
-      expect(() => {
-        die.modifiers = modifiers;
-      }).toThrowError(TypeError);
     });
   });
 

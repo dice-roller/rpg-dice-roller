@@ -3,7 +3,7 @@ import Parser from "./parser/Parser.js";
 import RollGroup from './RollGroup.js';
 import StandardDice from './dice/StandardDice.js';
 import math from "mathjs-expression-parser";
-import RollResults from "./results/RollResults";
+import RollResults from './results/RollResults.js';
 
 /**
  * @type {symbol}

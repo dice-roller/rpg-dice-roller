@@ -1,5 +1,5 @@
 import ComparisonModifier from "./ComparisonModifier.js";
-import ComparePoint from '../ComparePoint';
+import ComparePoint from '../ComparePoint.js';
 
 const _once = Symbol('once');
 

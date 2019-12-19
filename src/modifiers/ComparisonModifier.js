@@ -48,8 +48,6 @@ class ComparisonModifier extends Modifier{
    */
   isComparePoint(value){
     if (!this.comparePoint) {
-      console.warn('No Compare Point specified');
-
       return false;
     }
 
