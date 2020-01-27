@@ -8,17 +8,16 @@ Main = Expression
 // Dice groups
 DiceGroup
   = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* {
-    return {
-      type: 'group',
-      notation: text(),
-      expressions: [
+    return new RollGroup(
+      text(),
+      [
         expr,
         ...exprs.map(v => v[3])
       ],
-      modifiers: Object.assign({}, ...modifiers.map(item => {
+      Object.assign({}, ...modifiers.map(item => {
         return {[item.constructor.name]: item};
-      })),
-    };
+      }))
+    );
   }
 
 
