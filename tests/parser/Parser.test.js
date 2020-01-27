@@ -157,7 +157,7 @@ describe('Parser', () => {
         }));
       });
 
-      test('throws error invalid Fudge die sides', () => {
+      test('throws error for invalid Fudge die sides', () => {
         expect(() => {
           Parser.parse('dF.3');
         }).toThrow(SyntaxError);

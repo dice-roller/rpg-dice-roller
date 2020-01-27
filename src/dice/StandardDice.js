@@ -21,9 +21,9 @@ class StandardDice{
    */
   constructor(notation, sides, qty = 1, modifiers = null){
     if (!notation) {
-      throw new TypeError('Dice: Notation is required');
+      throw new TypeError('Notation is required');
     } else if (!sides) {
-      throw new TypeError('Dice: sides is required');
+      throw new TypeError('Sides is required');
     } else if (!diceUtils.isNumeric(qty) || (qty < 1)) {
       throw new TypeError('qty must be a positive integer');
     }
@@ -47,6 +47,11 @@ class StandardDice{
     return this[_modifiers] ? new Map([...this[_modifiers]].sort((a, b) => a[1].order - b[1].order)) : null;
   }
 
+  /**
+   * Sets the modifiers that affect this roll
+   *
+   * @param value
+   */
   set modifiers(value){
     let modifiers;
     if (value instanceof Map) {

@@ -32,25 +32,20 @@ Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
   return die;
 }
 
-// @todo sides should total the formula so we have a simple number
 StandardDie
-  = qty:DieQty? "d" sides:IntegerOrExpression {
+  = qty:IntegerOrExpression? "d" sides:IntegerOrExpression {
     return new Dice.StandardDice(text(), sides, qty || 1)
   }
 
 PercentileDie
-  = qty:DieQty? "d%" {
+  = qty:IntegerOrExpression? "d%" {
     return new Dice.PercentileDice(text(), qty || 1);
   }
 
 FudgeDie
-  = qty:DieQty? "dF" sides:("." [12])? {
+  = qty:IntegerOrExpression? "dF" sides:("." [12])? {
     return new Dice.FudgeDice(text(), sides ? parseInt(sides[1], 10) : 2, qty || 1);
   }
-
-// Die quantity
-// @todo this should total the formula so we have a simple number
-DieQty = IntegerOrExpression
 
 
 // Modifiers

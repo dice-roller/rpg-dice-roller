@@ -45,19 +45,19 @@ describe('StandardDice', () => {
     test('constructor requires sides', () => {
       expect(() => {
         new StandardDice('1d6');
-      }).toThrow('sides is required');
+      }).toThrow('Sides is required');
 
       expect(() => {
         new StandardDice('1d6', false);
-      }).toThrow('sides is required');
+      }).toThrow('Sides is required');
 
       expect(() => {
         new StandardDice('1d6', null);
-      }).toThrow('sides is required');
+      }).toThrow('Sides is required');
 
       expect(() => {
         new StandardDice('1d6', undefined);
-      }).toThrow('sides is required');
+      }).toThrow('Sides is required');
     });
   });
 
