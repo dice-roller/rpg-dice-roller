@@ -234,7 +234,7 @@ MathFunction
 
 
 FloatNumber
-  = Number ([.] Number)? { return parseFloat(text()) }
+  = "-"? Number ([.] Number)? { return parseFloat(text()) }
 
 IntegerNumber
   = [1-9] [0-9]* { return parseInt(text(), 10) }

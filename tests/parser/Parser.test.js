@@ -1524,5 +1524,66 @@ describe('Parser', () => {
         }));
       });
     });
+
+    describe('Negative numbers', () => {
+      test('roll `1d20+-5`', () => {
+        const parsed = Parser.parse('1d20+-5');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0]).toEqual(expect.objectContaining({
+          notation: '1d20',
+          sides: 20,
+          qty: 1,
+        }));
+
+        expect(parsed[1]).toEqual('+');
+        expect(parsed[2]).toBe(-5);
+      });
+
+      test('roll `-12*1d20`', () => {
+        const parsed = Parser.parse('-12*1d20');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBe(-12);
+        expect(parsed[1]).toEqual('*');
+
+        expect(parsed[2]).toBeInstanceOf(StandardDice);
+        expect(parsed[2]).toEqual(expect.objectContaining({
+          notation: '1d20',
+          sides: 20,
+          qty: 1,
+        }));
+      });
+
+      test('can parse `(-2+5)d(6+-4)`', () => {
+        const parsed = Parser.parse('(-2+5)d(6+-4)');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(1);
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0]).toEqual(expect.objectContaining({
+          notation: '(-2+5)d(6+-4)',
+          sides: 2,
+          qty: 3,
+        }));
+      });
+
+      test('throws error when using negative values for die quantity', () => {
+        expect(() => {
+          Parser.parse('-4d6');
+        }).toThrow(SyntaxError);
+      });
+
+      test('throws error when using negative values for die sides', () => {
+        expect(() => {
+          Parser.parse('4d-6');
+        }).toThrow(SyntaxError);
+      });
+    });
   });
 });
