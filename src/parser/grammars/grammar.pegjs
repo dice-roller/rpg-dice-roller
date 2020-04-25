@@ -165,6 +165,15 @@ MathFunction
       ')',
     ];
   }
+  / func:"max" "(" _ expr1:Expression _ "," _ expr2:Expression _ ")" {
+    return [
+      `${func}(`,
+      ...expr1,
+      ',',
+      ...expr2,
+      ')',
+    ];
+  }
 
 
 FloatNumber
