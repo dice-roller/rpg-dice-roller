@@ -2,7 +2,7 @@
   "name": "rpg-dice-roller",
   "description": "A dice roller that accepts standard dice notation",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
-  "version": "4.0.2",
+  "version": "4.0.3",
   "license": "MIT",
   "main": "lib/esm/bundle.js",
   "module": "lib/esm/bundle.js",
