@@ -77,6 +77,23 @@ describe('Rolling', () => {
     }));
   });
 
+  test('roll `min(2 * (d7/2), 1d7)`', () => {
+    const rollsFirst = new RollResults([5]);
+    const rollsSecond = new RollResults([2]);
+    const spy = jest.spyOn(StandardDice.prototype, 'roll')
+    .mockImplementationOnce(() => rollsFirst)
+    .mockImplementationOnce(() => rollsSecond);
+    const roll = roller.roll('min(2 * (d7/2), 1d7)');
+
+    expect(roll).toBeInstanceOf(DiceRoll);
+    expect(roll).toEqual(expect.objectContaining({
+      notation: 'min(2 * (d7/2), 1d7)',
+      rolls: [rollsFirst, rollsSecond],
+      output: 'min(2 * (d7/2), 1d7): min(2*([5]/2),[2]) = 2',
+      total: 2,
+    }));
+  });
+
   test('roll `3d6cs>3cf<3`', () => {
     const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
       .mockImplementationOnce(() => 5)
