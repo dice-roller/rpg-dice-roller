@@ -164,7 +164,7 @@ d6   // roll a 6 sided dice
 
 #### Percentile dice (`d%`)
 
-Percentile dice roll a whole number between `0-100`, and are specified with the format `d%`.
+Percentile dice roll a whole number between `1-100`, and are specified with the format `d%`.
 This is a shorthand to a standard die with 100 sides; `d100`
 
 ```
