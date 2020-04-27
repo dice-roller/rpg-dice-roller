@@ -1231,7 +1231,7 @@ describe('Parser', () => {
       });
 
       // loop through all the double argument functions
-      ['pow', 'max'].forEach(name => {
+      ['pow', 'max', 'min'].forEach(name => {
         test(`can parse \`${name}(4d6, 7)\``, () => {
           const parsed = Parser.parse(`${name}(4d6, 7)`);
 

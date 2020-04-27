@@ -156,7 +156,7 @@ MathFunction
       ')',
     ];
   }
-  / func:"pow" "(" _ expr1:Expression _ "," _ expr2:Expression _ ")" {
+  / func:("pow" / "max" / "min") "(" _ expr1:Expression _ "," _ expr2:Expression _ ")" {
     return [
       `${func}(`,
       ...expr1,
@@ -165,16 +165,6 @@ MathFunction
       ')',
     ];
   }
-  / func:"max" "(" _ expr1:Expression _ "," _ expr2:Expression _ ")" {
-    return [
-      `${func}(`,
-      ...expr1,
-      ',',
-      ...expr2,
-      ')',
-    ];
-  }
-
 
 FloatNumber
   = "-"? Number ([.] Number)? { return parseFloat(text()) }
