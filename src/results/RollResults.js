@@ -1,12 +1,12 @@
-import RollResult from './RollResult.js';
+import RollResult from './RollResult';
 
-const _rolls = Symbol('rolls');
+const rollsSymbol = Symbol('rolls');
 
-class RollResults{
+class RollResults {
   /**
    * @param {RollResult[]=} rolls
    */
-  constructor(rolls){
+  constructor(rolls) {
     this.rolls = rolls || [];
   }
 
@@ -15,7 +15,7 @@ class RollResults{
    *
    * @returns {number}
    */
-  get length(){
+  get length() {
     return this.rolls.length || 0;
   }
 
@@ -24,8 +24,8 @@ class RollResults{
    *
    * @returns {RollResult[]}
    */
-  get rolls(){
-    return [...(this[_rolls] || [])];
+  get rolls() {
+    return [...(this[rollsSymbol] || [])];
   }
 
   /**
@@ -35,15 +35,15 @@ class RollResults{
    *
    * @throws Error
    */
-  set rolls(rolls){
+  set rolls(rolls) {
     if (!rolls || !Array.isArray(rolls)) {
       // roll is not an array
       throw new Error(`Rolls must be an array: ${rolls}`);
     }
 
     // loop through each result and add it to the rolls list
-    this[_rolls] = [];
-    rolls.forEach(result => {
+    this[rollsSymbol] = [];
+    rolls.forEach((result) => {
       this.addRoll(result);
     });
   }
@@ -53,8 +53,8 @@ class RollResults{
    *
    * @returns {number}
    */
-  get value(){
-    return this.rolls.reduce((v, roll) => v+(roll.useInTotal ? roll.calculationValue : 0), 0);
+  get value() {
+    return this.rolls.reduce((v, roll) => v + (roll.useInTotal ? roll.calculationValue : 0), 0);
   }
 
   /**
@@ -62,10 +62,10 @@ class RollResults{
    *
    * @param {RollResult|number} value
    */
-  addRoll(value){
+  addRoll(value) {
     const result = (value instanceof RollResult) ? value : new RollResult(value);
 
-    this[_rolls].push(result);
+    this[rollsSymbol].push(result);
   }
 
   /**
@@ -73,8 +73,8 @@ class RollResults{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {rolls, value} = this;
+  toJSON() {
+    const { rolls, value } = this;
 
     return {
       rolls,
@@ -87,7 +87,7 @@ class RollResults{
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return `[${this.rolls.join(', ')}]`;
   }
 }

@@ -57,7 +57,7 @@
     "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
     "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
-    "lint": "eslint src/**",
+    "lint": "eslint src/** tests/**",
     "pretest": "npm run prebuild",
     "test": "npm run lint && jest /tests/",
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",

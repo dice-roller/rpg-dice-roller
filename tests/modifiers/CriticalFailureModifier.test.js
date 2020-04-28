@@ -1,8 +1,8 @@
-import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier';
+import ComparePoint from '../../src/ComparePoint';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
 
 describe('CriticalFailureModifier', () => {
   describe('Initialisation', () => {
@@ -88,7 +88,7 @@ describe('CriticalFailureModifier', () => {
       }).toThrow('comparePoint must be instance of ComparePoint');
 
       expect(() => {
-        mod.comparePoint = {comparePoint: new ComparePoint('>', 8)};
+        mod.comparePoint = { comparePoint: new ComparePoint('>', 8) };
       }).toThrow('comparePoint must be instance of ComparePoint');
     });
 

@@ -1,4 +1,4 @@
-import parser from './grammars/grammar.js';
+import parser from './grammars/grammar';
 
 /**
  * A DiceParser object, which takes a notation
@@ -6,8 +6,8 @@ import parser from './grammars/grammar.js';
  *
  * @param {string|Object} notation  The dice notation or object
  */
-class Parser{
-  /** Public methods **/
+class Parser {
+  /** Public methods * */
 
   /**
    * Parses the given dice notation
@@ -19,7 +19,7 @@ class Parser{
    *
    * @returns {Array}
    */
-  static parse(notation){
+  static parse(notation) {
     if (!notation) {
       throw Error('Notation is required');
     } else if (typeof notation !== 'string') {

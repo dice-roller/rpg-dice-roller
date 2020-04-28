@@ -1,16 +1,16 @@
-import {diceUtils, exportFormats} from "./utilities/utils.js";
-import Parser from "./parser/Parser.js";
-import RollGroup from './RollGroup.js';
-import StandardDice from './dice/StandardDice.js';
-import math from "mathjs-expression-parser";
-import RollResults from './results/RollResults.js';
+import math from 'mathjs-expression-parser';
+import { diceUtils, exportFormats } from './utilities/utils';
+import Parser from './parser/Parser';
+import RollGroup from './RollGroup';
+import StandardDice from './dice/StandardDice';
+import RollResults from './results/RollResults';
 
 /**
  * @type {symbol}
  *
  * @private
  */
-const _calculateTotal = Symbol('calculateTotals');
+const calculateTotalSymbol = Symbol('calculateTotals');
 
 /**
  * The notation
@@ -19,7 +19,7 @@ const _calculateTotal = Symbol('calculateTotals');
  *
  * @private
  */
-const _notation = Symbol('notation');
+const notationSymbol = Symbol('notation');
 
 /**
  * List of dice definition objects
@@ -28,7 +28,7 @@ const _notation = Symbol('notation');
  *
  * @private
  */
-const _parsedNotation = Symbol('parsed-notation');
+const parsedNotationSymbol = Symbol('parsed-notation');
 
 /**
  * List of rolls
@@ -37,7 +37,7 @@ const _parsedNotation = Symbol('parsed-notation');
  *
  * @private
  */
-const _rolls = Symbol('rolls');
+const rollsSymbol = Symbol('rolls');
 
 /**
  * The roll total
@@ -46,27 +46,27 @@ const _rolls = Symbol('rolls');
  *
  * @private
  */
-const _total = Symbol('totals');
+const totalSymbol = Symbol('totals');
 
 
-class DiceRoll{
+class DiceRoll {
   /**
    * Parses the notation and rolls the dice
    *
    * @param notation
    */
-  constructor(notation){
+  constructor(notation) {
     if (!notation) {
       throw new Error('Notation is required');
     }
 
     // initialise the parsed dice array
-    this[_parsedNotation] = [];
+    this[parsedNotationSymbol] = [];
 
     if ((notation instanceof Object) && !Array.isArray(notation)) {
       // validate object
       // @todo see if we can assert that the notation is valid
-      if(!notation.notation) {
+      if (!notation.notation) {
         // object doesn't contain a notation property
         throw new Error('Notation is required');
       } else if (typeof notation.notation !== 'string') {
@@ -78,30 +78,34 @@ class DiceRoll{
           throw new Error(`Rolls must be an Array: ${notation.rolls}`);
         } else {
           // if roll is a RollResults, return it, otherwise try to convert to a RollResults object
-          this[_rolls] = notation.rolls.map(roll => {
-            if (roll instanceof RollResults) {
-              // already a RollResults object
-              return roll;
-            } else if (Array.isArray(roll)) {
-              // array of values
-              return new RollResults(roll);
-            } else if ((roll instanceof Object) && Array.isArray(roll.rolls)) {
-              // object with list of rolls
-              return new RollResults(roll.rolls);
-            }
-          });
+          this[rollsSymbol] = notation.rolls
+            .map((roll) => {
+              if (roll instanceof RollResults) {
+                // already a RollResults object
+                return roll;
+              } if (Array.isArray(roll)) {
+                // array of values
+                return new RollResults(roll);
+              } if ((roll instanceof Object) && Array.isArray(roll.rolls)) {
+                // object with list of rolls
+                return new RollResults(roll.rolls);
+              }
+
+              return null;
+            })
+            .filter(Boolean);
         }
       }
 
       // store the notation
-      this[_notation] = notation.notation;
+      this[notationSymbol] = notation.notation;
 
       // parse the notation
-      this[_parsedNotation] = Parser.parse(this.notation);
+      this[parsedNotationSymbol] = Parser.parse(this.notation);
 
-      if (!this[_rolls] || !this[_rolls].length) {
+      if (!this[rollsSymbol] || !this[rollsSymbol].length) {
         // ensure rolls is an empty array
-        this[_rolls] = [];
+        this[rollsSymbol] = [];
 
         // roll the dice
         this.roll();
@@ -109,12 +113,12 @@ class DiceRoll{
     } else if (typeof notation === 'string') {
       // @todo see if we can assert that the notation is valid
       // store the notation
-      this[_notation] = notation;
+      this[notationSymbol] = notation;
       // empty the current rolls
-      this[_rolls] = [];
+      this[rollsSymbol] = [];
 
       // parse the notation
-      this[_parsedNotation] = Parser.parse(this.notation);
+      this[parsedNotationSymbol] = Parser.parse(this.notation);
 
       // roll the dice
       this.roll();
@@ -124,9 +128,9 @@ class DiceRoll{
   }
 
 
-  /*************************
+  /** ***********************
    * Static Methods
-   *************************/
+   ************************ */
 
   /**
    * Imports the given dice roll data and builds an object from it.
@@ -139,35 +143,35 @@ class DiceRoll{
    *
    * @returns {DiceRoll}
    */
-  static import(data){
-    if(!data){
+  static import(data) {
+    if (!data) {
       throw new Error('No data to import');
-    }else if(diceUtils.isJson(data)){
+    } else if (diceUtils.isJson(data)) {
       // data is JSON format - parse and import
       return DiceRoll.import(JSON.parse(data));
-    }else if(diceUtils.isBase64(data)) {
+    } else if (diceUtils.isBase64(data)) {
       // data is base64 encoded - decode and import
       return DiceRoll.import(atob(data));
-    }else if(typeof data === 'object'){
+    } else if (typeof data === 'object') {
       // if data is a `DiceRoll` return it, otherwise build it
       return (data instanceof DiceRoll) ? data : new DiceRoll(data);
-    }else{
+    } else {
       throw new Error(`Unrecognised import format for data: ${data}`);
     }
   }
 
 
-  /*************************
+  /** ***********************
    * Public Properties
-   *************************/
+   ************************ */
 
   /**
    * The dice notation
    *
    * @returns {string}
    */
-  get notation(){
-    return this[_notation] || '';
+  get notation() {
+    return this[notationSymbol] || '';
   }
 
   /**
@@ -176,21 +180,23 @@ class DiceRoll{
    *
    * @returns {string}
    */
-  get output(){
+  get output() {
     let rollIndex = 0;
-    let output  = `${this.notation}: `;
+    let output = `${this.notation}: `;
 
-    if(this.hasRolls()){
-      output += this[_parsedNotation]
-        .map(item => {
+    if (this.hasRolls()) {
+      output += this[parsedNotationSymbol]
+        .map((item) => {
           if (item instanceof StandardDice) {
             const rollResults = this.rolls[rollIndex] || null;
 
             // increment the roll index
-            rollIndex++;
+            rollIndex += 1;
 
             return rollResults;
-          } else if (item instanceof RollGroup) {
+          }
+
+          if (item instanceof RollGroup) {
             // @todo handle roll groups
           }
 
@@ -203,7 +209,7 @@ class DiceRoll{
 
       // add the total
       output += ` = ${this.total}`;
-    }else{
+    } else {
       output += 'No dice rolled';
     }
 
@@ -215,8 +221,8 @@ class DiceRoll{
    *
    * @returns {RollResults[]}
    */
-  get rolls(){
-    return this[_rolls] || [];
+  get rolls() {
+    return this[rollsSymbol] || [];
   }
 
   /**
@@ -224,20 +230,20 @@ class DiceRoll{
    *
    * @returns {number}
    */
-  get total(){
+  get total() {
     // only calculate the total if it has not already been done
-    if(!this[_total] && this.hasRolls()){
-      this[_total] = this[_calculateTotal]();
+    if (!this[totalSymbol] && this.hasRolls()) {
+      this[totalSymbol] = this[calculateTotalSymbol]();
     }
 
     // return the total
-    return this[_total] || 0;
+    return this[totalSymbol] || 0;
   }
 
 
-  /*************************
+  /** ***********************
    * Public methods
-   *************************/
+   ************************ */
 
   /**
    * Exports the DiceRoll in the given format.
@@ -247,10 +253,10 @@ class DiceRoll{
    * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
    * @returns {string|null}
    */
-  export(format = exportFormats.JSON){
-    switch(format){
+  export(format = exportFormats.JSON) {
+    switch (format) {
       case exportFormats.BASE_64:
-        // JSON encode, then base64, otherwise it exports the string representation of the roll output
+        // JSON encode then base64, else it exports the string representation of the roll output
         return btoa(this.export(exportFormats.JSON));
       case exportFormats.JSON:
         return JSON.stringify(this);
@@ -266,8 +272,8 @@ class DiceRoll{
    *
    * @returns {boolean}
    */
-  hasRolls(){
-    return !!(this[_parsedNotation] && Array.isArray(this.rolls) && this.rolls.length);
+  hasRolls() {
+    return !!(this[parsedNotationSymbol] && Array.isArray(this.rolls) && this.rolls.length);
   }
 
   /**
@@ -278,23 +284,25 @@ class DiceRoll{
    *
    * @returns {Array}
    */
-  roll(){
+  roll() {
     // clear the roll log
-    this[_rolls] = [];
+    this[rollsSymbol] = [];
 
     // reset the cached total
-    this[_total] = 0;
+    this[totalSymbol] = 0;
 
     // saved the rolls to the log
-    this[_rolls] = this[_parsedNotation].map(item => {
+    this[rollsSymbol] = this[parsedNotationSymbol].map((item) => {
       if ((item instanceof StandardDice) || (item instanceof RollGroup)) {
         // roll the object and return the value
         return item.roll();
       }
+
+      return null;
     }).filter(Boolean);
 
     // return the rolls;
-    return this[_rolls];
+    return this[rollsSymbol];
   }
 
   /**
@@ -302,8 +310,10 @@ class DiceRoll{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {notation, output, rolls, total} = this;
+  toJSON() {
+    const {
+      notation, output, rolls, total,
+    } = this;
 
     return {
       notation,
@@ -320,27 +330,27 @@ class DiceRoll{
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return this.output;
   }
 
 
-  /*************************
+  /** ***********************
    * Private Methods
-   *************************/
+   ************************ */
 
   /**
    * Calculates the total roll value and returns it
    *
    * @returns {Number}
    */
-  [_calculateTotal](){
+  [calculateTotalSymbol]() {
     let formula = '';
     let rollIndex = 0;
 
     if (this.hasRolls()) {
       // loop through each roll and calculate the totals
-      this[_parsedNotation].forEach(item => {
+      this[parsedNotationSymbol].forEach((item) => {
         // @todo need to handle roll groups
         if (item instanceof StandardDice) {
           // @todo should roll results be stored on their relevant parsed object?
@@ -348,7 +358,7 @@ class DiceRoll{
           formula += this.rolls[rollIndex] ? this.rolls[rollIndex].value : 0;
 
           // increment the roll index and store the previous rolls / parsed die
-          rollIndex++;
+          rollIndex += 1;
         } else {
           formula += item;
         }

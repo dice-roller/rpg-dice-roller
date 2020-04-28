@@ -1,16 +1,16 @@
-import ComparisonModifier from "./ComparisonModifier.js";
-import ComparePoint from '../ComparePoint.js';
+import ComparisonModifier from './ComparisonModifier';
+import ComparePoint from '../ComparePoint';
 
-const _failureCP = Symbol('failure-cp');
+const failureCPSymbol = Symbol('failure-cp');
 
-class TargetModifier extends ComparisonModifier{
+class TargetModifier extends ComparisonModifier {
   /**
    *
    * @param {string} notation
    * @param {ComparePoint} successCP
    * @param {ComparePoint=} failureCP
    */
-  constructor(notation, successCP, failureCP){
+  constructor(notation, successCP, failureCP) {
     super(notation, successCP);
 
     // set the failure compare point
@@ -25,8 +25,8 @@ class TargetModifier extends ComparisonModifier{
    *
    * @returns {ComparePoint|null}
    */
-  get failureComparePoint(){
-    return this[_failureCP];
+  get failureComparePoint() {
+    return this[failureCPSymbol];
   }
 
   /**
@@ -34,12 +34,12 @@ class TargetModifier extends ComparisonModifier{
    *
    * @param comparePoint
    */
-  set failureComparePoint(comparePoint){
+  set failureComparePoint(comparePoint) {
     if (comparePoint && !(comparePoint instanceof ComparePoint)) {
       throw TypeError('failure comparePoint must be instance of ComparePoint or null');
     }
 
-    this[_failureCP] = comparePoint || null;
+    this[failureCPSymbol] = comparePoint || null;
   }
 
   /**
@@ -47,7 +47,7 @@ class TargetModifier extends ComparisonModifier{
    *
    * @returns {ComparePoint}
    */
-  get successComparePoint(){
+  get successComparePoint() {
     return this.comparePoint;
   }
 
@@ -56,7 +56,7 @@ class TargetModifier extends ComparisonModifier{
    *
    * @param value
    */
-  set successComparePoint(value){
+  set successComparePoint(value) {
     super.comparePoint = value;
   }
 
@@ -70,7 +70,15 @@ class TargetModifier extends ComparisonModifier{
    * @returns {number}
    */
   getStateValue(value) {
-    return this.isSuccess(value) ? 1 : (this.isFailure(value) ? -1 : 0);
+    if (this.isSuccess(value)) {
+      return 1;
+    }
+
+    if (this.isFailure(value)) {
+      return -1;
+    }
+
+    return 0;
   }
 
   /**
@@ -83,7 +91,7 @@ class TargetModifier extends ComparisonModifier{
    * @param value
    * @returns {boolean}
    */
-  isFailure(value){
+  isFailure(value) {
     return this.failureComparePoint ? this.failureComparePoint.isMatch(value) : false;
   }
 
@@ -94,7 +102,7 @@ class TargetModifier extends ComparisonModifier{
    * @param {number} value
    * @returns {boolean}
    */
-  isNeutral(value){
+  isNeutral(value) {
     return !this.isSuccess(value) && !this.isFailure(value);
   }
 
@@ -109,7 +117,7 @@ class TargetModifier extends ComparisonModifier{
    *
    * @returns {boolean}
    */
-  isSuccess(value){
+  isSuccess(value) {
     return this.isComparePoint(value);
   }
 
@@ -117,14 +125,15 @@ class TargetModifier extends ComparisonModifier{
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
+  run(results, _dice) {
+    /* eslint-disable no-param-reassign */
     // loop through each roll and see if it matches the target
     results.rolls
-      .map(roll => {
+      .map((roll) => {
         // add the modifier flag
         if (this.isSuccess(roll.value)) {
           roll.modifiers.push('target-success');
@@ -147,7 +156,7 @@ class TargetModifier extends ComparisonModifier{
    * @returns {{}}
    */
   toJSON() {
-    const {failureComparePoint, successComparePoint} = this;
+    const { failureComparePoint, successComparePoint } = this;
 
     // get the inherited object, but remove the comparePoint property
     const result = super.toJSON();
@@ -158,7 +167,7 @@ class TargetModifier extends ComparisonModifier{
       {
         failureComparePoint,
         successComparePoint,
-      }
+      },
     );
   }
 }

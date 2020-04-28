@@ -1,14 +1,14 @@
-import Modifier from "./Modifier.js";
+import Modifier from './Modifier';
 
-const _direction = Symbol('direction');
+const directionSymbol = Symbol('direction');
 
-class SortingModifier extends Modifier{
+class SortingModifier extends Modifier {
   /**
    *
    * @param {string} notation
    * @param {string} direction Either `a|d`
    */
-  constructor(notation, direction = 'a'){
+  constructor(notation, direction = 'a') {
     super(notation);
 
     this.direction = direction || 'a';
@@ -22,8 +22,8 @@ class SortingModifier extends Modifier{
    *
    * @returns {string}
    */
-  get direction(){
-    return this[_direction];
+  get direction() {
+    return this[directionSymbol];
   }
 
   /**
@@ -31,32 +31,34 @@ class SortingModifier extends Modifier{
    *
    * @param {string} value
    */
-  set direction(value){
+  set direction(value) {
     if ((value !== 'a') && (value !== 'd')) {
       throw new Error('Direction must be "a" (Ascending) or "d" (Descending)');
     }
 
-    this[_direction] = value;
+    this[directionSymbol] = value;
   }
 
   /**
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
-    results.rolls = results.rolls.sort((a, b) => {
+  run(results, _dice) {
+    const sortedResults = results;
+
+    sortedResults.rolls = results.rolls.sort((a, b) => {
       if (this.direction === 'd') {
-        return b.value - a.value
+        return b.value - a.value;
       }
 
-      return a.value - b.value
+      return a.value - b.value;
     });
 
-    return results;
+    return sortedResults;
   }
 
   /**
@@ -64,14 +66,14 @@ class SortingModifier extends Modifier{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {direction} = this;
+  toJSON() {
+    const { direction } = this;
 
     return Object.assign(
       super.toJSON(),
       {
         direction,
-      }
+      },
     );
   }
 }

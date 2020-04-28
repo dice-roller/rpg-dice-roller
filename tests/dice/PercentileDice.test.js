@@ -1,8 +1,8 @@
-import PercentileDice from '../../src/dice/PercentileDice.js';
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
-import Modifier from '../../src/modifiers/Modifier.js';
+import PercentileDice from '../../src/dice/PercentileDice';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResult from '../../src/results/RollResult';
+import RollResults from '../../src/results/RollResults';
+import Modifier from '../../src/modifiers/Modifier';
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
@@ -48,27 +48,27 @@ describe('PercentileDice', () => {
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      const die = new PercentileDice('4d%', 8);
+      let die = new PercentileDice('4d%', 8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        const die = new PercentileDice('4d%', 'foo');
+        die = new PercentileDice('4d%', 'foo');
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', false);
+        die = new PercentileDice('4d%', false);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', true);
+        die = new PercentileDice('4d%', true);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', []);
+        die = new PercentileDice('4d%', []);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', {qty: 4});
+        die = new PercentileDice('4d%', { qty: 4 });
       }).toThrow('qty must be a positive integer');
     });
 
@@ -80,15 +80,15 @@ describe('PercentileDice', () => {
       expect(die.qty).toBe(324);
 
       expect(() => {
-        const die = new PercentileDice('4d%', 0);
+        die = new PercentileDice('4d%', 0);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', -42);
+        die = new PercentileDice('4d%', -42);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new PercentileDice('4d%', -1);
+        die = new PercentileDice('4d%', -1);
       }).toThrow('qty must be a positive integer');
     });
   });
@@ -96,7 +96,7 @@ describe('PercentileDice', () => {
   describe('Modifiers', () => {
     test('setting modifiers in constructor calls setter', () => {
       const spy = jest.spyOn(PercentileDice.prototype, 'modifiers', 'set');
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
 
       new PercentileDice('4d%', 1, modifiers);
 
@@ -107,7 +107,7 @@ describe('PercentileDice', () => {
     });
 
     test('can set modifiers with Map', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
       const die = new PercentileDice('4d%', 1);
 
       die.modifiers = modifiers;
@@ -120,7 +120,7 @@ describe('PercentileDice', () => {
       const modifier = new Modifier('m');
       const die = new PercentileDice('4d%', 1);
 
-      die.modifiers = {foo: modifier};
+      die.modifiers = { foo: modifier };
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('foo')).toEqual(modifier);
@@ -146,12 +146,12 @@ describe('PercentileDice', () => {
       }).toThrow('modifiers should be a Map or an Object');
 
       expect(() => {
-        const modifiers = new Map(Object.entries({foo: 'bar'}));
+        const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new PercentileDice('4d%', 1, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
       expect(() => {
-        const modifiers = {foo: 'bar'};
+        const modifiers = { foo: 'bar' };
         new PercentileDice('4d%', 1, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
@@ -175,7 +175,9 @@ describe('PercentileDice', () => {
       // create the dice instance
       const die = new PercentileDice('4d%', 1);
 
-      die.modifiers = {mod1, mod2, mod3, mod4,};
+      die.modifiers = {
+        mod1, mod2, mod3, mod4,
+      };
 
       // get the modifier keys
       const modKeys = [...die.modifiers.keys()];

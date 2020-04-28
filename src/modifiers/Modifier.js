@@ -3,7 +3,7 @@ class Modifier {
    *
    * @param {string} notation
    */
-  constructor(notation){
+  constructor(notation) {
     if (!notation) {
       throw new Error('Notation is required');
     }
@@ -20,29 +20,31 @@ class Modifier {
    *
    * @returns {*}
    */
-  get name(){
+  get name() {
     return this.constructor.name;
   }
 
+  /* eslint-disable class-methods-use-this */
   /**
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
+  run(results, _dice) {
     return results;
   }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * Returns an object for JSON serialising
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {notation, name} = this;
+  toJSON() {
+    const { notation, name } = this;
 
     return {
       name,
@@ -56,7 +58,7 @@ class Modifier {
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return this.notation;
   }
 }

@@ -11,10 +11,42 @@
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
+    "ignorePatterns": [
+        "/src/parser/grammars/grammar.js"
+    ],
+    "overrides": [
+        {
+            "files": ["tests/*.js", "tests/**/*.js"],
+            "globals": {
+                "afterEach": "readonly",
+                "beforeEach": "readonly",
+                "describe": "readonly",
+                "expect": "readonly",
+                "jest": "readonly",
+                "spy": "readonly",
+                "test": "readonly"
+            },
+          "rules": {
+              "no-new": "off"
+          }
+        }
+    ],
     "parserOptions": {
         "ecmaVersion": 2018,
         "sourceType": "module"
     },
     "rules": {
+        "no-plusplus": [
+            "error",
+            {
+                "allowForLoopAfterthoughts": true
+            }
+        ],
+        "no-unused-vars": [
+            "error",
+            {
+                "argsIgnorePattern": "^_"
+            }
+        ]
     }
 }

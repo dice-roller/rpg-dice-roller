@@ -1,4 +1,4 @@
-import ComparePoint from '../src/ComparePoint.js';
+import ComparePoint from '../src/ComparePoint';
 
 describe('ComparePoint', () => {
   describe('Initialisation', () => {
@@ -66,7 +66,7 @@ describe('ComparePoint', () => {
       expect(ComparePoint.isValidOperator([])).toBe(false);
       expect(ComparePoint.isValidOperator(['='])).toBe(false);
       expect(ComparePoint.isValidOperator({})).toBe(false);
-      expect(ComparePoint.isValidOperator({operator: '='})).toBe(false);
+      expect(ComparePoint.isValidOperator({ operator: '=' })).toBe(false);
       expect(ComparePoint.isValidOperator('==')).toBe(false);
       expect(ComparePoint.isValidOperator('*')).toBe(false);
       expect(ComparePoint.isValidOperator('4')).toBe(false);
@@ -118,20 +118,20 @@ describe('ComparePoint', () => {
       }).toThrow(`operator "${[]}" is not valid`);
 
       expect(() => {
-        new ComparePoint({operator: '='}, 2);
-      }).toThrow(`operator "${{operator: '='}}" is not valid`);
+        new ComparePoint({ operator: '=' }, 2);
+      }).toThrow(`operator "${{ operator: '=' }}" is not valid`);
 
       expect(() => {
         new ComparePoint('==', 2);
-      }).toThrow(`operator "==" is not valid`);
+      }).toThrow('operator "==" is not valid');
 
       expect(() => {
         new ComparePoint('*', 2);
-      }).toThrow(`operator "*" is not valid`);
+      }).toThrow('operator "*" is not valid');
 
       expect(() => {
         new ComparePoint(4, 2);
-      }).toThrow(`operator "4" is not valid`);
+      }).toThrow('operator "4" is not valid');
 
       expect(spy).toHaveBeenCalledTimes(5);
       // remove the spy
@@ -150,15 +150,15 @@ describe('ComparePoint', () => {
 
       expect(() => {
         new ComparePoint('=', [4]);
-      }).toThrow(`value must be numeric`);
+      }).toThrow('value must be numeric');
 
       expect(() => {
         new ComparePoint('=', 'foo');
-      }).toThrow(`value must be numeric`);
+      }).toThrow('value must be numeric');
 
       expect(() => {
         new ComparePoint('=', true);
-      }).toThrow(`value must be numeric`);
+      }).toThrow('value must be numeric');
     });
 
     test('value can be negative', () => {

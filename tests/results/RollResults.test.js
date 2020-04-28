@@ -1,8 +1,9 @@
-import RollResults from '../../src/results/RollResults.js';
-import RollResult from '../../src/results/RollResult.js';
+import RollResults from '../../src/results/RollResults';
+import RollResult from '../../src/results/RollResult';
 
 describe('RollResults', () => {
-  let rolls, results;
+  let rolls; let
+    results;
 
   beforeEach(() => {
     rolls = [
@@ -22,7 +23,7 @@ describe('RollResults', () => {
       expect(results).toBeInstanceOf(RollResults);
       expect(results).toEqual(expect.objectContaining({
         length: 6,
-        rolls: rolls,
+        rolls,
         value: 31,
         toJSON: expect.any(Function),
         toString: expect.any(Function),
@@ -49,7 +50,7 @@ describe('RollResults', () => {
 
     test('must be array', () => {
       const errorMsg = 'Rolls must be an array';
-      const results = new RollResults();
+      results = new RollResults();
 
       expect(() => {
         results.rolls = 'Foo';
@@ -85,7 +86,7 @@ describe('RollResults', () => {
     });
 
     test('accepts list of RollResult objects', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       results.rolls = rolls;
 
@@ -93,7 +94,7 @@ describe('RollResults', () => {
     });
 
     test('casts numbers to RollResult objects', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       results.rolls = [5, 2, 0, 6];
 
@@ -106,7 +107,7 @@ describe('RollResults', () => {
     });
 
     test('throws error on invalid roll values', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       expect(() => {
         results.rolls = [34, 'foo'];
@@ -125,7 +126,7 @@ describe('RollResults', () => {
 
   describe('length', () => {
     test('length returns number of rolls', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       expect(results.length).toBe(0);
 
@@ -140,7 +141,7 @@ describe('RollResults', () => {
     });
 
     test('cannot set length', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       expect(() => {
         results.length = 3;
@@ -150,7 +151,7 @@ describe('RollResults', () => {
 
   describe('value', () => {
     test('is total of rolls', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       expect(results.value).toEqual(0);
 
@@ -162,7 +163,7 @@ describe('RollResults', () => {
     });
 
     test('ignores rolls flagged as `useInTotal = false`', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       // flag a roll as ignored
       rolls[0].useInTotal = false;
@@ -173,7 +174,7 @@ describe('RollResults', () => {
     });
 
     test('uses RollResult calculationValue', () => {
-      const results = new RollResults();
+      results = new RollResults();
 
       // store the current value as the calculation value
       rolls[0].calculationValue = rolls[0].value;

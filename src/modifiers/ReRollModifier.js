@@ -1,16 +1,15 @@
-import ComparisonModifier from "./ComparisonModifier.js";
-import ComparePoint from '../ComparePoint.js';
+import ComparisonModifier from './ComparisonModifier';
 
-const _once = Symbol('once');
+const onceSymbol = Symbol('once');
 
-class ReRollModifier extends ComparisonModifier{
+class ReRollModifier extends ComparisonModifier {
   /**
    *
    * @param {string} notation
    * @param {boolean} once
    * @param {ComparePoint} comparePoint
    */
-  constructor(notation, once = false, comparePoint = null){
+  constructor(notation, once = false, comparePoint = null) {
     super(notation, comparePoint);
 
     this.once = !!once;
@@ -24,8 +23,8 @@ class ReRollModifier extends ComparisonModifier{
    *
    * @returns {boolean}
    */
-  get once(){
-    return !!this[_once];
+  get once() {
+    return !!this[onceSymbol];
   }
 
   /**
@@ -33,33 +32,34 @@ class ReRollModifier extends ComparisonModifier{
    *
    * @param value
    */
-  set once(value){
-    this[_once] = !!value;
+  set once(value) {
+    this[onceSymbol] = !!value;
   }
 
   /**
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
+  run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
-    if (dice.min === dice.max) {
-      throw new Error(`Die must have more than 1 side to re-roll: ${dice}`);
+    if (_dice.min === _dice.max) {
+      throw new Error(`Die must have more than 1 side to re-roll: ${_dice}`);
     }
 
     results.rolls
-      .map(roll => {
+      .map((roll) => {
+        /* eslint-disable no-param-reassign */
         let hasReRolled = false;
 
-        // if the die roll matches the compare point we re-roll
-        // unless we're only rolling once, we should re-roll if any consecutive rolls also match the CP
+        // if the die roll matches the compare point we re-roll. Unless we're only rolling once,
+        // we should re-roll if any consecutive rolls also match the CP
         while (this.isComparePoint(roll.value) && (!this.once || !hasReRolled)) {
           // roll the dice
-          const rollResult = dice.rollOnce();
+          const rollResult = _dice.rollOnce();
 
           // update the roll value (Unlike exploding, the original value if not kept)
           roll.value = rollResult.value;
@@ -84,14 +84,14 @@ class ReRollModifier extends ComparisonModifier{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {once} = this;
+  toJSON() {
+    const { once } = this;
 
     return Object.assign(
       super.toJSON(),
       {
-        once
-      }
+        once,
+      },
     );
   }
 }

@@ -1,6 +1,6 @@
-import DiceRoller from '../src/DiceRoller.js';
-import DiceRoll from '../src/DiceRoll.js';
-import {exportFormats} from "../src";
+import DiceRoller from '../src/DiceRoller';
+import DiceRoll from '../src/DiceRoll';
+import { exportFormats } from '../src';
 
 describe('DiceRoller', () => {
   let roller;
@@ -211,7 +211,7 @@ describe('DiceRoller', () => {
 
     test('returns semi-colon separated list of rolls', () => {
       const rolls = roller.roll('4d10*2d4', '2d10', '4d6');
-      const expectedOutput = rolls.map(roll => roll.toString()).join('; ');
+      const expectedOutput = rolls.map((roll) => roll.toString()).join('; ');
 
       expect(roller.output).toEqual(expectedOutput);
     });
@@ -311,7 +311,8 @@ describe('DiceRoller', () => {
     });
 
     describe('protoype', () => {
-      let importRoller, notations;
+      let importRoller; let
+        notations;
 
       beforeEach(() => {
         notations = [
@@ -351,7 +352,10 @@ describe('DiceRoller', () => {
         const log = roller.import(data);
 
         expect(log).toBeInstanceOf(Array);
-        expect(JSON.parse(JSON.stringify(log))).toEqual(JSON.parse(JSON.stringify(importRoller.log)));
+
+        const logRaw = JSON.parse(JSON.stringify(log));
+        const importRaw = JSON.parse(JSON.stringify(importRoller.log));
+        expect(logRaw).toEqual(importRaw);
       });
 
       test('invalid format throws error', () => {

@@ -1,8 +1,8 @@
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import FudgeDice from '../../src/dice/FudgeDice.js';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResult from '../../src/results/RollResult';
+import RollResults from '../../src/results/RollResults';
+import Modifier from '../../src/modifiers/Modifier';
+import FudgeDice from '../../src/dice/FudgeDice';
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {
@@ -68,13 +68,13 @@ describe('FudgeDice', () => {
     });
 
     test('can set sides to 2', () => {
-      let die = new FudgeDice('4dF', 2);
+      const die = new FudgeDice('4dF', 2);
       expect(die.sides).toEqual('F.2');
       expect(die.nonBlanks).toBe(2);
     });
 
     test('can set sides to 1', () => {
-      let die = new FudgeDice('4dF', 1);
+      const die = new FudgeDice('4dF', 1);
       expect(die.sides).toEqual('F.1');
       expect(die.nonBlanks).toBe(1);
     });
@@ -101,7 +101,7 @@ describe('FudgeDice', () => {
       }).toThrow('nonBlanks must be 1 or 2');
 
       expect(() => {
-        new FudgeDice('4dF', {nonBlanks: 2});
+        new FudgeDice('4dF', { nonBlanks: 2 });
       }).toThrow('nonBlanks must be 1 or 2');
 
       expect(() => {
@@ -112,27 +112,27 @@ describe('FudgeDice', () => {
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      const die = new FudgeDice('4dF', null, 8);
+      let die = new FudgeDice('4dF', null, 8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, 'foo');
+        die = new FudgeDice('4dF', null, 'foo');
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, false);
+        die = new FudgeDice('4dF', null, false);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, true);
+        die = new FudgeDice('4dF', null, true);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, []);
+        die = new FudgeDice('4dF', null, []);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, {qty: 4});
+        die = new FudgeDice('4dF', null, { qty: 4 });
       }).toThrow('qty must be a positive integer');
     });
 
@@ -144,15 +144,15 @@ describe('FudgeDice', () => {
       expect(die.qty).toBe(324);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, 0);
+        die = new FudgeDice('4dF', null, 0);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, -42);
+        die = new FudgeDice('4dF', null, -42);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, -1);
+        die = new FudgeDice('4dF', null, -1);
       }).toThrow('qty must be a positive integer');
     });
   });
@@ -160,7 +160,7 @@ describe('FudgeDice', () => {
   describe('Modifiers', () => {
     test('setting modifiers in constructor calls setter', () => {
       const spy = jest.spyOn(FudgeDice.prototype, 'modifiers', 'set');
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
 
       new FudgeDice('4dF', null, 1, modifiers);
 
@@ -171,7 +171,7 @@ describe('FudgeDice', () => {
     });
 
     test('can set modifiers with Map', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
       const die = new FudgeDice('4dF', null, 1);
 
       die.modifiers = modifiers;
@@ -184,7 +184,7 @@ describe('FudgeDice', () => {
       const modifier = new Modifier('m');
       const die = new FudgeDice('4dF', null, 1);
 
-      die.modifiers = {foo: modifier};
+      die.modifiers = { foo: modifier };
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('foo')).toEqual(modifier);
@@ -210,12 +210,12 @@ describe('FudgeDice', () => {
       }).toThrow('modifiers should be a Map or an Object');
 
       expect(() => {
-        const modifiers = new Map(Object.entries({foo: 'bar'}));
+        const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new FudgeDice('4dF', null, 1, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
       expect(() => {
-        const modifiers = {foo: 'bar'};
+        const modifiers = { foo: 'bar' };
         new FudgeDice('4dF', null, 1, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
@@ -239,7 +239,9 @@ describe('FudgeDice', () => {
       // create the dice instance
       const die = new FudgeDice('4dF', null, 4);
 
-      die.modifiers = {mod1, mod2, mod3, mod4,};
+      die.modifiers = {
+        mod1, mod2, mod3, mod4,
+      };
 
       // get the modifier keys
       const modKeys = [...die.modifiers.keys()];

@@ -1,26 +1,25 @@
-import StandardDice from "./StandardDice.js";
+import StandardDice from './StandardDice';
 
-class PercentileDice extends StandardDice{
-  constructor(notation, qty = 1 , modifiers = null){
-    super(notation, 100, qty, modifiers);
-  }
-
+class PercentileDice extends StandardDice {
   /**
-   * The maximum value that can be rolled on the die
-   *
-   * @returns {number}
+   * @param {string} notation
+   * @param {number=} qty
+   * @param {Map|{}|Map[]|null=} modifiers
+   * @param {boolean=} sidesAsNumber whether to show the sides as a number or the percent symbol
    */
-  get max(){
-    return 100;
+  constructor(notation, qty = 1, modifiers = null, sidesAsNumber = false) {
+    super(notation, 100, qty, modifiers);
+
+    this.sidesAsNumber = !!sidesAsNumber;
   }
 
   /**
    * The number of sides the dice has
    *
-   * @returns {string}s
+   * @returns {string}
    */
-  get sides(){
-    return '%';
+  get sides() {
+    return this.sidesAsNumber ? super.sides : '%';
   }
 }
 

@@ -1,14 +1,14 @@
-import Parser from '../../src/parser/Parser.js';
-import {FudgeDice, PercentileDice, StandardDice} from '../../src/Dice.js';
-import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier.js';
-import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier.js';
-import DropModifier from '../../src/modifiers/DropModifier.js';
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier.js';
-import ReRollModifier from '../../src/modifiers/ReRollModifier.js';
-import KeepModifier from '../../src/modifiers/KeepModifier.js';
-import {SyntaxError} from '../../src/parser/grammars/grammar.js';
-import SortingModifier from '../../src/modifiers/SortingModifier.js';
-import TargetModifier from '../../src/modifiers/TargetModifier.js';
+import Parser from '../../src/parser/Parser';
+import { FudgeDice, PercentileDice, StandardDice } from '../../src/Dice';
+import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier';
+import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier';
+import DropModifier from '../../src/modifiers/DropModifier';
+import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
+import ReRollModifier from '../../src/modifiers/ReRollModifier';
+import KeepModifier from '../../src/modifiers/KeepModifier';
+import parser from '../../src/parser/grammars/grammar';
+import SortingModifier from '../../src/modifiers/SortingModifier';
+import TargetModifier from '../../src/modifiers/TargetModifier';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -16,7 +16,7 @@ describe('Parser', () => {
       expect(Parser).toEqual(expect.objectContaining({
         parse: expect.any(Function),
       }));
-    })
+    });
   });
 
   describe('notation', () => {
@@ -40,7 +40,7 @@ describe('Parser', () => {
 
     test('notation must be string', () => {
       expect(() => {
-        Parser.parse({notation: '2d10'});
+        Parser.parse({ notation: '2d10' });
       }).toThrow('Notation must be a string');
 
       expect(() => {
@@ -160,43 +160,43 @@ describe('Parser', () => {
       test('throws error for invalid Fudge die sides', () => {
         expect(() => {
           Parser.parse('dF.3');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('dF.4');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('dF.0');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('dF.67');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('dF.foo');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
       });
 
       test('sides cannot start with 0', () => {
         expect(() => {
           Parser.parse('d0');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('d01');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
       });
 
       test('qty cannot start with 0', () => {
         expect(() => {
           Parser.parse('0d6');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
 
         expect(() => {
           Parser.parse('01d6');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
       });
     });
 
@@ -253,7 +253,7 @@ describe('Parser', () => {
         test('throws error if no compare point', () => {
           expect(() => {
             Parser.parse('d6cf');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
 
@@ -309,7 +309,7 @@ describe('Parser', () => {
         test('throws error if no compare point', () => {
           expect(() => {
             Parser.parse('d6cs');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
 
@@ -405,11 +405,11 @@ describe('Parser', () => {
         test('throws error without qty', () => {
           expect(() => {
             Parser.parse('12dF.1d');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
 
           expect(() => {
             Parser.parse('6d6dl');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
 
@@ -433,7 +433,7 @@ describe('Parser', () => {
             notation: '!',
             comparePoint: expect.objectContaining({
               operator: '=',
-              value: 6
+              value: 6,
             }),
             compound: false,
             penetrate: false,
@@ -459,7 +459,7 @@ describe('Parser', () => {
             notation: '!!',
             comparePoint: expect.objectContaining({
               operator: '=',
-              value: 7
+              value: 7,
             }),
             compound: true,
             penetrate: false,
@@ -485,7 +485,7 @@ describe('Parser', () => {
             notation: '!p',
             comparePoint: expect.objectContaining({
               operator: '=',
-              value: 100
+              value: 100,
             }),
             compound: false,
             penetrate: true,
@@ -511,7 +511,7 @@ describe('Parser', () => {
             notation: '!!p',
             comparePoint: expect.objectContaining({
               operator: '=',
-              value: 1
+              value: 1,
             }),
             compound: true,
             penetrate: true,
@@ -994,12 +994,12 @@ describe('Parser', () => {
           // can't have failure before success
           expect(() => {
             Parser.parse('2d6f<=3>4');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
 
           // can't have failure without success
           expect(() => {
             Parser.parse('4d7f!=2');
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
 
@@ -1036,7 +1036,7 @@ describe('Parser', () => {
             notation: '!>=9',
             comparePoint: expect.objectContaining({
               operator: '>=',
-              value: 9
+              value: 9,
             }),
             compound: false,
             penetrate: false,
@@ -1076,7 +1076,7 @@ describe('Parser', () => {
             notation: '!>=9',
             comparePoint: expect.objectContaining({
               operator: '>=',
-              value: 9
+              value: 9,
             }),
             compound: false,
             penetrate: false,
@@ -1202,7 +1202,7 @@ describe('Parser', () => {
 
     describe('Functions', () => {
       // loop through and test all the single argument functions
-      ['abs', 'ceil', 'cos', 'exp', 'floor', 'log', 'round', 'sign', 'sin', 'sqrt', 'tan'].forEach(name => {
+      ['abs', 'ceil', 'cos', 'exp', 'floor', 'log', 'round', 'sign', 'sin', 'sqrt', 'tan'].forEach((name) => {
         test(`can parse \`${name}(4d6/3)\``, () => {
           const parsed = Parser.parse(`${name}(4d6/3)`);
 
@@ -1226,12 +1226,12 @@ describe('Parser', () => {
         test('passing multiple arguments throws error', () => {
           expect(() => {
             Parser.parse(`${name}(4d6/3, 45)`);
-        }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
 
       // loop through all the double argument functions
-      ['pow', 'max', 'min'].forEach(name => {
+      ['pow', 'max', 'min'].forEach((name) => {
         test(`can parse \`${name}(4d6, 7)\``, () => {
           const parsed = Parser.parse(`${name}(4d6, 7)`);
 
@@ -1252,10 +1252,10 @@ describe('Parser', () => {
           expect(parsed[4]).toEqual(')');
         });
 
-        test('passing single argument throws error', () => {-
+        test('passing single argument throws error', () => {
           expect(() => {
             Parser.parse(`${name}(4d6/3)`);
-          }).toThrow(SyntaxError);
+          }).toThrow(parser.SyntaxError);
         });
       });
     });
@@ -1408,7 +1408,7 @@ describe('Parser', () => {
         expect(parsed[12]).toEqual(')');
       });
 
-      test('can parse `2*floor(4d10/3.4)`', ( )=> {
+      test('can parse `2*floor(4d10/3.4)`', () => {
         const parsed = Parser.parse('2*floor(4d10/3.4)');
 
         expect(parsed).toBeInstanceOf(Array);
@@ -1576,13 +1576,13 @@ describe('Parser', () => {
       test('throws error when using negative values for die quantity', () => {
         expect(() => {
           Parser.parse('-4d6');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
       });
 
       test('throws error when using negative values for die sides', () => {
         expect(() => {
           Parser.parse('4d-6');
-        }).toThrow(SyntaxError);
+        }).toThrow(parser.SyntaxError);
       });
     });
   });

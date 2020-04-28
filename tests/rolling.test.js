@@ -1,8 +1,8 @@
-import DiceRoller from '../src/DiceRoller.js';
-import DiceRoll from '../src/DiceRoll.js';
-import RollResults from '../src/results/RollResults.js';
-import StandardDice from '../src/dice/StandardDice.js';
-import RollResult from '../src/results/RollResult.js';
+import DiceRoller from '../src/DiceRoller';
+import DiceRoll from '../src/DiceRoll';
+import RollResults from '../src/results/RollResults';
+import StandardDice from '../src/dice/StandardDice';
+import RollResult from '../src/results/RollResult';
 
 describe('Rolling', () => {
   let roller;
@@ -14,7 +14,7 @@ describe('Rolling', () => {
   test('roll `2d7 + (5d4 * 2)`', () => {
     const rolls = [
       new RollResults([5, 2]),
-      new RollResults([4, 2, 1, 3, 3])
+      new RollResults([4, 2, 1, 3, 3]),
     ];
     const spy = jest.spyOn(StandardDice.prototype, 'roll')
       .mockImplementationOnce(() => rolls[0])
@@ -24,7 +24,7 @@ describe('Rolling', () => {
     expect(roll).toBeInstanceOf(DiceRoll);
     expect(roll).toEqual(expect.objectContaining({
       notation: '2d7 + (5d4 * 2)',
-      rolls: rolls,
+      rolls,
       output: '2d7 + (5d4 * 2): [5, 2]+([4, 2, 1, 3, 3]*2) = 33',
       total: 33,
     }));
@@ -73,8 +73,8 @@ describe('Rolling', () => {
     const rollsFirst = new RollResults([5]);
     const rollsSecond = new RollResults([2]);
     const spy = jest.spyOn(StandardDice.prototype, 'roll')
-    .mockImplementationOnce(() => rollsFirst)
-    .mockImplementationOnce(() => rollsSecond);
+      .mockImplementationOnce(() => rollsFirst)
+      .mockImplementationOnce(() => rollsSecond);
     const roll = roller.roll('max(2 * (d7/2), 1d7)');
 
     expect(roll).toBeInstanceOf(DiceRoll);
@@ -84,14 +84,17 @@ describe('Rolling', () => {
       output: 'max(2 * (d7/2), 1d7): max(2*([5]/2),[2]) = 5',
       total: 5,
     }));
+
+    // remove the spy
+    spy.mockRestore();
   });
 
   test('roll `min(2 * (d7/2), 1d7)`', () => {
     const rollsFirst = new RollResults([5]);
     const rollsSecond = new RollResults([2]);
     const spy = jest.spyOn(StandardDice.prototype, 'roll')
-    .mockImplementationOnce(() => rollsFirst)
-    .mockImplementationOnce(() => rollsSecond);
+      .mockImplementationOnce(() => rollsFirst)
+      .mockImplementationOnce(() => rollsSecond);
     const roll = roller.roll('min(2 * (d7/2), 1d7)');
 
     expect(roll).toBeInstanceOf(DiceRoll);
@@ -101,6 +104,9 @@ describe('Rolling', () => {
       output: 'min(2 * (d7/2), 1d7): min(2*([5]/2),[2]) = 2',
       total: 2,
     }));
+
+    // remove the spy
+    spy.mockRestore();
   });
 
   test('roll `3d6cs>3cf<3`', () => {

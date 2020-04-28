@@ -1,7 +1,7 @@
-import DropModifier from '../../src/modifiers/DropModifier.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import DropModifier from '../../src/modifiers/DropModifier';
+import Modifier from '../../src/modifiers/Modifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
 
 describe('DropModifier', () => {
   describe('Initialisation', () => {
@@ -103,7 +103,7 @@ describe('DropModifier', () => {
       }).toThrow('End must be "h" or "l"');
 
       expect(() => {
-        mod.end = {end: 'l'};
+        mod.end = { end: 'l' };
       }).toThrow('End must be "h" or "l"');
     });
   });
@@ -130,7 +130,7 @@ describe('DropModifier', () => {
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        mod.qty = {qty: 4};
+        mod.qty = { qty: 4 };
       }).toThrow('qty must be a positive integer');
     });
 
@@ -179,7 +179,8 @@ describe('DropModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
@@ -223,7 +224,7 @@ describe('DropModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -271,7 +272,7 @@ describe('DropModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -295,7 +296,7 @@ describe('DropModifier', () => {
           calculationValue: 8,
           initialValue: 8,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 8,
         }),
@@ -418,7 +419,7 @@ describe('DropModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
