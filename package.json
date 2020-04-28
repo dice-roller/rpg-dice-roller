@@ -28,6 +28,7 @@
     "@babel/core": "^7.9.0",
     "@babel/preset-env": "^7.9.5",
     "abab": "^2.0.3",
+    "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
     "jest": "^24.9.0",
     "pegjs": "^0.10.0",
@@ -58,6 +59,8 @@
     "pretest": "npm run prebuild",
     "test": "npm run lint && jest /tests/",
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
+    "test:coverage": "jest /tests/ --coverage",
+    "test:coveralls": "jest /tests/ --coverage && coveralls < coverage/lcov.info",
     "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
   },
   "type": "module"
