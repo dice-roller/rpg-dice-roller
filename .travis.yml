@@ -6,3 +6,12 @@ branches:
     - master
     - develop
 sudo: required
+script:
+  - npm run pretest
+  - npm run lint
+  - npm run test:coveralls
+env:
+  global:
+    - COVERALLS_PARALLEL=true
+notifications:
+  webhooks: https://coveralls.io/webhook

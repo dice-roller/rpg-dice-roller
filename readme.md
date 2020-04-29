@@ -3,6 +3,7 @@
 A JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.
 
 [![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
+[![Coverage Status](https://coveralls.io/repos/github/GreenImp/rpg-dice-roller/badge.svg?branch=develop)](https://coveralls.io/github/GreenImp/rpg-dice-roller?branch=develop)
 
 
 ## Demo
@@ -164,7 +165,7 @@ d6   // roll a 6 sided dice
 
 #### Percentile dice (`d%`)
 
-Percentile dice roll a whole number between `0-100`, and are specified with the format `d%`.
+Percentile dice roll a whole number between `1-100`, and are specified with the format `d%`.
 This is a shorthand to a standard die with 100 sides; `d100`
 
 ```
