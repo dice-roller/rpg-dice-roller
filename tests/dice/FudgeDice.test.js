@@ -203,11 +203,11 @@ describe('FudgeDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new FudgeDice('4dF', null, 1, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         new FudgeDice('4dF', null, 1, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         const modifiers = new Map(Object.entries({foo: 'bar'}));

@@ -62,7 +62,7 @@ class StandardDice{
     } else if (typeof value === 'object') {
       modifiers = new Map(Object.entries(value));
     } else {
-      throw new Error('modifiers should be a Map or an Object');
+      throw new Error('modifiers should be a Map, an Array, or an Object');
     }
 
     if (modifiers.size && [...modifiers.entries()].some(entry => !(entry[1] instanceof Modifier))) {

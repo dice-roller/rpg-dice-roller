@@ -154,11 +154,11 @@ describe('StandardDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new StandardDice('4d6', 6, 8, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         new StandardDice('4d6', 6, 8, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         const modifiers = new Map(Object.entries({foo: 'bar'}));

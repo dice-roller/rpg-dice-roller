@@ -139,11 +139,11 @@ describe('PercentileDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new PercentileDice('4d%', 1, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         new PercentileDice('4d%', 1, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow('modifiers should be a Map, an Array, or an Object');
 
       expect(() => {
         const modifiers = new Map(Object.entries({foo: 'bar'}));

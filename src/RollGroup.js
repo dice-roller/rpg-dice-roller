@@ -21,7 +21,7 @@ class RollGroup{
     }
 
     this[_notation] = notation;
-    this.expressions = expressions || [];
+    this.expressions = expressions;
     this.modifiers = modifiers || [];
   }
 
@@ -40,10 +40,19 @@ class RollGroup{
    * @param {[]} expressions
    */
   set expressions(expressions){
-    console.log(expressions);
     if (!expressions || !Array.isArray(expressions)) {
       throw new Error(`Expressions must be an array: ${expressions}`);
+    } else if (expressions.length == 0) {
+      throw new Error(`Expressions cannot be empty: ${expressions}`);
     }
+
+    expressions.forEach((e) => {
+      if (!e || !Array.isArray(e)) {
+        throw new Error(`Expressions must be an array of arrays: ${expressions}`);
+      } else if (e.length == 0) {
+        throw new Error(`Sub expressions cannot be empty: ${expressions}`);
+      }
+    });
 
     // loop through each expression and add it to the list
     this[_expressions] = [];
@@ -77,7 +86,7 @@ class RollGroup{
     } else if (typeof value === 'object') {
       modifiers = new Map(Object.entries(value));
     } else {
-      throw new Error('modifiers should be a Map or an Object');
+      throw new Error('modifiers should be a Map, an Array, or an Object');
     }
 
     if (modifiers.size && [...modifiers.entries()].some(entry => !(entry[1] instanceof Modifier))) {
@@ -124,6 +133,10 @@ class RollGroup{
       notation,
       type: 'group',
     };
+  }
+
+  toString(){
+    return this.notation;
   }
 }
 
