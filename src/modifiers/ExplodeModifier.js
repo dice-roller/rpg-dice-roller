@@ -1,12 +1,10 @@
-import ComparisonModifier from "./ComparisonModifier.js";
-import ComparePoint from '../ComparePoint.js';
-import {diceUtils} from "../utilities/utils.js";
-import RollResult from "../results/RollResult.js";
+import ComparisonModifier from './ComparisonModifier';
+import { diceUtils } from '../utilities/utils';
 
-const _compound = Symbol('compound');
-const _penetrate = Symbol('penetrate');
+const compoundSymbol = Symbol('compound');
+const penetrateSymbol = Symbol('penetrate');
 
-class ExplodeModifier extends ComparisonModifier{
+class ExplodeModifier extends ComparisonModifier {
   /**
    *
    * @param {string} notation
@@ -14,11 +12,11 @@ class ExplodeModifier extends ComparisonModifier{
    * @param {boolean=} compound Defaults to false
    * @param {boolean=} penetrate Defaults to false
    */
-  constructor(notation, comparePoint = null, compound = false, penetrate = false){
+  constructor(notation, comparePoint = null, compound = false, penetrate = false) {
     super(notation, comparePoint);
 
-    this[_compound] = !!compound;
-    this[_penetrate] = !!penetrate;
+    this[compoundSymbol] = !!compound;
+    this[penetrateSymbol] = !!penetrate;
 
     // set the modifier's sort order
     this.order = 1;
@@ -29,8 +27,8 @@ class ExplodeModifier extends ComparisonModifier{
    *
    * @type {boolean}
    */
-  get compound(){
-    return this[_compound];
+  get compound() {
+    return this[compoundSymbol];
   }
 
   /**
@@ -38,33 +36,36 @@ class ExplodeModifier extends ComparisonModifier{
    *
    * @returns {boolean}
    */
-  get penetrate(){
-    return this[_penetrate];
+  get penetrate() {
+    return this[penetrateSymbol];
   }
 
   /**
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
+  run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
-    if (dice.min === dice.max) {
-      throw new Error(`Die must have more than 1 side to explode: ${dice}`);
+    if (_dice.min === _dice.max) {
+      throw new Error(`Die must have more than 1 side to explode: ${_dice}`);
     }
 
-    results.rolls = results.rolls
-      .map(roll => {
+    const parsedResults = results;
+
+    parsedResults.rolls = results.rolls
+      .map((roll) => {
+        /* eslint-disable no-param-reassign */
         const subRolls = [roll];
         let compareValue = roll.value;
 
         while (this.isComparePoint(compareValue)) {
-          const prevRoll = subRolls[subRolls.length-1];
+          const prevRoll = subRolls[subRolls.length - 1];
           // roll the dice
-          const rollResult = dice.rollOnce();
+          const rollResult = _dice.rollOnce();
 
           // update the value to check against
           compareValue = rollResult.value;
@@ -75,7 +76,7 @@ class ExplodeModifier extends ComparisonModifier{
           // add the penetrate modifier flag and decrement the value
           if (this.penetrate) {
             prevRoll.modifiers.push('penetrate');
-            rollResult.value--;
+            rollResult.value -= 1;
           }
 
           // add the rolls to the list
@@ -102,7 +103,7 @@ class ExplodeModifier extends ComparisonModifier{
       })
       .flat();
 
-    return results;
+    return parsedResults;
   }
 
   /**
@@ -110,15 +111,15 @@ class ExplodeModifier extends ComparisonModifier{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {compound, penetrate} = this;
+  toJSON() {
+    const { compound, penetrate } = this;
 
     return Object.assign(
       super.toJSON(),
       {
         compound,
         penetrate,
-      }
+      },
     );
   }
 }

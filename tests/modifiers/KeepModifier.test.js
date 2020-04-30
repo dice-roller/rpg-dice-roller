@@ -1,7 +1,7 @@
-import KeepModifier from '../../src/modifiers/KeepModifier.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import KeepModifier from '../../src/modifiers/KeepModifier';
+import Modifier from '../../src/modifiers/Modifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
 
 describe('KeepModifier', () => {
   describe('Initialisation', () => {
@@ -103,7 +103,7 @@ describe('KeepModifier', () => {
       }).toThrow('End must be "h" or "l"');
 
       expect(() => {
-        mod.end = {end: 'h'};
+        mod.end = { end: 'h' };
       }).toThrow('End must be "h" or "l"');
     });
   });
@@ -130,7 +130,7 @@ describe('KeepModifier', () => {
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        mod.qty = {qty: 4};
+        mod.qty = { qty: 4 };
       }).toThrow('qty must be a positive integer');
     });
 
@@ -179,7 +179,8 @@ describe('KeepModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
@@ -207,7 +208,7 @@ describe('KeepModifier', () => {
           calculationValue: 4,
           initialValue: 4,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 4,
         }),
@@ -215,7 +216,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -223,7 +224,7 @@ describe('KeepModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -231,7 +232,7 @@ describe('KeepModifier', () => {
           calculationValue: 6,
           initialValue: 6,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 6,
         }),
@@ -263,7 +264,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -271,7 +272,7 @@ describe('KeepModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -295,7 +296,7 @@ describe('KeepModifier', () => {
           calculationValue: 8,
           initialValue: 8,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 8,
         }),
@@ -303,7 +304,7 @@ describe('KeepModifier', () => {
           calculationValue: 4,
           initialValue: 4,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 4,
         }),
@@ -311,7 +312,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -327,7 +328,7 @@ describe('KeepModifier', () => {
           calculationValue: 6,
           initialValue: 6,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 6,
         }),

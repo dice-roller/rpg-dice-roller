@@ -1,10 +1,10 @@
-import DiceRoll from '../src/DiceRoll.js';
-import Parser from '../src/parser/Parser.js';
-import StandardDice from '../src/dice/StandardDice.js';
-import RollResults from '../src/results/RollResults.js';
-import RollResult from '../src/results/RollResult.js';
-import {exportFormats} from "../src/utilities/utils.js";
-import math from "mathjs-expression-parser";
+import math from 'mathjs-expression-parser';
+import DiceRoll from '../src/DiceRoll';
+import Parser from '../src/parser/Parser';
+import StandardDice from '../src/dice/StandardDice';
+import RollResults from '../src/results/RollResults';
+import RollResult from '../src/results/RollResult';
+import { exportFormats } from '../src/utilities/utils';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -42,7 +42,7 @@ describe('DiceRoll', () => {
     });
 
     test('can be object with notation property', () => {
-      const diceRoll = new DiceRoll({notation: '3d%*(4+2)dF'});
+      const diceRoll = new DiceRoll({ notation: '3d%*(4+2)dF' });
 
       expect(diceRoll.notation).toBe('3d%*(4+2)dF');
     });
@@ -53,11 +53,11 @@ describe('DiceRoll', () => {
       }).toThrow('Notation is not valid');
 
       expect(() => {
-        new DiceRoll({notation: []});
+        new DiceRoll({ notation: [] });
       }).toThrow('Notation is not valid');
 
       expect(() => {
-        new DiceRoll({notation: {}});
+        new DiceRoll({ notation: {} });
       }).toThrow('Notation is not valid');
     });
 
@@ -83,19 +83,19 @@ describe('DiceRoll', () => {
       }).toThrow('Notation is required');
 
       expect(() => {
-        new DiceRoll({notation: null,});
+        new DiceRoll({ notation: null });
       }).toThrow('Notation is required');
 
       expect(() => {
-        new DiceRoll({notation: false,});
+        new DiceRoll({ notation: false });
       }).toThrow('Notation is required');
 
       expect(() => {
-        new DiceRoll({notation: undefined,});
+        new DiceRoll({ notation: undefined });
       }).toThrow('Notation is required');
 
       expect(() => {
-        new DiceRoll({notation: 0,});
+        new DiceRoll({ notation: 0 });
       }).toThrow('Notation is required');
     });
 
@@ -119,7 +119,7 @@ describe('DiceRoll', () => {
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with object notation
-      new DiceRoll({notation});
+      new DiceRoll({ notation });
       expect(spy).toHaveBeenCalledWith(notation);
       expect(spy).toHaveBeenCalledTimes(2);
 
@@ -137,7 +137,7 @@ describe('DiceRoll', () => {
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with string notation
-      new DiceRoll({notation: '4d8'});
+      new DiceRoll({ notation: '4d8' });
       expect(spy).toHaveBeenCalledTimes(2);
 
       // remove the spy
@@ -155,7 +155,7 @@ describe('DiceRoll', () => {
       spy.mockReset();
 
       // initialise with object notation
-      new DiceRoll({notation: '(2*3)d6!p/4+10d%dh2-5d3'});
+      new DiceRoll({ notation: '(2*3)d6!p/4+10d%dh2-5d3' });
       expect(spy).toHaveBeenCalledTimes(3); // once for each dice notation
 
       // remove the spy
@@ -185,7 +185,7 @@ describe('DiceRoll', () => {
 
       const results = diceRoll.roll();
 
-      expect(results).toEqual([roll1, roll2,]);
+      expect(results).toEqual([roll1, roll2]);
 
       jest.restoreAllMocks();
     });
@@ -214,7 +214,7 @@ describe('DiceRoll', () => {
           ],
           [
             new RollResult(8),
-          ]
+          ],
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
@@ -230,11 +230,11 @@ describe('DiceRoll', () => {
       test('can be array of numbers', () => {
         const rolls = [
           [2, 8, 5, 4],
-          [8]
+          [8],
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
-          rolls: rolls,
+          rolls,
         });
 
         expect(diceRoll.rolls).toEqual([
@@ -254,7 +254,7 @@ describe('DiceRoll', () => {
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
-          rolls: rolls,
+          rolls,
         });
 
         expect(diceRoll.rolls).toEqual([
@@ -352,8 +352,10 @@ describe('DiceRoll', () => {
   describe('Total', () => {
     test('calls RollResults value', () => {
       const spy = jest.spyOn(RollResults.prototype, 'value', 'get');
+      const diceRoll = new DiceRoll('4d8');
 
-      (new DiceRoll('4d8')).total;
+      // call the total getter
+      expect(diceRoll.total).toBeGreaterThanOrEqual(1);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -552,17 +554,18 @@ describe('DiceRoll', () => {
   });
 
   describe('Export', () => {
-    let notation, diceRoll, rolls;
+    let notation; let diceRoll; let
+      rolls;
 
     beforeEach(() => {
       notation = '4d8+6d10';
 
       rolls = [
         new RollResults([
-          7, 4, 3, 6
+          7, 4, 3, 6,
         ]),
         new RollResults([
-          8, 4, 2, 1, 6, 10
+          8, 4, 2, 1, 6, 10,
         ]),
       ];
 

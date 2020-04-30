@@ -1,7 +1,7 @@
-import KeepModifier from "./KeepModifier.js";
+import KeepModifier from './KeepModifier';
 
-class DropModifier extends KeepModifier{
-  constructor(notation, end, qty){
+class DropModifier extends KeepModifier {
+  constructor(notation, end, qty) {
     super(notation, end, qty);
 
     // set the modifier's sort order
@@ -11,13 +11,11 @@ class DropModifier extends KeepModifier{
   /**
    * Returns the min/max range of rolls to drop
    *
-   * @param {RollResults} results
+   * @param {RollResults} _results
    *
    * @returns {number[]}
-   *
-   * @private
    */
-  _rangeToDrop(results){
+  rangeToDrop(_results) {
     // we're dropping, so we want to drop all dice that are inside of the qty range
     return [0, this.qty];
   }

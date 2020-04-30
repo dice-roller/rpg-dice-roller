@@ -1,11 +1,12 @@
-import TargetModifier from '../../src/modifiers/TargetModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import TargetModifier from '../../src/modifiers/TargetModifier';
+import ComparePoint from '../../src/ComparePoint';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
 
 describe('TargetModifier', () => {
-  let sCP, fCP, mod;
+  let sCP; let fCP; let
+    mod;
 
   beforeEach(() => {
     sCP = new ComparePoint('>', 8);
@@ -52,7 +53,7 @@ describe('TargetModifier', () => {
 
   describe('Success Compare Point', () => {
     test('gets set in constructor', () => {
-      const mod = new TargetModifier('>8', sCP);
+      mod = new TargetModifier('>8', sCP);
 
       expect(mod.successComparePoint).toBe(sCP);
     });
@@ -61,7 +62,7 @@ describe('TargetModifier', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'comparePoint', 'set');
 
       // create the modifier
-      const mod = new TargetModifier('>8', sCP);
+      mod = new TargetModifier('>8', sCP);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -73,7 +74,7 @@ describe('TargetModifier', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'comparePoint', 'set');
 
       // create the modifier
-      const mod = new TargetModifier('>8');
+      mod = new TargetModifier('>8');
 
       mod.successComparePoint = sCP;
 
@@ -87,9 +88,10 @@ describe('TargetModifier', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'comparePoint', 'get');
 
       // create the modifier
-      const mod = new TargetModifier('>8', sCP);
+      mod = new TargetModifier('>8', sCP);
 
-      mod.successComparePoint;
+      // call the success compare point getter
+      expect(mod.successComparePoint).toBeInstanceOf(ComparePoint);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -100,7 +102,7 @@ describe('TargetModifier', () => {
 
   describe('Failure Compare Point', () => {
     test('gets set in constructor', () => {
-      const mod = new TargetModifier('>8', sCP, fCP);
+      mod = new TargetModifier('>8', sCP, fCP);
 
       expect(mod.failureComparePoint).toBe(fCP);
     });
@@ -109,7 +111,7 @@ describe('TargetModifier', () => {
       const spy = jest.spyOn(TargetModifier.prototype, 'failureComparePoint', 'set');
 
       // create the modifier
-      new TargetModifier('>8', sCP, fCP);
+      mod = new TargetModifier('>8', sCP, fCP);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -118,7 +120,7 @@ describe('TargetModifier', () => {
     });
 
     test('falsey value gets set to `null', () => {
-      const mod = new TargetModifier('>8f<4');
+      mod = new TargetModifier('>8f<4');
 
       mod.failureComparePoint = null;
       expect(mod.failureComparePoint).toBe(null);
@@ -134,7 +136,7 @@ describe('TargetModifier', () => {
     });
 
     test('must be instance of ComparePoint', () => {
-      const mod = new TargetModifier('>8f<4');
+      mod = new TargetModifier('>8f<4');
 
       expect(() => {
         mod.failureComparePoint = 'foo';
@@ -153,7 +155,7 @@ describe('TargetModifier', () => {
       }).toThrow('failure comparePoint must be instance of ComparePoint or null');
 
       expect(() => {
-        mod.failureComparePoint = {comparePoint: fCP};
+        mod.failureComparePoint = { comparePoint: fCP };
       }).toThrow('failure comparePoint must be instance of ComparePoint or null');
     });
   });
@@ -161,7 +163,7 @@ describe('TargetModifier', () => {
   describe('Success Matching', () => {
     test('isSuccess uses `isComparePoint` in parent', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'isComparePoint');
-      const mod = new TargetModifier('>8', sCP);
+      mod = new TargetModifier('>8', sCP);
 
       // attempt to match
       expect(mod.isSuccess(9)).toBe(true);
@@ -195,7 +197,7 @@ describe('TargetModifier', () => {
     });
 
     test('with no ComparePoint return false', () => {
-      const mod = new TargetModifier('>8<4');
+      mod = new TargetModifier('>8<4');
 
       expect(mod.isFailure(3)).toBe(false);
     });
@@ -225,7 +227,7 @@ describe('TargetModifier', () => {
     });
 
     test('with no ComparePoints return true', () => {
-      const mod = new TargetModifier('>8<4');
+      mod = new TargetModifier('>8<4');
 
       expect(mod.isNeutral(3)).toBe(true);
       expect(mod.isNeutral(8)).toBe(true);
@@ -263,7 +265,7 @@ describe('TargetModifier', () => {
 
   describe('Readonly properties', () => {
     test('cannot change name value', () => {
-      const mod = new TargetModifier('=4');
+      mod = new TargetModifier('=4');
 
       expect(() => {
         mod.name = 'Foo';
@@ -272,7 +274,8 @@ describe('TargetModifier', () => {
   });
 
   describe('Run', () => {
-    let die, results;
+    let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
@@ -286,7 +289,7 @@ describe('TargetModifier', () => {
     });
 
     test('flags successes and failures', () => {
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       expect(rolls.length).toEqual(7);
       expect(rolls).toEqual([

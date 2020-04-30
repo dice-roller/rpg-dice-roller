@@ -1,7 +1,7 @@
-import ComparisonModifier from "./ComparisonModifier.js";
+import ComparisonModifier from './ComparisonModifier';
 
-class CriticalSuccessModifier extends ComparisonModifier{
-  constructor(notation, comparePoint){
+class CriticalSuccessModifier extends ComparisonModifier {
+  constructor(notation, comparePoint) {
     super(notation, comparePoint);
 
     // set the modifier's sort order
@@ -12,14 +12,14 @@ class CriticalSuccessModifier extends ComparisonModifier{
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results
-   * @param {StandardDice} dice
+   * @param {StandardDice} _dice
    *
    * @returns {RollResults}
    */
-  run(results, dice){
+  run(results, _dice) {
     // loop through each roll and see if it's a critical success
     results.rolls
-      .map(roll => {
+      .map((roll) => {
         // add the modifier flag
         if (this.isComparePoint(roll.value)) {
           roll.modifiers.push('critical-success');

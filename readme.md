@@ -83,7 +83,7 @@ const diceRoller = new DiceRoller();
 Rather than specifying the individual components, you can import everything like so:
 ```js
 // import everything and store it on the `rpgDiceRoller` scope
-const rpgDiceRoller = require('rpg-dice-roller/lib/umd/bundle.js');
+const rpgDiceRoller = require('rpg-dice-roller/lib/umd/bundle.min.js');
 
 // create a DiceRoller
 const roller = new rpgDiceRoller.DiceRoller();

@@ -1,7 +1,7 @@
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
-import Modifier from '../../src/modifiers/Modifier.js';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResult from '../../src/results/RollResult';
+import RollResults from '../../src/results/RollResults';
+import Modifier from '../../src/modifiers/Modifier';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -63,27 +63,27 @@ describe('StandardDice', () => {
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      const die = new StandardDice('4d6', 6, 8);
+      let die = new StandardDice('4d6', 6, 8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, 'foo');
+        die = new StandardDice('4d6', 6, 'foo');
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, false);
+        die = new StandardDice('4d6', 6, false);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, true);
+        die = new StandardDice('4d6', 6, true);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, []);
+        die = new StandardDice('4d6', 6, []);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, {qty: 4});
+        die = new StandardDice('4d6', 6, { qty: 4 });
       }).toThrow('qty must be a positive integer');
     });
 
@@ -95,15 +95,15 @@ describe('StandardDice', () => {
       expect(die.qty).toBe(324);
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, 0);
+        die = new StandardDice('4d6', 6, 0);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, -42);
+        die = new StandardDice('4d6', 6, -42);
       }).toThrow('qty must be a positive integer');
 
       expect(() => {
-        const die = new StandardDice('4d6', 6, -1);
+        die = new StandardDice('4d6', 6, -1);
       }).toThrow('qty must be a positive integer');
     });
   });
@@ -111,7 +111,7 @@ describe('StandardDice', () => {
   describe('Modifiers', () => {
     test('setting modifiers in constructor calls setter', () => {
       const spy = jest.spyOn(StandardDice.prototype, 'modifiers', 'set');
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
 
       new StandardDice('4d6', 6, 8, modifiers);
 
@@ -122,7 +122,7 @@ describe('StandardDice', () => {
     });
 
     test('can set modifiers with Map', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
       const die = new StandardDice('4d6', 6, 8);
 
       die.modifiers = modifiers;
@@ -135,7 +135,7 @@ describe('StandardDice', () => {
       const modifier = new Modifier('m');
       const die = new StandardDice('4d6', 6, 8);
 
-      die.modifiers = {foo: modifier};
+      die.modifiers = { foo: modifier };
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('foo')).toEqual(modifier);
@@ -161,12 +161,12 @@ describe('StandardDice', () => {
       }).toThrow('modifiers should be a Map or an Object');
 
       expect(() => {
-        const modifiers = new Map(Object.entries({foo: 'bar'}));
+        const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new StandardDice('4d6', 6, 8, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
       expect(() => {
-        const modifiers = {foo: 'bar'};
+        const modifiers = { foo: 'bar' };
         new StandardDice('4d6', 6, 8, modifiers);
       }).toThrow('modifiers is invalid. List must only contain Modifier instances');
 
@@ -190,7 +190,9 @@ describe('StandardDice', () => {
       // create the dice instance
       const die = new StandardDice('4d6', 6, 8);
 
-      die.modifiers = {mod1, mod2, mod3, mod4,};
+      die.modifiers = {
+        mod1, mod2, mod3, mod4,
+      };
 
       // get the modifier keys
       const modKeys = [...die.modifiers.keys()];

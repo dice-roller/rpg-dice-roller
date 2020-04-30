@@ -1,7 +1,7 @@
-import SortingModifier from '../../src/modifiers/SortingModifier.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import SortingModifier from '../../src/modifiers/SortingModifier';
+import Modifier from '../../src/modifiers/Modifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
 
 describe('SortingModifier', () => {
   describe('Initialisation', () => {
@@ -73,7 +73,7 @@ describe('SortingModifier', () => {
       }).toThrow(errorMsg);
 
       expect(() => {
-        mod.direction = {direction: 'a'};
+        mod.direction = { direction: 'a' };
       }).toThrow(errorMsg);
 
       expect(() => {
@@ -117,11 +117,12 @@ describe('SortingModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
-        8, 4, 2, 1, 6, 10
+        8, 4, 2, 1, 6, 10,
       ]);
       die = new StandardDice('6d10', 10, 6);
       mod = new SortingModifier('a');

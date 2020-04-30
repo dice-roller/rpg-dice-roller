@@ -1,21 +1,18 @@
-import StandardDice from "./dice/StandardDice.js";
-import Modifier from "./modifiers/Modifier.js";
+const modifiersSymbol = Symbol('modifiers');
+const notationSymbol = Symbol('notation');
+const expressionsSymbol = Symbol('expressions');
 
-const _modifiers = Symbol('modifiers');
-const _notation = Symbol('notation');
-const _expressions = Symbol('expressions');
-
-class RollGroup{
+class RollGroup {
   /**
    *
    * @param {string} notation
    * @param {StandardDice[]} expressions
    * @param {[]|null} modifiers
    */
-  constructor(notation, expressions, modifiers = null){
-    this[_notation] = notation;
-    this[_expressions] = expressions;
-    this[_modifiers] = modifiers;
+  constructor(notation, expressions, modifiers = null) {
+    this[notationSymbol] = notation;
+    this[expressionsSymbol] = expressions;
+    this[modifiersSymbol] = modifiers;
   }
 
   /**
@@ -23,8 +20,8 @@ class RollGroup{
    *
    * @returns {Modifier[]|null}
    */
-  get modifiers(){
-    return this[_modifiers];
+  get modifiers() {
+    return this[modifiersSymbol];
   }
 
   /**
@@ -32,8 +29,8 @@ class RollGroup{
    *
    * @returns {string}
    */
-  get notation(){
-    return this[_notation];
+  get notation() {
+    return this[notationSymbol];
   }
 
   /**
@@ -41,8 +38,8 @@ class RollGroup{
    *
    * @returns {StandardDice[]}
    */
-  get expressions(){
-    return this[_expressions];
+  get expressions() {
+    return this[expressionsSymbol];
   }
 
   /**
@@ -50,8 +47,8 @@ class RollGroup{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {modifiers,notation,expressions,} = this;
+  toJSON() {
+    const { modifiers, notation, expressions } = this;
 
     return {
       expressions,

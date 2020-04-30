@@ -1,36 +1,43 @@
-/**
- * Polyfill for Array.prototype.flat
- * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat#Polyfill
- */
 if (!Array.prototype.flat) {
-  Array.prototype.flat = function() {
-    var depth = arguments[0];
+  /* eslint-disable */
+  /**
+   * Polyfill for Array.prototype.flat (Required for node < 11)
+   *
+   * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat#Polyfill
+   *
+   * @returns {unknown[]|[]}
+   */
+  Array.prototype.flat = function () {
+    let depth = arguments[0];
     depth = depth === undefined ? 1 : Math.floor(depth);
     if (depth < 1) return Array.prototype.slice.call(this);
     return (function flat(arr, depth) {
-      var len = arr.length >>> 0;
-      var flattened = [];
-      var i = 0;
+      const len = arr.length >>> 0;
+      let flattened = [];
+      let i = 0;
       while (i < len) {
         if (i in arr) {
-          var el = arr[i];
-          if (Array.isArray(el) && depth > 0)
-            flattened = flattened.concat(flat(el, depth - 1));
+          const el = arr[i];
+          if (Array.isArray(el) && depth > 0) flattened = flattened.concat(flat(el, depth - 1));
           else flattened.push(el);
         }
         i++;
       }
       return flattened;
-    })(this, depth);
+    }(this, depth));
   };
 }
 
-/**
- * Polyfill for Array.prototype.flatMap
- * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
- */
 if (!Array.prototype.flatMap) {
-  Array.prototype.flatMap = function() {
+  /* eslint-disable */
+  /**
+   * Polyfill for Array.prototype.flatMap (Required for node < 11)
+   *
+   *  @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
+   *
+   * @returns {[]}
+   */
+  Array.prototype.flatMap = function () {
     return Array.prototype.map.apply(this, arguments).flat(1);
   };
 }
@@ -47,22 +54,22 @@ const diceUtils = Object.freeze({
    * @param val
    * @returns {boolean}
    */
-  isNumeric(val){
+  isNumeric(val) {
     return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
   },
-  isBase64(val){
-    try{
+  isBase64(val) {
+    try {
       return !!(val && (btoa(atob(val)) === val));
-    }catch(e){
+    } catch (e) {
       return false;
     }
   },
-  isJson(val){
-    try{
-      let parsed = val ? JSON.parse(val) : false;
+  isJson(val) {
+    try {
+      const parsed = val ? JSON.parse(val) : false;
 
       return !!(parsed && (typeof parsed === 'object'));
-    }catch(e){
+    } catch (e) {
       return false;
     }
   },
@@ -74,20 +81,20 @@ const diceUtils = Object.freeze({
    * @param {number|string} max
    * @returns {*}
    */
-  generateNumber(min, max){
-    min = min ? parseInt(min, 10) : 1;
-    max = max ? parseInt(max, 10) : min;
+  generateNumber(min, max) {
+    const minNumber = min ? parseInt(min, 10) : 1;
+    const maxNumber = max ? parseInt(max, 10) : min;
 
-    if(max <= min){
-      return min;
+    if (maxNumber <= minNumber) {
+      return minNumber;
     }
 
-    return Math.floor(Math.random() * (max - min + 1) + min);
+    return Math.floor(Math.random() * (maxNumber - minNumber + 1) + minNumber);
   },
   /**
    * @returns {function(Array): number}
    */
-  get sumArray(){
+  get sumArray() {
     /**
      * Takes an array of numbers and adds them together,
      * returning the result
@@ -95,7 +102,7 @@ const diceUtils = Object.freeze({
      * @param {Number[]} numbers
      * @returns {number}
      */
-    return numbers => (
+    return (numbers) => (
       !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => (
         prev + (this.isNumeric(current) ? parseFloat(current) : 0)
       ), 0)
@@ -110,32 +117,31 @@ const diceUtils = Object.freeze({
    * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
    * @returns {boolean}
    */
-  compareNumbers(a, b, operator){
+  compareNumbers(a, b, operator) {
+    const aNum = parseFloat(a);
+    const bNum = parseFloat(b);
     let result;
 
-    a = parseFloat(a);
-    b = parseFloat(b);
-
-    switch(operator){
+    switch (operator) {
       case '=':
       case '==':
-        result = a === b;
+        result = aNum === bNum;
         break;
       case '<':
-        result = a < b;
+        result = aNum < bNum;
         break;
       case '>':
-        result = a > b;
+        result = aNum > bNum;
         break;
       case '<=':
-        result = a <= b;
+        result = aNum <= bNum;
         break;
       case '>=':
-        result = a >= b;
+        result = aNum >= bNum;
         break;
       case '!':
       case '!=':
-        result = a !== b;
+        result = aNum !== bNum;
         break;
       default:
         result = false;
@@ -156,7 +162,7 @@ const diceUtils = Object.freeze({
    * @param {number=} decPlaces
    * @returns {number}
    */
-  toFixed(num, decPlaces){
+  toFixed(num, decPlaces) {
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
     return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
@@ -171,7 +177,7 @@ const diceUtils = Object.freeze({
 const exportFormats = Object.freeze({
   JSON: 0,
   BASE_64: 1,
-  OBJECT: 2
+  OBJECT: 2,
 });
 
 export { diceUtils, exportFormats };

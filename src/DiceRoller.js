@@ -1,12 +1,12 @@
-import DiceRoll from './DiceRoll.js';
-import {diceUtils, exportFormats} from './utilities/utils.js';
+import DiceRoll from './DiceRoll';
+import { diceUtils, exportFormats } from './utilities/utils';
 
 /**
  * history of log rolls
  *
  * @type {symbol}
  */
-const _log = Symbol('log');
+const logSymbol = Symbol('log');
 
 /**
  * A DiceRoller handles dice rolling functionality,
@@ -14,23 +14,23 @@ const _log = Symbol('log');
  *
  * @param {{}=} data
  */
-class DiceRoller{
+class DiceRoller {
   /**
    * Initialises the object
    *
    * @constructor
    * @param data
    */
-  constructor(data){
-    this[_log] = [];
+  constructor(data) {
+    this[logSymbol] = [];
 
-    if(data){
-      if(Array.isArray(data.log)){
+    if (data) {
+      if (Array.isArray(data.log)) {
         // loop through each log entry and import it
-        data.log.forEach(roll => {
-          this[_log].push(DiceRoll.import(roll));
+        data.log.forEach((roll) => {
+          this[logSymbol].push(DiceRoll.import(roll));
         });
-      }else if(data.log){
+      } else if (data.log) {
         throw new Error('DiceRoller: Roll log must be an Array');
       }
     }
@@ -41,8 +41,8 @@ class DiceRoller{
    *
    * @returns {DiceRoll[]}
    */
-  get log(){
-    return this[_log] || [];
+  get log() {
+    return this[logSymbol] || [];
   }
 
   /**
@@ -51,7 +51,7 @@ class DiceRoller{
    *
    * @returns {string}
    */
-  get output(){
+  get output() {
     // return the log as a joined string
     return this.log.join('; ');
   }
@@ -61,7 +61,7 @@ class DiceRoller{
    *
    * @returns {number}
    */
-  get total(){
+  get total() {
     return this.log.reduce((prev, current) => prev + current.total, 0);
   }
 
@@ -73,7 +73,7 @@ class DiceRoller{
    * @param data
    * @returns {DiceRoller}
    */
-  static import(data){
+  static import(data) {
     // create a new DiceRoller object
     const diceRoller = new DiceRoller();
 
@@ -87,8 +87,8 @@ class DiceRoller{
   /**
    * Clears the roll history log
    */
-  clearLog(){
-    this[_log].length = 0;
+  clearLog() {
+    this[logSymbol].length = 0;
   }
 
   /**
@@ -99,8 +99,8 @@ class DiceRoller{
    * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
    * @returns {string|null}
    */
-  export(format){
-    switch (format || exportFormats.JSON){
+  export(format) {
+    switch (format || exportFormats.JSON) {
       case exportFormats.BASE_64:
         // JSON encode, then base64
         return btoa(this.export(exportFormats.JSON));
@@ -109,7 +109,7 @@ class DiceRoller{
       case exportFormats.OBJECT:
         return JSON.parse(this.export(exportFormats.JSON));
       default:
-        throw new Error('Unrecognised export format: ' + format);
+        throw new Error(`Unrecognised export format: ${format}`);
     }
   }
 
@@ -125,33 +125,35 @@ class DiceRoller{
    *
    * @returns {DiceRoll[]}
    */
-  import(data){
-    if(!data){
+  import(data) {
+    if (!data) {
       throw new Error('No data to import');
-    }else if(diceUtils.isJson(data)){
+    } else if (diceUtils.isJson(data)) {
       // data is JSON - parse and import
       return this.import(JSON.parse(data));
-    }else if(diceUtils.isBase64(data)){
+    } else if (diceUtils.isBase64(data)) {
       // data is base64 encoded - decode an import
       return this.import(atob(data));
-    }else if(typeof data === 'object'){
-      // if `log` is not defined, but data is an array, use it as the list of logs
-      if(!data.log && Array.isArray(data) && data.length){
-        data = {log: data};
+    } else if (typeof data === 'object') {
+      let log = data.log || null;
+
+      if (!data.log && Array.isArray(data) && data.length) {
+        // if `log` is not defined, but data is an array, use it as the list of logs
+        log = data;
       }
 
-      if(data.log && Array.isArray(data.log)){
+      if (log && Array.isArray(log)) {
         // loop through each log entry and import it
-        data.log.forEach(roll => {
-          this[_log].push(DiceRoll.import(roll));
+        log.forEach((roll) => {
+          this[logSymbol].push(DiceRoll.import(roll));
         });
-      }else if(data.log){
+      } else if (log) {
         throw new Error('Roll log must be an Array');
       }
 
       return this.log;
-    }else{
-      throw new Error('Unrecognised import format for data: ' + data);
+    } else {
+      throw new Error(`Unrecognised import format for data: ${data}`);
     }
   }
 
@@ -160,8 +162,8 @@ class DiceRoller{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {log, output, total} = this;
+  toJSON() {
+    const { log, output, total } = this;
 
     return {
       log,
@@ -177,7 +179,7 @@ class DiceRoller{
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return this.output;
   }
 
@@ -198,7 +200,7 @@ class DiceRoller{
    *
    * @returns {DiceRoll|DiceRoll[]}
    */
-  roll(...notations){
+  roll(...notations) {
     if (!notations || !notations.length) {
       throw new Error('No notations specified');
     }
@@ -211,11 +213,11 @@ class DiceRoller{
       throw new Error('No notations specified');
     }
 
-    const rolls = filteredNotations.map(notation => {
-      let diceRoll = new DiceRoll(notation);
+    const rolls = filteredNotations.map((notation) => {
+      const diceRoll = new DiceRoll(notation);
 
       // add the roll log to our global log
-      this[_log].push(diceRoll);
+      this[logSymbol].push(diceRoll);
 
       // return the current DiceRoll
       return diceRoll;

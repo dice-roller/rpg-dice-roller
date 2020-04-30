@@ -1,15 +1,15 @@
-import Modifier from "./Modifier.js";
-import ComparePoint from "../ComparePoint.js";
+import Modifier from './Modifier';
+import ComparePoint from '../ComparePoint';
 
-const _comparePoint = Symbol('compare-point');
+const comparePointSymbol = Symbol('compare-point');
 
-class ComparisonModifier extends Modifier{
+class ComparisonModifier extends Modifier {
   /**
    *
    * @param {string} notation
    * @param {ComparePoint} comparePoint
    */
-  constructor(notation, comparePoint){
+  constructor(notation, comparePoint) {
     super(notation);
 
     if (comparePoint) {
@@ -22,8 +22,8 @@ class ComparisonModifier extends Modifier{
    *
    * @returns {ComparePoint}
    */
-  get comparePoint(){
-    return this[_comparePoint];
+  get comparePoint() {
+    return this[comparePointSymbol];
   }
 
   /**
@@ -31,12 +31,12 @@ class ComparisonModifier extends Modifier{
    *
    * @param comparePoint
    */
-  set comparePoint(comparePoint){
+  set comparePoint(comparePoint) {
     if (!(comparePoint instanceof ComparePoint)) {
       throw TypeError('comparePoint must be instance of ComparePoint');
     }
 
-    this[_comparePoint] = comparePoint;
+    this[comparePointSymbol] = comparePoint;
   }
 
   /**
@@ -46,7 +46,7 @@ class ComparisonModifier extends Modifier{
    *
    * @returns {boolean}
    */
-  isComparePoint(value){
+  isComparePoint(value) {
     if (!this.comparePoint) {
       return false;
     }
@@ -59,14 +59,14 @@ class ComparisonModifier extends Modifier{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {comparePoint} = this;
+  toJSON() {
+    const { comparePoint } = this;
 
     return Object.assign(
       super.toJSON(),
       {
         comparePoint,
-      }
+      },
     );
   }
 }

@@ -1,25 +1,28 @@
-import {diceUtils} from "../utilities/utils.js";
-import ExplodeModifier from "../modifiers/ExplodeModifier.js";
-import RollResult from '../results/RollResult.js';
-import RollResults from '../results/RollResults.js';
-import ComparePoint from '../ComparePoint.js';
-import ReRollModifier from "../modifiers/ReRollModifier.js";
-import Modifier from "../modifiers/Modifier.js";
+import { diceUtils } from '../utilities/utils';
+import ExplodeModifier from '../modifiers/ExplodeModifier';
+import RollResult from '../results/RollResult';
+import RollResults from '../results/RollResults';
+import ComparePoint from '../ComparePoint';
+import ReRollModifier from '../modifiers/ReRollModifier';
+import Modifier from '../modifiers/Modifier';
 
-const _modifiers = Symbol('modifiers');
-const _notation = Symbol('notation');
-const _qty = Symbol('qty');
-const _sides = Symbol('sides');
+const modifiersSymbol = Symbol('modifiers');
+const notationSymbol = Symbol('notation');
+const qtySymbol = Symbol('qty');
+const sidesSymbol = Symbol('sides');
+const minSymbol = Symbol('min-value');
+const maxSymbol = Symbol('max-value');
 
-class StandardDice{
+class StandardDice {
   /**
-   *
    * @param {string} notation
    * @param {number} sides
-   * @param {number} qty
-   * @param {Map|{}|Map[]|null} modifiers
+   * @param {number=} qty
+   * @param {Map|{}|Map[]|null=} modifiers
+   * @param {?number=} min The minimum possible roll value (Defaults to 1)
+   * @param {?number=} max The maximum possible roll value (Defaults to the value of sides)
    */
-  constructor(notation, sides, qty = 1, modifiers = null){
+  constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!notation) {
       throw new TypeError('Notation is required');
     } else if (!sides) {
@@ -28,13 +31,16 @@ class StandardDice{
       throw new TypeError('qty must be a positive integer');
     }
 
-    this[_notation] = notation;
-    this[_qty] = parseInt(qty, 10);
-    this[_sides] = sides;
+    this[notationSymbol] = notation;
+    this[qtySymbol] = parseInt(qty, 10);
+    this[sidesSymbol] = sides;
 
     if (modifiers) {
       this.modifiers = modifiers;
     }
+
+    this[minSymbol] = diceUtils.isNumeric(min) ? parseInt(min, 10) : 1;
+    this[maxSymbol] = diceUtils.isNumeric(max) ? parseInt(max, 10) : sides;
   }
 
   /**
@@ -42,9 +48,13 @@ class StandardDice{
    *
    * @returns {Map|null}
    */
-  get modifiers(){
-    // ensure modifiers are ordered correctly
-    return this[_modifiers] ? new Map([...this[_modifiers]].sort((a, b) => a[1].order - b[1].order)) : null;
+  get modifiers() {
+    if (this[modifiersSymbol]) {
+      // ensure modifiers are ordered correctly
+      return new Map([...this[modifiersSymbol]].sort((a, b) => a[1].order - b[1].order));
+    }
+
+    return null;
   }
 
   /**
@@ -52,28 +62,32 @@ class StandardDice{
    *
    * @param value
    */
-  set modifiers(value){
+  set modifiers(value) {
     let modifiers;
     if (value instanceof Map) {
       modifiers = value;
     } else if (Array.isArray(value)) {
       // loop through and get the modifier name of each item and use it as the map key
-      modifiers = new Map(value.map(modifier => [modifier.name, modifier]));
+      modifiers = new Map(value.map((modifier) => [modifier.name, modifier]));
     } else if (typeof value === 'object') {
       modifiers = new Map(Object.entries(value));
     } else {
       throw new Error('modifiers should be a Map or an Object');
     }
 
-    if (modifiers.size && [...modifiers.entries()].some(entry => !(entry[1] instanceof Modifier))) {
+    if (
+      modifiers.size
+      && [...modifiers.entries()].some((entry) => !(entry[1] instanceof Modifier))
+    ) {
       throw new Error('modifiers is invalid. List must only contain Modifier instances');
     }
 
-    this[_modifiers] = modifiers;
+    this[modifiersSymbol] = modifiers;
 
     // loop through each modifier and ensure that those that require it have compare points
     // @todo find a better way of defining compare point on modifiers that don't have them
-    this[_modifiers].forEach((modifier) => {
+    this[modifiersSymbol].forEach((modifier) => {
+      /* eslint-disable no-param-reassign */
       if ((modifier instanceof ExplodeModifier) && !modifier.comparePoint) {
         modifier.comparePoint = new ComparePoint('=', this.max);
       } else if ((modifier instanceof ReRollModifier) && !modifier.comparePoint) {
@@ -87,8 +101,8 @@ class StandardDice{
    *
    * @returns {number}
    */
-  get max(){
-    return this.sides;
+  get max() {
+    return this[maxSymbol];
   }
 
   /**
@@ -96,8 +110,8 @@ class StandardDice{
    *
    * @returns {number}
    */
-  get min(){
-    return 1;
+  get min() {
+    return this[minSymbol];
   }
 
   /**
@@ -105,7 +119,7 @@ class StandardDice{
    *
    * @returns {*}
    */
-  get name(){
+  get name() {
     return this.constructor.name;
   }
 
@@ -114,8 +128,8 @@ class StandardDice{
    *
    * @returns {string}
    */
-  get notation(){
-    return this[_notation];
+  get notation() {
+    return this[notationSymbol];
   }
 
   /**
@@ -123,8 +137,8 @@ class StandardDice{
    *
    * @returns {number}
    */
-  get qty(){
-    return this[_qty];
+  get qty() {
+    return this[qtySymbol];
   }
 
   /**
@@ -132,8 +146,8 @@ class StandardDice{
    *
    * @returns {*}
    */
-  get sides(){
-    return this[_sides];
+  get sides() {
+    return this[sidesSymbol];
   }
 
   /**
@@ -142,18 +156,18 @@ class StandardDice{
    *
    * @returns {RollResults}
    */
-  roll(){
+  roll() {
     // create a result object to hold the rolls
     const rollResult = new RollResults();
 
     // loop for the quantity and roll the die
-    for(let i = 0; i < this.qty; i++){
+    for (let i = 0; i < this.qty; i++) {
       // add the rolls to the list
       rollResult.addRoll(this.rollOnce());
     }
 
     // loop through each modifier and carry out its actions
-    (this.modifiers || []).forEach(modifier => {
+    (this.modifiers || []).forEach((modifier) => {
       modifier.run(rollResult, this);
     });
 
@@ -165,7 +179,7 @@ class StandardDice{
    *
    * @returns {RollResult}
    */
-  rollOnce(){
+  rollOnce() {
     return new RollResult(diceUtils.generateNumber(this.min, this.max));
   }
 
@@ -174,8 +188,10 @@ class StandardDice{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {max, min, modifiers, name, notation, qty, sides} = this;
+  toJSON() {
+    const {
+      max, min, modifiers, name, notation, qty, sides,
+    } = this;
 
     return {
       max,
@@ -194,7 +210,7 @@ class StandardDice{
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return this.notation;
   }
 }

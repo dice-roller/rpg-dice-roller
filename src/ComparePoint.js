@@ -1,18 +1,18 @@
-import {diceUtils} from "./utilities/utils.js";
+import { diceUtils } from './utilities/utils';
 
-const _operator = Symbol('operator');
-const _value = Symbol('value');
+const operatorSymbol = Symbol('operator');
+const valueSymbol = Symbol('value');
 
-class ComparePoint{
+class ComparePoint {
   /**
    *
    * @param {string} operator
    * @param {number} value
    */
-  constructor(operator, value){
-    if(!operator){
+  constructor(operator, value) {
+    if (!operator) {
       throw new Error('ComparePoint: No compare operator specified');
-    } else if(!value && (value !== 0)){
+    } else if (!value && (value !== 0)) {
       throw new Error('ComparePoint: No compare value specified');
     }
 
@@ -27,7 +27,7 @@ class ComparePoint{
    *
    * @returns {boolean}
    */
-  static isValidOperator(operator){
+  static isValidOperator(operator) {
     return (typeof operator === 'string') && /^(?:[<>!]?=|[<>])$/.test(operator);
   }
 
@@ -38,12 +38,12 @@ class ComparePoint{
    *
    * @throws Error
    */
-  set operator(operator){
+  set operator(operator) {
     if (!this.constructor.isValidOperator(operator)) {
       throw new Error(`ComparePoint: operator "${operator}" is not valid`);
     }
 
-    this[_operator] = operator;
+    this[operatorSymbol] = operator;
   }
 
   /**
@@ -51,8 +51,8 @@ class ComparePoint{
    *
    * @returns {string}
    */
-  get operator(){
-    return this[_operator];
+  get operator() {
+    return this[operatorSymbol];
   }
 
   /**
@@ -62,12 +62,12 @@ class ComparePoint{
    *
    * @throws Error
    */
-  set value(value){
+  set value(value) {
     if (!diceUtils.isNumeric(value)) {
       throw new Error('ComparePoint: value must be numeric');
     }
 
-    this[_value] = parseInt(value, 10);
+    this[valueSymbol] = parseInt(value, 10);
   }
 
   /**
@@ -75,8 +75,8 @@ class ComparePoint{
    *
    * @returns {number}
    */
-  get value(){
-    return this[_value];
+  get value() {
+    return this[valueSymbol];
   }
 
   /**
@@ -86,7 +86,7 @@ class ComparePoint{
    *
    * @returns {boolean}
    */
-  isMatch(value){
+  isMatch(value) {
     return diceUtils.compareNumbers(value, this.value, this.operator);
   }
 
@@ -95,8 +95,8 @@ class ComparePoint{
    *
    * @returns {{}}
    */
-  toJSON(){
-    const {operator, value} = this;
+  toJSON() {
+    const { operator, value } = this;
 
     return {
       operator,
@@ -110,7 +110,7 @@ class ComparePoint{
    *
    * @returns {string}
    */
-  toString(){
+  toString() {
     return `${this.operator}${this.value}`;
   }
 }
