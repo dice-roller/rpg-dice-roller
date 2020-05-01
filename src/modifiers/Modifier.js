@@ -1,3 +1,5 @@
+import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
+
 class Modifier {
   /**
    *
@@ -5,7 +7,7 @@ class Modifier {
    */
   constructor(notation) {
     if (!notation) {
-      throw new Error('Notation is required');
+      throw new RequiredArgumentError('notation');
     }
 
     // set the modifier's notation

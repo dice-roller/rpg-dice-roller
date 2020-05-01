@@ -36,7 +36,7 @@ class TargetModifier extends ComparisonModifier {
    */
   set failureComparePoint(comparePoint) {
     if (comparePoint && !(comparePoint instanceof ComparePoint)) {
-      throw TypeError('failure comparePoint must be instance of ComparePoint or null');
+      throw new TypeError('failure comparePoint must be instance of ComparePoint or null');
     }
 
     this[failureCPSymbol] = comparePoint || null;

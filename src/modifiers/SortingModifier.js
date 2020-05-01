@@ -33,7 +33,7 @@ class SortingModifier extends Modifier {
    */
   set direction(value) {
     if ((value !== 'a') && (value !== 'd')) {
-      throw new Error('Direction must be "a" (Ascending) or "d" (Descending)');
+      throw new RangeError('Direction must be "a" (Ascending) or "d" (Descending)');
     }
 
     this[directionSymbol] = value;

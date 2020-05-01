@@ -1,4 +1,6 @@
 import { diceUtils } from './utilities/utils';
+import CompareOperatorError from './exceptions/CompareOperatorError';
+import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
 
 const operatorSymbol = Symbol('operator');
 const valueSymbol = Symbol('value');
@@ -11,9 +13,9 @@ class ComparePoint {
    */
   constructor(operator, value) {
     if (!operator) {
-      throw new Error('ComparePoint: No compare operator specified');
+      throw new RequiredArgumentError('operator');
     } else if (!value && (value !== 0)) {
-      throw new Error('ComparePoint: No compare value specified');
+      throw new RequiredArgumentError('value');
     }
 
     this.operator = operator;
@@ -40,7 +42,7 @@ class ComparePoint {
    */
   set operator(operator) {
     if (!this.constructor.isValidOperator(operator)) {
-      throw new Error(`ComparePoint: operator "${operator}" is not valid`);
+      throw new CompareOperatorError(operator);
     }
 
     this[operatorSymbol] = operator;
@@ -64,7 +66,7 @@ class ComparePoint {
    */
   set value(value) {
     if (!diceUtils.isNumeric(value)) {
-      throw new Error('ComparePoint: value must be numeric');
+      throw new TypeError('value must be numeric');
     }
 
     this[valueSymbol] = parseInt(value, 10);

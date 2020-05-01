@@ -2,6 +2,7 @@ import DropModifier from '../../src/modifiers/DropModifier';
 import Modifier from '../../src/modifiers/Modifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('DropModifier', () => {
   describe('Initialisation', () => {
@@ -24,37 +25,37 @@ describe('DropModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new DropModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DropModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DropModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DropModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('constructor requires end', () => {
       expect(() => {
         new DropModifier('d1');
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new DropModifier('d1', false);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new DropModifier('d1', null);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new DropModifier('d1', undefined);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
     });
   });
 
@@ -88,23 +89,23 @@ describe('DropModifier', () => {
 
       expect(() => {
         mod.end = 0;
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = 1;
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = 'foo';
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = ['l'];
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = { end: 'l' };
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
     });
   });
 
@@ -115,23 +116,23 @@ describe('DropModifier', () => {
 
       expect(() => {
         mod.qty = 'foo';
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = false;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = true;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = [];
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = { qty: 4 };
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
@@ -143,15 +144,15 @@ describe('DropModifier', () => {
 
       expect(() => {
         mod.qty = 0;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = -42;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = -1;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
   });
 
@@ -441,7 +442,7 @@ describe('DropModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

@@ -49,40 +49,39 @@ describe('RollResults', () => {
     });
 
     test('must be array', () => {
-      const errorMsg = 'Rolls must be an array';
       results = new RollResults();
 
       expect(() => {
         results.rolls = 'Foo';
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = {};
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = true;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = false;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = null;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = undefined;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = 0;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         results.rolls = 1;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
     });
 
     test('accepts list of RollResult objects', () => {
@@ -111,7 +110,7 @@ describe('RollResults', () => {
 
       expect(() => {
         results.rolls = [34, 'foo'];
-      }).toThrowError('Result value is invalid');
+      }).toThrow(TypeError);
     });
 
     test('can append to rolls', () => {
@@ -145,7 +144,7 @@ describe('RollResults', () => {
 
       expect(() => {
         results.length = 3;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 

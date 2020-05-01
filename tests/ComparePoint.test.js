@@ -1,4 +1,6 @@
 import ComparePoint from '../src/ComparePoint';
+import CompareOperatorError from '../src/exceptions/CompareOperatorError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
 
 describe('ComparePoint', () => {
   describe('Initialisation', () => {
@@ -19,37 +21,37 @@ describe('ComparePoint', () => {
     test('constructor requires operator', () => {
       expect(() => {
         new ComparePoint();
-      }).toThrow('No compare operator specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint(false);
-      }).toThrow('No compare operator specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint(null);
-      }).toThrow('No compare operator specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint(undefined);
-      }).toThrow('No compare operator specified');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('constructor requires value', () => {
       expect(() => {
         new ComparePoint('=');
-      }).toThrow('No compare value specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint('=', false);
-      }).toThrow('No compare value specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint('=', null);
-      }).toThrow('No compare value specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint('=', undefined);
-      }).toThrow('No compare value specified');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -111,27 +113,27 @@ describe('ComparePoint', () => {
 
       expect(() => {
         new ComparePoint(0);
-      }).toThrow('No compare operator specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparePoint([], 2);
-      }).toThrow(`operator "${[]}" is not valid`);
+      }).toThrow(CompareOperatorError);
 
       expect(() => {
         new ComparePoint({ operator: '=' }, 2);
-      }).toThrow(`operator "${{ operator: '=' }}" is not valid`);
+      }).toThrow(CompareOperatorError);
 
       expect(() => {
         new ComparePoint('==', 2);
-      }).toThrow('operator "==" is not valid');
+      }).toThrow(CompareOperatorError);
 
       expect(() => {
         new ComparePoint('*', 2);
-      }).toThrow('operator "*" is not valid');
+      }).toThrow(CompareOperatorError);
 
       expect(() => {
         new ComparePoint(4, 2);
-      }).toThrow('operator "4" is not valid');
+      }).toThrow(CompareOperatorError);
 
       expect(spy).toHaveBeenCalledTimes(5);
       // remove the spy
@@ -150,15 +152,15 @@ describe('ComparePoint', () => {
 
       expect(() => {
         new ComparePoint('=', [4]);
-      }).toThrow('value must be numeric');
+      }).toThrow(TypeError);
 
       expect(() => {
         new ComparePoint('=', 'foo');
-      }).toThrow('value must be numeric');
+      }).toThrow(TypeError);
 
       expect(() => {
         new ComparePoint('=', true);
-      }).toThrow('value must be numeric');
+      }).toThrow(TypeError);
     });
 
     test('value can be negative', () => {

@@ -38,7 +38,7 @@ class RollResults {
   set rolls(rolls) {
     if (!rolls || !Array.isArray(rolls)) {
       // roll is not an array
-      throw new Error(`Rolls must be an array: ${rolls}`);
+      throw new TypeError(`rolls must be an array: ${rolls}`);
     }
 
     // loop through each result and add it to the rolls list

@@ -3,6 +3,7 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
@@ -30,19 +31,19 @@ describe('PercentileDice', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new PercentileDice();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new PercentileDice(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new PercentileDice(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new PercentileDice(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -53,23 +54,23 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die = new PercentileDice('4d%', 'foo');
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', false);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', true);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', []);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', { qty: 4 });
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
@@ -81,15 +82,15 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die = new PercentileDice('4d%', 0);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', -42);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new PercentileDice('4d%', -1);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
   });
 
@@ -139,26 +140,26 @@ describe('PercentileDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new PercentileDice('4d%', 1, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
         new PercentileDice('4d%', 1, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new PercentileDice('4d%', 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = { foo: 'bar' };
         new PercentileDice('4d%', 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = ['bar'];
         new PercentileDice('4d%', 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
     });
 
     test('modifiers list always returns in correct order', () => {
@@ -264,7 +265,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.max = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change min value', () => {
@@ -272,7 +273,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.min = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change name value', () => {
@@ -280,7 +281,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change notation value', () => {
@@ -288,7 +289,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.notation = '6d4';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change qty value', () => {
@@ -296,7 +297,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.qty = 6;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change sides value', () => {
@@ -304,7 +305,7 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die.sides = 2;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

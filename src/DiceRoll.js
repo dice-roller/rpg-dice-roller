@@ -4,6 +4,9 @@ import Parser from './parser/Parser';
 import RollGroup from './RollGroup';
 import StandardDice from './dice/StandardDice';
 import RollResults from './results/RollResults';
+import NotationError from './exceptions/NotationError';
+import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import DataFormatError from './exceptions/DataFormatError';
 
 /**
  * @type {symbol}
@@ -57,7 +60,7 @@ class DiceRoll {
    */
   constructor(notation) {
     if (!notation) {
-      throw new Error('Notation is required');
+      throw new RequiredArgumentError('notation');
     }
 
     // initialise the parsed dice array
@@ -68,14 +71,14 @@ class DiceRoll {
       // @todo see if we can assert that the notation is valid
       if (!notation.notation) {
         // object doesn't contain a notation property
-        throw new Error('Notation is required');
+        throw new RequiredArgumentError('notation');
       } else if (typeof notation.notation !== 'string') {
-        throw new Error(`Notation is not valid: ${notation.notation}`);
+        throw new NotationError(notation.notation);
       } else if (notation.rolls) {
         // we have rolls - validate them
         if (!Array.isArray(notation.rolls)) {
           // rolls is not an array
-          throw new Error(`Rolls must be an Array: ${notation.rolls}`);
+          throw new TypeError(`Rolls must be an Array: ${notation.rolls}`);
         } else {
           // if roll is a RollResults, return it, otherwise try to convert to a RollResults object
           this[rollsSymbol] = notation.rolls
@@ -123,7 +126,7 @@ class DiceRoll {
       // roll the dice
       this.roll();
     } else {
-      throw new Error(`Notation is not valid: ${notation}`);
+      throw new NotationError(notation);
     }
   }
 
@@ -145,7 +148,7 @@ class DiceRoll {
    */
   static import(data) {
     if (!data) {
-      throw new Error('No data to import');
+      throw new RequiredArgumentError('data');
     } else if (diceUtils.isJson(data)) {
       // data is JSON format - parse and import
       return DiceRoll.import(JSON.parse(data));
@@ -156,7 +159,7 @@ class DiceRoll {
       // if data is a `DiceRoll` return it, otherwise build it
       return (data instanceof DiceRoll) ? data : new DiceRoll(data);
     } else {
-      throw new Error(`Unrecognised import format for data: ${data}`);
+      throw new DataFormatError(data);
     }
   }
 
@@ -263,7 +266,7 @@ class DiceRoll {
       case exportFormats.OBJECT:
         return JSON.parse(this.export(exportFormats.JSON));
       default:
-        throw new Error(`Unrecognised export format: ${format}`);
+        throw new TypeError(`Invalid export format "${format}"`);
     }
   }
 

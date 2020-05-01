@@ -33,7 +33,7 @@ class ComparisonModifier extends Modifier {
    */
   set comparePoint(comparePoint) {
     if (!(comparePoint instanceof ComparePoint)) {
-      throw TypeError('comparePoint must be instance of ComparePoint');
+      throw new TypeError('comparePoint must be instance of ComparePoint');
     }
 
     this[comparePointSymbol] = comparePoint;
