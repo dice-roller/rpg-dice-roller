@@ -11,9 +11,6 @@
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
     },
-    "ignorePatterns": [
-        "/src/parser/grammars/grammar.js"
-    ],
     "overrides": [
         {
             "files": ["tests/*.js", "tests/**/*.js"],

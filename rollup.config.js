@@ -1,9 +1,10 @@
 import commonjs from 'rollup-plugin-commonjs';
 import resolve from 'rollup-plugin-node-resolve';
-const { terser } = require('rollup-plugin-terser');
-const { eslint } = require('rollup-plugin-eslint');
 import babel from 'rollup-plugin-babel';
 import banner from 'rollup-plugin-banner';
+
+const { terser } = require('rollup-plugin-terser');
+const { eslint } = require('rollup-plugin-eslint');
 const path = require('path');
 
 const format = process.env.FORMAT || 'esm';
@@ -14,7 +15,7 @@ export default {
   input: 'src/index.js',
   output: {
     file: `lib/${format}/bundle${production ? '.min' : ''}.js`,
-    format: format,
+    format,
     name: 'rpgDiceRoller',
   },
   plugins: [
@@ -30,7 +31,7 @@ export default {
     // minify for production
     production ? terser() : null,
     banner({
-      file: path.join(__dirname, 'banner.txt')
+      file: path.join(__dirname, 'banner.txt'),
     }),
   ],
 };
