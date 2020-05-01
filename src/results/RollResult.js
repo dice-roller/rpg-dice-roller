@@ -23,7 +23,7 @@ class RollResult {
       // ensure that we have a valid value
       const initialVal = diceUtils.isNumeric(value.initialValue) ? value.initialValue : value.value;
       if (!diceUtils.isNumeric(initialVal)) {
-        throw new Error(`Result value is invalid: ${initialVal}`);
+        throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
       this[initialValueSymbol] = parseInt(initialVal, 10);
@@ -45,7 +45,7 @@ class RollResult {
       this.modifiers = Array.isArray(value.modifiers) ? value.modifiers : (modifiers || []);
       this.useInTotal = (typeof value.useInTotal === 'boolean') ? value.useInTotal : (useInTotal || false);
     } else {
-      throw new Error(`Result value is invalid: ${value}`);
+      throw new TypeError(`Result value is invalid: ${value}`);
     }
   }
 
@@ -68,7 +68,7 @@ class RollResult {
   set calculationValue(value) {
     const isNumeric = diceUtils.isNumeric(value);
     if (value && !isNumeric) {
-      throw new Error(`Result calculation value is invalid: ${value}`);
+      throw new TypeError(`Result calculation value is invalid: ${value}`);
     }
 
     this[calculationValueSymbol] = isNumeric ? parseFloat(value) : null;
@@ -148,7 +148,7 @@ class RollResult {
    */
   set modifiers(value) {
     if ((value || (value === 0)) && (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))) {
-      throw new Error(`Modifiers must be an array of modifier names: ${value}`);
+      throw new TypeError(`modifiers must be an array of modifier names: ${value}`);
     }
 
     this[modifiersSymbol] = value || [];
@@ -188,7 +188,7 @@ class RollResult {
    */
   set value(value) {
     if (!diceUtils.isNumeric(value)) {
-      throw new Error(`Result value is invalid: ${value}`);
+      throw new TypeError(`Result value is invalid: ${value}`);
     }
 
     this[valueSymbol] = parseInt(value, 10);

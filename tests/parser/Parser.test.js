@@ -9,6 +9,7 @@ import KeepModifier from '../../src/modifiers/KeepModifier';
 import parser from '../../src/parser/grammars/grammar';
 import SortingModifier from '../../src/modifiers/SortingModifier';
 import TargetModifier from '../../src/modifiers/TargetModifier';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -23,37 +24,37 @@ describe('Parser', () => {
     test('requires notation', () => {
       expect(() => {
         Parser.parse();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         Parser.parse(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         Parser.parse(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         Parser.parse(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('notation must be string', () => {
       expect(() => {
         Parser.parse({ notation: '2d10' });
-      }).toThrow('Notation must be a string');
+      }).toThrow(TypeError);
 
       expect(() => {
         Parser.parse(['4d6']);
-      }).toThrow('Notation must be a string');
+      }).toThrow(TypeError);
 
       expect(() => {
         Parser.parse(true);
-      }).toThrow('Notation must be a string');
+      }).toThrow(TypeError);
 
       expect(() => {
         Parser.parse(124);
-      }).toThrow('Notation must be a string');
+      }).toThrow(TypeError);
     });
   });
 

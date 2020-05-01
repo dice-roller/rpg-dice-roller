@@ -21,19 +21,19 @@ describe('RollResult', () => {
     test('constructor requires value', () => {
       expect(() => {
         new RollResult();
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(false);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(null);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(undefined);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
     });
 
     test('constructor accepts object of values', () => {
@@ -75,7 +75,7 @@ describe('RollResult', () => {
 
       expect(() => {
         result.initialValue = 5;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('must be numeric', () => {
@@ -86,23 +86,23 @@ describe('RollResult', () => {
 
       expect(() => {
         new RollResult('foo');
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult([]);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult({});
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult({ initialValue: 'foo' });
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult({ value: 'foo' });
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
     });
   });
 
@@ -222,23 +222,23 @@ describe('RollResult', () => {
 
       expect(() => {
         result.calculationValue = 'foo';
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = [];
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = {};
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = { initialValue: 'foo' };
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = { value: 'foo' };
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
     });
 
     test('when unset it should return the value property', () => {
@@ -329,61 +329,59 @@ describe('RollResult', () => {
     });
 
     test('must be array', () => {
-      const errorMsg = 'Modifiers must be an array of modifier names';
       const result = new RollResult(4);
 
       expect(() => {
         result.modifiers = 'foo';
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = {};
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = 0;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = -34;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = 1;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = true;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
     });
 
     test('items must be strings', () => {
-      const errorMsg = 'Modifiers must be an array of modifier names';
       const result = new RollResult(4);
 
       expect(() => {
         result.modifiers = ['drop', 1];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', {}];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = [false, 'drop'];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', undefined];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', null];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = [true];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
     });
 
     test('can unset', () => {

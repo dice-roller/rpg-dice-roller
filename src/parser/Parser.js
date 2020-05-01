@@ -1,4 +1,5 @@
 import parser from './grammars/grammar';
+import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
 /**
  * A DiceParser object, which takes a notation
@@ -21,9 +22,11 @@ class Parser {
    */
   static parse(notation) {
     if (!notation) {
-      throw Error('Notation is required');
-    } else if (typeof notation !== 'string') {
-      throw Error('Notation must be a string');
+      throw new RequiredArgumentError('notation');
+    }
+
+    if (typeof notation !== 'string') {
+      throw new TypeError('Notation must be a string');
     }
 
     // parse the notation

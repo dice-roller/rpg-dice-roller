@@ -1,5 +1,6 @@
 import ComparisonModifier from './ComparisonModifier';
 import { diceUtils } from '../utilities/utils';
+import DieActionValueError from '../exceptions/DieActionValueError';
 
 const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');
@@ -51,7 +52,7 @@ class ExplodeModifier extends ComparisonModifier {
   run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
     if (_dice.min === _dice.max) {
-      throw new Error(`Die must have more than 1 side to explode: ${_dice}`);
+      throw new DieActionValueError(_dice, 'explode');
     }
 
     const parsedResults = results;

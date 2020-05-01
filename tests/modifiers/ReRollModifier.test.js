@@ -4,6 +4,8 @@ import ComparePoint from '../../src/ComparePoint';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 import RollResult from '../../src/results/RollResult';
+import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {
@@ -27,19 +29,19 @@ describe('ReRollModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new ReRollModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -308,7 +310,7 @@ describe('ReRollModifier', () => {
 
       expect(() => {
         mod.run(results, die);
-      }).toThrow('Die must have more than 1 side to re-roll');
+      }).toThrow(DieActionValueError);
     });
   });
 });

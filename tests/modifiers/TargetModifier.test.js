@@ -3,6 +3,7 @@ import ComparePoint from '../../src/ComparePoint';
 import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('TargetModifier', () => {
   let sCP; let fCP; let
@@ -35,19 +36,19 @@ describe('TargetModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new TargetModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new TargetModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new TargetModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new TargetModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -140,23 +141,23 @@ describe('TargetModifier', () => {
 
       expect(() => {
         mod.failureComparePoint = 'foo';
-      }).toThrow('failure comparePoint must be instance of ComparePoint or null');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.failureComparePoint = 1;
-      }).toThrow('failure comparePoint must be instance of ComparePoint or null');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.failureComparePoint = true;
-      }).toThrow('failure comparePoint must be instance of ComparePoint or null');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.failureComparePoint = [fCP];
-      }).toThrow('failure comparePoint must be instance of ComparePoint or null');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.failureComparePoint = { comparePoint: fCP };
-      }).toThrow('failure comparePoint must be instance of ComparePoint or null');
+      }).toThrow(TypeError);
     });
   });
 
@@ -269,7 +270,7 @@ describe('TargetModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 

@@ -1,5 +1,7 @@
 import DiceRoll from './DiceRoll';
 import { diceUtils, exportFormats } from './utilities/utils';
+import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import DataFormatError from './exceptions/DataFormatError';
 
 /**
  * history of log rolls
@@ -31,7 +33,7 @@ class DiceRoller {
           this[logSymbol].push(DiceRoll.import(roll));
         });
       } else if (data.log) {
-        throw new Error('DiceRoller: Roll log must be an Array');
+        throw new TypeError('data.log must be an Array');
       }
     }
   }
@@ -109,7 +111,7 @@ class DiceRoller {
       case exportFormats.OBJECT:
         return JSON.parse(this.export(exportFormats.JSON));
       default:
-        throw new Error(`Unrecognised export format: ${format}`);
+        throw new TypeError(`Invalid export format "${format}"`);
     }
   }
 
@@ -127,7 +129,7 @@ class DiceRoller {
    */
   import(data) {
     if (!data) {
-      throw new Error('No data to import');
+      throw new RequiredArgumentError('data');
     } else if (diceUtils.isJson(data)) {
       // data is JSON - parse and import
       return this.import(JSON.parse(data));
@@ -148,12 +150,12 @@ class DiceRoller {
           this[logSymbol].push(DiceRoll.import(roll));
         });
       } else if (log) {
-        throw new Error('Roll log must be an Array');
+        throw new TypeError('log must be an Array');
       }
 
       return this.log;
     } else {
-      throw new Error(`Unrecognised import format for data: ${data}`);
+      throw new DataFormatError(data);
     }
   }
 
@@ -201,16 +203,10 @@ class DiceRoller {
    * @returns {DiceRoll|DiceRoll[]}
    */
   roll(...notations) {
-    if (!notations || !notations.length) {
-      throw new Error('No notations specified');
-    }
-
-    // remove any empty/falsey notations
     const filteredNotations = notations.filter(Boolean);
 
-    // ensure we still have notations
-    if (!filteredNotations.length) {
-      throw new Error('No notations specified');
+    if (filteredNotations.length === 0) {
+      throw new RequiredArgumentError('notations');
     }
 
     const rolls = filteredNotations.map((notation) => {

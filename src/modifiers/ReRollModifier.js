@@ -1,4 +1,5 @@
 import ComparisonModifier from './ComparisonModifier';
+import DieActionValueError from '../exceptions/DieActionValueError';
 
 const onceSymbol = Symbol('once');
 
@@ -47,7 +48,7 @@ class ReRollModifier extends ComparisonModifier {
   run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
     if (_dice.min === _dice.max) {
-      throw new Error(`Die must have more than 1 side to re-roll: ${_dice}`);
+      throw new DieActionValueError(_dice, 're-roll');
     }
 
     results.rolls

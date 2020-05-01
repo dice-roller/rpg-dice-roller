@@ -2,6 +2,7 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -27,37 +28,37 @@ describe('StandardDice', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new StandardDice();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('constructor requires sides', () => {
       expect(() => {
         new StandardDice('1d6');
-      }).toThrow('Sides is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice('1d6', false);
-      }).toThrow('Sides is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice('1d6', null);
-      }).toThrow('Sides is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new StandardDice('1d6', undefined);
-      }).toThrow('Sides is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -68,23 +69,23 @@ describe('StandardDice', () => {
 
       expect(() => {
         die = new StandardDice('4d6', 6, 'foo');
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, false);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, true);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, []);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, { qty: 4 });
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
@@ -96,15 +97,15 @@ describe('StandardDice', () => {
 
       expect(() => {
         die = new StandardDice('4d6', 6, 0);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, -42);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, -1);
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
   });
 
@@ -154,26 +155,26 @@ describe('StandardDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new StandardDice('4d6', 6, 8, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
         new StandardDice('4d6', 6, 8, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new StandardDice('4d6', 6, 8, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = { foo: 'bar' };
         new StandardDice('4d6', 6, 8, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = ['bar'];
         new StandardDice('4d6', 6, 8, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
     });
 
     test('modifiers list always returns in correct order', () => {
@@ -279,7 +280,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.max = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change min value', () => {
@@ -287,7 +288,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.min = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change name value', () => {
@@ -295,7 +296,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change notation value', () => {
@@ -303,7 +304,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.notation = '6d4';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change qty value', () => {
@@ -311,7 +312,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.qty = 6;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change sides value', () => {
@@ -319,7 +320,7 @@ describe('StandardDice', () => {
 
       expect(() => {
         die.sides = 2;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

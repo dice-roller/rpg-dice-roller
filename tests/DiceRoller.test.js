@@ -1,6 +1,9 @@
 import DiceRoller from '../src/DiceRoller';
 import DiceRoll from '../src/DiceRoll';
 import { exportFormats } from '../src';
+import NotationError from '../src/exceptions/NotationError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import DataFormatError from '../src/exceptions/DataFormatError';
 
 describe('DiceRoller', () => {
   let roller;
@@ -54,37 +57,37 @@ describe('DiceRoller', () => {
     test('no notation throws error', () => {
       expect(() => {
         roller.roll();
-      }).toThrow('No notations specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         roller.roll(false);
-      }).toThrow('No notations specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         roller.roll(null);
-      }).toThrow('No notations specified');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         roller.roll(undefined);
-      }).toThrow('No notations specified');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('notation must be string', () => {
       expect(() => {
         roller.roll({});
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         roller.roll([]);
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
 
       expect(() => {
         roller.roll(true);
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
 
       expect(() => {
         roller.roll(45);
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
     });
   });
 
@@ -286,7 +289,7 @@ describe('DiceRoller', () => {
     test('Invalid export format throws error', () => {
       expect(() => {
         roller.export('foo');
-      }).toThrow('Unrecognised export format');
+      }).toThrow(TypeError);
     });
   });
 
@@ -359,19 +362,17 @@ describe('DiceRoller', () => {
       });
 
       test('invalid format throws error', () => {
-        const errorMsg = 'Unrecognised import format for data';
-
         expect(() => {
           DiceRoller.import('foo');
-        }).toThrow();
+        }).toThrow(DataFormatError);
 
         expect(() => {
           DiceRoller.import(true);
-        }).toThrow(errorMsg);
+        }).toThrow(DataFormatError);
 
         expect(() => {
           DiceRoller.import(1);
-        }).toThrow(errorMsg);
+        }).toThrow(DataFormatError);
       });
     });
   });

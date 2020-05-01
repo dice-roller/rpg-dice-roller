@@ -9,7 +9,7 @@ class FudgeDice extends StandardDice {
     if (!numNonBlanks && (numNonBlanks !== 0)) {
       numNonBlanks = 2;
     } else if ((numNonBlanks !== 1) && (numNonBlanks !== 2)) {
-      throw new Error('nonBlanks must be 1 or 2');
+      throw new RangeError('nonBlanks must be 1 or 2');
     }
 
     super(notation, numNonBlanks, qty, modifiers, -1, 1);

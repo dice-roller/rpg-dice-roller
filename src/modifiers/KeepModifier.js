@@ -37,7 +37,7 @@ class KeepModifier extends Modifier {
    */
   set end(value) {
     if ((value !== 'h') && (value !== 'l')) {
-      throw new Error('End must be "h" or "l"');
+      throw new RangeError('End must be "h" or "l"');
     }
 
     this[endSymbol] = value;
@@ -59,7 +59,7 @@ class KeepModifier extends Modifier {
    */
   set qty(value) {
     if (!diceUtils.isNumeric(value) || (value < 1)) {
-      throw new Error('qty must be a positive integer');
+      throw new TypeError('qty must be a positive integer');
     }
 
     this[qtySymbol] = parseInt(value, 10);

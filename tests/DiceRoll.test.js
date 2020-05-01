@@ -5,6 +5,9 @@ import StandardDice from '../src/dice/StandardDice';
 import RollResults from '../src/results/RollResults';
 import RollResult from '../src/results/RollResult';
 import { exportFormats } from '../src/utilities/utils';
+import NotationError from '../src/exceptions/NotationError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import DataFormatError from '../src/exceptions/DataFormatError';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -32,7 +35,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.notation = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('can be string', () => {
@@ -50,53 +53,53 @@ describe('DiceRoll', () => {
     test('throws error if invalid type', () => {
       expect(() => {
         new DiceRoll(['4d10']);
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
 
       expect(() => {
         new DiceRoll({ notation: [] });
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
 
       expect(() => {
         new DiceRoll({ notation: {} });
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
     });
 
     test('is required', () => {
       expect(() => {
         new DiceRoll();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({});
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({ notation: null });
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({ notation: false });
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({ notation: undefined });
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({ notation: 0 });
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('cannot change value', () => {
@@ -104,7 +107,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.notation = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -283,21 +286,21 @@ describe('DiceRoll', () => {
             notation: '3d6',
             rolls: 'foo',
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
 
         expect(() => {
           new DiceRoll({
             notation: '3d6',
             rolls: {},
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
 
         expect(() => {
           new DiceRoll({
             notation: '3d6',
             rolls: true,
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
       });
 
       test('does not roll if rolls passed to constructor', () => {
@@ -331,7 +334,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.rolls = [new RollResults([7])];
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -445,7 +448,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.total = 57;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -603,7 +606,7 @@ describe('DiceRoll', () => {
     test('Invalid export format throws error', () => {
       expect(() => {
         diceRoll.export('foo');
-      }).toThrow('Unrecognised export format');
+      }).toThrow(TypeError);
     });
   });
 
@@ -615,27 +618,25 @@ describe('DiceRoll', () => {
     });
 
     test('requires data', () => {
-      const errorMsg = 'No data to import';
-
       expect(() => {
         DiceRoll.import();
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(false);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(null);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(undefined);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(0);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
     });
 
     test('can import JSON encoded string', () => {
@@ -667,19 +668,17 @@ describe('DiceRoll', () => {
     });
 
     test('invalid format throws error', () => {
-      const errorMsg = 'Unrecognised import format for data';
-
       expect(() => {
         DiceRoll.import('foo');
-      }).toThrow();
+      }).toThrow(DataFormatError);
 
       expect(() => {
         DiceRoll.import(true);
-      }).toThrow(errorMsg);
+      }).toThrow(DataFormatError);
 
       expect(() => {
         DiceRoll.import(1);
-      }).toThrow(errorMsg);
+      }).toThrow(DataFormatError);
     });
   });
 });

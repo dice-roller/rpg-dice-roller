@@ -4,6 +4,8 @@ import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
+import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ExplodeModifier', () => {
   describe('Initialisation', () => {
@@ -28,19 +30,19 @@ describe('ExplodeModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new ExplodeModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -523,7 +525,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.run(results, die);
-      }).toThrow('Die must have more than 1 side to explode');
+      }).toThrow(DieActionValueError);
     });
   });
 
@@ -533,7 +535,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change compound value', () => {
@@ -541,7 +543,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.compound = true;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change penetrate value', () => {
@@ -549,7 +551,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.penetrate = true;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

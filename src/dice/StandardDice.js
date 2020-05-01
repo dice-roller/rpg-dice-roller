@@ -5,6 +5,7 @@ import RollResults from '../results/RollResults';
 import ComparePoint from '../ComparePoint';
 import ReRollModifier from '../modifiers/ReRollModifier';
 import Modifier from '../modifiers/Modifier';
+import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
 const modifiersSymbol = Symbol('modifiers');
 const notationSymbol = Symbol('notation');
@@ -24,9 +25,9 @@ class StandardDice {
    */
   constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!notation) {
-      throw new TypeError('Notation is required');
+      throw new RequiredArgumentError('notation');
     } else if (!sides) {
-      throw new TypeError('Sides is required');
+      throw new RequiredArgumentError('sides');
     } else if (!diceUtils.isNumeric(qty) || (qty < 1)) {
       throw new TypeError('qty must be a positive integer');
     }
@@ -72,14 +73,14 @@ class StandardDice {
     } else if (typeof value === 'object') {
       modifiers = new Map(Object.entries(value));
     } else {
-      throw new Error('modifiers should be a Map or an Object');
+      throw new TypeError('modifiers should be a Map or an Object');
     }
 
     if (
       modifiers.size
       && [...modifiers.entries()].some((entry) => !(entry[1] instanceof Modifier))
     ) {
-      throw new Error('modifiers is invalid. List must only contain Modifier instances');
+      throw new TypeError('modifiers must only contain Modifier instances');
     }
 
     this[modifiersSymbol] = modifiers;

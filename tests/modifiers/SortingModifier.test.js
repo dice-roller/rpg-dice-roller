@@ -2,6 +2,7 @@ import SortingModifier from '../../src/modifiers/SortingModifier';
 import Modifier from '../../src/modifiers/Modifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('SortingModifier', () => {
   describe('Initialisation', () => {
@@ -23,19 +24,19 @@ describe('SortingModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new SortingModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new SortingModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new SortingModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new SortingModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -57,40 +58,39 @@ describe('SortingModifier', () => {
     });
 
     test('throws error if not set to `a` | `b`', () => {
-      const errorMsg = 'Direction must be "a" (Ascending) or "d" (Descending)';
       const mod = new SortingModifier('s');
 
       expect(() => {
         mod.direction = 'foo';
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = '';
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = ['a'];
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = { direction: 'a' };
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = true;
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = false;
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = 1;
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.direction = 0;
-      }).toThrow(errorMsg);
+      }).toThrow(RangeError);
     });
   });
 
