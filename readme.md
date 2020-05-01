@@ -613,9 +613,9 @@ roller.roll('d6');
 | Method                               | Description                                                  | Return                |
 | ------------------------------------ | ------------------------------------------------------------ | --------------------- |
 | `clearLog()`                         | Clears the roll history log.                                 | `void`                |
-| `export({exportFormats=} format)`    | Exports the `DiceRoller` object to the specified format. Throws `Error` if format is invalid | `string|null`         |
+| `export({exportFormats=} format)`    | Exports the `DiceRoller` object to the specified format. Throws `Error` if format is invalid | `string\|null`         |
 | `import({mixed} data)`               | Imports the given data and appends it to the current roll log, returning the updated log. Throws `Error` if data type is invalid | `DiceRoll[]`          |
-| `roll({String} ...notation)`         | Rolls the dice notation returning the rolls. You can pass in multiple notations (i.e `roll('d6', '2d8')`) | `DiceRoll|DiceRoll[]` |
+| `roll({String} ...notation)`         | Rolls the dice notation returning the rolls. You can pass in multiple notations (i.e `roll('d6', '2d8')`) | `DiceRoll\|DiceRoll[]` |
 | `toJSON()`                           | Returns a JSON serialisable version of the object. Called automatically when using `JSON.stringify(roller)` | `Object`              |
 | `toString()`                         | Returns a string representation of the object (See `output` property). Called automatically when the object is cast to a string (ie. `Rolled: ${diceroller}`) | `string`              |
 | ~~`rollMany({String[]} notations)`~~ | ~~**Deprecated (Removed in v4.0.0)** use `roll()` method instead.~~ |                       |
@@ -692,7 +692,7 @@ roll.export();
 
 | Method                            | Description                                                  | Return        |
 | --------------------------------- | ------------------------------------------------------------ | ------------- |
-| `export({exportFormats=} format)` | Exports the `DiceRoll` in the specified format. Throes `Error` if format is invalid | `string|null` |
+| `export({exportFormats=} format)` | Exports the `DiceRoll` in the specified format. Throws `Error` if format is invalid | `string\|null` |
 | `hasRolls()`                      | Returns whether the object has rolled dice or not            | `boolean`     |
 | `rolls()`                         | Rolls the dice for the existing notation and returns the results. Useful if you want to re-roll the dice, but usually better to create a new `DiceRoll` instance instead | `[]`          |
 | `toJSON()`                        | Returns a JSON serialisable version of the object. Called automatically when using `JSON.stringify(diceroll)` | `Object`      |
@@ -721,7 +721,7 @@ const diceRoll = DiceRoll.import(data);
 
 | Method                                 | Description                                                  | Return     |
 | -------------------------------------- | ------------------------------------------------------------ | ---------- |
-| `import({{}|string|DiceRoll} data)`    | Imports the given data and creates a new dice roll           | `DiceRoll` |
+| `import({{}\|string\|DiceRoll} data)`    | Imports the given data and creates a new dice roll           | `DiceRoll` |
 | ~~`parseNotation({String} notation)`~~ | ~~**Deprecated (Removed in v4.0.0)** use `Parser` object instead~~ | ~~[]~~     |
 
 
