@@ -1,0 +1,10 @@
+# Ignore everything
+*
+
+# Except for these
+!/lib/*.js
+!/lib/**/*.js
+!CONTRIBUTING.md
+!licence.txt
+!package.json
+!readme.md

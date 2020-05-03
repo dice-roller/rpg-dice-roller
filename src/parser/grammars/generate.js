@@ -11,10 +11,10 @@ const grammar = fs.readFileSync(`${dir}grammar.pegjs`).toString();
 // generate the parser
 const parser = pegjs.generate(grammar, { output: 'source' });
 
-const output = `import * as Dice from '../../Dice.js';
-import * as Modifiers from '../../Modifiers.js';
-import ComparePoint from '../../ComparePoint.js';
-import RollGroup from '../../RollGroup.js';
+const output = `import * as Dice from '../../Dice';
+import * as Modifiers from '../../Modifiers';
+import ComparePoint from '../../ComparePoint';
+import RollGroup from '../../RollGroup';
 import math from 'mathjs-expression-parser';
 
 const parser = ${parser};
