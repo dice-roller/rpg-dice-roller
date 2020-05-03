@@ -1,7 +1,8 @@
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResults from '../../src/results/RollResults.js';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import ComparePoint from '../../src/ComparePoint';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResults from '../../src/results/RollResults';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ComparisonModifier', () => {
   describe('Initialisation', () => {
@@ -22,19 +23,19 @@ describe('ComparisonModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new ComparisonModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparisonModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparisonModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ComparisonModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -63,31 +64,31 @@ describe('ComparisonModifier', () => {
 
       expect(() => {
         mod.comparePoint = 'foo';
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = 1;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = 0;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = true;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = false;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = [new ComparePoint('>', 8)];
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
-        mod.comparePoint = {comparePoint: new ComparePoint('>', 8)};
-      }).toThrow('comparePoint must be instance of ComparePoint');
+        mod.comparePoint = { comparePoint: new ComparePoint('>', 8) };
+      }).toThrow(TypeError);
     });
 
     test('cannot unset compare point', () => {
@@ -95,11 +96,11 @@ describe('ComparisonModifier', () => {
 
       expect(() => {
         mod.comparePoint = null;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = undefined;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
     });
   });
 
@@ -169,7 +170,7 @@ describe('ComparisonModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

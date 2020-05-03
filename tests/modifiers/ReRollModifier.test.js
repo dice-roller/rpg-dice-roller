@@ -1,9 +1,11 @@
-import ReRollModifier from '../../src/modifiers/ReRollModifier.js';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResults from '../../src/results/RollResults.js';
-import RollResult from '../../src/results/RollResult.js';
+import ReRollModifier from '../../src/modifiers/ReRollModifier';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import ComparePoint from '../../src/ComparePoint';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResults from '../../src/results/RollResults';
+import RollResult from '../../src/results/RollResult';
+import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {
@@ -27,19 +29,19 @@ describe('ReRollModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new ReRollModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ReRollModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -137,11 +139,12 @@ describe('ReRollModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
-        8, 4, 2, 1, 6, 10
+        8, 4, 2, 1, 6, 10,
       ]);
       die = new StandardDice('6d10', 10, 6);
       mod = new ReRollModifier('r');
@@ -206,7 +209,7 @@ describe('ReRollModifier', () => {
     test('can re-roll with compare point `<=4`', () => {
       mod.comparePoint = new ComparePoint('<=', 4);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist, including the exploded ones
       expect(rolls.length).toEqual(6);
@@ -254,7 +257,7 @@ describe('ReRollModifier', () => {
       mod.comparePoint = new ComparePoint('<=', 4);
       mod.once = true;
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist, including the exploded ones
       expect(rolls.length).toEqual(6);
@@ -307,7 +310,7 @@ describe('ReRollModifier', () => {
 
       expect(() => {
         mod.run(results, die);
-      }).toThrow('Die must have more than 1 side to re-roll');
+      }).toThrow(DieActionValueError);
     });
   });
 });

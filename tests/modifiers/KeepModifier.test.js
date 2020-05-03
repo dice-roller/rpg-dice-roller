@@ -1,7 +1,8 @@
-import KeepModifier from '../../src/modifiers/KeepModifier.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import KeepModifier from '../../src/modifiers/KeepModifier';
+import Modifier from '../../src/modifiers/Modifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('KeepModifier', () => {
   describe('Initialisation', () => {
@@ -24,37 +25,37 @@ describe('KeepModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new KeepModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new KeepModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new KeepModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new KeepModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
 
     test('constructor requires end', () => {
       expect(() => {
         new KeepModifier('kh');
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier('kh', false);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier('kh', null);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier('kh', undefined);
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
     });
   });
 
@@ -88,23 +89,23 @@ describe('KeepModifier', () => {
 
       expect(() => {
         mod.end = 0;
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = 1;
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = 'foo';
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
         mod.end = ['h'];
-      }).toThrow('End must be "h" or "l"');
+      }).toThrow(RangeError);
 
       expect(() => {
-        mod.end = {end: 'h'};
-      }).toThrow('End must be "h" or "l"');
+        mod.end = { end: 'h' };
+      }).toThrow(RangeError);
     });
   });
 
@@ -115,23 +116,23 @@ describe('KeepModifier', () => {
 
       expect(() => {
         mod.qty = 'foo';
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = false;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = true;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = [];
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
-        mod.qty = {qty: 4};
-      }).toThrow('qty must be a positive integer');
+        mod.qty = { qty: 4 };
+      }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
@@ -143,15 +144,15 @@ describe('KeepModifier', () => {
 
       expect(() => {
         mod.qty = 0;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = -42;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.qty = -1;
-      }).toThrow('qty must be a positive integer');
+      }).toThrow(TypeError);
     });
   });
 
@@ -179,7 +180,8 @@ describe('KeepModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
@@ -207,7 +209,7 @@ describe('KeepModifier', () => {
           calculationValue: 4,
           initialValue: 4,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 4,
         }),
@@ -215,7 +217,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -223,7 +225,7 @@ describe('KeepModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -231,7 +233,7 @@ describe('KeepModifier', () => {
           calculationValue: 6,
           initialValue: 6,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 6,
         }),
@@ -263,7 +265,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -271,7 +273,7 @@ describe('KeepModifier', () => {
           calculationValue: 1,
           initialValue: 1,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 1,
         }),
@@ -295,7 +297,7 @@ describe('KeepModifier', () => {
           calculationValue: 8,
           initialValue: 8,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 8,
         }),
@@ -303,7 +305,7 @@ describe('KeepModifier', () => {
           calculationValue: 4,
           initialValue: 4,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 4,
         }),
@@ -311,7 +313,7 @@ describe('KeepModifier', () => {
           calculationValue: 2,
           initialValue: 2,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 2,
         }),
@@ -327,7 +329,7 @@ describe('KeepModifier', () => {
           calculationValue: 6,
           initialValue: 6,
           modifierFlags: 'd',
-          modifiers: ['drop',],
+          modifiers: ['drop'],
           useInTotal: false,
           value: 6,
         }),
@@ -439,7 +441,7 @@ describe('KeepModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

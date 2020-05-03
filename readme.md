@@ -1,8 +1,9 @@
 # rpg-dice-roller
 
-A JS based dice roller that can role various types of dice and modifiers, along with mathematical equations.
+A JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.
 
 [![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
+[![Coverage Status](https://coveralls.io/repos/github/GreenImp/rpg-dice-roller/badge.svg)](https://coveralls.io/github/GreenImp/rpg-dice-roller)
 
 
 ## Demo
@@ -82,7 +83,7 @@ const diceRoller = new DiceRoller();
 Rather than specifying the individual components, you can import everything like so:
 ```js
 // import everything and store it on the `rpgDiceRoller` scope
-const rpgDiceRoller = require('rpg-dice-roller/lib/umd/bundle.js');
+const rpgDiceRoller = require('rpg-dice-roller/lib/umd/bundle.min.js');
 
 // create a DiceRoller
 const roller = new rpgDiceRoller.DiceRoller();
@@ -164,7 +165,7 @@ d6   // roll a 6 sided dice
 
 #### Percentile dice (`d%`)
 
-Percentile dice roll a whole number between `0-100`, and are specified with the format `d%`.
+Percentile dice roll a whole number between `1-100`, and are specified with the format `d%`.
 This is a shorthand to a standard die with 100 sides; `d100`
 
 ```
@@ -215,7 +216,7 @@ Each exploded die shows as a separate roll in the list, like so:
 2d6!: [4, 6!, 6!, 2] = 18
 ```
 
-The second die rolled the highest value, and so it exploded - we roll again. The re-rolled die also exploded, so we roll a fourth time. The fourth role, however, did not explode, so we stop rolling.
+The second die rolled the highest value, and so it exploded - we roll again. The re-rolled die also exploded, so we roll a fourth time. The fourth roll, however, did not explode, so we stop rolling.
 
 If you want to change the number that a dice will explode on, you can use a [Compare Point](#Compare Point):
 
@@ -524,8 +525,11 @@ This notation will actually create a compound roll if you roll a 4.
 You can use mathematical operators to carry out equations with roll results
 
 ```
-d6*5     // roll a six sided dice and multiple the result by 5
-2d10/d20 // roll a 10 sided dice 2 times and add the results together, then roll a 20 sided dice and divide the two totals
+d6*5     // roll a 6 sided die and multiple the result by 5
+2d10/d20 // roll a 10 sided die 2 times and add the results together, then roll a 20 sided dice and divide the two totals
+3d20^4   // roll a 20 sided die 3 times and raise the result to the power of 4 (Exponent)
+3d20**4  // Equivalent to above (Exponent)
+d15%2    // roll a 15 sided die and return the remainder after division (Modulus)
 (4-2)d10 // subtract 2 from 4 (`2`) and then roll a 10 sided dice that many times
 3d(2*6)  // multiple 2 by 6 (`12`) and roll a dice with that many sides 3 times
 ```
@@ -542,14 +546,14 @@ Parenthesis are recognised anywhere in notations to group sections and define th
 
 #### Functions
 
-You can also use an array of mathematical formulas and functions.
-
-Internally it uses [Math.Js](https://mathjs.org), so you should be able to use any of its built in [arithmetic functions](https://mathjs.org/docs/reference/functions.html#arithmetic-functions).
+You can also use an array of mathematical formulas and functions. It works with many of the [Javascript math functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Math#Methods):
 
 ```
 round(4d10/3): round([3, 6, 1, 1]/3) = 3.7
 floor(4d10/3): round([3, 6, 1, 1]/3) = 3.6
 ceil(4d10/3): round([3, 6, 1, 1]/3) = 3.7
+abs(4d10-25): abs([3, 6, 1, 1]-25) = 14
+sqrt(4d10/3): = sqrt([3, 6, 1, 1]) = 1.91
 ```
 
 
@@ -609,9 +613,9 @@ roller.roll('d6');
 | Method                               | Description                                                  | Return                |
 | ------------------------------------ | ------------------------------------------------------------ | --------------------- |
 | `clearLog()`                         | Clears the roll history log.                                 | `void`                |
-| `export({exportFormats=} format)`    | Exports the `DiceRoller` object to the specified format. Throws `Error` if format is invalid | `string|null`         |
+| `export({exportFormats=} format)`    | Exports the `DiceRoller` object to the specified format. Throws `Error` if format is invalid | `string\|null`         |
 | `import({mixed} data)`               | Imports the given data and appends it to the current roll log, returning the updated log. Throws `Error` if data type is invalid | `DiceRoll[]`          |
-| `roll({String} ...notation)`         | Rolls the dice notation returning the rolls. You can pass in multiple notations (i.e `roll('d6', '2d8')`) | `DiceRoll|DiceRoll[]` |
+| `roll({String} ...notation)`         | Rolls the dice notation returning the rolls. You can pass in multiple notations (i.e `roll('d6', '2d8')`) | `DiceRoll\|DiceRoll[]` |
 | `toJSON()`                           | Returns a JSON serialisable version of the object. Called automatically when using `JSON.stringify(roller)` | `Object`              |
 | `toString()`                         | Returns a string representation of the object (See `output` property). Called automatically when the object is cast to a string (ie. `Rolled: ${diceroller}`) | `string`              |
 | ~~`rollMany({String[]} notations)`~~ | ~~**Deprecated (Removed in v4.0.0)** use `roll()` method instead.~~ |                       |
@@ -688,7 +692,7 @@ roll.export();
 
 | Method                            | Description                                                  | Return        |
 | --------------------------------- | ------------------------------------------------------------ | ------------- |
-| `export({exportFormats=} format)` | Exports the `DiceRoll` in the specified format. Throes `Error` if format is invalid | `string|null` |
+| `export({exportFormats=} format)` | Exports the `DiceRoll` in the specified format. Throws `Error` if format is invalid | `string\|null` |
 | `hasRolls()`                      | Returns whether the object has rolled dice or not            | `boolean`     |
 | `rolls()`                         | Rolls the dice for the existing notation and returns the results. Useful if you want to re-roll the dice, but usually better to create a new `DiceRoll` instance instead | `[]`          |
 | `toJSON()`                        | Returns a JSON serialisable version of the object. Called automatically when using `JSON.stringify(diceroll)` | `Object`      |
@@ -717,7 +721,7 @@ const diceRoll = DiceRoll.import(data);
 
 | Method                                 | Description                                                  | Return     |
 | -------------------------------------- | ------------------------------------------------------------ | ---------- |
-| `import({{}|string|DiceRoll} data)`    | Imports the given data and creates a new dice roll           | `DiceRoll` |
+| `import({{}\|string\|DiceRoll} data)`    | Imports the given data and creates a new dice roll           | `DiceRoll` |
 | ~~`parseNotation({String} notation)`~~ | ~~**Deprecated (Removed in v4.0.0)** use `Parser` object instead~~ | ~~[]~~     |
 
 

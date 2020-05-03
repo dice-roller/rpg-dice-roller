@@ -1,8 +1,9 @@
-import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
+import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier';
+import ComparePoint from '../../src/ComparePoint';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('CriticalSuccessModifier', () => {
   describe('Initialisation', () => {
@@ -24,19 +25,19 @@ describe('CriticalSuccessModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new CriticalSuccessModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new CriticalSuccessModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new CriticalSuccessModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new CriticalSuccessModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -65,31 +66,31 @@ describe('CriticalSuccessModifier', () => {
 
       expect(() => {
         mod.comparePoint = 'foo';
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = 1;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = 0;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = true;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = false;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = [new ComparePoint('>', 8)];
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
-        mod.comparePoint = {comparePoint: new ComparePoint('>', 8)};
-      }).toThrow('comparePoint must be instance of ComparePoint');
+        mod.comparePoint = { comparePoint: new ComparePoint('>', 8) };
+      }).toThrow(TypeError);
     });
 
     test('cannot unset compare point', () => {
@@ -97,11 +98,11 @@ describe('CriticalSuccessModifier', () => {
 
       expect(() => {
         mod.comparePoint = null;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
 
       expect(() => {
         mod.comparePoint = undefined;
-      }).toThrow('comparePoint must be instance of ComparePoint');
+      }).toThrow(TypeError);
     });
   });
 
@@ -241,7 +242,7 @@ describe('CriticalSuccessModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

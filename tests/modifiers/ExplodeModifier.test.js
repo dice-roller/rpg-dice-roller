@@ -1,9 +1,11 @@
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier.js';
-import RollResults from '../../src/results/RollResults.js';
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResult from '../../src/results/RollResult.js';
+import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
+import ComparePoint from '../../src/ComparePoint';
+import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResult from '../../src/results/RollResult';
+import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ExplodeModifier', () => {
   describe('Initialisation', () => {
@@ -28,19 +30,19 @@ describe('ExplodeModifier', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new ExplodeModifier();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new ExplodeModifier(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -151,17 +153,18 @@ describe('ExplodeModifier', () => {
   });
 
   describe('Run', () => {
-    let mod, die, results;
+    let mod; let die; let
+      results;
 
     beforeEach(() => {
       results = new RollResults([
-        8, 4, 2, 1, 6, 10
+        8, 4, 2, 1, 6, 10,
       ]);
       die = new StandardDice('6d10', 10, 6);
       mod = new ExplodeModifier('!');
 
       jest.spyOn(StandardDice.prototype, 'rollOnce')
-        //.mockResolvedValue(new RollResult(1));
+        // .mockResolvedValue(new RollResult(1));
         .mockImplementationOnce(() => new RollResult(10))
         .mockImplementationOnce(() => new RollResult(2))
         .mockImplementationOnce(() => new RollResult(5))
@@ -221,7 +224,7 @@ describe('ExplodeModifier', () => {
     test('can explode with compare point `>=8`', () => {
       mod.comparePoint = new ComparePoint('>=', 8);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist, including the exploded ones
       expect(rolls.length).toEqual(9);
@@ -286,7 +289,7 @@ describe('ExplodeModifier', () => {
     test('can explode with compare point `<3`', () => {
       mod.comparePoint = new ComparePoint('<', 3);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist, including the exploded ones
       expect(rolls.length).toEqual(9);
@@ -351,7 +354,7 @@ describe('ExplodeModifier', () => {
     test('can compound with compare point `>5`', () => {
       mod = new ExplodeModifier('!!', new ComparePoint('>', 5), true);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist
       expect(rolls.length).toEqual(6);
@@ -398,7 +401,7 @@ describe('ExplodeModifier', () => {
     test('can penetrate with compare point `<=4`', () => {
       mod = new ExplodeModifier('!p', new ComparePoint('<=', 4), false, true);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist, including the exploded ones
       expect(rolls.length).toEqual(10);
@@ -469,7 +472,7 @@ describe('ExplodeModifier', () => {
     test('can compound and penetrate with compare point >6', () => {
       mod = new ExplodeModifier('!!p', new ComparePoint('>', 6), true, true);
 
-      const rolls = mod.run(results, die).rolls;
+      const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist
       expect(rolls.length).toEqual(6);
@@ -522,7 +525,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.run(results, die);
-      }).toThrow('Die must have more than 1 side to explode');
+      }).toThrow(DieActionValueError);
     });
   });
 
@@ -532,7 +535,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change compound value', () => {
@@ -540,7 +543,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.compound = true;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change penetrate value', () => {
@@ -548,7 +551,7 @@ describe('ExplodeModifier', () => {
 
       expect(() => {
         mod.penetrate = true;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });

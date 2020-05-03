@@ -1,4 +1,4 @@
-import RollResult from '../../src/results/RollResult.js';
+import RollResult from '../../src/results/RollResult';
 
 describe('RollResult', () => {
   describe('Initialisation', () => {
@@ -21,19 +21,19 @@ describe('RollResult', () => {
     test('constructor requires value', () => {
       expect(() => {
         new RollResult();
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(false);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(null);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult(undefined);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
     });
 
     test('constructor accepts object of values', () => {
@@ -75,7 +75,7 @@ describe('RollResult', () => {
 
       expect(() => {
         result.initialValue = 5;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('must be numeric', () => {
@@ -86,23 +86,23 @@ describe('RollResult', () => {
 
       expect(() => {
         new RollResult('foo');
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult([]);
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         new RollResult({});
-      }).toThrow('Result value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
-        new RollResult({initialValue: 'foo'});
-      }).toThrow('Result value is invalid');
+        new RollResult({ initialValue: 'foo' });
+      }).toThrow(TypeError);
 
       expect(() => {
-        new RollResult({value: 'foo'});
-      }).toThrow('Result value is invalid');
+        new RollResult({ value: 'foo' });
+      }).toThrow(TypeError);
     });
   });
 
@@ -217,28 +217,28 @@ describe('RollResult', () => {
       result.calculationValue = 0;
       expect(result.calculationValue).toBe(0);
 
-      result.calculationValue = 360
+      result.calculationValue = 360;
       expect(result.calculationValue).toBe(360);
 
       expect(() => {
         result.calculationValue = 'foo';
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = [];
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
         result.calculationValue = {};
-      }).toThrow('Result calculation value is invalid');
+      }).toThrow(TypeError);
 
       expect(() => {
-        result.calculationValue = {initialValue: 'foo'};
-      }).toThrow('Result calculation value is invalid');
+        result.calculationValue = { initialValue: 'foo' };
+      }).toThrow(TypeError);
 
       expect(() => {
-        result.calculationValue = {value: 'foo'};
-      }).toThrow('Result calculation value is invalid');
+        result.calculationValue = { value: 'foo' };
+      }).toThrow(TypeError);
     });
 
     test('when unset it should return the value property', () => {
@@ -279,7 +279,7 @@ describe('RollResult', () => {
     test('can set in constructor', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop',]);
+      expect(result.modifiers).toEqual(['explode', 'drop']);
     });
 
     test('setting in constructor calls setter', () => {
@@ -296,7 +296,7 @@ describe('RollResult', () => {
     test('can change', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop',]);
+      expect(result.modifiers).toEqual(['explode', 'drop']);
 
       const mods = [
         'critical-success',
@@ -311,17 +311,17 @@ describe('RollResult', () => {
     test('can append', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop',]);
+      expect(result.modifiers).toEqual(['explode', 'drop']);
 
       result.modifiers.push('re-roll');
 
-      expect(result.modifiers).toEqual(['explode', 'drop', 're-roll',]);
+      expect(result.modifiers).toEqual(['explode', 'drop', 're-roll']);
     });
 
     test('can replace item', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop',]);
+      expect(result.modifiers).toEqual(['explode', 'drop']);
 
       result.modifiers[0] = 're-roll';
 
@@ -329,65 +329,63 @@ describe('RollResult', () => {
     });
 
     test('must be array', () => {
-      const errorMsg = 'Modifiers must be an array of modifier names';
       const result = new RollResult(4);
 
       expect(() => {
         result.modifiers = 'foo';
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = {};
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = 0;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = -34;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = 1;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = true;
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
     });
 
     test('items must be strings', () => {
-      const errorMsg = 'Modifiers must be an array of modifier names';
       const result = new RollResult(4);
 
       expect(() => {
         result.modifiers = ['drop', 1];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', {}];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = [false, 'drop'];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', undefined];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = ['drop', null];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
 
       expect(() => {
         result.modifiers = [true];
-      }).toThrowError(errorMsg);
+      }).toThrow(TypeError);
     });
 
     test('can unset', () => {
-      let result = new RollResult(4, ['explode', 'compound']);
+      const result = new RollResult(4, ['explode', 'compound']);
 
       result.modifiers = [];
       expect(result.modifiers).toEqual([]);
@@ -415,7 +413,7 @@ describe('RollResult', () => {
     });
 
     test('modifier flags are set correctly', () => {
-      let result = new RollResult(4, ['explode', 'compound']);
+      const result = new RollResult(4, ['explode', 'compound']);
 
       expect(result.modifierFlags).toEqual('!!');
 
@@ -502,7 +500,7 @@ describe('RollResult', () => {
 
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const result = new RollResult(4, ['explode', 'compound', 'drop',], false);
+      const result = new RollResult(4, ['explode', 'compound', 'drop'], false);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -511,7 +509,9 @@ describe('RollResult', () => {
         calculationValue: 4,
         initialValue: 4,
         modifierFlags: '!!d',
-        modifiers: ['explode', 'compound', 'drop',],
+        modifiers: [
+          'explode', 'compound', 'drop',
+        ],
         type: 'result',
         useInTotal: false,
         value: 4,
@@ -523,7 +523,9 @@ describe('RollResult', () => {
         calculationValue: 3,
         initialValue: 4,
         modifierFlags: '!!d',
-        modifiers: ['explode', 'compound', 'drop',],
+        modifiers: [
+          'explode', 'compound', 'drop',
+        ],
         type: 'result',
         useInTotal: false,
         value: 3,
@@ -535,7 +537,9 @@ describe('RollResult', () => {
         calculationValue: 75,
         initialValue: 4,
         modifierFlags: '!!d',
-        modifiers: ['explode', 'compound', 'drop',],
+        modifiers: [
+          'explode', 'compound', 'drop',
+        ],
         type: 'result',
         useInTotal: false,
         value: 3,
@@ -547,7 +551,9 @@ describe('RollResult', () => {
         calculationValue: 75,
         initialValue: 4,
         modifierFlags: '**',
-        modifiers: ['critical-success'],
+        modifiers: [
+          'critical-success',
+        ],
         type: 'result',
         useInTotal: false,
         value: 3,
@@ -567,7 +573,9 @@ describe('RollResult', () => {
     });
 
     test('toString output is correct', () => {
-      const result = new RollResult(4, ['explode', 'compound', 'drop',]);
+      const result = new RollResult(4, [
+        'explode', 'compound', 'drop',
+      ]);
 
       expect(result.toString()).toEqual('4!!d');
 

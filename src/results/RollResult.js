@@ -1,222 +1,228 @@
-import {diceUtils} from "../utilities/utils.js";
+import { diceUtils } from '../utilities/utils';
 
-const RollResult = (() => {
-  const _calculationValue = Symbol('calculation-value');
-  const _modifiers = Symbol('modifiers');
-  const _initialValue = Symbol('initial-value');
-  const _useInTotal = Symbol('use-in-total');
-  const _value = Symbol('value');
+const calculationValueSymbol = Symbol('calculation-value');
+const modifiersSymbol = Symbol('modifiers');
+const initialValueSymbol = Symbol('initial-value');
+const useInTotalSymbol = Symbol('use-in-total');
+const valueSymbol = Symbol('value');
 
-  class RollResult{
-    /**
-     *
-     * @param {number|{value: Number, initialValue: number}} value The value rolled
-     * @param {string[]=} modifiers List of modifier names that affect this roll
-     * @param {boolean=} useInTotal Whether to include the roll value when calculating totals
-     */
-    constructor(value, modifiers, useInTotal = true){
-      if (diceUtils.isNumeric(value)) {
-        this[_initialValue] = parseInt(value, 10);
-      } else if (value && (typeof value === 'object') && !Array.isArray(value)) {
-        // ensure that we have a valid value
-        const initialVal = diceUtils.isNumeric(value.initialValue) ? value.initialValue : value.value;
-        if (!diceUtils.isNumeric(initialVal)) {
-          throw new Error(`Result value is invalid: ${initialVal}`);
-        }
-
-        this[_initialValue] = parseInt(initialVal, 10);
-
-        if (diceUtils.isNumeric(value.value) && (parseInt(value.value, 10) !== this[_initialValue])) {
-          this.value = value.value;
-        }
-
-        if (diceUtils.isNumeric(value.calculationValue) && (parseFloat(value.calculationValue) !== this.value)) {
-          this.calculationValue = value.calculationValue;
-        }
-
-        if (Array.isArray(value.modifiers) && value.modifiers.length){
-          modifiers = value.modifiers;
-        }
-
-        if (typeof value.useInTotal === 'boolean') {
-          useInTotal = value.useInTotal;
-        }
-      } else {
-        throw new Error(`Result value is invalid: ${value}`);
-      }
+class RollResult {
+  /**
+   *
+   * @param {number|{value: Number, initialValue: number}} value The value rolled
+   * @param {string[]=} modifiers List of modifier names that affect this roll
+   * @param {boolean=} useInTotal Whether to include the roll value when calculating totals
+   */
+  constructor(value, modifiers, useInTotal = true) {
+    if (diceUtils.isNumeric(value)) {
+      this[initialValueSymbol] = parseInt(value, 10);
 
       this.modifiers = modifiers || [];
       this.useInTotal = useInTotal;
-    }
-
-    /**
-     * Returns the value to use in calculations
-     *
-     * @returns {number}
-     */
-    get calculationValue(){
-      return diceUtils.isNumeric(this[_calculationValue]) ? parseFloat(this[_calculationValue]) : this.value;
-    }
-
-    /**
-     * Sets the value to use in calculations
-     *
-     * @param value
-     */
-    set calculationValue(value){
-      const isNumeric = diceUtils.isNumeric(value);
-      if (value && !isNumeric) {
-        throw new Error(`Result calculation value is invalid: ${value}`);
+    } else if (value && (typeof value === 'object') && !Array.isArray(value)) {
+      // ensure that we have a valid value
+      const initialVal = diceUtils.isNumeric(value.initialValue) ? value.initialValue : value.value;
+      if (!diceUtils.isNumeric(initialVal)) {
+        throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
-      this[_calculationValue] = isNumeric ? parseFloat(value) : null;
-    }
+      this[initialValueSymbol] = parseInt(initialVal, 10);
 
-    /**
-     * The initial roll value before any modifiers.
-     * Not often used, you probably want `value` instead.
-     *
-     * @returns {Number}
-     */
-    get initialValue(){
-      return this[_initialValue];
-    }
-
-    /**
-     * Returns the flags for the modifiers that affect the roll
-     *
-     * @returns {string}
-     */
-    get modifierFlags(){
-      // @todo need a better way of mapping modifiers to symbols
-      return this.modifiers.reduce((acc, flag) => {
-        switch (flag) {
-          case 'compound':
-          case 'explode':
-            flag = '!';
-            break;
-          case 'critical-failure':
-            flag = '__';
-            break;
-          case 'critical-success':
-            flag = '**';
-            break;
-          case 'drop':
-            flag = 'd';
-            break;
-          case 'penetrate':
-            flag = 'p';
-            break;
-          case 're-roll':
-            flag = 'r';
-            break;
-          case 're-roll-once':
-            flag = 'ro';
-            break;
-          case 'target-failure':
-            flag = '_';
-            break;
-          case 'target-success':
-            flag = '*';
-            break;
-        }
-
-        return acc+flag
-      }, '');
-    }
-
-    /**
-     * Returns the modifiers that affect the roll
-     *
-     * @returns {string[]}
-     */
-    get modifiers(){
-      return this[_modifiers] || [];
-    }
-
-    /**
-     * Set the modifiers that affect the roll
-     *
-     * @param value
-     */
-    set modifiers(value){
-      if ((value || (0 === value)) && (!Array.isArray(value) || value.some(item => typeof item !== 'string'))) {
-        throw new Error(`Modifiers must be an array of modifier names: ${value}`);
+      if (
+        diceUtils.isNumeric(value.value)
+        && (parseInt(value.value, 10) !== this[initialValueSymbol])
+      ) {
+        this.value = value.value;
       }
 
-      this[_modifiers] = value || [];
-    }
-
-    /**
-     * Returns the useInTotal flag
-     *
-     * @returns {boolean}
-     */
-    get useInTotal(){
-      return !!this[_useInTotal];
-    }
-
-    /**
-     * Sets the useInTotal flag
-     *
-     * @param {boolean} value
-     */
-    set useInTotal(value){
-      this[_useInTotal] = !!value;
-    }
-
-    /**
-     * Roll value after modifiers have affected it
-     *
-     * @returns {number}
-     */
-    get value(){
-      return diceUtils.isNumeric(this[_value]) ? this[_value] : this[_initialValue];
-    }
-
-    /**
-     * Sets the value
-     *
-     * @param value
-     */
-    set value(value){
-      if (!diceUtils.isNumeric(value)) {
-        throw new Error(`Result value is invalid: ${value}`);
+      if (
+        diceUtils.isNumeric(value.calculationValue)
+        && (parseFloat(value.calculationValue) !== this.value)
+      ) {
+        this.calculationValue = value.calculationValue;
       }
 
-      this[_value] = parseInt(value, 10);
-    }
-
-    /**
-     * Returns an object for JSON serialising
-     *
-     * @returns {{}}
-     */
-    toJSON(){
-      const {calculationValue, initialValue, modifierFlags, modifiers, useInTotal, value} = this;
-
-      return {
-        calculationValue,
-        initialValue,
-        modifierFlags,
-        modifiers,
-        type: 'result',
-        useInTotal,
-        value,
-      };
-    }
-
-    /**
-     * Returns the String representation of the object
-     *
-     * @returns {string}
-     */
-    toString(){
-      return this.value + this.modifierFlags;
+      this.modifiers = Array.isArray(value.modifiers) ? value.modifiers : (modifiers || []);
+      this.useInTotal = (typeof value.useInTotal === 'boolean') ? value.useInTotal : (useInTotal || false);
+    } else {
+      throw new TypeError(`Result value is invalid: ${value}`);
     }
   }
 
-  return RollResult;
-})();
+  /**
+   * Returns the value to use in calculations
+   *
+   * @returns {number}
+   */
+  get calculationValue() {
+    return diceUtils.isNumeric(this[calculationValueSymbol])
+      ? parseFloat(this[calculationValueSymbol])
+      : this.value;
+  }
+
+  /**
+   * Sets the value to use in calculations
+   *
+   * @param value
+   */
+  set calculationValue(value) {
+    const isNumeric = diceUtils.isNumeric(value);
+    if (value && !isNumeric) {
+      throw new TypeError(`Result calculation value is invalid: ${value}`);
+    }
+
+    this[calculationValueSymbol] = isNumeric ? parseFloat(value) : null;
+  }
+
+  /**
+   * The initial roll value before any modifiers.
+   * Not often used, you probably want `value` instead.
+   *
+   * @returns {Number}
+   */
+  get initialValue() {
+    return this[initialValueSymbol];
+  }
+
+  /**
+   * Returns the flags for the modifiers that affect the roll
+   *
+   * @returns {string}
+   */
+  get modifierFlags() {
+    // @todo need a better way of mapping modifiers to symbols
+    return this.modifiers.reduce((acc, modifier) => {
+      let flag;
+
+      switch (modifier) {
+        case 'compound':
+        case 'explode':
+          flag = '!';
+          break;
+        case 'critical-failure':
+          flag = '__';
+          break;
+        case 'critical-success':
+          flag = '**';
+          break;
+        case 'drop':
+          flag = 'd';
+          break;
+        case 'penetrate':
+          flag = 'p';
+          break;
+        case 're-roll':
+          flag = 'r';
+          break;
+        case 're-roll-once':
+          flag = 'ro';
+          break;
+        case 'target-failure':
+          flag = '_';
+          break;
+        case 'target-success':
+          flag = '*';
+          break;
+        default:
+          flag = modifier;
+          break;
+      }
+
+      return acc + flag;
+    }, '');
+  }
+
+  /**
+   * Returns the modifiers that affect the roll
+   *
+   * @returns {string[]}
+   */
+  get modifiers() {
+    return this[modifiersSymbol] || [];
+  }
+
+  /**
+   * Set the modifiers that affect the roll
+   *
+   * @param value
+   */
+  set modifiers(value) {
+    if ((value || (value === 0)) && (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))) {
+      throw new TypeError(`modifiers must be an array of modifier names: ${value}`);
+    }
+
+    this[modifiersSymbol] = value || [];
+  }
+
+  /**
+   * Returns the useInTotal flag
+   *
+   * @returns {boolean}
+   */
+  get useInTotal() {
+    return !!this[useInTotalSymbol];
+  }
+
+  /**
+   * Sets the useInTotal flag
+   *
+   * @param {boolean} value
+   */
+  set useInTotal(value) {
+    this[useInTotalSymbol] = !!value;
+  }
+
+  /**
+   * Roll value after modifiers have affected it
+   *
+   * @returns {number}
+   */
+  get value() {
+    return diceUtils.isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
+  }
+
+  /**
+   * Sets the value
+   *
+   * @param value
+   */
+  set value(value) {
+    if (!diceUtils.isNumeric(value)) {
+      throw new TypeError(`Result value is invalid: ${value}`);
+    }
+
+    this[valueSymbol] = parseInt(value, 10);
+  }
+
+  /**
+   * Returns an object for JSON serialising
+   *
+   * @returns {{}}
+   */
+  toJSON() {
+    const {
+      calculationValue, initialValue, modifierFlags, modifiers, useInTotal, value,
+    } = this;
+
+    return {
+      calculationValue,
+      initialValue,
+      modifierFlags,
+      modifiers,
+      type: 'result',
+      useInTotal,
+      value,
+    };
+  }
+
+  /**
+   * Returns the String representation of the object
+   *
+   * @returns {string}
+   */
+  toString() {
+    return this.value + this.modifierFlags;
+  }
+}
 
 export default RollResult;

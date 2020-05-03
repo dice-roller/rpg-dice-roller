@@ -1,10 +1,13 @@
-import DiceRoll from '../src/DiceRoll.js';
-import Parser from '../src/parser/Parser.js';
-import StandardDice from '../src/dice/StandardDice.js';
-import RollResults from '../src/results/RollResults.js';
-import RollResult from '../src/results/RollResult.js';
-import {exportFormats} from "../src/utilities/utils.js";
-import math from "mathjs-expression-parser";
+import math from 'mathjs-expression-parser';
+import DiceRoll from '../src/DiceRoll';
+import Parser from '../src/parser/Parser';
+import StandardDice from '../src/dice/StandardDice';
+import RollResults from '../src/results/RollResults';
+import RollResult from '../src/results/RollResult';
+import { exportFormats } from '../src/utilities/utils';
+import NotationError from '../src/exceptions/NotationError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import DataFormatError from '../src/exceptions/DataFormatError';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -32,7 +35,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.notation = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('can be string', () => {
@@ -42,7 +45,7 @@ describe('DiceRoll', () => {
     });
 
     test('can be object with notation property', () => {
-      const diceRoll = new DiceRoll({notation: '3d%*(4+2)dF'});
+      const diceRoll = new DiceRoll({ notation: '3d%*(4+2)dF' });
 
       expect(diceRoll.notation).toBe('3d%*(4+2)dF');
     });
@@ -50,53 +53,53 @@ describe('DiceRoll', () => {
     test('throws error if invalid type', () => {
       expect(() => {
         new DiceRoll(['4d10']);
-      }).toThrow('Notation is not valid');
+      }).toThrow(NotationError);
 
       expect(() => {
-        new DiceRoll({notation: []});
-      }).toThrow('Notation is not valid');
+        new DiceRoll({ notation: [] });
+      }).toThrow(NotationError);
 
       expect(() => {
-        new DiceRoll({notation: {}});
-      }).toThrow('Notation is not valid');
+        new DiceRoll({ notation: {} });
+      }).toThrow(NotationError);
     });
 
     test('is required', () => {
       expect(() => {
         new DiceRoll();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new DiceRoll({});
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
-        new DiceRoll({notation: null,});
-      }).toThrow('Notation is required');
+        new DiceRoll({ notation: null });
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
-        new DiceRoll({notation: false,});
-      }).toThrow('Notation is required');
+        new DiceRoll({ notation: false });
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
-        new DiceRoll({notation: undefined,});
-      }).toThrow('Notation is required');
+        new DiceRoll({ notation: undefined });
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
-        new DiceRoll({notation: 0,});
-      }).toThrow('Notation is required');
+        new DiceRoll({ notation: 0 });
+      }).toThrow(RequiredArgumentError);
     });
 
     test('cannot change value', () => {
@@ -104,7 +107,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.notation = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -119,7 +122,7 @@ describe('DiceRoll', () => {
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with object notation
-      new DiceRoll({notation});
+      new DiceRoll({ notation });
       expect(spy).toHaveBeenCalledWith(notation);
       expect(spy).toHaveBeenCalledTimes(2);
 
@@ -137,7 +140,7 @@ describe('DiceRoll', () => {
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with string notation
-      new DiceRoll({notation: '4d8'});
+      new DiceRoll({ notation: '4d8' });
       expect(spy).toHaveBeenCalledTimes(2);
 
       // remove the spy
@@ -155,7 +158,7 @@ describe('DiceRoll', () => {
       spy.mockReset();
 
       // initialise with object notation
-      new DiceRoll({notation: '(2*3)d6!p/4+10d%dh2-5d3'});
+      new DiceRoll({ notation: '(2*3)d6!p/4+10d%dh2-5d3' });
       expect(spy).toHaveBeenCalledTimes(3); // once for each dice notation
 
       // remove the spy
@@ -185,7 +188,7 @@ describe('DiceRoll', () => {
 
       const results = diceRoll.roll();
 
-      expect(results).toEqual([roll1, roll2,]);
+      expect(results).toEqual([roll1, roll2]);
 
       jest.restoreAllMocks();
     });
@@ -214,7 +217,7 @@ describe('DiceRoll', () => {
           ],
           [
             new RollResult(8),
-          ]
+          ],
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
@@ -230,11 +233,11 @@ describe('DiceRoll', () => {
       test('can be array of numbers', () => {
         const rolls = [
           [2, 8, 5, 4],
-          [8]
+          [8],
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
-          rolls: rolls,
+          rolls,
         });
 
         expect(diceRoll.rolls).toEqual([
@@ -254,7 +257,7 @@ describe('DiceRoll', () => {
         ];
         const diceRoll = new DiceRoll({
           notation: '3d%*(4+2)dF',
-          rolls: rolls,
+          rolls,
         });
 
         expect(diceRoll.rolls).toEqual([
@@ -283,21 +286,21 @@ describe('DiceRoll', () => {
             notation: '3d6',
             rolls: 'foo',
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
 
         expect(() => {
           new DiceRoll({
             notation: '3d6',
             rolls: {},
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
 
         expect(() => {
           new DiceRoll({
             notation: '3d6',
             rolls: true,
           });
-        }).toThrow('Rolls must be an Array');
+        }).toThrow(TypeError);
       });
 
       test('does not roll if rolls passed to constructor', () => {
@@ -331,7 +334,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.rolls = [new RollResults([7])];
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -352,8 +355,10 @@ describe('DiceRoll', () => {
   describe('Total', () => {
     test('calls RollResults value', () => {
       const spy = jest.spyOn(RollResults.prototype, 'value', 'get');
+      const diceRoll = new DiceRoll('4d8');
 
-      (new DiceRoll('4d8')).total;
+      // call the total getter
+      expect(diceRoll.total).toBeGreaterThanOrEqual(1);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -443,7 +448,7 @@ describe('DiceRoll', () => {
 
       expect(() => {
         diceRoll.total = 57;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 
@@ -552,17 +557,18 @@ describe('DiceRoll', () => {
   });
 
   describe('Export', () => {
-    let notation, diceRoll, rolls;
+    let notation; let diceRoll; let
+      rolls;
 
     beforeEach(() => {
       notation = '4d8+6d10';
 
       rolls = [
         new RollResults([
-          7, 4, 3, 6
+          7, 4, 3, 6,
         ]),
         new RollResults([
-          8, 4, 2, 1, 6, 10
+          8, 4, 2, 1, 6, 10,
         ]),
       ];
 
@@ -600,7 +606,7 @@ describe('DiceRoll', () => {
     test('Invalid export format throws error', () => {
       expect(() => {
         diceRoll.export('foo');
-      }).toThrow('Unrecognised export format');
+      }).toThrow(TypeError);
     });
   });
 
@@ -612,27 +618,25 @@ describe('DiceRoll', () => {
     });
 
     test('requires data', () => {
-      const errorMsg = 'No data to import';
-
       expect(() => {
         DiceRoll.import();
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(false);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(null);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(undefined);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         DiceRoll.import(0);
-      }).toThrow(errorMsg);
+      }).toThrow(RequiredArgumentError);
     });
 
     test('can import JSON encoded string', () => {
@@ -664,19 +668,17 @@ describe('DiceRoll', () => {
     });
 
     test('invalid format throws error', () => {
-      const errorMsg = 'Unrecognised import format for data';
-
       expect(() => {
         DiceRoll.import('foo');
-      }).toThrow();
+      }).toThrow(DataFormatError);
 
       expect(() => {
         DiceRoll.import(true);
-      }).toThrow(errorMsg);
+      }).toThrow(DataFormatError);
 
       expect(() => {
         DiceRoll.import(1);
-      }).toThrow(errorMsg);
+      }).toThrow(DataFormatError);
     });
   });
 });

@@ -1,8 +1,9 @@
-import StandardDice from '../../src/dice/StandardDice.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
-import Modifier from '../../src/modifiers/Modifier.js';
-import FudgeDice from '../../src/dice/FudgeDice.js';
+import StandardDice from '../../src/dice/StandardDice';
+import RollResult from '../../src/results/RollResult';
+import RollResults from '../../src/results/RollResults';
+import Modifier from '../../src/modifiers/Modifier';
+import FudgeDice from '../../src/dice/FudgeDice';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {
@@ -31,19 +32,19 @@ describe('FudgeDice', () => {
     test('constructor requires notation', () => {
       expect(() => {
         new FudgeDice();
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new FudgeDice(false);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new FudgeDice(null);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
 
       expect(() => {
         new FudgeDice(undefined);
-      }).toThrow('Notation is required');
+      }).toThrow(RequiredArgumentError);
     });
   });
 
@@ -68,13 +69,13 @@ describe('FudgeDice', () => {
     });
 
     test('can set sides to 2', () => {
-      let die = new FudgeDice('4dF', 2);
+      const die = new FudgeDice('4dF', 2);
       expect(die.sides).toEqual('F.2');
       expect(die.nonBlanks).toBe(2);
     });
 
     test('can set sides to 1', () => {
-      let die = new FudgeDice('4dF', 1);
+      const die = new FudgeDice('4dF', 1);
       expect(die.sides).toEqual('F.1');
       expect(die.nonBlanks).toBe(1);
     });
@@ -82,58 +83,58 @@ describe('FudgeDice', () => {
     test('sides must be 1 or 2', () => {
       expect(() => {
         new FudgeDice('4dF', 0);
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
 
       expect(() => {
         new FudgeDice('4dF', 3);
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
 
       expect(() => {
         new FudgeDice('4dF', -1);
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
 
       expect(() => {
         new FudgeDice('4dF', 6);
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
 
       expect(() => {
         new FudgeDice('4dF', []);
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
 
       expect(() => {
-        new FudgeDice('4dF', {nonBlanks: 2});
-      }).toThrow('nonBlanks must be 1 or 2');
+        new FudgeDice('4dF', { nonBlanks: 2 });
+      }).toThrow(RangeError);
 
       expect(() => {
         new FudgeDice('4dF', 'foo');
-      }).toThrow('nonBlanks must be 1 or 2');
+      }).toThrow(RangeError);
     });
   });
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      const die = new FudgeDice('4dF', null, 8);
+      let die = new FudgeDice('4dF', null, 8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, 'foo');
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, 'foo');
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, false);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, false);
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, true);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, true);
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, []);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, []);
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, {qty: 4});
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, { qty: 4 });
+      }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
@@ -144,23 +145,37 @@ describe('FudgeDice', () => {
       expect(die.qty).toBe(324);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, 0);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, 0);
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, -42);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, -42);
+      }).toThrow(TypeError);
 
       expect(() => {
-        const die = new FudgeDice('4dF', null, -1);
-      }).toThrow('qty must be a positive integer');
+        die = new FudgeDice('4dF', null, -1);
+      }).toThrow(TypeError);
     });
   });
 
   describe('Modifiers', () => {
+    test('setting modifiers in constructor calls setter', () => {
+      const spy = jest.spyOn(FudgeDice.prototype, 'modifiers', 'set');
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
+
+      new FudgeDice('4dF', null, 1, modifiers);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
     test('can set modifiers with Map', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
-      const die = new FudgeDice('4dF', null, 1, modifiers);
+      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
+      const die = new FudgeDice('4dF', null, 1);
+
+      die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers).toEqual(modifiers);
@@ -168,7 +183,9 @@ describe('FudgeDice', () => {
 
     test('can set modifiers with Object', () => {
       const modifier = new Modifier('m');
-      const die = new FudgeDice('4dF', null, 1, {foo: modifier});
+      const die = new FudgeDice('4dF', null, 1);
+
+      die.modifiers = { foo: modifier };
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('foo')).toEqual(modifier);
@@ -176,7 +193,9 @@ describe('FudgeDice', () => {
 
     test('can set modifiers with Array', () => {
       const modifiers = [new Modifier('m')];
-      const die = new FudgeDice('4dF', null, 1, modifiers);
+      const die = new FudgeDice('4dF', null, 1);
+
+      die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
       expect(die.modifiers.get('Modifier')).toEqual(modifiers[0]);
@@ -185,26 +204,26 @@ describe('FudgeDice', () => {
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
         new FudgeDice('4dF', null, 1, 'foo');
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
         new FudgeDice('4dF', null, 1, 351);
-      }).toThrow('modifiers should be a Map or an Object');
+      }).toThrow(TypeError);
 
       expect(() => {
-        const modifiers = new Map(Object.entries({foo: 'bar'}));
+        const modifiers = new Map(Object.entries({ foo: 'bar' }));
         new FudgeDice('4dF', null, 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
-        const modifiers = {foo: 'bar'};
+        const modifiers = { foo: 'bar' };
         new FudgeDice('4dF', null, 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = ['bar'];
         new FudgeDice('4dF', null, 1, modifiers);
-      }).toThrow('modifiers is invalid. List must only contain Modifier instances');
+      }).toThrow(TypeError);
     });
 
     test('modifiers list always returns in correct order', () => {
@@ -219,7 +238,11 @@ describe('FudgeDice', () => {
       mod4.order = 2;
 
       // create the dice instance
-      const die = new FudgeDice('4dF', null, 4, {mod1, mod2, mod3, mod4,});
+      const die = new FudgeDice('4dF', null, 4);
+
+      die.modifiers = {
+        mod1, mod2, mod3, mod4,
+      };
 
       // get the modifier keys
       const modKeys = [...die.modifiers.keys()];
@@ -228,15 +251,6 @@ describe('FudgeDice', () => {
       expect(modKeys[1]).toEqual('mod4');
       expect(modKeys[2]).toEqual('mod2');
       expect(modKeys[3]).toEqual('mod1');
-    });
-
-    test('cannot change modifiers', () => {
-      const modifiers = new Map(Object.entries({foo: new Modifier('m')}));
-      const die = new FudgeDice('4dF', null, 1);
-
-      expect(() => {
-        die.modifiers = modifiers;
-      }).toThrowError(TypeError);
     });
   });
 
@@ -332,7 +346,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.max = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change min value', () => {
@@ -340,7 +354,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.min = 450;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change name value', () => {
@@ -348,7 +362,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.name = 'Foo';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change notation value', () => {
@@ -356,7 +370,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.notation = '6d4';
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change qty value', () => {
@@ -364,7 +378,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.qty = 6;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change sides value', () => {
@@ -372,7 +386,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.sides = 2;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
 
     test('cannot change nonBlanks value', () => {
@@ -380,7 +394,7 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die.nonBlanks = 2;
-      }).toThrowError(TypeError);
+      }).toThrow(TypeError);
     });
   });
 });
