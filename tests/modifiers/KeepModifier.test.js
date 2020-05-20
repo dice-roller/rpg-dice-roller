@@ -13,7 +13,7 @@ describe('KeepModifier', () => {
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         end: 'h',
-        name: 'KeepModifier',
+        name: 'KeepModifier-h',
         notation: 'kh',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -158,15 +158,15 @@ describe('KeepModifier', () => {
 
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new KeepModifier('kh4', 'h', 4);
+      const mod = new KeepModifier('kl4', 'l', 4);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
-        end: 'h',
-        name: 'KeepModifier',
-        notation: 'kh4',
+        end: 'l',
+        name: 'KeepModifier-l',
+        notation: 'kl4',
         qty: 4,
         type: 'modifier',
       });

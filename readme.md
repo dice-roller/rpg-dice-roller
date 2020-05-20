@@ -195,7 +195,9 @@ dF.1 // roll the variant fudge dice
 
 Modifiers a special flags that can change the value of dice rolls, their appearance, order, and more.
 
-You can generally combine multiple modifiers of different types and they'll work together. This will both [Explode](#explode) any maximum rolls, and [Keep](#keep-kn--khn--kln) only keep the highest 2 rolls:
+You can generally combine multiple modifiers of different types, and they'll work together.
+
+For example, This will both [Explode](#explode) any maximum rolls, and [Keep](#keep-kn--khn--kln) only keep the highest 2 rolls:
 
 ```
 5d10!k2
@@ -203,8 +205,12 @@ You can generally combine multiple modifiers of different types and they'll work
 
 We have tried to cover all the commonly used modifiers. [Let us know](https://github.com/GreenImp/rpg-dice-roller/issues) if we've missed one that you use!
 
+> *Note:* Modifiers are always run in a specific order, regardless of the order you specifying them in. This is determined by the modifier's `order` property, lowest first.
+
 
 #### Exploding (`!` / `!{cp}`)
+
+**Order:** 1
 
 The exploding dice mechanic allows one or more dice to be re-rolled (Usually when it rolls the highest possible number on the die), with each successive roll being added to the total.
 
@@ -284,12 +290,14 @@ You can also use [Compare Points](#Compare Point) to change when a dice will pen
 
 ```
 2d6!p=5   // penetrate on any rolls equal to 5
-2d6!!p>4   // penetrate and compound on any rolls greater than 4
+2d6!!p>4  // penetrate and compound on any rolls greater than 4
 4d10!p<=3 // penetrate on any roll less than or equal to 3
 ```
 
 
 #### Drop (`d{n}` / `dh{n}` / `dl{n}`)
+
+**Order:** 4
 
 Sometimes you may want roll a certain number of dice, but "drop" or remove high or low rolls from the results. It is the opposite of the Keep modifier.
 
@@ -300,9 +308,9 @@ The "end" is optional and, if omitted, will default to _lowest_.
 For example:
 
 ```
-4d10dl2 // roll a d10 4 times and drop the lowest 2 rolls
-4d10d2  // equivalent to the above
-4d10dh1 // roll a d10 4 times and drop the highest roll
+4d10dl2    // roll a d10 4 times and drop the lowest 2 rolls
+4d10d2     // equivalent to the above
+4d10dh1    // roll a d10 4 times and drop the highest roll
 ```
 
 When outputting the roll, the dropped rolls are given the "d" flag:
@@ -311,8 +319,19 @@ When outputting the roll, the dropped rolls are given the "d" flag:
 6d8dh3: [3, 6d, 7d, 2, 5d, 4] = 9
 ```
 
+You can also use "drop lowest" and "drop highest" modifiers together:
+
+```
+// roll a d10 4 times and drop the highest and lowest rolls
+4d10dh1dl2: [5, 3d, 7, 8d] = 12
+```
+
+> See the note in the [Keep modifier section](#keep-kn--khn--kln) regarding using the two together
+
 
 #### Keep (`k{n}` / `kh{n}` / `kl{n}`)
+
+**Order:** 3
 
 The keep modifier allows you to roll a collection of dice but to disregard all except for the highest or lowest result. It is the opposite of the Drop modifier.
 
@@ -325,7 +344,7 @@ For example:
 ```
 4d10kh2 // roll a d10 4 times and keep the highest 2 rolls
 4d10k2  // equivalent to the above
-4d10dl1 // roll a d10 4 times and keep the lowest roll
+4d10kl1 // roll a d10 4 times and keep the lowest roll
 ```
 
 When outputting the roll, the kept rolls aren't modified, but the dropped rolls are given the "d" flag:
@@ -334,8 +353,30 @@ When outputting the roll, the kept rolls aren't modified, but the dropped rolls 
 6d8k3: [3d, 6, 7, 2d, 5, 4d] = 9
 ```
 
+> _Note:_ The keep and drop modifiers work really well together, but there's some caveats.
+> They both look at the entire dice pool. So if a roll has been dropped, it will be still be included in the list of possible rolls to drop.
+> 
+> This means that using keep and drop modifiers together can override each other.
+> 
+> For example, the following will drop all of the rolls:
+> 
+> ```
+> 3d10k1dh1: [7d, 1d, 2d] = 0
+> ```
+> 
+> The is because the `k1` will drop the second and third dice, and the `dh1` will drop the first dice.
+> 
+> And this (perhaps more expectecdly) will only keep the highest dice:
+> ```
+> 3d10k1d1: [6d, 1d, 9] = 9
+> ```
+> 
+> The `k1` will drop the first and second rolls, and the `d1` will also drop the first roll.
+
 
 #### Re-roll (`r` / `ro` / `r{cp}` / `ro{cp}`)
+
+**Order:** 2
 
 This will re-roll a die that rolls the lowest possible number on a die (Usually a 1). It will keep re-rolling until a number greater than the minimum is rolled, disregarding any of the previous rolls.
 
@@ -365,6 +406,8 @@ Read more about [Compare Points below](#Compare Point).
 
 
 #### Target Success / Dice pool (`{cp}`)
+
+**Order:** 5
 
 Some systems use dice pool, or success counts, whereby the total is equal to the quantity of dice rolled that meet a fixed condition, rather than the total value of the rolls.
 
@@ -411,6 +454,8 @@ The result total will be the number of success, instead of the value of the roll
 
 #### Target Failures / Dice Pool (`f{cp}`)
 
+**Order:** 5
+
 Sometimes, when counting success, you also need to consider failures. A failure modifier _must_ directly follow a Success modifier, and works in much the same way.
 
 For each failure counted, it will subtract 1 from the total number of success counted.
@@ -423,6 +468,8 @@ The Failure modifier is a [Compare Point](#compare-point), preceded with the let
 
 
 #### Sorting (`s` / `sa` / `sd`)
+
+**Order:** 8
 
 You can sort the dice rolls, so that they are displayed in numerical order by appending the `s` flag after the dice notation.
 
@@ -437,6 +484,8 @@ The default order is ascending, but you can specify the sort order using `sa` an
 
 
 #### Critical Success (`cs{cp}`)
+
+**Order:** 6
 
 _This is purely aesthetic and makes no functional difference to the rolls or their values._
 
@@ -458,6 +507,8 @@ The roll result output will look something like this:
 
 
 #### Critical Failure (`cf{cp}`)
+
+**Order:** 7
 
 _This is purely aesthetic and makes no functional difference to the rolls or their values._
 

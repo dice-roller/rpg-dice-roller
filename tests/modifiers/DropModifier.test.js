@@ -13,7 +13,7 @@ describe('DropModifier', () => {
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         end: 'l',
-        name: 'DropModifier',
+        name: 'DropModifier-l',
         notation: 'd1',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -73,7 +73,7 @@ describe('DropModifier', () => {
     });
 
     test('can be changed', () => {
-      const mod = new DropModifier('d1', 'h');
+      const mod = new DropModifier('dh', 'h');
 
       expect(mod.end).toEqual('h');
 
@@ -158,15 +158,15 @@ describe('DropModifier', () => {
 
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new DropModifier('dl4', 'l', 4);
+      const mod = new DropModifier('dh4', 'h', 4);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
-        end: 'l',
-        name: 'DropModifier',
-        notation: 'dl4',
+        end: 'h',
+        name: 'DropModifier-h',
+        notation: 'dh4',
         qty: 4,
         type: 'modifier',
       });
