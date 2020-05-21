@@ -16,7 +16,7 @@ DiceGroup
         ...exprs.map(v => v[3])
       ],
       modifiers: Object.assign({}, ...modifiers.map(item => {
-        return {[item.constructor.name]: item};
+        return {[item.name]: item};
       })),
     };
   }
@@ -26,7 +26,7 @@ DiceGroup
 
 Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
   die.modifiers = Object.assign({}, ...modifiers.map(item => {
-    return {[item.constructor.name]: item};
+    return {[item.name]: item};
   }));
 
   return die;
