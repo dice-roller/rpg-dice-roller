@@ -21,7 +21,7 @@ class CriticalFailureModifier extends ComparisonModifier {
       .map((roll) => {
         // add the modifier flag
         if (this.isComparePoint(roll.value)) {
-          roll.modifiers.push('critical-failure');
+          roll.modifiers.add('critical-failure');
         }
 
         return roll;

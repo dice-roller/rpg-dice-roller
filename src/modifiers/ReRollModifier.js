@@ -71,7 +71,7 @@ class ReRollModifier extends ComparisonModifier {
 
         // add the re-roll modifier flag outside the loop, otherwise we get duplicate flags
         if (hasReRolled) {
-          roll.modifiers.push(`re-roll${this.once ? '-once' : ''}`);
+          roll.modifiers.add(`re-roll${this.once ? '-once' : ''}`);
         }
 
         return roll;
