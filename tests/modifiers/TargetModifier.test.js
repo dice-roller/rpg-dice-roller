@@ -4,6 +4,7 @@ import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
 import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RollResult from '../../src/results/RollResult';
 
 describe('TargetModifier', () => {
   let sCP; let fCP; let
@@ -293,57 +294,69 @@ describe('TargetModifier', () => {
       const { rolls } = mod.run(results, die);
 
       expect(rolls.length).toEqual(7);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          calculationValue: 0,
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: [],
-          value: 8,
-        }),
-        expect.objectContaining({
-          calculationValue: 0,
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: [],
-          value: 4,
-        }),
-        expect.objectContaining({
-          calculationValue: -1,
-          initialValue: 2,
-          modifierFlags: '_',
-          modifiers: ['target-failure'],
-          value: 2,
-        }),
-        expect.objectContaining({
-          calculationValue: 1,
-          initialValue: 9,
-          modifierFlags: '*',
-          modifiers: ['target-success'],
-          value: 9,
-        }),
-        expect.objectContaining({
-          calculationValue: -1,
-          initialValue: 1,
-          modifierFlags: '_',
-          modifiers: ['target-failure'],
-          value: 1,
-        }),
-        expect.objectContaining({
-          calculationValue: 0,
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: [],
-          value: 6,
-        }),
-        expect.objectContaining({
-          calculationValue: 1,
-          initialValue: 10,
-          modifierFlags: '*',
-          modifiers: ['target-success'],
-          value: 10,
-        }),
-      ]);
+
+      expect(rolls[0]).toBeInstanceOf(RollResult);
+      expect(rolls[0]).toEqual(expect.objectContaining({
+        calculationValue: 0,
+        initialValue: 8,
+        modifierFlags: '',
+        value: 8,
+      }));
+      expect(rolls[0].modifiers).toEqual(new Set());
+
+      expect(rolls[1]).toBeInstanceOf(RollResult);
+      expect(rolls[1]).toEqual(expect.objectContaining({
+        calculationValue: 0,
+        initialValue: 4,
+        modifierFlags: '',
+        value: 4,
+      }));
+      expect(rolls[1].modifiers).toEqual(new Set());
+
+      expect(rolls[2]).toBeInstanceOf(RollResult);
+      expect(rolls[2]).toEqual(expect.objectContaining({
+        calculationValue: -1,
+        initialValue: 2,
+        modifierFlags: '_',
+        value: 2,
+      }));
+      expect(rolls[2].modifiers).toEqual(new Set(['target-failure']));
+
+      expect(rolls[3]).toBeInstanceOf(RollResult);
+      expect(rolls[3]).toEqual(expect.objectContaining({
+        calculationValue: 1,
+        initialValue: 9,
+        modifierFlags: '*',
+        value: 9,
+      }));
+      expect(rolls[3].modifiers).toEqual(new Set(['target-success']));
+
+      expect(rolls[4]).toBeInstanceOf(RollResult);
+      expect(rolls[4]).toEqual(expect.objectContaining({
+        calculationValue: -1,
+        initialValue: 1,
+        modifierFlags: '_',
+        value: 1,
+      }));
+      expect(rolls[4].modifiers).toEqual(new Set(['target-failure']));
+
+      expect(rolls[5]).toBeInstanceOf(RollResult);
+      expect(rolls[5]).toEqual(expect.objectContaining({
+        calculationValue: 0,
+        initialValue: 6,
+        modifierFlags: '',
+        value: 6,
+      }));
+      expect(rolls[5].modifiers).toEqual(new Set());
+
+      expect(rolls[6]).toBeInstanceOf(RollResult);
+      expect(rolls[6]).toEqual(expect.objectContaining({
+        calculationValue: 1,
+        initialValue: 10,
+        modifierFlags: '*',
+        value: 10,
+      }));
+      expect(rolls[6].modifiers).toEqual(new Set(['target-success']));
     });
   });
 });

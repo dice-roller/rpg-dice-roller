@@ -10,7 +10,7 @@ class RollResult {
   /**
    *
    * @param {number|{value: Number, initialValue: number}} value The value rolled
-   * @param {string[]=} modifiers List of modifier names that affect this roll
+   * @param {string[]|Set<string>=} modifiers List of modifier names that affect this roll
    * @param {boolean=} useInTotal Whether to include the roll value when calculating totals
    */
   constructor(value, modifiers, useInTotal = true) {
@@ -42,7 +42,7 @@ class RollResult {
         this.calculationValue = value.calculationValue;
       }
 
-      this.modifiers = Array.isArray(value.modifiers) ? value.modifiers : (modifiers || []);
+      this.modifiers = value.modifiers || modifiers || [];
       this.useInTotal = (typeof value.useInTotal === 'boolean') ? value.useInTotal : (useInTotal || false);
     } else {
       throw new TypeError(`Result value is invalid: ${value}`);
@@ -91,7 +91,7 @@ class RollResult {
    */
   get modifierFlags() {
     // @todo need a better way of mapping modifiers to symbols
-    return this.modifiers.reduce((acc, modifier) => {
+    return [...this.modifiers].reduce((acc, modifier) => {
       let flag;
 
       switch (modifier) {
@@ -135,10 +135,10 @@ class RollResult {
   /**
    * Returns the modifiers that affect the roll
    *
-   * @returns {string[]}
+   * @returns {Set<string>}
    */
   get modifiers() {
-    return this[modifiersSymbol] || [];
+    return this[modifiersSymbol] || new Set();
   }
 
   /**
@@ -147,11 +147,20 @@ class RollResult {
    * @param value
    */
   set modifiers(value) {
-    if ((value || (value === 0)) && (!Array.isArray(value) || value.some((item) => typeof item !== 'string'))) {
-      throw new TypeError(`modifiers must be an array of modifier names: ${value}`);
+    if ((Array.isArray(value) || (value instanceof Set)) && [...value].every((item) => typeof item === 'string')) {
+      this[modifiersSymbol] = new Set([...value]);
+
+      return;
     }
 
-    this[modifiersSymbol] = value || [];
+    if (!value && (value !== 0)) {
+      // clear the modifiers
+      this[modifiersSymbol] = new Set();
+
+      return;
+    }
+
+    throw new TypeError(`modifiers must be a Set or array of modifier names: ${value}`);
   }
 
   /**
@@ -208,7 +217,7 @@ class RollResult {
       calculationValue,
       initialValue,
       modifierFlags,
-      modifiers,
+      modifiers: [...modifiers],
       type: 'result',
       useInTotal,
       value,

@@ -112,7 +112,7 @@ class KeepModifier extends Modifier {
     rollIndexes.forEach((rollIndex) => {
       const roll = results.rolls[rollIndex];
 
-      roll.modifiers.push('drop');
+      roll.modifiers.add('drop');
       roll.useInTotal = false;
     });
 
