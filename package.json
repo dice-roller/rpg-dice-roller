@@ -25,8 +25,9 @@
     "notation"
   ],
   "devDependencies": {
-    "@babel/core": "^7.9.6",
-    "@babel/preset-env": "^7.9.6",
+    "@babel/core": "^7.10.1",
+    "@babel/preset-env": "^7.10.1",
+    "@vuepress/plugin-back-to-top": "^1.5.0",
     "abab": "^2.0.3",
     "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
@@ -40,7 +41,9 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^6.0.0",
     "rollup-plugin-node-resolve": "^4.2.4",
-    "rollup-plugin-terser": "^5.3.0"
+    "rollup-plugin-terser": "^5.3.0",
+    "vuepress": "^1.5.0",
+    "vuepress-plugin-dice-roller": "^0.1.1"
   },
   "dependencies": {
     "mathjs-expression-parser": "^1.0.2"
@@ -63,7 +66,9 @@
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
     "test:coverage": "jest /tests/ --coverage",
     "test:coveralls": "jest /tests/ --coverage && coveralls < coverage/lcov.info",
-    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
+    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test",
+    "docs:dev": "vuepress dev docs",
+    "docs:build": "vuepress build docs"
   },
   "type": "module"
 }
