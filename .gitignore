@@ -38,7 +38,6 @@ nbproject
 
 
 # Package Managers
-
 node_modules
 bower_components
 .grunt
@@ -47,12 +46,12 @@ bower_components
 # Project specific
 
 ## Compiled scripts
-
 /lib/*.js
 /lib/**/*.js
 /src/parser/grammars/grammar.js
 
-
 ## Testing
-
 /coverage
+
+## Documentation
+/docs/.vuepress/dist/

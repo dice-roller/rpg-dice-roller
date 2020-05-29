@@ -22,7 +22,7 @@ class CriticalSuccessModifier extends ComparisonModifier {
       .map((roll) => {
         // add the modifier flag
         if (this.isComparePoint(roll.value)) {
-          roll.modifiers.push('critical-success');
+          roll.modifiers.add('critical-success');
         }
 
         return roll;

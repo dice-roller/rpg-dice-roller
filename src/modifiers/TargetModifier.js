@@ -136,9 +136,9 @@ class TargetModifier extends ComparisonModifier {
       .map((roll) => {
         // add the modifier flag
         if (this.isSuccess(roll.value)) {
-          roll.modifiers.push('target-success');
+          roll.modifiers.add('target-success');
         } else if (this.isFailure(roll)) {
-          roll.modifiers.push('target-failure');
+          roll.modifiers.add('target-failure');
         }
 
         // set the value to the success state value

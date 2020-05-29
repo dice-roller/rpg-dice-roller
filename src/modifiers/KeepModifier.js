@@ -44,6 +44,15 @@ class KeepModifier extends Modifier {
   }
 
   /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return `${super.name}-${this.end}`;
+  }
+
+  /**
    * Returns the quantity of dice that should be kept
    *
    * @returns {number}
@@ -103,7 +112,7 @@ class KeepModifier extends Modifier {
     rollIndexes.forEach((rollIndex) => {
       const roll = results.rolls[rollIndex];
 
-      roll.modifiers.push('drop');
+      roll.modifiers.add('drop');
       roll.useInTotal = false;
     });
 

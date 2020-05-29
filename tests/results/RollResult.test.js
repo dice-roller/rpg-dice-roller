@@ -10,7 +10,7 @@ describe('RollResult', () => {
         calculationValue: 4,
         initialValue: 4,
         modifierFlags: '',
-        modifiers: [],
+        modifiers: new Set(),
         useInTotal: true,
         value: 4,
         toJSON: expect.any(Function),
@@ -279,7 +279,7 @@ describe('RollResult', () => {
     test('can set in constructor', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop']);
+      expect(result.modifiers).toEqual(new Set(['explode', 'drop']));
     });
 
     test('setting in constructor calls setter', () => {
@@ -296,7 +296,7 @@ describe('RollResult', () => {
     test('can change', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop']);
+      expect(result.modifiers).toEqual(new Set(['explode', 'drop']));
 
       const mods = [
         'critical-success',
@@ -305,30 +305,38 @@ describe('RollResult', () => {
       ];
       result.modifiers = mods;
 
-      expect(result.modifiers).toEqual(mods);
+      expect(result.modifiers).toEqual(new Set(mods));
     });
 
     test('can append', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop']);
+      expect(result.modifiers).toEqual(new Set(['explode', 'drop']));
 
-      result.modifiers.push('re-roll');
+      result.modifiers.add('re-roll');
 
-      expect(result.modifiers).toEqual(['explode', 'drop', 're-roll']);
+      expect(result.modifiers).toEqual(new Set(['explode', 'drop', 're-roll']));
     });
 
-    test('can replace item', () => {
+    test('can remove old item and add new item', () => {
       const result = new RollResult(4, ['explode', 'drop']);
 
-      expect(result.modifiers).toEqual(['explode', 'drop']);
+      expect(result.modifiers).toEqual(new Set(['explode', 'drop']));
 
-      result.modifiers[0] = 're-roll';
+      result.modifiers.delete('explode');
+      result.modifiers.add('re-roll');
 
-      expect(result.modifiers).toEqual(['re-roll', 'drop']);
+      expect(result.modifiers).toEqual(new Set(['re-roll', 'drop']));
     });
 
-    test('must be array', () => {
+    test('can be Set<string>', () => {
+      const modifiers = new Set(['explode', 'drop']);
+      const result = new RollResult(4, modifiers);
+
+      expect(result.modifiers).toEqual(modifiers);
+    });
+
+    test('throws error for invalid type', () => {
       const result = new RollResult(4);
 
       expect(() => {
@@ -388,28 +396,28 @@ describe('RollResult', () => {
       const result = new RollResult(4, ['explode', 'compound']);
 
       result.modifiers = [];
-      expect(result.modifiers).toEqual([]);
+      expect(result.modifiers).toEqual(new Set());
 
       // reset modifiers
       result.modifiers = ['drop'];
-      expect(result.modifiers).toEqual(['drop']);
+      expect(result.modifiers).toEqual(new Set(['drop']));
 
       result.modifiers = null;
-      expect(result.modifiers).toEqual([]);
+      expect(result.modifiers).toEqual(new Set());
 
       // reset modifiers
       result.modifiers = ['drop'];
-      expect(result.modifiers).toEqual(['drop']);
+      expect(result.modifiers).toEqual(new Set(['drop']));
 
       result.modifiers = false;
-      expect(result.modifiers).toEqual([]);
+      expect(result.modifiers).toEqual(new Set());
 
       // reset modifiers
       result.modifiers = ['drop'];
-      expect(result.modifiers).toEqual(['drop']);
+      expect(result.modifiers).toEqual(new Set(['drop']));
 
       result.modifiers = undefined;
-      expect(result.modifiers).toEqual([]);
+      expect(result.modifiers).toEqual(new Set());
     });
 
     test('modifier flags are set correctly', () => {
@@ -417,16 +425,19 @@ describe('RollResult', () => {
 
       expect(result.modifierFlags).toEqual('!!');
 
-      result.modifiers.push('drop');
+      result.modifiers.add('drop');
       expect(result.modifierFlags).toEqual('!!d');
 
       result.modifiers = ['critical-success'];
       expect(result.modifierFlags).toEqual('**');
 
-      result.modifiers[0] = 'drop';
+      result.modifiers.delete('critical-success');
+      expect(result.modifierFlags).toEqual('');
+
+      result.modifiers.add('drop');
       expect(result.modifierFlags).toEqual('d');
 
-      result.modifiers[1] = 'critical-failure';
+      result.modifiers.add('critical-failure');
       expect(result.modifierFlags).toEqual('d__');
 
       result.modifiers = ['penetrate'];

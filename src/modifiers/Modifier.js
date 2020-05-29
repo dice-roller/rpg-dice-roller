@@ -20,7 +20,7 @@ class Modifier {
   /**
    * Returns the name for the modifier
    *
-   * @returns {*}
+   * @returns {string}
    */
   get name() {
     return this.constructor.name;

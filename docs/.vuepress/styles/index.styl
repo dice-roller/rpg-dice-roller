@@ -1,0 +1,26 @@
+rainbow = linear-gradient(-45deg, #c6ffdd, #fbd786, #f7797d);
+hexagonClip = polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+
+.navbar .home-link {
+  &:hover,
+  &:focus,
+  &:active {
+    .logo {
+      background-position: 40px;
+    }
+  }
+
+  .logo {
+    background-image: rainbow;
+      background-position: 0;
+    clip-path: hexagonClip;
+    transition: all ease-in .25s;
+  }
+}
+
+.home .hero img {
+  padding: 1rem;
+  box-sizing: border-box;
+  background: rainbow;
+  clip-path: hexagonClip;
+}

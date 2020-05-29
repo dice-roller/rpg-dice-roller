@@ -72,11 +72,11 @@ class ExplodeModifier extends ComparisonModifier {
           compareValue = rollResult.value;
 
           // add the explode modifier flag
-          prevRoll.modifiers.push('explode');
+          prevRoll.modifiers.add('explode');
 
           // add the penetrate modifier flag and decrement the value
           if (this.penetrate) {
-            prevRoll.modifiers.push('penetrate');
+            prevRoll.modifiers.add('penetrate');
             rollResult.value -= 1;
           }
 
@@ -94,7 +94,7 @@ class ExplodeModifier extends ComparisonModifier {
           ];
 
           if (this.penetrate) {
-            roll.modifiers.push('penetrate');
+            roll.modifiers.add('penetrate');
           }
 
           return roll;
