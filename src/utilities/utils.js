@@ -1,5 +1,5 @@
+/* eslint-disable */
 if (!Array.prototype.flat) {
-  /* eslint-disable */
   /**
    * Polyfill for Array.prototype.flat (Required for node < 11)
    *
@@ -29,7 +29,6 @@ if (!Array.prototype.flat) {
 }
 
 if (!Array.prototype.flatMap) {
-  /* eslint-disable */
   /**
    * Polyfill for Array.prototype.flatMap (Required for node < 11)
    *
@@ -41,22 +40,29 @@ if (!Array.prototype.flatMap) {
     return Array.prototype.map.apply(this, arguments).flat(1);
   };
 }
+/* eslint-enable */
 
 /**
  * Utility helper functions
  *
- * @type {Readonly<{compareNumbers(number, number, string): boolean, toFixed(number, number=): number, generateNumber((number|string), (number|string)): *, isNumeric(*=): boolean, isJson(*=): (*|boolean|undefined), sumArray(Array): number, isBase64(*=): (*|boolean|undefined)}>}
+ * @type {Readonly<{}>}
  */
 const diceUtils = Object.freeze({
   /**
    * Checks if the given val is a valid number
    *
-   * @param val
+   * @param {*} val
    * @returns {boolean}
    */
   isNumeric(val) {
     return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
   },
+  /**
+   * Checks if the string is valid base64 encoded
+   *
+   * @param {string} val
+   * @returns {boolean}
+   */
   isBase64(val) {
     try {
       return !!(val && (btoa(atob(val)) === val));
@@ -64,6 +70,12 @@ const diceUtils = Object.freeze({
       return false;
     }
   },
+  /**
+   * Checks if the string is valid JSON
+   *
+   * @param {string} val
+   * @returns {boolean}
+   */
   isJson(val) {
     try {
       const parsed = val ? JSON.parse(val) : false;
@@ -79,7 +91,7 @@ const diceUtils = Object.freeze({
    *
    * @param {number|string} min
    * @param {number|string} max
-   * @returns {*}
+   * @returns {number}
    */
   generateNumber(min, max) {
     const minNumber = min ? parseInt(min, 10) : 1;
