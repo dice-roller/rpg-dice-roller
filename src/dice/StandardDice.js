@@ -87,14 +87,15 @@ class StandardDice {
 
     // loop through each modifier and ensure that those that require it have compare points
     // @todo find a better way of defining compare point on modifiers that don't have them
+    /* eslint-disable no-param-reassign */
     this[modifiersSymbol].forEach((modifier) => {
-      /* eslint-disable no-param-reassign */
       if ((modifier instanceof ExplodeModifier) && !modifier.comparePoint) {
         modifier.comparePoint = new ComparePoint('=', this.max);
       } else if ((modifier instanceof ReRollModifier) && !modifier.comparePoint) {
         modifier.comparePoint = new ComparePoint('=', this.min);
       }
     });
+    /* eslint-enable */
   }
 
   /**

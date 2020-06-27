@@ -130,7 +130,6 @@ class TargetModifier extends ComparisonModifier {
    * @returns {RollResults}
    */
   run(results, _dice) {
-    /* eslint-disable no-param-reassign */
     // loop through each roll and see if it matches the target
     results.rolls
       .map((roll) => {
@@ -142,6 +141,7 @@ class TargetModifier extends ComparisonModifier {
         }
 
         // set the value to the success state value
+        // eslint-disable-next-line no-param-reassign
         roll.calculationValue = this.getStateValue(roll.value);
 
         return roll;
