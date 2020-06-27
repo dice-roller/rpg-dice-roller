@@ -24,9 +24,14 @@ npm install rpg-dice-roller
 Check out the documentation at [https://greenimp.github.io/rpg-dice-roller/](https://greenimp.github.io/rpg-dice-roller/).
 
 
+## Contributing
+
+We're always happy for community contributions. You can find our contributing guide in the docs: [https://greenimp.github.io/rpg-dice-roller/contributing/](https://greenimp.github.io/rpg-dice-roller/contributing/).
+
+
 ## Licence
 
-This dice roller is released under the MIT licence, meaning that you can do pretty much anything you like with it, so long as the original copyright remains in place.
+This dice roller has been released under the MIT licence, meaning you can do pretty much anything you like with it, so long as the original copyright remains in place.
 
 You **can** use it in commercial products.
 
