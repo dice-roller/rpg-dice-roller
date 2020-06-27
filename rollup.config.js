@@ -29,7 +29,7 @@ export default {
       exclude: 'node_modules/**',
     }) : null,
     // minify for production
-    production ? terser() : null,
+    production ? terser({ keep_classnames: true }) : null,
     banner({
       file: path.join(__dirname, 'banner.txt'),
     }),

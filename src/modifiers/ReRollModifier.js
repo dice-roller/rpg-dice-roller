@@ -53,7 +53,6 @@ class ReRollModifier extends ComparisonModifier {
 
     results.rolls
       .map((roll) => {
-        /* eslint-disable no-param-reassign */
         let hasReRolled = false;
 
         // if the die roll matches the compare point we re-roll. Unless we're only rolling once,
@@ -63,6 +62,7 @@ class ReRollModifier extends ComparisonModifier {
           const rollResult = _dice.rollOnce();
 
           // update the roll value (Unlike exploding, the original value if not kept)
+          // eslint-disable-next-line no-param-reassign
           roll.value = rollResult.value;
 
           // increment the roll count so we only roll once when required

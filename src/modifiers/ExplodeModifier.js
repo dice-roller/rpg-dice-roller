@@ -59,7 +59,6 @@ class ExplodeModifier extends ComparisonModifier {
 
     parsedResults.rolls = results.rolls
       .map((roll) => {
-        /* eslint-disable no-param-reassign */
         const subRolls = [roll];
         let compareValue = roll.value;
 
@@ -85,6 +84,7 @@ class ExplodeModifier extends ComparisonModifier {
         }
 
         // return the rolls (Compounded if necessary)
+        /* eslint-disable  no-param-reassign */
         if (this.compound && (subRolls.length > 1)) {
           // update the roll value and modifiers
           roll.value = diceUtils.sumArray(subRolls);
@@ -99,6 +99,7 @@ class ExplodeModifier extends ComparisonModifier {
 
           return roll;
         }
+        /* eslint-enable */
 
         return subRolls;
       })
