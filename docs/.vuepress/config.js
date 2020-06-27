@@ -16,6 +16,7 @@ module.exports = {
       { text: 'Home', link: '/' },
       { text: 'Guide', link: '/guide/' },
       { text: 'API', link: '/api/' },
+      { text: 'Contribute', link: '/contributing/' },
     ],
     sidebar: {
       '/guide/': [
@@ -53,7 +54,7 @@ module.exports = {
             'exportFormats',
           ],
         }
-      ]
+      ],
     },
   },
   plugins: [

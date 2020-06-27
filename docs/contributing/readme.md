@@ -1,23 +1,13 @@
+---
+sidebar: auto
+sidebarDepth: 2
+---
+
 # Contributing
 
 Thanks for helping out with the dice roller!
 
 The following is a set of guidelines for contributing to the library. They explain the process to get started, and ensure that the it's as easy as possible for people to work with the project.
-
-
-## Table of contents
-
-* [Code of Conduct](#code-of-conduct)
-* [I have a question](#i-have-a-question)
-* [How to contribute](#how-to-contribute)
-  * [Reporting bugs](#reporting-bugs)
-  * [Suggesting improvements and new features](#suggesting-improvements-and-new-features)
-  * [Contributing code](#contributing-code)
-  * [Pull requests](#pull-requests)
-* [Styles and standards](#styles-and-standards)
-  * [Git](#git)
-  * [Javascript style guide](#javascript-style-guide)
-  * [Testing](#testing)
 
 
 ## Code of Conduct
@@ -34,7 +24,9 @@ We don't have a message board or similar, so feel free to use the [Github ticket
 
 ### Reporting bugs
 
-> **Note:** before raising a ticket, please check it hasn't already been raised!
+::: tip
+Before raising a ticket, please check it hasn't already been raised!
+:::
 
 If you find a bug, please let us know.
 
@@ -97,7 +89,7 @@ If you're unsure where to begin, you can start by having a look at the tickets f
 If there aren't any flagged as `help wanted` that doesn't mean we don't want your help! Generally, we're happy for people to dig into any ticket that hasn't been assigned to someone.
 A ticket that has been assigned means that someone else is working on it.
 
-So have a look around the open tickets and see if you feel as though you can help with ny of them.
+So have a look around the open tickets and see if you feel as though you can help with any of them.
 
 If you've got an idea for a feature, but there isn't a ticket for it, feel free to [create one](#suggesting-improvements-and-new-features) and assign it to yourself.
 This way, it's easier to keep track on what is being worked on, and we can try to ensure that multiple people aren't unknowingly working on the same thing.
@@ -107,10 +99,13 @@ This way, it's easier to keep track on what is being worked on, and we can try t
 
 The code is stored in a Git repository. To get started either [clone repository or fork the repository](https://github.com/GreenImp/rpg-dice-roller).
 
-Make sure that you're either checkout the `develop` branch, or a `feature` / `hotfix` branch for the task you're working on, and _not_ the `master branch.
+Make sure that you're either checkout the `develop` branch, or a `feature` / `hotfix` branch for the task you're working on, and _not_ the `master` branch.
 
-> **Note:** You should never work directly on the `master` branch. Any pull requests on to `master` will, unfortunately have to be rejected and moved to `develop`.
-> See the [Branching model](#branching-model) section for more information.
+::: warning
+You should **never** work directly on the `master` branch. You should work on either the `develop` branch or a `feature` branch.
+
+See the [Branching model](#branching-model) section for more information.
+:::
 
 
 #### File structure
@@ -128,10 +123,10 @@ The project file structure is split up into logical groups:
 ```
 
 * `root` contains mostly meta files, such as the `.babelrc`, `eslintrc.json`. `rollup.config.js` and other files used for the generation of the library.
-
-* `lib` contains the compiled Javascript files, in both EcmaScript and UMD versions, in the `esm` and `umd` directories. Do **not** manually change the files in this directory as any changes will be overwritten.
-
-* `src` is where the magic happens. This contains all the original Javascript ES modules that get compiled. It is these files that you should modify.
+* `lib` contains the compiled Javascript files, in both EcmaScript and UMD versions, in the `esm` and `umd` directories respectively.
+  
+  Do **not** manually change the files in this directory as any changes will be overwritten.
+* `src` is where the magic happens. This contains all the source Javascript ES modules that get compiled into the `lib` directory. It is these files that you should modify.
 * `tests` contain [Jest tests](#testing-your-code). If you make changes to the source code, you should update / add tests to cover the changes.
 
 
@@ -142,7 +137,7 @@ If you want to see what how your code functions, you'll need to compile the sour
 There are several scripts to help:
 
 ```bash
-# compile compressed version of the ES and UMD files
+# compile compressed / minified the ES and UMD files
 npm run build
 
 # compile un-compressed version of the ES and UMD files
@@ -173,7 +168,15 @@ Please follow these steps so that your pull request can be considered by the mai
 * Follow the [style guides](#styles-and-standards).
 * After submitting your pull request, verify that all [status checks](https://help.github.com/articles/about-status-checks/) are passing.
 
-> **What if the status checks are failing?** Check what is failing. If you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer can re-run the status checks and determine if it's a false positive, or otherwise unrelated to your changes.
+::: tip What if the status checks are failing?
+Check what is failing. If you believe that the failure is unrelated to your change, please leave a comment on the pull request explaining why you believe the failure is unrelated. A maintainer can re-run the status checks and determine if it's a false positive, or otherwise unrelated to your changes.
+:::
+
+::: warning
+You should **never** work directly on the `master` branch. Any pull requests on to `master` will, unfortunately, have to be rejected and you'll have to re-create it on `develop`.
+
+See the [Branching model](#branching-model) section for more information.
+:::
 
 
 ## Styles and standards
@@ -185,7 +188,7 @@ Please follow these steps so that your pull request can be considered by the mai
 We use the [git-flow branching model](https://nvie.com/posts/a-successful-git-branching-model/).
 This means that there is always a `master` branch and a `develop` branch, and there may be other branches that follow the git-flow naming conventions.
 
-* The `master` branch is is the current latest release, and should only be modified when making a release.
+* The `master` branch is is the current latest release, and should _only be modified when making a release_.
 * The `develop` branch is where all the fun happens, and where we can work and make our changes (Although these should generally be done on a feature branch).
 
 
