@@ -51,7 +51,6 @@ const rollsSymbol = Symbol('rolls');
  */
 const totalSymbol = Symbol('totals');
 
-
 class DiceRoll {
   /**
    * Parses the notation and rolls the dice
@@ -130,7 +129,6 @@ class DiceRoll {
     }
   }
 
-
   /** ***********************
    * Static Methods
    ************************ */
@@ -162,7 +160,6 @@ class DiceRoll {
       throw new DataFormatError(data);
     }
   }
-
 
   /** ***********************
    * Public Properties
@@ -242,7 +239,6 @@ class DiceRoll {
     // return the total
     return this[totalSymbol] || 0;
   }
-
 
   /** ***********************
    * Public methods
@@ -336,7 +332,6 @@ class DiceRoll {
   toString() {
     return this.output;
   }
-
 
   /** ***********************
    * Private Methods

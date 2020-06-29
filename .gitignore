@@ -52,6 +52,3 @@ bower_components
 
 ## Testing
 /coverage
-
-## Documentation
-/docs/.vuepress/dist/

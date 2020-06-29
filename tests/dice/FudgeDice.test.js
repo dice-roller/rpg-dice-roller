@@ -55,12 +55,10 @@ describe('FudgeDice', () => {
       expect(die.nonBlanks).toBe(2);
       expect(die.sides).toEqual('F.2');
 
-
       die = new FudgeDice('4dF', null);
 
       expect(die.nonBlanks).toBe(2);
       expect(die.sides).toEqual('F.2');
-
 
       die = new FudgeDice('4dF', false);
 
