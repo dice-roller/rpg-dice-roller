@@ -1095,7 +1095,6 @@ describe('Parser', () => {
           expect(parsed[0].sides).toEqual(8);
           expect(parsed[0].qty).toEqual(10);
 
-
           expect(parsed[0].modifiers.has('DropModifier-h')).toBe(true);
 
           let mod = parsed[0].modifiers.get('DropModifier-h');
@@ -1106,7 +1105,6 @@ describe('Parser', () => {
             qty: 2,
           }));
 
-
           expect(parsed[0].modifiers.has('KeepModifier-l')).toBe(true);
 
           mod = parsed[0].modifiers.get('KeepModifier-l');
@@ -1116,7 +1114,6 @@ describe('Parser', () => {
             end: 'l',
             qty: 3,
           }));
-
 
           expect(parsed[0].modifiers.has('ReRollModifier')).toBe(true);
 
