@@ -94,6 +94,30 @@ describe('PercentileDice', () => {
     });
   });
 
+  describe('Average', () => {
+    test('average is correct for single die', () => {
+      const die = new PercentileDice('d%');
+      expect(die.average).toBe(50.5);
+    });
+
+    test('average is unaffected when rolling multiple', () => {
+      let die = new PercentileDice('2d%', 2);
+      expect(die.average).toBe(50.5);
+
+      die = new PercentileDice('400d%', 400);
+      expect(die.average).toBe(50.5);
+
+      die = new PercentileDice('56d%', 56);
+      expect(die.average).toBe(50.5);
+
+      die = new PercentileDice('12d%', 12);
+      expect(die.average).toBe(50.5);
+
+      die = new PercentileDice('145d%', 145);
+      expect(die.average).toBe(50.5);
+    });
+  });
+
   describe('Modifiers', () => {
     test('setting modifiers in constructor calls setter', () => {
       const spy = jest.spyOn(PercentileDice.prototype, 'modifiers', 'set');
@@ -198,6 +222,7 @@ describe('PercentileDice', () => {
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(die))).toEqual({
+        average: 50.5,
         max: 100,
         min: 1,
         modifiers: null,
