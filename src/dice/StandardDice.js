@@ -45,6 +45,15 @@ class StandardDice {
   }
 
   /**
+   * The average value that the die can roll (Excluding modifiers)
+   *
+   * @returns {number}
+   */
+  get average() {
+    return (this.min + this.max) / 2;
+  }
+
+  /**
    * The modifiers that affect this dice roll
    *
    * @returns {Map|null}
@@ -192,10 +201,11 @@ class StandardDice {
    */
   toJSON() {
     const {
-      max, min, modifiers, name, notation, qty, sides,
+      average, max, min, modifiers, name, notation, qty, sides,
     } = this;
 
     return {
+      average,
       max,
       min,
       modifiers,
