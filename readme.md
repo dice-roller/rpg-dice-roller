@@ -1,5 +1,5 @@
 <p align="center">
-    <img src="./docs/.vuepress/public/hero.svg" alt="RPG Dice Roller" style="max-width: 100%;" width="180"/>
+    <img src="https://greenimp.github.io/rpg-dice-roller/hero.svg" alt="RPG Dice Roller" style="max-width: 100%;" width="180"/>
 </p>
 
 # RPG Dice Roller
