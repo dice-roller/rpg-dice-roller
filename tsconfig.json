@@ -1,0 +1,26 @@
+{
+	"files": [
+	  "src/index.js"
+	],
+	"include": [
+	  "tests/**/*.js",
+	  "tests/**/*.ts"
+	],
+	"compilerOptions": {
+	  /* Basic Options */
+	  "target": "ES2016",
+	  "module": "commonjs",
+	  "allowJs": true,
+	  "resolveJsonModule": true,
+	  "noEmit": true,
+	  "maxNodeModuleJsDepth": 3,
+  
+	  /* Strict Type-Checking Options */
+	  "strict": true,
+	  "noImplicitAny": true,
+	  "strictNullChecks": true,
+  
+	  /* Additional Checks */
+	  "noUnusedLocals": true
+	}
+}
