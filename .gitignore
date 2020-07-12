@@ -50,5 +50,8 @@ bower_components
 /lib/**/*.js
 /src/parser/grammars/grammar.js
 
+## Compiled TypeScript
+/types
+
 ## Testing
 /coverage
