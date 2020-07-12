@@ -46,7 +46,6 @@ describe('RollResult', () => {
       expect(result.calculationValue).toBe(4);
       expect(result.value).toBe(4);
 
-
       // set only the value should set all values
       result = new RollResult({
         value: 2,
@@ -55,7 +54,6 @@ describe('RollResult', () => {
       expect(result.initialValue).toBe(2);
       expect(result.calculationValue).toBe(2);
       expect(result.value).toBe(2);
-
 
       // set only the initial value and value should set all values
       result = new RollResult({

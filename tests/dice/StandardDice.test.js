@@ -92,7 +92,7 @@ describe('StandardDice', () => {
       let die = new StandardDice('4d6', 6, 1);
       expect(die.qty).toBe(1);
 
-      die = new StandardDice('4d6', 6, 324);
+      die = new StandardDice('324d6', 6, 324);
       expect(die.qty).toBe(324);
 
       expect(() => {
@@ -106,6 +106,42 @@ describe('StandardDice', () => {
       expect(() => {
         die = new StandardDice('4d6', 6, -1);
       }).toThrow(TypeError);
+    });
+  });
+
+  describe('Average', () => {
+    test('average is correct for single die', () => {
+      let die = new StandardDice('d3', 3, 1);
+      expect(die.average).toBe(2);
+
+      die = new StandardDice('d10', 10, 1);
+      expect(die.average).toBe(5.5);
+
+      die = new StandardDice('d1', 1, 1);
+      expect(die.average).toBe(1);
+
+      die = new StandardDice('d20', 20, 1);
+      expect(die.average).toBe(10.5);
+
+      die = new StandardDice('d45', 45, 1);
+      expect(die.average).toBe(23);
+    });
+
+    test('average is unaffected when rolling multiple', () => {
+      let die = new StandardDice('2d3', 3, 2);
+      expect(die.average).toBe(2);
+
+      die = new StandardDice('400d10', 10, 400);
+      expect(die.average).toBe(5.5);
+
+      die = new StandardDice('56d1', 1, 56);
+      expect(die.average).toBe(1);
+
+      die = new StandardDice('12d20', 20, 12);
+      expect(die.average).toBe(10.5);
+
+      die = new StandardDice('145d45', 45, 145);
+      expect(die.average).toBe(23);
     });
   });
 
@@ -213,6 +249,7 @@ describe('StandardDice', () => {
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(die))).toEqual({
+        average: 3.5,
         max: 6,
         min: 1,
         modifiers: null,

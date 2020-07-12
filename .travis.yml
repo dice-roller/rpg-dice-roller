@@ -11,15 +11,6 @@ script:
   - npm run pretest
   - npm run lint
   - npm run test:coveralls
-  - npm run docs:build
-deploy:
-  provider: pages:git
-  edge: true
-  token: $GITHUB_TOKEN
-  local_dir: docs/.vuepress/dist
-  keep_history: false
-  on:
-    branch: master
 env:
   global:
     - COVERALLS_PARALLEL=true

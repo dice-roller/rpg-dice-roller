@@ -55,12 +55,10 @@ describe('FudgeDice', () => {
       expect(die.nonBlanks).toBe(2);
       expect(die.sides).toEqual('F.2');
 
-
       die = new FudgeDice('4dF', null);
 
       expect(die.nonBlanks).toBe(2);
       expect(die.sides).toEqual('F.2');
-
 
       die = new FudgeDice('4dF', false);
 
@@ -155,6 +153,30 @@ describe('FudgeDice', () => {
       expect(() => {
         die = new FudgeDice('4dF', null, -1);
       }).toThrow(TypeError);
+    });
+  });
+
+  describe('Average', () => {
+    test('average is correct for single die', () => {
+      let die = new FudgeDice('dF');
+      expect(die.average).toBe(0);
+
+      die = new FudgeDice('dF.1', 1);
+      expect(die.average).toBe(0);
+    });
+
+    test('average is unaffected when rolling multiple', () => {
+      let die = new FudgeDice('2dF', 2, 2);
+      expect(die.average).toBe(0);
+
+      die = new FudgeDice('400dF', 2, 400);
+      expect(die.average).toBe(0);
+
+      die = new FudgeDice('56dF.1', 1, 56);
+      expect(die.average).toBe(0);
+
+      die = new FudgeDice('145dF.1', 1, 145);
+      expect(die.average).toBe(0);
     });
   });
 
@@ -262,6 +284,7 @@ describe('FudgeDice', () => {
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(die))).toEqual({
+        average: 0,
         max: 1,
         min: -1,
         modifiers: null,
