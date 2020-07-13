@@ -6,7 +6,7 @@ import DropModifier from '../../src/modifiers/DropModifier';
 import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
 import ReRollModifier from '../../src/modifiers/ReRollModifier';
 import KeepModifier from '../../src/modifiers/KeepModifier';
-import parser from '../../src/parser/grammars/grammar';
+import * as parser from '../../src/parser/grammars/grammar';
 import SortingModifier from '../../src/modifiers/SortingModifier';
 import TargetModifier from '../../src/modifiers/TargetModifier';
 import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
