@@ -1,4 +1,4 @@
-import parser from './grammars/grammar';
+import * as parser from './grammars/grammar';
 import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
 /**
