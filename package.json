@@ -7,6 +7,7 @@
   "main": "lib/esm/bundle.js",
   "module": "lib/esm/bundle.js",
   "browser": "lib/umd/bundle.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -40,7 +41,8 @@
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^6.0.0",
     "rollup-plugin-node-resolve": "^4.2.4",
-    "rollup-plugin-terser": "^5.3.0"
+    "rollup-plugin-terser": "^5.3.0",
+    "typescript": "^3.9.6"
   },
   "dependencies": {
     "mathjs-expression-parser": "^1.0.2"
@@ -55,7 +57,8 @@
     "build:umd": "rollup --c --environment FORMAT:umd",
     "build:esm": "rollup --c --environment FORMAT:esm",
     "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
-    "prebuild": "npm run build:grammars",
+    "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
+    "prebuild": "npm run build:grammars && npm run build:declaration",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",

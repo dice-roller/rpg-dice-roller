@@ -18,7 +18,6 @@ A JS based dice roller that can roll various types of dice and modifiers, along 
 npm install rpg-dice-roller
 ```
 
-
 ## Documentation
 
 Check out the documentation at [https://greenimp.github.io/rpg-dice-roller/](https://greenimp.github.io/rpg-dice-roller/).
