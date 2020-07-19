@@ -1,5 +1,6 @@
 import { diceUtils } from '../utilities/utils';
 import ExplodeModifier from '../modifiers/ExplodeModifier';
+import { generator } from '../utilities/NumberGenerator';
 import RollResult from '../results/RollResult';
 import RollResults from '../results/RollResults';
 import ComparePoint from '../ComparePoint';
@@ -191,7 +192,7 @@ class StandardDice {
    * @returns {RollResult}
    */
   rollOnce() {
-    return new RollResult(diceUtils.generateNumber(this.min, this.max));
+    return new RollResult(generator.integer(this.min, this.max));
   }
 
   /**
