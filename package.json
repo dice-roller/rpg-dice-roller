@@ -59,16 +59,16 @@
     "build:esm": "rollup --c --environment FORMAT:esm",
     "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
-    "prebuild": "npm run build:grammars && npm run build:declaration",
+    "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
-    "pretest": "npm run prebuild",
+    "pretest": "npm run prebuild && npm run build:declaration",
     "test": "npm run lint && jest /tests/",
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
     "test:coverage": "jest /tests/ --coverage",
     "test:coveralls": "jest /tests/ --coverage && coveralls < coverage/lcov.info",
-    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test"
+    "prepublishOnly": "npm test && npm run build:prod && npm run build:dev"
   },
   "type": "module"
 }
