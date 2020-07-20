@@ -45,7 +45,8 @@
     "typescript": "^3.9.6"
   },
   "dependencies": {
-    "mathjs-expression-parser": "^1.0.2"
+    "mathjs-expression-parser": "^1.0.2",
+    "random-js": "^2.1.0"
   },
   "engines": {
     "node": ">=11.0"

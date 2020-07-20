@@ -17,6 +17,10 @@ export default {
     file: `lib/${format}/bundle${production ? '.min' : ''}.js`,
     format,
     name: 'rpgDiceRoller',
+    // map external dependencies to variables, for UMD builds
+    globals: !es6 ? {
+      'random-js': 'randomJs',
+    } : {},
   },
   plugins: [
     // lint the files
@@ -34,4 +38,6 @@ export default {
       file: path.join(__dirname, 'banner.txt'),
     }),
   ],
+  // indicate which modules should be treated as external
+  external: [],
 };
