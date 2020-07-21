@@ -4,7 +4,10 @@
 # Except for these
 !/lib/*.js
 !/lib/**/*.js
+!/types/*.d.ts
+!/types/**/*.d.ts
 !CONTRIBUTING.md
 !licence.txt
 !package.json
 !readme.md
+!tsconfig.json

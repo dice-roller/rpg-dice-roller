@@ -4,6 +4,7 @@ import DiceRoller from './DiceRoller';
 import { diceUtils, exportFormats } from './utilities/utils';
 import * as Dice from './Dice';
 import * as Modifiers from './Modifiers';
+import * as NumberGenerator from './utilities/NumberGenerator';
 
 export {
   diceUtils,
@@ -12,5 +13,6 @@ export {
   DiceRoll,
   DiceRoller,
   Modifiers,
+  NumberGenerator,
   Parser,
 };

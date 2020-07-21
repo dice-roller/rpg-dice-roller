@@ -1,3 +1,5 @@
+import { generator } from './NumberGenerator';
+
 /* eslint-disable */
 if (!Array.prototype.flat) {
   /**
@@ -92,16 +94,14 @@ const diceUtils = Object.freeze({
    * @param {number|string} min
    * @param {number|string} max
    * @returns {number}
+   *
+   * @deprecated use `NumberGenerator.generator.integer()` instead
    */
   generateNumber(min, max) {
-    const minNumber = min ? parseInt(min, 10) : 1;
-    const maxNumber = max ? parseInt(max, 10) : min;
+    // eslint-disable-next-line no-console
+    console.warn('diceUtils.generateNumber is deprecated, use NumberGenerator.generator.integer() instead');
 
-    if (maxNumber <= minNumber) {
-      return minNumber;
-    }
-
-    return Math.floor(Math.random() * (maxNumber - minNumber + 1) + minNumber);
+    return generator.integer(min, max);
   },
   /**
    * @returns {function(Array): number}

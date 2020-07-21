@@ -1,11 +1,12 @@
 <p align="center">
-    <img src="./docs/.vuepress/public/hero.svg" alt="RPG Dice Roller" style="max-width: 100%;" width="180"/>
+    <img src="https://greenimp.github.io/rpg-dice-roller/hero.svg" alt="RPG Dice Roller" style="max-width: 100%;" width="180"/>
 </p>
 
 # RPG Dice Roller
 
-[![Build Status](https://travis-ci.org/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.org/GreenImp/rpg-dice-roller)
+[![Build Status](https://travis-ci.com/GreenImp/rpg-dice-roller.svg?branch=master)](https://travis-ci.com/GreenImp/rpg-dice-roller)
 [![Coverage Status](https://coveralls.io/repos/github/GreenImp/rpg-dice-roller/badge.svg)](https://coveralls.io/github/GreenImp/rpg-dice-roller)
+![Tyepscript friendly](https://img.shields.io/badge/typescript-supported-blue)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](licence.txt)
 [![npm downloads](https://img.shields.io/npm/dm/rpg-dice-roller)](https://www.npmjs.com/package/rpg-dice-roller)
 
@@ -17,7 +18,6 @@ A JS based dice roller that can roll various types of dice and modifiers, along 
 ```bash
 npm install rpg-dice-roller
 ```
-
 
 ## Documentation
 

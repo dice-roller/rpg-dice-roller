@@ -2,11 +2,12 @@
   "name": "rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
-  "version": "4.1.2",
+  "version": "4.2.0",
   "license": "MIT",
   "main": "lib/esm/bundle.js",
   "module": "lib/esm/bundle.js",
   "browser": "lib/umd/bundle.js",
+  "types": "types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -25,9 +26,8 @@
     "notation"
   ],
   "devDependencies": {
-    "@babel/core": "^7.10.1",
-    "@babel/preset-env": "^7.10.1",
-    "@vuepress/plugin-back-to-top": "^1.5.0",
+    "@babel/core": "^7.10.5",
+    "@babel/preset-env": "^7.10.4",
     "abab": "^2.0.3",
     "coveralls": "^3.1.0",
     "eslint": "^6.8.0",
@@ -42,11 +42,11 @@
     "rollup-plugin-eslint": "^6.0.0",
     "rollup-plugin-node-resolve": "^4.2.4",
     "rollup-plugin-terser": "^5.3.0",
-    "vuepress": "^1.5.0",
-    "vuepress-plugin-dice-roller": "^0.1.1"
+    "typescript": "^3.9.7"
   },
   "dependencies": {
-    "mathjs-expression-parser": "^1.0.2"
+    "mathjs-expression-parser": "^1.0.2",
+    "random-js": "^2.1.0"
   },
   "engines": {
     "node": ">=11.0"
@@ -58,17 +58,17 @@
     "build:umd": "rollup --c --environment FORMAT:umd",
     "build:esm": "rollup --c --environment FORMAT:esm",
     "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
+    "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/** tests/**",
-    "pretest": "npm run prebuild",
+    "lint:fix": "eslint --fix src/** tests/**",
+    "pretest": "npm run prebuild && npm run build:declaration",
     "test": "npm run lint && jest /tests/",
     "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
     "test:coverage": "jest /tests/ --coverage",
     "test:coveralls": "jest /tests/ --coverage && coveralls < coverage/lcov.info",
-    "prepublishOnly": "npm run build:prod && npm run build:dev && npm run test",
-    "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "prepublishOnly": "npm test && npm run build:prod && npm run build:dev"
   },
   "type": "module"
 }

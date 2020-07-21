@@ -1,5 +1,6 @@
 import { diceUtils } from '../utilities/utils';
 import ExplodeModifier from '../modifiers/ExplodeModifier';
+import { generator } from '../utilities/NumberGenerator';
 import RollResult from '../results/RollResult';
 import RollResults from '../results/RollResults';
 import ComparePoint from '../ComparePoint';
@@ -42,6 +43,15 @@ class StandardDice {
 
     this[minSymbol] = diceUtils.isNumeric(min) ? parseInt(min, 10) : 1;
     this[maxSymbol] = diceUtils.isNumeric(max) ? parseInt(max, 10) : sides;
+  }
+
+  /**
+   * The average value that the die can roll (Excluding modifiers)
+   *
+   * @returns {number}
+   */
+  get average() {
+    return (this.min + this.max) / 2;
   }
 
   /**
@@ -182,7 +192,7 @@ class StandardDice {
    * @returns {RollResult}
    */
   rollOnce() {
-    return new RollResult(diceUtils.generateNumber(this.min, this.max));
+    return new RollResult(generator.integer(this.min, this.max));
   }
 
   /**
@@ -192,10 +202,11 @@ class StandardDice {
    */
   toJSON() {
     const {
-      max, min, modifiers, name, notation, qty, sides,
+      average, max, min, modifiers, name, notation, qty, sides,
     } = this;
 
     return {
+      average,
       max,
       min,
       modifiers,
