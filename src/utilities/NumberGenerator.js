@@ -13,6 +13,9 @@ const engines = {
 };
 
 class NumberGenerator {
+  /**
+   * @param {Engine=} engine
+   */
   constructor(engine = nativeMath) {
     this.engine = engine || nativeMath;
   }
