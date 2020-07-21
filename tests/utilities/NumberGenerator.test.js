@@ -149,3 +149,47 @@ describe('NumberGenerator', () => {
     });
   });
 });
+
+describe('Engines', () => {
+  describe('Min', () => {
+    test('model structure', () => {
+      expect(engines.min).toEqual(expect.objectContaining({
+        next: expect.any(Function),
+      }));
+    });
+
+    test('`next()` always returns `0`', () => {
+      // run it several times to ensure the correct value is always returned
+      for (let i = 0; i < 100; i++) {
+        expect(engines.min.next()).toBe(0);
+      }
+    });
+  });
+
+  describe('Max', () => {
+    test('model structure', () => {
+      expect(engines.max).toEqual(expect.objectContaining({
+        next: expect.any(Function),
+        range: [],
+      }));
+    });
+
+    test('`next()` always returns the index of the max value in the range', () => {
+      // range values are 0 indexed and the next method should return
+      // the index of the max value in the range, as though the range
+      // is an array of all values between the max and min:
+      // [1, 4] = [1, 2, 3, 4]
+      engines.max.range = [1, 4];
+      expect(engines.max.next()).toBe(3);
+
+      engines.max.range = [6, 25];
+      expect(engines.max.next()).toBe(19);
+
+      engines.max.range = [-5, -3];
+      expect(engines.max.next()).toBe(2);
+
+      engines.max.range = [-1, 0];
+      expect(engines.max.next()).toBe(1);
+    });
+  });
+});
