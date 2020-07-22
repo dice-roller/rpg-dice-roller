@@ -28,6 +28,17 @@ class Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
+   * The maximum number of iterations that the modifier can be applied to a single die roll
+   *
+   * @returns {number}
+   */
+  get maxIterations() {
+    return 1000;
+  }
+  /* eslint-enable class-methods-use-this */
+
+  /* eslint-disable class-methods-use-this */
+  /**
    * Runs the modifier on the rolls
    *
    * @param {RollResults} results

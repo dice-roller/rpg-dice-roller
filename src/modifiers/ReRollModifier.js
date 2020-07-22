@@ -53,25 +53,23 @@ class ReRollModifier extends ComparisonModifier {
 
     results.rolls
       .map((roll) => {
-        let hasReRolled = false;
-
-        // if the die roll matches the compare point we re-roll. Unless we're only rolling once,
-        // we should re-roll if any consecutive rolls also match the CP
-        while (this.isComparePoint(roll.value) && (!this.once || !hasReRolled)) {
-          // roll the dice
+        // re-roll if the value matches the compare point and we haven't reached the max iterations,
+        // unless we're only rolling once and have already re-rolled
+        for (let i = 0; (i < this.maxIterations) && this.isComparePoint(roll.value); i++) {
+          // re-roll the dice
           const rollResult = _dice.rollOnce();
 
-          // update the roll value (Unlike exploding, the original value if not kept)
+          // update the roll value (Unlike exploding, the original value is not kept)
           // eslint-disable-next-line no-param-reassign
           roll.value = rollResult.value;
 
-          // increment the roll count so we only roll once when required
-          hasReRolled = true;
-        }
-
-        // add the re-roll modifier flag outside the loop, otherwise we get duplicate flags
-        if (hasReRolled) {
+          // add the re-roll modifier flag
           roll.modifiers.add(`re-roll${this.once ? '-once' : ''}`);
+
+          // stop the loop if we're only re-rolling once
+          if (this.once) {
+            break;
+          }
         }
 
         return roll;

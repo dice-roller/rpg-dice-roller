@@ -62,7 +62,8 @@ class ExplodeModifier extends ComparisonModifier {
         const subRolls = [roll];
         let compareValue = roll.value;
 
-        while (this.isComparePoint(compareValue)) {
+        // explode if the value matches the compare point, and we haven't reached the max iterations
+        for (let i = 0; (i < this.maxIterations) && this.isComparePoint(compareValue); i++) {
           const prevRoll = subRolls[subRolls.length - 1];
           // roll the dice
           const rollResult = _dice.rollOnce();
