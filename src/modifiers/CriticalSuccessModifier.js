@@ -5,7 +5,7 @@ class CriticalSuccessModifier extends ComparisonModifier {
     super(notation, comparePoint);
 
     // set the modifier's sort order
-    this.order = 7;
+    this.order = 8;
   }
 
   /**

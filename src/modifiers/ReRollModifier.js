@@ -16,7 +16,7 @@ class ReRollModifier extends ComparisonModifier {
     this.once = !!once;
 
     // set the modifier's sort order
-    this.order = 3;
+    this.order = 4;
   }
 
   /**

@@ -108,6 +108,9 @@ class RollResult {
         case 'drop':
           flag = 'd';
           break;
+        case 'max':
+          flag = 'v';
+          break;
         case 'min':
           flag = '^';
           break;

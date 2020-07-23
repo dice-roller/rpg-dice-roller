@@ -4,6 +4,7 @@ import CriticalSuccessModifier from './modifiers/CriticalSuccessModifier';
 import DropModifier from './modifiers/DropModifier';
 import ExplodeModifier from './modifiers/ExplodeModifier';
 import KeepModifier from './modifiers/KeepModifier';
+import MaxModifier from './modifiers/MaxModifier';
 import MinModifier from './modifiers/MinModifier';
 import ReRollModifier from './modifiers/ReRollModifier';
 import SortingModifier from './modifiers/SortingModifier';
@@ -16,6 +17,7 @@ export {
   DropModifier,
   ExplodeModifier,
   KeepModifier,
+  MaxModifier,
   MinModifier,
   ReRollModifier,
   SortingModifier,

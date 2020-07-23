@@ -59,6 +59,7 @@ Modifier
   / CriticalSuccessModifier
   / CriticalFailureModifier
   / SortingModifier
+  / MaxModifier
   / MinModifier
 
 // Explode, Penetrate, Compound modifier
@@ -83,6 +84,12 @@ DropModifier
 KeepModifier
   = "k" end:[lh]? qty:IntegerNumber {
     return new Modifiers.KeepModifier(text(), end || 'h', qty);
+  }
+
+// Maximum roll value
+MaxModifier
+  = "max" max:FloatNumber {
+    return new Modifiers.MaxModifier(text(), max);
   }
 
 // Minimum roll value

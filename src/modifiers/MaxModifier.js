@@ -1,43 +1,43 @@
 import Modifier from './Modifier';
 import { diceUtils } from '../utilities/utils';
 
-const minSymbol = Symbol('min');
+const maxSymbol = Symbol('max');
 
-class MinModifier extends Modifier {
+class MaxModifier extends Modifier {
   /**
    *
    * @param {string} notation
-   * @param {Number} min
+   * @param {number} max
    */
-  constructor(notation, min) {
+  constructor(notation, max) {
     super(notation);
 
-    this.min = min;
+    this.max = max;
 
     // set the modifier's sort order
-    this.order = 1;
+    this.order = 2;
   }
 
   /**
-   * Returns the minimum value
+   * Returns the maximum value
    *
    * @returns {Number}
    */
-  get min() {
-    return this[minSymbol];
+  get max() {
+    return this[maxSymbol];
   }
 
   /**
-   * Sets the minimum value
+   * Sets the maximum value
    *
    * @param value
    */
-  set min(value) {
+  set max(value) {
     if (!diceUtils.isNumeric(value)) {
-      throw new TypeError('min must be a number');
+      throw new TypeError('max must be a number');
     }
 
-    this[minSymbol] = parseFloat(value);
+    this[maxSymbol] = parseFloat(value);
   }
 
   /**
@@ -54,9 +54,9 @@ class MinModifier extends Modifier {
     parsedResults.rolls = results.rolls.map((roll) => {
       const parsedRoll = roll;
 
-      if (roll.value < this.min) {
-        parsedRoll.value = this.min;
-        parsedRoll.modifiers.add('min');
+      if (roll.value > this.max) {
+        parsedRoll.value = this.max;
+        parsedRoll.modifiers.add('max');
       }
 
       return parsedRoll;
@@ -71,15 +71,15 @@ class MinModifier extends Modifier {
    * @returns {{}}
    */
   toJSON() {
-    const { min } = this;
+    const { max } = this;
 
     return Object.assign(
       super.toJSON(),
       {
-        min,
+        max,
       },
     );
   }
 }
 
-export default MinModifier;
+export default MaxModifier;

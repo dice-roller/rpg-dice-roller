@@ -4,6 +4,7 @@ import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier
 import DropModifier from '../../src/modifiers/DropModifier';
 import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
 import KeepModifier from '../../src/modifiers/KeepModifier';
+import MaxModifier from '../../src/modifiers/MaxModifier';
 import MinModifier from '../../src/modifiers/MinModifier';
 import * as parser from '../../src/parser/grammars/grammar';
 import Parser from '../../src/parser/Parser';
@@ -686,6 +687,87 @@ describe('Parser', () => {
             end: 'l',
             qty: 3,
           }));
+        });
+      });
+
+      describe('Max', () => {
+        test('max for `2d6max3`', () => {
+          const parsed = Parser.parse('2d6max3');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('2d6');
+          expect(parsed[0].sides).toEqual(6);
+          expect(parsed[0].qty).toEqual(2);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 3,
+            notation: 'max3',
+          }));
+        });
+
+        test('max for `4d20max-12`', () => {
+          const parsed = Parser.parse('4d20max-12');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('4d20');
+          expect(parsed[0].sides).toEqual(20);
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: -12,
+            notation: 'max-12',
+          }));
+        });
+
+        test('max for `6d%max50.45`', () => {
+          const parsed = Parser.parse('6d%max50.45');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('6d%');
+          expect(parsed[0].sides).toEqual('%');
+          expect(parsed[0].qty).toEqual(6);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 50.45,
+            notation: 'max50.45',
+          }));
+        });
+
+        test('throws error if no max value', () => {
+          expect(() => {
+            Parser.parse('d6max');
+          }).toThrow(parser.SyntaxError);
+        });
+
+        test('throws error if invalid max value', () => {
+          expect(() => {
+            Parser.parse('d6maxfoo');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('d6maxd6');
+          }).toThrow(parser.SyntaxError);
         });
       });
 
