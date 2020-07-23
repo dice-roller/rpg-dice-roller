@@ -194,6 +194,15 @@ class DiceRoll {
    ************************ */
 
   /**
+   * Returns the average possible total for the notation
+   *
+   * @returns {number}
+   */
+  get averageTotal() {
+    return (this.maxTotal + this.minTotal) / 2;
+  }
+
+  /**
    * Returns the maximum possible total for the notation
    *
    * @returns {number}
