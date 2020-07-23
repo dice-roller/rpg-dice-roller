@@ -462,7 +462,7 @@ describe('DiceRoll', () => {
         expect(typeof diceRoll.minTotal).toEqual('number');
       });
 
-      test('returns the correct min value', () => {
+      test('returns the correct value', () => {
         let diceRoll = new DiceRoll('4d8');
         expect(diceRoll.minTotal).toBe(4);
 
@@ -496,7 +496,7 @@ describe('DiceRoll', () => {
         expect(typeof diceRoll.maxTotal).toEqual('number');
       });
 
-      test('returns the correct max value', () => {
+      test('returns the correct value', () => {
         let diceRoll = new DiceRoll('4d8');
         expect(diceRoll.maxTotal).toBe(32);
 
@@ -517,6 +517,37 @@ describe('DiceRoll', () => {
 
         diceRoll = new DiceRoll('2dF');
         expect(diceRoll.maxTotal).toBe(2);
+      });
+    });
+
+    describe('Average Total', () => {
+      test('returns a number', () => {
+        const diceRoll = new DiceRoll('4d8');
+
+        expect(typeof diceRoll.averageTotal).toEqual('number');
+      });
+
+      test('returns the correct value', () => {
+        let diceRoll = new DiceRoll('4d8');
+        expect(diceRoll.averageTotal).toBe(18);
+
+        diceRoll = new DiceRoll('4d8+1');
+        expect(diceRoll.averageTotal).toBe(19);
+
+        diceRoll = new DiceRoll('4d8+2d10');
+        expect(diceRoll.averageTotal).toBe(29);
+
+        diceRoll = new DiceRoll('d%');
+        expect(diceRoll.averageTotal).toBe(50.5);
+
+        diceRoll = new DiceRoll('3d%');
+        expect(diceRoll.averageTotal).toBe(151.5);
+
+        diceRoll = new DiceRoll('dF');
+        expect(diceRoll.averageTotal).toBe(0);
+
+        diceRoll = new DiceRoll('2dF');
+        expect(diceRoll.averageTotal).toBe(0);
       });
     });
   });
