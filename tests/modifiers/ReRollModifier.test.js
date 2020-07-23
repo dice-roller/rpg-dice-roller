@@ -139,8 +139,10 @@ describe('ReRollModifier', () => {
   });
 
   describe('Run', () => {
-    let mod; let die; let
-      results;
+    let mod;
+    let die;
+    let results;
+    let spy;
 
     beforeEach(() => {
       results = new RollResults([
@@ -149,7 +151,7 @@ describe('ReRollModifier', () => {
       die = new StandardDice('6d10', 10, 6);
       mod = new ReRollModifier('r');
 
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(10))
         .mockImplementationOnce(() => new RollResult(2))
         .mockImplementationOnce(() => new RollResult(5))
@@ -311,6 +313,34 @@ describe('ReRollModifier', () => {
       expect(() => {
         mod.run(results, die);
       }).toThrow(DieActionValueError);
+    });
+
+    describe('Iteration limit', () => {
+      test('has iteration limit', () => {
+        expect(mod.maxIterations).toBe(1000);
+      });
+
+      test('infinite re-roll stops at iteration limit `r>0`', () => {
+        // re-rolling on greater than zero will always re-rolling, but shouldn't loop infinitely
+        mod.comparePoint = new ComparePoint('>', 0);
+
+        for (let qty = 1; qty < 2; qty++) {
+          // create a results object with the correct number of rolls in it, filled with values of 1
+          results = new RollResults(Array(qty).fill(1));
+
+          // create the dice
+          die = new StandardDice(`${qty}d10`, 10, qty);
+
+          // apply modifiers
+          const { rolls } = mod.run(results, die);
+
+          // check that the roll length is correct (It shouldn't change)
+          expect(rolls.length).toEqual(qty);
+
+          // `StandardDice.rollOnce()` should be called once for each re-roll
+          expect(spy).toHaveBeenCalledTimes(mod.maxIterations * qty);
+        }
+      });
     });
   });
 });
