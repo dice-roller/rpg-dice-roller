@@ -20,7 +20,7 @@ class ExplodeModifier extends ComparisonModifier {
     this[penetrateSymbol] = !!penetrate;
 
     // set the modifier's sort order
-    this.order = 1;
+    this.order = 3;
   }
 
   /**

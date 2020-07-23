@@ -1,15 +1,17 @@
-import Parser from '../../src/parser/Parser';
 import { FudgeDice, PercentileDice, StandardDice } from '../../src/Dice';
 import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier';
 import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier';
 import DropModifier from '../../src/modifiers/DropModifier';
 import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
-import ReRollModifier from '../../src/modifiers/ReRollModifier';
 import KeepModifier from '../../src/modifiers/KeepModifier';
+import MaxModifier from '../../src/modifiers/MaxModifier';
+import MinModifier from '../../src/modifiers/MinModifier';
 import * as parser from '../../src/parser/grammars/grammar';
+import Parser from '../../src/parser/Parser';
 import SortingModifier from '../../src/modifiers/SortingModifier';
 import TargetModifier from '../../src/modifiers/TargetModifier';
 import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import ReRollModifier from '../../src/modifiers/ReRollModifier';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -685,6 +687,168 @@ describe('Parser', () => {
             end: 'l',
             qty: 3,
           }));
+        });
+      });
+
+      describe('Max', () => {
+        test('max for `2d6max3`', () => {
+          const parsed = Parser.parse('2d6max3');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('2d6');
+          expect(parsed[0].sides).toEqual(6);
+          expect(parsed[0].qty).toEqual(2);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 3,
+            notation: 'max3',
+          }));
+        });
+
+        test('max for `4d20max-12`', () => {
+          const parsed = Parser.parse('4d20max-12');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('4d20');
+          expect(parsed[0].sides).toEqual(20);
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: -12,
+            notation: 'max-12',
+          }));
+        });
+
+        test('max for `6d%max50.45`', () => {
+          const parsed = Parser.parse('6d%max50.45');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('6d%');
+          expect(parsed[0].sides).toEqual('%');
+          expect(parsed[0].qty).toEqual(6);
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 50.45,
+            notation: 'max50.45',
+          }));
+        });
+
+        test('throws error if no max value', () => {
+          expect(() => {
+            Parser.parse('d6max');
+          }).toThrow(parser.SyntaxError);
+        });
+
+        test('throws error if invalid max value', () => {
+          expect(() => {
+            Parser.parse('d6maxfoo');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('d6maxd6');
+          }).toThrow(parser.SyntaxError);
+        });
+      });
+
+      describe('Min', () => {
+        test('min for `2d6min3`', () => {
+          const parsed = Parser.parse('2d6min3');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('2d6');
+          expect(parsed[0].sides).toEqual(6);
+          expect(parsed[0].qty).toEqual(2);
+
+          expect(parsed[0].modifiers.has('MinModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MinModifier');
+          expect(mod).toBeInstanceOf(MinModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            min: 3,
+            notation: 'min3',
+          }));
+        });
+
+        test('min for `4d20min-12`', () => {
+          const parsed = Parser.parse('4d20min-12');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('4d20');
+          expect(parsed[0].sides).toEqual(20);
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('MinModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MinModifier');
+          expect(mod).toBeInstanceOf(MinModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            min: -12,
+            notation: 'min-12',
+          }));
+        });
+
+        test('min for `6d%min50.45`', () => {
+          const parsed = Parser.parse('6d%min50.45');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('6d%');
+          expect(parsed[0].sides).toEqual('%');
+          expect(parsed[0].qty).toEqual(6);
+
+          expect(parsed[0].modifiers.has('MinModifier')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('MinModifier');
+          expect(mod).toBeInstanceOf(MinModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            min: 50.45,
+            notation: 'min50.45',
+          }));
+        });
+
+        test('throws error if no min value', () => {
+          expect(() => {
+            Parser.parse('d6min');
+          }).toThrow(parser.SyntaxError);
+        });
+
+        test('throws error if invalid min value', () => {
+          expect(() => {
+            Parser.parse('d6minfoo');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('d6mind6');
+          }).toThrow(parser.SyntaxError);
         });
       });
 

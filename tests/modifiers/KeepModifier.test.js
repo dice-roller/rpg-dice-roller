@@ -180,8 +180,9 @@ describe('KeepModifier', () => {
   });
 
   describe('Run', () => {
-    let mod; let die; let
-      results;
+    let mod;
+    let die;
+    let results;
 
     beforeEach(() => {
       results = new RollResults([
