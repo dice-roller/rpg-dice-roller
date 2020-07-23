@@ -5,7 +5,7 @@ class CriticalFailureModifier extends ComparisonModifier {
     super(notation, comparePoint);
 
     // set the modifier's sort order
-    this.order = 7;
+    this.order = 8;
   }
 
   /**
@@ -18,7 +18,7 @@ class CriticalFailureModifier extends ComparisonModifier {
    */
   run(results, _dice) {
     results.rolls
-      .map((roll) => {
+      .forEach((roll) => {
         // add the modifier flag
         if (this.isComparePoint(roll.value)) {
           roll.modifiers.add('critical-failure');

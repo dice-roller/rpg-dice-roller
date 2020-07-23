@@ -14,7 +14,7 @@ class SortingModifier extends Modifier {
     this.direction = direction || 'a';
 
     // set the modifier's sort order
-    this.order = 8;
+    this.order = 9;
   }
 
   /**

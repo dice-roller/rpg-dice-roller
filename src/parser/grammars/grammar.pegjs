@@ -50,7 +50,16 @@ FudgeDie
 
 // Modifiers
 
-Modifier = ExplodeModifier / TargetModifier / DropModifier / KeepModifier / ReRollModifier / CriticalSuccessModifier / CriticalFailureModifier / SortingModifier
+Modifier
+  = ExplodeModifier
+  / TargetModifier
+  / DropModifier
+  / KeepModifier
+  / ReRollModifier
+  / CriticalSuccessModifier
+  / CriticalFailureModifier
+  / SortingModifier
+  / MinModifier
 
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
@@ -74,6 +83,12 @@ DropModifier
 KeepModifier
   = "k" end:[lh]? qty:IntegerNumber {
     return new Modifiers.KeepModifier(text(), end || 'h', qty);
+  }
+
+// Minimum roll value
+MinModifier
+  = "min" min:FloatNumber {
+    return new Modifiers.MinModifier(text(), min);
   }
 
 // Re-rolling Dice (Including Re-roll Once)

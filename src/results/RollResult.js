@@ -108,6 +108,9 @@ class RollResult {
         case 'drop':
           flag = 'd';
           break;
+        case 'min':
+          flag = '^';
+          break;
         case 'penetrate':
           flag = 'p';
           break;
