@@ -291,4 +291,25 @@ describe('Rolling', () => {
     // remove the spy
     spy.mockRestore();
   });
+
+  test('roll `6d10min3max6', () => {
+    const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+      .mockImplementationOnce(() => new RollResult(10))
+      .mockImplementationOnce(() => new RollResult(2))
+      .mockImplementationOnce(() => new RollResult(3))
+      .mockImplementationOnce(() => new RollResult(7))
+      .mockImplementationOnce(() => new RollResult(1))
+      .mockImplementationOnce(() => new RollResult(9));
+    const roll = roller.roll('6d10min3max6');
+
+    expect(roll).toBeInstanceOf(DiceRoll);
+    expect(roll).toEqual(expect.objectContaining({
+      notation: '6d10min3max6',
+      output: '6d10min3max6: [6v, 3^, 3, 6v, 3^, 6v] = 27',
+      total: 27,
+    }));
+
+    // remove the spy
+    spy.mockRestore();
+  });
 });
