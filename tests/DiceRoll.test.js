@@ -1,13 +1,13 @@
 import math from 'mathjs-expression-parser';
+import { exportFormats } from '../src/utilities/utils';
+import DataFormatError from '../src/exceptions/DataFormatError';
 import DiceRoll from '../src/DiceRoll';
+import NotationError from '../src/exceptions/NotationError';
 import Parser from '../src/parser/Parser';
 import StandardDice from '../src/dice/StandardDice';
 import RollResults from '../src/results/RollResults';
 import RollResult from '../src/results/RollResult';
-import { exportFormats } from '../src/utilities/utils';
-import NotationError from '../src/exceptions/NotationError';
 import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
-import DataFormatError from '../src/exceptions/DataFormatError';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -16,15 +16,17 @@ describe('DiceRoll', () => {
 
       expect(diceRoll).toBeInstanceOf(DiceRoll);
       expect(diceRoll).toEqual(expect.objectContaining({
-        notation: '4d10',
-        output: expect.any(String),
-        rolls: expect.any(Array),
-        total: expect.any(Number),
         export: expect.any(Function),
         hasRolls: expect.any(Function),
+        maxTotal: expect.any(Number),
+        minTotal: expect.any(Number),
+        notation: '4d10',
+        output: expect.any(String),
         roll: expect.any(Function),
+        rolls: expect.any(Array),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
+        total: expect.any(Number),
       }));
     });
   });
@@ -352,103 +354,201 @@ describe('DiceRoll', () => {
     });
   });
 
-  describe('Total', () => {
-    test('calls RollResults value', () => {
-      const spy = jest.spyOn(RollResults.prototype, 'value', 'get');
-      const diceRoll = new DiceRoll('4d8');
+  describe('Totals', () => {
+    describe('Actual total', () => {
+      test('calls RollResults value', () => {
+        const spy = jest.spyOn(RollResults.prototype, 'value', 'get');
+        const diceRoll = new DiceRoll('4d8');
 
-      // call the total getter
-      expect(diceRoll.total).toBeGreaterThanOrEqual(1);
+        // call the total getter
+        expect(diceRoll.total).toBeGreaterThanOrEqual(1);
 
-      expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledTimes(1);
 
-      // remove the spy
-      spy.mockRestore();
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('calls math.eval', () => {
+        // mock the roll values
+        jest.spyOn(StandardDice.prototype, 'roll')
+          .mockImplementationOnce(() => new RollResults([6, 2, 5, 8]))
+          .mockImplementationOnce(() => new RollResults([3, 9]));
+
+        const diceRoll = new DiceRoll('4d8*(5+2d10)');
+        const spy = jest.spyOn(math, 'eval');
+
+        expect(diceRoll.total).toBe(357);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith('21*(5+12)');
+
+        // remove the spy
+        spy.mockRestore();
+        jest.restoreAllMocks();
+      });
+
+      test('equal to total roll values', () => {
+        // mock the roll values
+        const roll = new RollResults([6, 2, 5, 8]);
+        jest.spyOn(StandardDice.prototype, 'roll').mockImplementation(() => roll);
+
+        const diceRoll = new DiceRoll('4d8');
+
+        // assert that the total matches
+        expect(diceRoll.total).toBe(21);
+
+        jest.restoreAllMocks();
+      });
+
+      test('equal to rolls with equation', () => {
+        // mock the roll values
+        const roll1 = new RollResults([3, 2, 7, 5]);
+        const roll2 = new RollResults([5, 2, 4, 2, 1, 6, 5]);
+        jest.spyOn(StandardDice.prototype, 'roll')
+          .mockImplementationOnce(() => roll1)
+          .mockImplementationOnce(() => roll2);
+
+        const diceRoll = new DiceRoll('4d8/(5+2)d6');
+        const spy = jest.spyOn(math, 'eval');
+
+        // assert that the total matches
+        expect(diceRoll.total).toBeCloseTo(0.68);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith('17/25');
+
+        jest.restoreAllMocks();
+      });
+
+      test('equal to rolls with modifiers', () => {
+        // mock the roll values
+        jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(6))
+          .mockImplementationOnce(() => new RollResult(2))
+          .mockImplementationOnce(() => new RollResult(5))
+          .mockImplementationOnce(() => new RollResult(8))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(9));
+
+        const diceRoll = new DiceRoll('4d8dl2*(5+2d10kh1)');
+        const spy = jest.spyOn(math, 'eval');
+
+        // assert that the total matches
+        expect(diceRoll.total).toBe(196);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith('14*(5+9)');
+
+        jest.restoreAllMocks();
+      });
+
+      test('returns 0 if no rolls', () => {
+        const diceRoll = new DiceRoll('4+8');
+
+        expect(diceRoll.total).toBe(0);
+      });
+
+      test('cannot change value', () => {
+        const diceRoll = new DiceRoll('4d8');
+
+        expect(() => {
+          diceRoll.total = 57;
+        }).toThrow(TypeError);
+      });
     });
 
-    test('calls math.eval', () => {
-      // mock the roll values
-      jest.spyOn(StandardDice.prototype, 'roll')
-        .mockImplementationOnce(() => new RollResults([6, 2, 5, 8]))
-        .mockImplementationOnce(() => new RollResults([3, 9]));
+    describe('Min Total', () => {
+      test('returns a number', () => {
+        const diceRoll = new DiceRoll('4d8');
 
-      const diceRoll = new DiceRoll('4d8*(5+2d10)');
-      const spy = jest.spyOn(math, 'eval');
+        expect(typeof diceRoll.minTotal).toEqual('number');
+      });
 
-      expect(diceRoll.total).toBe(357);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('21*(5+12)');
+      test('returns the correct value', () => {
+        let diceRoll = new DiceRoll('4d8');
+        expect(diceRoll.minTotal).toBe(4);
 
-      // remove the spy
-      spy.mockRestore();
-      jest.restoreAllMocks();
+        diceRoll = new DiceRoll('4d8+1');
+        expect(diceRoll.minTotal).toBe(5);
+
+        diceRoll = new DiceRoll('4d8+2d10');
+        expect(diceRoll.minTotal).toBe(6);
+
+        diceRoll = new DiceRoll('d%');
+        expect(diceRoll.minTotal).toBe(1);
+
+        diceRoll = new DiceRoll('3d%');
+        expect(diceRoll.minTotal).toBe(3);
+
+        diceRoll = new DiceRoll('dF');
+        expect(diceRoll.minTotal).toBe(-1);
+
+        diceRoll = new DiceRoll('2dF');
+        expect(diceRoll.minTotal).toBe(-2);
+
+        diceRoll = new DiceRoll('2d6ro=1');
+        expect(diceRoll.minTotal).toBe(2);
+      });
     });
 
-    test('equal to total roll values', () => {
-      // mock the roll values
-      const roll = new RollResults([6, 2, 5, 8]);
-      jest.spyOn(StandardDice.prototype, 'roll').mockImplementation(() => roll);
+    describe('Max Total', () => {
+      test('returns a number', () => {
+        const diceRoll = new DiceRoll('4d8');
 
-      const diceRoll = new DiceRoll('4d8');
+        expect(typeof diceRoll.maxTotal).toEqual('number');
+      });
 
-      // assert that the total matches
-      expect(diceRoll.total).toBe(21);
+      test('returns the correct value', () => {
+        let diceRoll = new DiceRoll('4d8');
+        expect(diceRoll.maxTotal).toBe(32);
 
-      jest.restoreAllMocks();
+        diceRoll = new DiceRoll('4d8+1');
+        expect(diceRoll.maxTotal).toBe(33);
+
+        diceRoll = new DiceRoll('4d8+2d10');
+        expect(diceRoll.maxTotal).toBe(52);
+
+        diceRoll = new DiceRoll('d%');
+        expect(diceRoll.maxTotal).toBe(100);
+
+        diceRoll = new DiceRoll('3d%');
+        expect(diceRoll.maxTotal).toBe(300);
+
+        diceRoll = new DiceRoll('dF');
+        expect(diceRoll.maxTotal).toBe(1);
+
+        diceRoll = new DiceRoll('2dF');
+        expect(diceRoll.maxTotal).toBe(2);
+      });
     });
 
-    test('equal to rolls with equation', () => {
-      // mock the roll values
-      const roll1 = new RollResults([3, 2, 7, 5]);
-      const roll2 = new RollResults([5, 2, 4, 2, 1, 6, 5]);
-      jest.spyOn(StandardDice.prototype, 'roll')
-        .mockImplementationOnce(() => roll1)
-        .mockImplementationOnce(() => roll2);
+    describe('Average Total', () => {
+      test('returns a number', () => {
+        const diceRoll = new DiceRoll('4d8');
 
-      const diceRoll = new DiceRoll('4d8/(5+2)d6');
-      const spy = jest.spyOn(math, 'eval');
+        expect(typeof diceRoll.averageTotal).toEqual('number');
+      });
 
-      // assert that the total matches
-      expect(diceRoll.total).toBeCloseTo(0.68);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('17/25');
+      test('returns the correct value', () => {
+        let diceRoll = new DiceRoll('4d8');
+        expect(diceRoll.averageTotal).toBe(18);
 
-      jest.restoreAllMocks();
-    });
+        diceRoll = new DiceRoll('4d8+1');
+        expect(diceRoll.averageTotal).toBe(19);
 
-    test('equal to rolls with modifiers', () => {
-      // mock the roll values
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => new RollResult(6))
-        .mockImplementationOnce(() => new RollResult(2))
-        .mockImplementationOnce(() => new RollResult(5))
-        .mockImplementationOnce(() => new RollResult(8))
-        .mockImplementationOnce(() => new RollResult(3))
-        .mockImplementationOnce(() => new RollResult(9));
+        diceRoll = new DiceRoll('4d8+2d10');
+        expect(diceRoll.averageTotal).toBe(29);
 
-      const diceRoll = new DiceRoll('4d8dl2*(5+2d10kh1)');
-      const spy = jest.spyOn(math, 'eval');
+        diceRoll = new DiceRoll('d%');
+        expect(diceRoll.averageTotal).toBe(50.5);
 
-      // assert that the total matches
-      expect(diceRoll.total).toBe(196);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith('14*(5+9)');
+        diceRoll = new DiceRoll('3d%');
+        expect(diceRoll.averageTotal).toBe(151.5);
 
-      jest.restoreAllMocks();
-    });
+        diceRoll = new DiceRoll('dF');
+        expect(diceRoll.averageTotal).toBe(0);
 
-    test('returns 0 if no rolls', () => {
-      const diceRoll = new DiceRoll('4+8');
-
-      expect(diceRoll.total).toBe(0);
-    });
-
-    test('cannot change value', () => {
-      const diceRoll = new DiceRoll('4d8');
-
-      expect(() => {
-        diceRoll.total = 57;
-      }).toThrow(TypeError);
+        diceRoll = new DiceRoll('2dF');
+        expect(diceRoll.averageTotal).toBe(0);
+      });
     });
   });
 
@@ -534,6 +634,8 @@ describe('DiceRoll', () => {
         // this allows us to check that the output is correct, but ignoring the order of the
         // returned properties
         expect(JSON.parse(JSON.stringify(diceRoll))).toEqual({
+          maxTotal: 32,
+          minTotal: 4,
           notation: diceRoll.notation,
           output: diceRoll.output,
           rolls: JSON.parse(JSON.stringify(diceRoll.rolls)),

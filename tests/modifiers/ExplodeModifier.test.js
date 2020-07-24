@@ -1,11 +1,11 @@
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
 import ComparePoint from '../../src/ComparePoint';
 import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
-import RollResult from '../../src/results/RollResult';
-import DieActionValueError from '../../src/exceptions/DieActionValueError';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
 
 describe('ExplodeModifier', () => {
   describe('Initialisation', () => {
@@ -19,6 +19,7 @@ describe('ExplodeModifier', () => {
         compound: false,
         isComparePoint: expect.any(Function),
         penetrate: false,
+        maxIterations: 1000,
         name: 'ExplodeModifier',
         notation: '!',
         run: expect.any(Function),
@@ -153,8 +154,9 @@ describe('ExplodeModifier', () => {
   });
 
   describe('Run', () => {
-    let mod; let die; let
-      results;
+    let mod;
+    let die;
+    let results;
 
     beforeEach(() => {
       results = new RollResults([
@@ -526,6 +528,31 @@ describe('ExplodeModifier', () => {
       expect(() => {
         mod.run(results, die);
       }).toThrow(DieActionValueError);
+    });
+
+    describe('Iteration limit', () => {
+      test('has iteration limit', () => {
+        expect(mod.maxIterations).toBe(1000);
+      });
+
+      test('infinite explode stops at iteration limit `!>0`', () => {
+        // exploding on greater than zero will always explode, but shouldn't loop infinitely
+        mod.comparePoint = new ComparePoint('>', 0);
+
+        for (let qty = 1; qty < 2; qty++) {
+          // create a results object with the correct number of rolls in it, filled with values of 1
+          results = new RollResults(Array(qty).fill(1));
+
+          // create the dice
+          die = new StandardDice(`${qty}d10`, 10, qty);
+
+          // apply modifiers
+          const { rolls } = mod.run(results, die);
+
+          // check that the roll length is correct
+          expect(rolls.length).toEqual((mod.maxIterations + 1) * qty);
+        }
+      });
     });
   });
 

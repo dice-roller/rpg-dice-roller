@@ -1,19 +1,22 @@
 import math from 'mathjs-expression-parser';
 import { diceUtils, exportFormats } from './utilities/utils';
-import Parser from './parser/Parser';
-import RollGroup from './RollGroup';
-import StandardDice from './dice/StandardDice';
-import RollResults from './results/RollResults';
-import NotationError from './exceptions/NotationError';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import { engines, generator } from './utilities/NumberGenerator';
 import DataFormatError from './exceptions/DataFormatError';
+import NotationError from './exceptions/NotationError';
+import Parser from './parser/Parser';
+import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import RollGroup from './RollGroup';
+import RollResults from './results/RollResults';
+import StandardDice from './dice/StandardDice';
 
 /**
+ * Method for calculating the roll total
+ *
  * @type {symbol}
  *
  * @private
  */
-const calculateTotalSymbol = Symbol('calculateTotals');
+const calculateTotalSymbol = Symbol('calculateTotal');
 
 /**
  * The notation
@@ -25,6 +28,24 @@ const calculateTotalSymbol = Symbol('calculateTotals');
 const notationSymbol = Symbol('notation');
 
 /**
+ * The maximum possible roll total
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
+const maxTotalSymbol = Symbol('maxTotal');
+
+/**
+ * The minimum possible roll total
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
+const minTotalSymbol = Symbol('minTotal');
+
+/**
  * List of dice definition objects
  *
  * @type {symbol}
@@ -32,6 +53,13 @@ const notationSymbol = Symbol('notation');
  * @private
  */
 const parsedNotationSymbol = Symbol('parsed-notation');
+
+/**
+ * Method for rolling dice
+ *
+ * @type {symbol}
+ */
+const rollMethodSymbol = Symbol('roll-method');
 
 /**
  * List of rolls
@@ -49,7 +77,7 @@ const rollsSymbol = Symbol('rolls');
  *
  * @private
  */
-const totalSymbol = Symbol('totals');
+const totalSymbol = Symbol('total');
 
 class DiceRoll {
   /**
@@ -166,6 +194,53 @@ class DiceRoll {
    ************************ */
 
   /**
+   * Returns the average possible total for the notation
+   *
+   * @returns {number}
+   */
+  get averageTotal() {
+    return (this.maxTotal + this.minTotal) / 2;
+  }
+
+  /**
+   * Returns the maximum possible total for the notation
+   *
+   * @returns {number}
+   */
+  get maxTotal() {
+    // only calculate the total if it has not already been done
+    if (!this[maxTotalSymbol] && this[parsedNotationSymbol]) {
+      // roll the dice, forcing values to their maximum
+      const rolls = this[rollMethodSymbol](engines.max);
+
+      // calculate the total
+      this[maxTotalSymbol] = this[calculateTotalSymbol](rolls);
+    }
+
+    // return the total
+    return this[maxTotalSymbol] || 0;
+  }
+
+  /**
+   * Returns the minimum possible total for the notation
+   *
+   * @returns {number}
+   */
+  get minTotal() {
+    // only calculate the total if it has not already been done
+    if (!this[minTotalSymbol] && this[parsedNotationSymbol]) {
+      // roll the dice, forcing values to their minimum
+      const rolls = this[rollMethodSymbol](engines.min);
+
+      // calculate the total
+      this[minTotalSymbol] = this[calculateTotalSymbol](rolls);
+    }
+
+    // return the total
+    return this[minTotalSymbol] || 0;
+  }
+
+  /**
    * The dice notation
    *
    * @returns {string}
@@ -233,7 +308,7 @@ class DiceRoll {
   get total() {
     // only calculate the total if it has not already been done
     if (!this[totalSymbol] && this.hasRolls()) {
-      this[totalSymbol] = this[calculateTotalSymbol]();
+      this[totalSymbol] = this[calculateTotalSymbol](this.rolls);
     }
 
     // return the total
@@ -284,21 +359,11 @@ class DiceRoll {
    * @returns {Array}
    */
   roll() {
-    // clear the roll log
-    this[rollsSymbol] = [];
-
     // reset the cached total
     this[totalSymbol] = 0;
 
-    // saved the rolls to the log
-    this[rollsSymbol] = this[parsedNotationSymbol].map((item) => {
-      if ((item instanceof StandardDice) || (item instanceof RollGroup)) {
-        // roll the object and return the value
-        return item.roll();
-      }
-
-      return null;
-    }).filter(Boolean);
+    // save the rolls to the log
+    this[rollsSymbol] = this[rollMethodSymbol]();
 
     // return the rolls;
     return this[rollsSymbol];
@@ -311,10 +376,12 @@ class DiceRoll {
    */
   toJSON() {
     const {
-      notation, output, rolls, total,
+      maxTotal, minTotal, notation, output, rolls, total,
     } = this;
 
     return {
+      maxTotal,
+      minTotal,
       notation,
       output,
       rolls,
@@ -342,29 +409,66 @@ class DiceRoll {
    *
    * @returns {Number}
    */
-  [calculateTotalSymbol]() {
+  [calculateTotalSymbol](rolls) {
     let formula = '';
     let rollIndex = 0;
 
-    if (this.hasRolls()) {
-      // loop through each roll and calculate the totals
-      this[parsedNotationSymbol].forEach((item) => {
-        // @todo need to handle roll groups
-        if (item instanceof StandardDice) {
-          // @todo should roll results be stored on their relevant parsed object?
-          // item is a die - total the rolls for it
-          formula += this.rolls[rollIndex] ? this.rolls[rollIndex].value : 0;
-
-          // increment the roll index and store the previous rolls / parsed die
-          rollIndex += 1;
-        } else {
-          formula += item;
-        }
-      });
+    if (!rolls.length) {
+      return 0;
     }
+
+    // loop through each roll and calculate the totals
+    this[parsedNotationSymbol].forEach((item) => {
+      // @todo need to handle roll groups
+      if (item instanceof StandardDice) {
+        // @todo should roll results be stored on their relevant parsed object?
+        // item is a die - total the rolls for it
+        formula += rolls[rollIndex] ? rolls[rollIndex].value : 0;
+
+        // increment the roll index and store the previous rolls / parsed die
+        rollIndex += 1;
+      } else {
+        formula += item;
+      }
+    });
 
     // if a total formula has been produced, evaluate it and round it to max 2 decimal places
     return formula ? diceUtils.toFixed(math.eval(formula), 2) : 0;
+  }
+
+  /**
+   * Rolls the dice and returns the result.
+   * If the engine is passed, it will be used for the
+   * number generation. The engine will be reset after use.
+   *
+   * @param {Engine|{}=} engine
+   *
+   * @returns {*}
+   */
+  [rollMethodSymbol](engine) {
+    let oEngine;
+    if (engine) {
+      // use the selected engine
+      oEngine = generator.engine;
+      generator.engine = engine;
+    }
+
+    // roll the dice
+    const rolls = this[parsedNotationSymbol].map((item) => {
+      if ((item instanceof StandardDice) || (item instanceof RollGroup)) {
+        // roll the object and return the value
+        return item.roll();
+      }
+
+      return null;
+    }).filter(Boolean);
+
+    if (engine) {
+      // reset the engine
+      generator.engine = oEngine;
+    }
+
+    return rolls;
   }
 }
 

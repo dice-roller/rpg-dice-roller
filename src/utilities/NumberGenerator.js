@@ -5,11 +5,38 @@ import {
 const engineSymbol = Symbol('engine');
 const randomSymbol = Symbol('random');
 
+/**
+ * Engine that always returns tha maximum value,
+ * provided that it is supplied with the range
+ *
+ * @type {{next(): *, range: []}}
+ */
+const maxEngine = {
+  range: [],
+  next() {
+    // calculate the index of the max number
+    return this.range[1] - this.range[0];
+  },
+};
+
+/**
+ * Engine that always returns the minimum value
+ *
+ * @type {{next(): number}}
+ */
+const minEngine = {
+  next() {
+    return 0;
+  },
+};
+
 const engines = {
   browserCrypto,
   nodeCrypto,
   MersenneTwister19937,
   nativeMath,
+  min: minEngine,
+  max: maxEngine,
 };
 
 class NumberGenerator {
@@ -53,6 +80,8 @@ class NumberGenerator {
    * @returns {number}
    */
   integer(min, max) {
+    this[engineSymbol].range = [min, max];
+
     return this[randomSymbol].integer(min, max);
   }
 
@@ -66,6 +95,8 @@ class NumberGenerator {
    * @returns {number}
    */
   real(min, max, inclusive = false) {
+    this[engineSymbol].range = [min, max];
+
     return this[randomSymbol].real(min, max, inclusive);
   }
 }

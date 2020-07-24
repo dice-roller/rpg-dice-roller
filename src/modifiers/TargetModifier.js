@@ -17,7 +17,7 @@ class TargetModifier extends ComparisonModifier {
     this.failureComparePoint = failureCP;
 
     // set the modifier's sort order
-    this.order = 5;
+    this.order = 7;
   }
 
   /**
