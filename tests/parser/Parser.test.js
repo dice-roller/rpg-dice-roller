@@ -1293,6 +1293,66 @@ describe('Parser', () => {
           }));
         });
 
+        test('use Min followed by Max', () => {
+          const parsed = Parser.parse('4d10min3max6');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('4d10');
+          expect(parsed[0].sides).toEqual(10);
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('MinModifier')).toBe(true);
+
+          let mod = parsed[0].modifiers.get('MinModifier');
+          expect(mod).toBeInstanceOf(MinModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            min: 3,
+            notation: 'min3',
+          }));
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 6,
+            notation: 'max6',
+          }));
+        });
+
+        test('use Max followed by Min', () => {
+          const parsed = Parser.parse('4d10max6min3');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].notation).toEqual('4d10');
+          expect(parsed[0].sides).toEqual(10);
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('MinModifier')).toBe(true);
+
+          let mod = parsed[0].modifiers.get('MinModifier');
+          expect(mod).toBeInstanceOf(MinModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            min: 3,
+            notation: 'min3',
+          }));
+
+          expect(parsed[0].modifiers.has('MaxModifier')).toBe(true);
+
+          mod = parsed[0].modifiers.get('MaxModifier');
+          expect(mod).toBeInstanceOf(MaxModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            max: 6,
+            notation: 'max6',
+          }));
+        });
+
         test('multiple of the same operator just keeps the last one', () => {
           const parsed = Parser.parse('42d2!=6!!>4!p<5');
 
