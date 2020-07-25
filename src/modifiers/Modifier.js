@@ -17,14 +17,16 @@ class Modifier {
     this.order = 999;
   }
 
+  /* eslint-disable class-methods-use-this */
   /**
    * Returns the name for the modifier
    *
    * @returns {string}
    */
   get name() {
-    return this.constructor.name;
+    return 'modifier';
   }
+  /* eslint-enable class-methods-use-this */
 
   /* eslint-disable class-methods-use-this */
   /**

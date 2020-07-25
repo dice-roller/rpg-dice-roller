@@ -126,14 +126,16 @@ class StandardDice {
     return this[minSymbol];
   }
 
+  /* eslint-disable class-methods-use-this */
   /**
    * Returns the name for the dice
    *
-   * @returns {*}
+   * @returns {string}
    */
   get name() {
-    return this.constructor.name;
+    return 'standard';
   }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * The dice notation for this dice roll

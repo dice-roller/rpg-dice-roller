@@ -9,6 +9,15 @@ class DropModifier extends KeepModifier {
   }
 
   /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return `drop-${this.end}`;
+  }
+
+  /**
    * Returns the min/max range of rolls to drop
    *
    * @param {RollResults} _results

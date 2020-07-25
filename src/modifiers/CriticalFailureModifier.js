@@ -8,6 +8,17 @@ class CriticalFailureModifier extends ComparisonModifier {
     this.order = 9;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'critical-failure';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Runs the modifier on the rolls
    *

@@ -49,7 +49,7 @@ class KeepModifier extends Modifier {
    * @returns {string}
    */
   get name() {
-    return `${super.name}-${this.end}`;
+    return `keep-${this.end}`;
   }
 
   /**

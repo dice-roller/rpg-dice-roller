@@ -39,6 +39,17 @@ class SortingModifier extends Modifier {
     this[directionSymbol] = value;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'sorting';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Runs the modifier on the rolls
    *

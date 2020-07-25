@@ -42,6 +42,17 @@ class TargetModifier extends ComparisonModifier {
     this[failureCPSymbol] = comparePoint || null;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'target';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Returns the success compare point for the modifier
    *

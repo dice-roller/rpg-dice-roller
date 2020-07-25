@@ -13,7 +13,7 @@ describe('DropModifier', () => {
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         end: 'l',
-        name: 'DropModifier-l',
+        name: 'drop-l',
         notation: 'd1',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -165,7 +165,7 @@ describe('DropModifier', () => {
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         end: 'h',
-        name: 'DropModifier-h',
+        name: 'drop-h',
         notation: 'dh4',
         qty: 4,
         type: 'modifier',

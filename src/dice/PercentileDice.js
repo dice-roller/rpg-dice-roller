@@ -13,6 +13,17 @@ class PercentileDice extends StandardDice {
     this.sidesAsNumber = !!sidesAsNumber;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the dice
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'percentile';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * The number of sides the dice has
    *

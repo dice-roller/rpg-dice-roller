@@ -39,6 +39,17 @@ class ComparisonModifier extends Modifier {
     this[comparePointSymbol] = comparePoint;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'comparison';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Checks whether value matches the compare point
    *

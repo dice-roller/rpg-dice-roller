@@ -40,6 +40,17 @@ class MaxModifier extends Modifier {
     this[maxSymbol] = parseFloat(value);
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'max';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Runs the modifier on the rolls
    *
