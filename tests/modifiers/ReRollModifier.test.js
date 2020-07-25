@@ -17,7 +17,7 @@ describe('ReRollModifier', () => {
       expect(mod).toEqual(expect.objectContaining({
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
-        name: 'ReRollModifier',
+        name: 're-roll',
         notation: 'r',
         once: false,
         run: expect.any(Function),
@@ -124,7 +124,7 @@ describe('ReRollModifier', () => {
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         comparePoint: cp.toJSON(),
-        name: 'ReRollModifier',
+        name: 're-roll',
         notation: 'ro<=3',
         once: true,
         type: 'modifier',

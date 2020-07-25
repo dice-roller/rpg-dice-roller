@@ -25,7 +25,7 @@ describe('TargetModifier', () => {
         isFailure: expect.any(Function),
         isNeutral: expect.any(Function),
         isSuccess: expect.any(Function),
-        name: 'TargetModifier',
+        name: 'target',
         notation: '>8f<4',
         run: expect.any(Function),
         successComparePoint: sCP,
@@ -244,7 +244,7 @@ describe('TargetModifier', () => {
       // this allows us to check that the output is correct, but ignoring the order of the
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
-        name: 'TargetModifier',
+        name: 'target',
         notation: '>8f<4',
         type: 'modifier',
         failureComparePoint: {

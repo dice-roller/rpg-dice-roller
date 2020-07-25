@@ -20,7 +20,7 @@ describe('ExplodeModifier', () => {
         isComparePoint: expect.any(Function),
         penetrate: false,
         maxIterations: 1000,
-        name: 'ExplodeModifier',
+        name: 'explode',
         notation: '!',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -140,7 +140,7 @@ describe('ExplodeModifier', () => {
         comparePoint: cp.toJSON(),
         compound: true,
         penetrate: true,
-        name: 'ExplodeModifier',
+        name: 'explode',
         notation: '!!p<=3',
         type: 'modifier',
       });

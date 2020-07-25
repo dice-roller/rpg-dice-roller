@@ -20,7 +20,7 @@ describe('FudgeDice', () => {
         modifiers: null,
         max: 1,
         min: -1,
-        name: 'FudgeDice',
+        name: 'fudge',
         nonBlanks: 2,
         roll: expect.any(Function),
         rollOnce: expect.any(Function),
@@ -220,7 +220,7 @@ describe('FudgeDice', () => {
       die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
-      expect(die.modifiers.get('Modifier')).toEqual(modifiers[0]);
+      expect(die.modifiers.get('modifier')).toEqual(modifiers[0]);
     });
 
     test('throws error if modifiers type is invalid', () => {
@@ -288,7 +288,7 @@ describe('FudgeDice', () => {
         max: 1,
         min: -1,
         modifiers: null,
-        name: 'FudgeDice',
+        name: 'fudge',
         notation: '4dF',
         qty: 4,
         sides: 'F.2',

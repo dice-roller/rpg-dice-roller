@@ -15,6 +15,17 @@ class FudgeDice extends StandardDice {
     super(notation, numNonBlanks, qty, modifiers, -1, 1);
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the dice
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'fudge';
+  }
+  /* eslint-enable class-methods-use-this */
+
   get nonBlanks() {
     return super.sides;
   }

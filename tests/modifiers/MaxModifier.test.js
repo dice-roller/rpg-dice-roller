@@ -18,7 +18,7 @@ describe('MaxModifier', () => {
 
       expect(mod).toEqual(expect.objectContaining({
         max: 3,
-        name: 'MaxModifier',
+        name: 'max',
         notation: 'max3',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -109,7 +109,7 @@ describe('MaxModifier', () => {
     test('JSON output is correct', () => {
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         max: 3,
-        name: 'MaxModifier',
+        name: 'max',
         notation: 'max3',
         type: 'modifier',
       });

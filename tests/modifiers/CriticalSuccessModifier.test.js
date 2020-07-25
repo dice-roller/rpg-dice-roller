@@ -15,7 +15,7 @@ describe('CriticalSuccessModifier', () => {
       expect(mod).toEqual(expect.objectContaining({
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
-        name: 'CriticalSuccessModifier',
+        name: 'critical-success',
         notation: '>8',
         toJSON: expect.any(Function),
         toString: expect.any(Function),
@@ -143,7 +143,7 @@ describe('CriticalSuccessModifier', () => {
           type: 'compare-point',
           value: 4,
         },
-        name: 'CriticalSuccessModifier',
+        name: 'critical-success',
         notation: '=4',
         type: 'modifier',
       });

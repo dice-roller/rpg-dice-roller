@@ -17,7 +17,7 @@ describe('StandardDice', () => {
         modifiers: null,
         max: 6,
         min: 1,
-        name: 'StandardDice',
+        name: 'standard',
         roll: expect.any(Function),
         rollOnce: expect.any(Function),
         toJSON: expect.any(Function),
@@ -185,7 +185,7 @@ describe('StandardDice', () => {
       die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
-      expect(die.modifiers.get('Modifier')).toEqual(modifiers[0]);
+      expect(die.modifiers.get('modifier')).toEqual(modifiers[0]);
     });
 
     test('throws error if modifiers type is invalid', () => {
@@ -253,7 +253,7 @@ describe('StandardDice', () => {
         max: 6,
         min: 1,
         modifiers: null,
-        name: 'StandardDice',
+        name: 'standard',
         notation: '4d6',
         qty: 4,
         sides: 6,

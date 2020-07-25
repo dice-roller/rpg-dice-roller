@@ -19,6 +19,17 @@ class ReRollModifier extends ComparisonModifier {
     this.order = 4;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 're-roll';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Returns whether the modifier should only re-roll once or not
    *

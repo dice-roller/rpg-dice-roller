@@ -18,7 +18,7 @@ describe('MinModifier', () => {
 
       expect(mod).toEqual(expect.objectContaining({
         min: 3,
-        name: 'MinModifier',
+        name: 'min',
         notation: 'min3',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -109,7 +109,7 @@ describe('MinModifier', () => {
     test('JSON output is correct', () => {
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         min: 3,
-        name: 'MinModifier',
+        name: 'min',
         notation: 'min3',
         type: 'modifier',
       });

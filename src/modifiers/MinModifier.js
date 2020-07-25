@@ -40,6 +40,17 @@ class MinModifier extends Modifier {
     this[minSymbol] = parseFloat(value);
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'min';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Runs the modifier on the rolls
    *

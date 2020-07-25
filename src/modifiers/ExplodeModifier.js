@@ -32,6 +32,17 @@ class ExplodeModifier extends ComparisonModifier {
     return this[compoundSymbol];
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'explode';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Whether the modifier should penetrate the results or not
    *

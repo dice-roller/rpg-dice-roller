@@ -13,7 +13,7 @@ describe('SortingModifier', () => {
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         direction: 'a',
-        name: 'SortingModifier',
+        name: 'sorting',
         notation: 's',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -103,7 +103,7 @@ describe('SortingModifier', () => {
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         direction: 'd',
-        name: 'SortingModifier',
+        name: 'sorting',
         notation: 'sd',
         type: 'modifier',
       });

@@ -13,7 +13,7 @@ describe('KeepModifier', () => {
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         end: 'h',
-        name: 'KeepModifier-h',
+        name: 'keep-h',
         notation: 'kh',
         run: expect.any(Function),
         toJSON: expect.any(Function),
@@ -165,7 +165,7 @@ describe('KeepModifier', () => {
       // returned properties
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         end: 'l',
-        name: 'KeepModifier-l',
+        name: 'keep-l',
         notation: 'kl4',
         qty: 4,
         type: 'modifier',
