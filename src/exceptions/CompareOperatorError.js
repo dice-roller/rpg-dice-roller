@@ -1,4 +1,12 @@
+/**
+ * An error thrown when a comparison operator is invalid
+ */
 class CompareOperatorError extends TypeError {
+  /**
+   * Create a CompareOperatorError
+   *
+   * @param {string} operator The invalid operator
+   */
   constructor(operator) {
     super(`Operator "${operator}" is invalid`);
 

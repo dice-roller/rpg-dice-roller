@@ -1,6 +1,18 @@
 import ComparisonModifier from './ComparisonModifier';
 
+/**
+ * A critical failure modifier
+ */
 class CriticalFailureModifier extends ComparisonModifier {
+  /**
+   * Create a CriticalFailureModifier
+   *
+   * @param {string} notation The modifier notation
+   * @param {ComparePoint} comparePoint The comparison object
+   *
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {TypeError} comparePoint must be a ComparePoint object
+   */
   constructor(notation, comparePoint) {
     super(notation, comparePoint);
 

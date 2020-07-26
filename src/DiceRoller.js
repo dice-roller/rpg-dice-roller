@@ -11,17 +11,15 @@ import DataFormatError from './exceptions/DataFormatError';
 const logSymbol = Symbol('log');
 
 /**
- * A DiceRoller handles dice rolling functionality,
- * keeps track of rolls and can output logs etc.
- *
- * @param {{}=} data
+ * A DiceRoller handles dice rolling functionality, keeps track of rolls and can output logs etc.
  */
 class DiceRoller {
   /**
-   * Initialises the object
+   * Create a DiceRoller
    *
-   * @constructor
-   * @param data
+   * @param {{}} [data] The data to import
+   *
+   * @throws {TypeError} data.log must be an array
    */
   constructor(data) {
     this[logSymbol] = [];
@@ -71,9 +69,15 @@ class DiceRoller {
    * Takes the given data, imports it into a new DiceRoller instance
    * and returns the DiceRoller
    *
-   * @throws Error
    * @param data
+   *
+   * @param {string|{log: []}|[]} data
+   *
    * @returns {DiceRoller}
+   *
+   * @throws {DataFormatError} data format invalid
+   * @throws {RequiredArgumentError} data is required
+   * @throws {TypeError} log must be an array
    */
   static import(data) {
     // create a new DiceRoller object
@@ -97,9 +101,11 @@ class DiceRoller {
    * Exports the roll log in the given format.
    * If no format is specified, JSON is returned.
    *
-   * @throws Error
-   * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @param {number} [format=exportFormats.JSON] The format to export the data to
+   *
    * @returns {string|null}
+   *
+   * @throws {TypeError} Invalid export format
    */
   export(format) {
     switch (format || exportFormats.JSON) {
@@ -121,11 +127,13 @@ class DiceRoller {
    * to the current roll log.
    * Returns the roll log.
    *
-   * @param {*} data
-   *
-   * @throws Error
+   * @param {string|{log: []}|[]} data
    *
    * @returns {DiceRoll[]}
+   *
+   * @throws {DataFormatError} data format invalid
+   * @throws {RequiredArgumentError} data is required
+   * @throws {TypeError} log must be an array
    */
   import(data) {
     if (!data) {
@@ -150,7 +158,7 @@ class DiceRoller {
           this[logSymbol].push(DiceRoll.import(roll));
         });
       } else if (log) {
-        throw new TypeError('log must be an Array');
+        throw new TypeError('log must be an array');
       }
 
       return this.log;
@@ -188,17 +196,16 @@ class DiceRoller {
   /**
    * Rolls the given dice notation(s) and returns them.
    *
-   * You can roll multiple, separate notations at once by
-   * passing them as separate arguments like:
+   * You can roll multiple, separate notations at once by passing them as separate arguments like:
+   *
    * ```
    * roll('2d6', '4d10', 'd8');
    * ```
    *
-   * If only a single notation is passed, a single DiceRoll
-   * object will be returned, if multiple are provided then
-   * it will return an array of DiceRoll objects.
+   * If only a single notation is passed, a single DiceRoll object will be returned.
+   * If multiple are provided then it will return an array of DiceRoll objects.
    *
-   * @param {string[]} notations
+   * @param {...string} notations The notations to roll
    *
    * @returns {DiceRoll|DiceRoll[]}
    */

@@ -2,11 +2,17 @@ import Modifier from './Modifier';
 
 const directionSymbol = Symbol('direction');
 
+/**
+ * A sorting modifier
+ */
 class SortingModifier extends Modifier {
   /**
+   * Create a SortingModifier
    *
-   * @param {string} notation
-   * @param {string} direction Either `a|d`
+   * @param {string} notation The modifier notation
+   * @param {string} [direction=a] The direction to sort in; either 'a' or 'd'
+   *
+   * @throws {RangeError} Direction must be 'a' or 'd'
    */
   constructor(notation, direction = 'a') {
     super(notation);
@@ -20,7 +26,7 @@ class SortingModifier extends Modifier {
   /**
    * Returns the sort direction
    *
-   * @returns {string}
+   * @returns {string} Either 'a' or 'd'
    */
   get direction() {
     return this[directionSymbol];
@@ -29,7 +35,9 @@ class SortingModifier extends Modifier {
   /**
    * Sets the sort direction
    *
-   * @param {string} value
+   * @param {string} value Either 'a' or 'd'
+   *
+   * @throws {RangeError} Direction must be 'a' or 'd'
    */
   set direction(value) {
     if ((value !== 'a') && (value !== 'd')) {

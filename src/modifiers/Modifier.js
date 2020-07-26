@@ -1,9 +1,15 @@
 import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
+/**
+ * The base modifier class
+ */
 class Modifier {
   /**
+   * Create a Modifier
    *
-   * @param {string} notation
+   * @param {string} notation The modifier notation
+   *
+   * @throws {RequiredArgumentError} Notation is required
    */
   constructor(notation) {
     if (!notation) {

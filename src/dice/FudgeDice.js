@@ -2,7 +2,22 @@ import { generator } from '../utilities/NumberGenerator';
 import RollResult from '../results/RollResult';
 import StandardDice from './StandardDice';
 
+/**
+ * A Fudge / Fate die
+ */
 class FudgeDice extends StandardDice {
+  /**
+   * Create a FudgeDice
+   *
+   * @param {string} notation The dice notation (e.g. '4dF')
+   * @param {number} [nonBlanks=2] The number of non-blanks the Fudge die should have
+   * @param {number} [qty=1] The number of dice to roll (e.g. 4)
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
+   *
+   * @throws {RangeError} nonBlanks must be 1 or 2
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {TypeError} modifiers must be valid
+   */
   constructor(notation, nonBlanks = 2, qty = 1, modifiers = null) {
     let numNonBlanks = nonBlanks;
 
@@ -26,10 +41,20 @@ class FudgeDice extends StandardDice {
   }
   /* eslint-enable class-methods-use-this */
 
+  /**
+   * The number of sides that each symbol (+, -) covers
+   *
+   * @returns {number}
+   */
   get nonBlanks() {
     return super.sides;
   }
 
+  /**
+   * The number of sides the dice has
+   *
+   * @returns {string}
+   */
   get sides() {
     return `F.${this.nonBlanks}`;
   }

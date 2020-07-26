@@ -47,13 +47,24 @@ if (!Array.prototype.flatMap) {
 /**
  * Utility helper functions
  *
- * @type {Readonly<{}>}
+ * @readonly
+ *
+ * @type {Readonly<{
+ *  compareNumbers(a: number, b: number, operator: string): boolean,
+ *  toFixed(num: number, decPlaces: number=): number,
+ *  generateNumber(min: number, max: number): number,
+ *  isNumeric(val: *): boolean,
+ *  isJson(val: string): boolean,
+ *  readonly sumArray(numbers: number[]): number,
+ *  isBase64(val: string): boolean}>
+ * }
  */
 const diceUtils = Object.freeze({
   /**
-   * Checks if the given val is a valid number
+   * Checks if the given value is a valid number
    *
    * @param {*} val
+   *
    * @returns {boolean}
    */
   isNumeric(val) {
@@ -63,6 +74,7 @@ const diceUtils = Object.freeze({
    * Checks if the string is valid base64 encoded
    *
    * @param {string} val
+   *
    * @returns {boolean}
    */
   isBase64(val) {
@@ -76,6 +88,7 @@ const diceUtils = Object.freeze({
    * Checks if the string is valid JSON
    *
    * @param {string} val
+   *
    * @returns {boolean}
    */
   isJson(val) {
@@ -91,8 +104,9 @@ const diceUtils = Object.freeze({
    * Generates a random number between the
    * min and max, inclusive
    *
-   * @param {number|string} min
-   * @param {number|string} max
+   * @param {number} min
+   * @param {number} max
+   *
    * @returns {number}
    *
    * @deprecated use `NumberGenerator.generator.integer()` instead
@@ -104,14 +118,15 @@ const diceUtils = Object.freeze({
     return generator.integer(min, max);
   },
   /**
-   * @returns {function(Array): number}
+   * @returns {function(number[]): number}
    */
   get sumArray() {
     /**
      * Takes an array of numbers and adds them together,
      * returning the result
      *
-     * @param {Number[]} numbers
+     * @param {number[]} numbers
+     *
      * @returns {number}
      */
     return (numbers) => (
@@ -127,6 +142,7 @@ const diceUtils = Object.freeze({
    * @param {number} a
    * @param {number} b
    * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
+   *
    * @returns {boolean}
    */
   compareNumbers(a, b, operator) {
@@ -170,11 +186,12 @@ const diceUtils = Object.freeze({
    * `toFixed(30.1, 2) == 30.1`
    * `toFixed(4.0000000004, 3) == 4`
    *
-   * @param {number} num
-   * @param {number=} decPlaces
+   * @param {number} num The number to round
+   * @param {number} [decPlaces=0] The number of digits after the decimal point
+   *
    * @returns {number}
    */
-  toFixed(num, decPlaces) {
+  toFixed(num, decPlaces = 0) {
     // round to the specified decimal places, then convert back to
     // a number to remove trailing zeroes after the decimal point
     return parseFloat(parseFloat(num).toFixed(decPlaces || 0));
@@ -183,6 +200,8 @@ const diceUtils = Object.freeze({
 
 /**
  * Allowed formats for exporting dice data
+ *
+ * @readonly
  *
  * @type {Readonly<{BASE_64: number, JSON: number, OBJECT: number}>}
  */

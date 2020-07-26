@@ -5,13 +5,20 @@ import DieActionValueError from '../exceptions/DieActionValueError';
 const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');
 
+/**
+ * An explode modifier
+ */
 class ExplodeModifier extends ComparisonModifier {
   /**
+   * Create an ExplodeModifier
    *
-   * @param {string} notation
-   * @param {ComparePoint} comparePoint
-   * @param {boolean=} compound Defaults to false
-   * @param {boolean=} penetrate Defaults to false
+   * @param {string} notation The modifier notation
+   * @param {ComparePoint} [comparePoint=null] The comparison object
+   * @param {boolean} [compound=false] Whether to compound or not
+   * @param {boolean} [penetrate=false] Whether to penetrate or not
+   *
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {TypeError} comparePoint must be a ComparePoint object
    */
   constructor(notation, comparePoint = null, compound = false, penetrate = false) {
     super(notation, comparePoint);
@@ -26,7 +33,7 @@ class ExplodeModifier extends ComparisonModifier {
   /**
    * Whether the modifier should compound the results or not
    *
-   * @type {boolean}
+   * @returns {boolean}
    */
   get compound() {
     return this[compoundSymbol];

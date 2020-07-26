@@ -79,11 +79,18 @@ const rollsSymbol = Symbol('rolls');
  */
 const totalSymbol = Symbol('total');
 
+/**
+ * A single DiceRoll
+ */
 class DiceRoll {
   /**
-   * Parses the notation and rolls the dice
+   * Create a DiceRoll, parse the notation and roll the dice
    *
-   * @param notation
+   * @param {string} notation The notation to roll
+   *
+   * @throws {NotationError} notation is invalid
+   * @throws {RequiredArgumentError} notation is required
+   * @throws {TypeError} Rolls must be an array
    */
   constructor(notation) {
     if (!notation) {
@@ -105,7 +112,7 @@ class DiceRoll {
         // we have rolls - validate them
         if (!Array.isArray(notation.rolls)) {
           // rolls is not an array
-          throw new TypeError(`Rolls must be an Array: ${notation.rolls}`);
+          throw new TypeError(`Rolls must be an array: ${notation.rolls}`);
         } else {
           // if roll is a RollResults, return it, otherwise try to convert to a RollResults object
           this[rollsSymbol] = notation.rolls
@@ -168,9 +175,9 @@ class DiceRoll {
    *
    * @param {{}|string|DiceRoll} data The data to import
    *
-   * @throws Error
-   *
    * @returns {DiceRoll}
+   *
+   * @throws {DataFormatError} data format is invalid
    */
   static import(data) {
     if (!data) {
@@ -323,9 +330,11 @@ class DiceRoll {
    * Exports the DiceRoll in the given format.
    * If no format is specified, JSON is returned.
    *
-   * @throws Error
-   * @param {exportFormats=} format The format to export the data as (ie. JSON, base64)
+   * @param {number} [format=exportFormats.JSON] The format to export the data to
+   *
    * @returns {string|null}
+   *
+   * @throws {TypeError} Invalid export format
    */
   export(format = exportFormats.JSON) {
     switch (format) {
@@ -356,7 +365,7 @@ class DiceRoll {
    * for some reason, but it's usually better to
    * create a new DiceRoll instance instead.
    *
-   * @returns {Array}
+   * @returns {RollResults[]}
    */
   roll() {
     // reset the cached total
@@ -391,8 +400,7 @@ class DiceRoll {
   }
 
   /**
-   * Returns the String representation
-   * of the object as the roll notation
+   * Returns the String representation of the object as the roll notation
    *
    * @returns {string}
    */
@@ -406,6 +414,8 @@ class DiceRoll {
 
   /**
    * Calculates the total roll value and returns it
+   *
+   * @private
    *
    * @returns {Number}
    */
@@ -441,9 +451,13 @@ class DiceRoll {
    * If the engine is passed, it will be used for the
    * number generation. The engine will be reset after use.
    *
-   * @param {Engine|{}=} engine
+   * @private
    *
-   * @returns {*}
+   * @param {Engine|{next(): number}} [engine]
+   *
+   * @returns {RollResults[]}
+   *
+   * @throws {TypeError} engine must have function `next()`
    */
   [rollMethodSymbol](engine) {
     let oEngine;

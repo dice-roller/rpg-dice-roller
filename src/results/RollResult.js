@@ -6,14 +6,20 @@ const initialValueSymbol = Symbol('initial-value');
 const useInTotalSymbol = Symbol('use-in-total');
 const valueSymbol = Symbol('value');
 
+/**
+ * A single dice roll result
+ */
 class RollResult {
   /**
+   * Create a RollResult
    *
    * @param {number|{value: Number, initialValue: number}} value The value rolled
-   * @param {string[]|Set<string>=} modifiers List of modifier names that affect this roll
-   * @param {boolean=} useInTotal Whether to include the roll value when calculating totals
+   * @param {string[]|Set<string>} [modifiers=[]] List of modifier names that affect this roll
+   * @param {boolean} [useInTotal=true] Whether to include the roll value when calculating totals
+   *
+   * @throws {TypeError} Result value, calculation value, or modifiers are invalid
    */
-  constructor(value, modifiers, useInTotal = true) {
+  constructor(value, modifiers = [], useInTotal = true) {
     if (diceUtils.isNumeric(value)) {
       this[initialValueSymbol] = parseInt(value, 10);
 
@@ -63,7 +69,9 @@ class RollResult {
   /**
    * Sets the value to use in calculations
    *
-   * @param value
+   * @param {number} value
+   *
+   * @throws {TypeError} value is invalid
    */
   set calculationValue(value) {
     const isNumeric = diceUtils.isNumeric(value);
@@ -78,7 +86,7 @@ class RollResult {
    * The initial roll value before any modifiers.
    * Not often used, you probably want `value` instead.
    *
-   * @returns {Number}
+   * @returns {number}
    */
   get initialValue() {
     return this[initialValueSymbol];
@@ -150,7 +158,9 @@ class RollResult {
   /**
    * Set the modifiers that affect the roll
    *
-   * @param value
+   * @param {string[]|Set<string>} value
+   *
+   * @throws {TypeError} modifiers must be a Set or array of modifier names
    */
   set modifiers(value) {
     if ((Array.isArray(value) || (value instanceof Set)) && [...value].every((item) => typeof item === 'string')) {
@@ -170,7 +180,7 @@ class RollResult {
   }
 
   /**
-   * Returns the useInTotal flag
+   * Returns whether to use the value in total calculations or not
    *
    * @returns {boolean}
    */
@@ -179,7 +189,7 @@ class RollResult {
   }
 
   /**
-   * Sets the useInTotal flag
+   * Sets whether to use the value in total calculations or not
    *
    * @param {boolean} value
    */
@@ -188,7 +198,7 @@ class RollResult {
   }
 
   /**
-   * Roll value after modifiers have affected it
+   * Value of the roll after modifiers have affected it
    *
    * @returns {number}
    */
@@ -197,9 +207,11 @@ class RollResult {
   }
 
   /**
-   * Sets the value
+   * Sets the roll value
    *
-   * @param value
+   * @param {number} value
+   *
+   * @throws {TypeError} value is invalid
    */
   set value(value) {
     if (!diceUtils.isNumeric(value)) {
