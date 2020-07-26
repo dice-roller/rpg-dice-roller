@@ -3,11 +3,17 @@ import { diceUtils } from '../utilities/utils';
 
 const maxSymbol = Symbol('max');
 
+/**
+ * A max number modifier
+ */
 class MaxModifier extends Modifier {
   /**
+   * Create a MaxModifier
    *
-   * @param {string} notation
-   * @param {number} max
+   * @param {string} notation The modifier notation
+   * @param {number} max The maximum value
+   *
+   * @throws {TypeError} max must be a number
    */
   constructor(notation, max) {
     super(notation);
@@ -30,7 +36,9 @@ class MaxModifier extends Modifier {
   /**
    * Sets the maximum value
    *
-   * @param value
+   * @param {number} value
+   *
+   * @throws {TypeError} max must be a number
    */
   set max(value) {
     if (!diceUtils.isNumeric(value)) {

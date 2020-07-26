@@ -313,9 +313,9 @@ describe('DiceRoller', () => {
       });
     });
 
-    describe('protoype', () => {
-      let importRoller; let
-        notations;
+    describe('prototype', () => {
+      let importRoller;
+      let notations;
 
       beforeEach(() => {
         notations = [
@@ -363,16 +363,22 @@ describe('DiceRoller', () => {
 
       test('invalid format throws error', () => {
         expect(() => {
-          DiceRoller.import('foo');
+          roller.import('foo');
         }).toThrow(DataFormatError);
 
         expect(() => {
-          DiceRoller.import(true);
+          roller.import(true);
         }).toThrow(DataFormatError);
 
         expect(() => {
-          DiceRoller.import(1);
+          roller.import(1);
         }).toThrow(DataFormatError);
+      });
+
+      test('invalid log throws error', () => {
+        expect(() => {
+          roller.import({ log: 'foo' });
+        }).toThrow(TypeError);
       });
     });
   });

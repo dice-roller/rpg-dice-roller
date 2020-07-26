@@ -2,10 +2,14 @@ const modifiersSymbol = Symbol('modifiers');
 const notationSymbol = Symbol('notation');
 const expressionsSymbol = Symbol('expressions');
 
+/**
+ * A RollGroup groups together dice rolls
+ */
 class RollGroup {
   /**
+   * Create a RollGroup
    *
-   * @param {string} notation
+   * @param {string} notation The roll group notation (e.g. '{4d6, 2d10}k1')
    * @param {StandardDice[]} expressions
    * @param {[]|null} modifiers
    */

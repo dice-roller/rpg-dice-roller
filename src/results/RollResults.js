@@ -2,11 +2,18 @@ import RollResult from './RollResult';
 
 const rollsSymbol = Symbol('rolls');
 
+/**
+ * A collection of roll results
+ */
 class RollResults {
   /**
-   * @param {RollResult[]=} rolls
+   * Create a RollResults
+   *
+   * @param {RollResult[]|number[]} [rolls=[]]
+   *
+   * @throws {TypeError} Rolls must be an array
    */
-  constructor(rolls) {
+  constructor(rolls = []) {
     this.rolls = rolls || [];
   }
 
@@ -33,7 +40,7 @@ class RollResults {
    *
    * @param {RollResult[]|number[]} rolls
    *
-   * @throws Error
+   * @throws {TypeError} Rolls must be an array
    */
   set rolls(rolls) {
     if (!rolls || !Array.isArray(rolls)) {

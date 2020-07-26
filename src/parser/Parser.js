@@ -2,23 +2,21 @@ import * as parser from './grammars/grammar';
 import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
 /**
- * A DiceParser object, which takes a notation
- * and parses it in to rolls
- *
- * @param {string|Object} notation  The dice notation or object
+ * A DiceParser object that takes notations and parses them to rolls
  */
 class Parser {
-  /** Public methods * */
-
   /**
-   * Parses the given dice notation
-   * and returns a list of dice and modifiers found
+   * Parses the given dice notation and returns a list of dice and modifiers found
    *
    * @link https://en.m.wikipedia.org/wiki/Dice_notation
    *
-   * @param {string} notation
+   * @param {string} notation The notation to parse
    *
-   * @returns {Array}
+   * @returns {[]}
+   *
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {SyntaxError} The notation syntax is invalid
+   * @throws {TypeError} Notation must be a string
    */
   static parse(notation) {
     if (!notation) {

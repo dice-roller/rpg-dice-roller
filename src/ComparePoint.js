@@ -5,11 +5,19 @@ import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
 const operatorSymbol = Symbol('operator');
 const valueSymbol = Symbol('value');
 
+/**
+ * A compare point
+ */
 class ComparePoint {
   /**
+   * Create a ComparePoint
    *
-   * @param {string} operator
-   * @param {number} value
+   * @param {string} operator The comparison operator (e.g '=')
+   * @param {number} value The value to compare to
+   *
+   * @throws {CompareOperatorError} operator is invalid
+   * @throws {RequiredArgumentError} operator and value are required
+   * @throws {TypeError} value must be numeric
    */
   constructor(operator, value) {
     if (!operator) {
@@ -38,7 +46,7 @@ class ComparePoint {
    *
    * @param {string} operator
    *
-   * @throws Error
+   * @throws CompareOperatorError operator is invalid
    */
   set operator(operator) {
     if (!this.constructor.isValidOperator(operator)) {
@@ -62,7 +70,7 @@ class ComparePoint {
    *
    * @param {number} value
    *
-   * @throws Error
+   * @throws {TypeError} value must be numeric
    */
   set value(value) {
     if (!diceUtils.isNumeric(value)) {
