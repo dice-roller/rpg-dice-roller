@@ -5,7 +5,7 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 import RollResult from '../../src/results/RollResult';
 import DieActionValueError from '../../src/exceptions/DieActionValueError';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {

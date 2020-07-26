@@ -1,6 +1,6 @@
 import MinModifier from '../../src/modifiers/MinModifier';
 import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 

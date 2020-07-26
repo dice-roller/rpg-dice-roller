@@ -2,7 +2,7 @@ import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import ComparePoint from '../../src/ComparePoint';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('ComparisonModifier', () => {
   describe('Initialisation', () => {

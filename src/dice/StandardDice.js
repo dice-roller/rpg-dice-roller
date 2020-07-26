@@ -6,7 +6,7 @@ import RollResults from '../results/RollResults';
 import ComparePoint from '../ComparePoint';
 import ReRollModifier from '../modifiers/ReRollModifier';
 import Modifier from '../modifiers/Modifier';
-import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../exceptions/RequiredArgumentError';
 
 const modifiersSymbol = Symbol('modifiers');
 const notationSymbol = Symbol('notation');

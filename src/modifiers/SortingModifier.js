@@ -17,7 +17,7 @@ class SortingModifier extends Modifier {
   constructor(notation, direction = 'a') {
     super(notation);
 
-    this.direction = direction || 'a';
+    this.direction = direction;
 
     // set the modifier's sort order
     this.order = 10;

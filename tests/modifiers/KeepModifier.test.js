@@ -2,7 +2,7 @@ import KeepModifier from '../../src/modifiers/KeepModifier';
 import Modifier from '../../src/modifiers/Modifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('KeepModifier', () => {
   describe('Initialisation', () => {

@@ -3,7 +3,7 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
@@ -214,6 +214,20 @@ describe('PercentileDice', () => {
     });
   });
 
+  describe('Sides', () => {
+    test('returns `%`', () => {
+      const die = new PercentileDice('4d%', 4);
+
+      expect(die.sides).toBe('%');
+    });
+
+    test('can be returned as `100`', () => {
+      const die = new PercentileDice('4d%', 4, null, true);
+
+      expect(die.sides).toBe(100);
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
       const die = new PercentileDice('4d%', 4);
@@ -238,6 +252,12 @@ describe('PercentileDice', () => {
       const die = new PercentileDice('4d%', 4);
 
       expect(die.toString()).toEqual('4d%');
+    });
+
+    test('can output sides as a number in JSON', () => {
+      const die = new PercentileDice('4d%', 4, null, true);
+
+      expect(JSON.parse(JSON.stringify(die)).sides).toBe(100);
     });
   });
 

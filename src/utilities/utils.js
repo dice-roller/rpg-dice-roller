@@ -1,49 +1,3 @@
-import { generator } from './NumberGenerator';
-
-/* eslint-disable */
-if (!Array.prototype.flat) {
-  /**
-   * Polyfill for Array.prototype.flat (Required for node < 11)
-   *
-   * @link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flat#Polyfill
-   *
-   * @returns {unknown[]|[]}
-   */
-  Array.prototype.flat = function () {
-    let depth = arguments[0];
-    depth = depth === undefined ? 1 : Math.floor(depth);
-    if (depth < 1) return Array.prototype.slice.call(this);
-    return (function flat(arr, depth) {
-      const len = arr.length >>> 0;
-      let flattened = [];
-      let i = 0;
-      while (i < len) {
-        if (i in arr) {
-          const el = arr[i];
-          if (Array.isArray(el) && depth > 0) flattened = flattened.concat(flat(el, depth - 1));
-          else flattened.push(el);
-        }
-        i++;
-      }
-      return flattened;
-    }(this, depth));
-  };
-}
-
-if (!Array.prototype.flatMap) {
-  /**
-   * Polyfill for Array.prototype.flatMap (Required for node < 11)
-   *
-   *  @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/flatMap#Polyfill
-   *
-   * @returns {[]}
-   */
-  Array.prototype.flatMap = function () {
-    return Array.prototype.map.apply(this, arguments).flat(1);
-  };
-}
-/* eslint-enable */
-
 /**
  * Utility helper functions
  *
@@ -99,23 +53,6 @@ const diceUtils = Object.freeze({
     } catch (e) {
       return false;
     }
-  },
-  /**
-   * Generates a random number between the
-   * min and max, inclusive
-   *
-   * @param {number} min
-   * @param {number} max
-   *
-   * @returns {number}
-   *
-   * @deprecated use `NumberGenerator.generator.integer()` instead
-   */
-  generateNumber(min, max) {
-    // eslint-disable-next-line no-console
-    console.warn('diceUtils.generateNumber is deprecated, use NumberGenerator.generator.integer() instead');
-
-    return generator.integer(min, max);
   },
   /**
    * @returns {function(number[]): number}
@@ -206,8 +143,8 @@ const diceUtils = Object.freeze({
  * @type {Readonly<{BASE_64: number, JSON: number, OBJECT: number}>}
  */
 const exportFormats = Object.freeze({
-  JSON: 0,
   BASE_64: 1,
+  JSON: 0,
   OBJECT: 2,
 });
 

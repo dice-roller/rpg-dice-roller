@@ -1,4 +1,4 @@
-import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../exceptions/RequiredArgumentError';
 
 /**
  * The base modifier class

@@ -1,6 +1,6 @@
 import ComparePoint from '../src/ComparePoint';
 import CompareOperatorError from '../src/exceptions/CompareOperatorError';
-import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentError';
 
 describe('ComparePoint', () => {
   describe('Initialisation', () => {

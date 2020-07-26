@@ -1,6 +1,6 @@
 import DiceRoll from './DiceRoll';
 import { diceUtils, exportFormats } from './utilities/utils';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from './exceptions/RequiredArgumentError';
 import DataFormatError from './exceptions/DataFormatError';
 
 /**
@@ -17,7 +17,7 @@ class DiceRoller {
   /**
    * Create a DiceRoller
    *
-   * @param {{}} [data] The data to import
+   * @param {{log: []}|[]} [data] The data to import
    *
    * @throws {TypeError} data.log must be an array
    */
@@ -25,14 +25,7 @@ class DiceRoller {
     this[logSymbol] = [];
 
     if (data) {
-      if (Array.isArray(data.log)) {
-        // loop through each log entry and import it
-        data.log.forEach((roll) => {
-          this[logSymbol].push(DiceRoll.import(roll));
-        });
-      } else if (data.log) {
-        throw new TypeError('data.log must be an Array');
-      }
+      this.import(data);
     }
   }
 

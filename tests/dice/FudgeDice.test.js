@@ -3,7 +3,7 @@ import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
 import FudgeDice from '../../src/dice/FudgeDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {
