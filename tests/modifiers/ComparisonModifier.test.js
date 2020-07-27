@@ -13,7 +13,7 @@ describe('ComparisonModifier', () => {
       expect(mod).toEqual(expect.objectContaining({
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
-        name: 'ComparisonModifier',
+        name: 'comparison',
         notation: '>8',
         toJSON: expect.any(Function),
         toString: expect.any(Function),
@@ -141,7 +141,7 @@ describe('ComparisonModifier', () => {
           type: 'compare-point',
           value: 4,
         },
-        name: 'ComparisonModifier',
+        name: 'comparison',
         notation: '=4',
         type: 'modifier',
       });

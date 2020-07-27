@@ -3,11 +3,17 @@ import { diceUtils } from '../utilities/utils';
 
 const minSymbol = Symbol('min');
 
+/**
+ * A min number modifier
+ */
 class MinModifier extends Modifier {
   /**
+   * Create a MinModifier
    *
-   * @param {string} notation
-   * @param {Number} min
+   * @param {string} notation The modifier notation
+   * @param {number} min The minimum value
+   *
+   * @throws {TypeError} min must be a number
    */
   constructor(notation, min) {
     super(notation);
@@ -30,7 +36,9 @@ class MinModifier extends Modifier {
   /**
    * Sets the minimum value
    *
-   * @param value
+   * @param {number} value
+   *
+   * @throws {TypeError} min must be a number
    */
   set min(value) {
     if (!diceUtils.isNumeric(value)) {
@@ -39,6 +47,17 @@ class MinModifier extends Modifier {
 
     this[minSymbol] = parseFloat(value);
   }
+
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'min';
+  }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * Runs the modifier on the rolls

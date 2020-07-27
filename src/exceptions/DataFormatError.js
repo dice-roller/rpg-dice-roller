@@ -1,4 +1,12 @@
+/**
+ * An error thrown when a data format is invalid
+ */
 class DataFormatError extends Error {
+  /**
+   * Create a DataFormatError
+   *
+   * @param {*} data The invalid data
+   */
   constructor(data) {
     super(`Invalid data format: ${data}`);
 

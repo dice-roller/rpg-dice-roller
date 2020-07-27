@@ -3,11 +3,18 @@ import ComparePoint from '../ComparePoint';
 
 const comparePointSymbol = Symbol('compare-point');
 
+/**
+ * A comparison modifier
+ */
 class ComparisonModifier extends Modifier {
   /**
+   * Create a ComparisonModifier
    *
-   * @param {string} notation
-   * @param {ComparePoint} comparePoint
+   * @param {string} notation The modifier notation
+   * @param {ComparePoint} comparePoint The comparison object
+   *
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {TypeError} comparePoint must be a ComparePoint object
    */
   constructor(notation, comparePoint) {
     super(notation);
@@ -29,7 +36,9 @@ class ComparisonModifier extends Modifier {
   /**
    * Sets the compare point
    *
-   * @param comparePoint
+   * @param {ComparePoint} comparePoint
+   *
+   * @throws {TypeError} value must be a ComparePoint object
    */
   set comparePoint(comparePoint) {
     if (!(comparePoint instanceof ComparePoint)) {
@@ -39,10 +48,21 @@ class ComparisonModifier extends Modifier {
     this[comparePointSymbol] = comparePoint;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'comparison';
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Checks whether value matches the compare point
    *
-   * @param {number} value
+   * @param {number} value The value to compare with
    *
    * @returns {boolean}
    */

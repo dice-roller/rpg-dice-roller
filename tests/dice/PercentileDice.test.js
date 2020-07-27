@@ -20,7 +20,7 @@ describe('PercentileDice', () => {
         modifiers: null,
         max: 100,
         min: 1,
-        name: 'PercentileDice',
+        name: 'percentile',
         roll: expect.any(Function),
         rollOnce: expect.any(Function),
         toJSON: expect.any(Function),
@@ -158,7 +158,7 @@ describe('PercentileDice', () => {
       die.modifiers = modifiers;
 
       expect(die.modifiers).toBeInstanceOf(Map);
-      expect(die.modifiers.get('Modifier')).toEqual(modifiers[0]);
+      expect(die.modifiers.get('modifier')).toEqual(modifiers[0]);
     });
 
     test('throws error if modifiers type is invalid', () => {
@@ -226,7 +226,7 @@ describe('PercentileDice', () => {
         max: 100,
         min: 1,
         modifiers: null,
-        name: 'PercentileDice',
+        name: 'percentile',
         notation: '4d%',
         qty: 4,
         sides: '%',

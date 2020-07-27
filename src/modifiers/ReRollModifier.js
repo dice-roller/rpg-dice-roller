@@ -3,12 +3,16 @@ import DieActionValueError from '../exceptions/DieActionValueError';
 
 const onceSymbol = Symbol('once');
 
+/**
+ * A Re-roll modifier
+ */
 class ReRollModifier extends ComparisonModifier {
   /**
+   * Create a ReRollModifier
    *
-   * @param {string} notation
-   * @param {boolean} once
-   * @param {ComparePoint} comparePoint
+   * @param {string} notation The modifier notation
+   * @param {boolean} [once=false] Whether to only re-roll once or not
+   * @param {ComparePoint} [comparePoint=null] The comparison object
    */
   constructor(notation, once = false, comparePoint = null) {
     super(notation, comparePoint);
@@ -18,6 +22,17 @@ class ReRollModifier extends ComparisonModifier {
     // set the modifier's sort order
     this.order = 4;
   }
+
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 're-roll';
+  }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * Returns whether the modifier should only re-roll once or not
@@ -31,7 +46,7 @@ class ReRollModifier extends ComparisonModifier {
   /**
    * Sets whether the modifier should only re-roll once or not
    *
-   * @param value
+   * @param {boolean} value
    */
   set once(value) {
     this[onceSymbol] = !!value;

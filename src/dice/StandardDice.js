@@ -15,14 +15,22 @@ const sidesSymbol = Symbol('sides');
 const minSymbol = Symbol('min-value');
 const maxSymbol = Symbol('max-value');
 
+/**
+ * A standard numerical die
+ */
 class StandardDice {
   /**
-   * @param {string} notation
-   * @param {number} sides
-   * @param {number=} qty
-   * @param {Map|{}|Map[]|null=} modifiers
-   * @param {?number=} min The minimum possible roll value (Defaults to 1)
-   * @param {?number=} max The maximum possible roll value (Defaults to the value of sides)
+   * Create a StandardDice
+   *
+   * @param {string} notation The dice notation (e.g. '4d6')
+   * @param {number} sides The number of sides the die has (.e.g 6)
+   * @param {number} [qty=1] The number of dice to roll (e.g. 4)
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
+   * @param {number|null} [min=1] The minimum possible roll value
+   * @param {number|null} [max=null] The maximum possible roll value. Defaults to number of sides
+   *
+   * @throws {RequiredArgumentError} Notation and sides are required
+   * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
   constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!notation) {
@@ -57,7 +65,7 @@ class StandardDice {
   /**
    * The modifiers that affect this dice roll
    *
-   * @returns {Map|null}
+   * @returns {Map<string, Modifier>|null}
    */
   get modifiers() {
     if (this[modifiersSymbol]) {
@@ -71,7 +79,9 @@ class StandardDice {
   /**
    * Sets the modifiers that affect this roll
    *
-   * @param value
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} value
+   *
+   * @throws {TypeError} Modifiers should be a Map, array of Modifiers, or an Object
    */
   set modifiers(value) {
     let modifiers;
@@ -83,7 +93,7 @@ class StandardDice {
     } else if (typeof value === 'object') {
       modifiers = new Map(Object.entries(value));
     } else {
-      throw new TypeError('modifiers should be a Map or an Object');
+      throw new TypeError('modifiers should be a Map, array, or an Object containing Modifiers');
     }
 
     if (
@@ -126,14 +136,16 @@ class StandardDice {
     return this[minSymbol];
   }
 
+  /* eslint-disable class-methods-use-this */
   /**
    * Returns the name for the dice
    *
-   * @returns {*}
+   * @returns {string}
    */
   get name() {
-    return this.constructor.name;
+    return 'standard';
   }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * The dice notation for this dice roll
@@ -156,7 +168,7 @@ class StandardDice {
   /**
    * The number of sides the dice has
    *
-   * @returns {*}
+   * @returns {number}
    */
   get sides() {
     return this[sidesSymbol];

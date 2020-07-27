@@ -1,4 +1,13 @@
+/**
+ * An error thrown when an invalid die action (e.g Exploding on a d1) occurs
+ */
 class DieActionValueError extends Error {
+  /**
+   * Create a DieActionValueError
+   *
+   * @param {StandardDice} die The Dice object
+   * @param {string|null} [action=null] The invalid action
+   */
   constructor(die, action = null) {
     super(`Die "${die}" must have more than 1 possible value to ${action || 'do this action'}`);
 

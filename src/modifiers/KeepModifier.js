@@ -4,14 +4,22 @@ import { diceUtils } from '../utilities/utils';
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');
 
+/**
+ * A keep modifier
+ */
 class KeepModifier extends Modifier {
   /**
+   * Create a KeepModifier
    *
-   * @param {string} notation
+   * @param {string} notation The modifier notation
    * @param {string} end Either `h|l` to keep highest or lowest
-   * @param {number=} qty The amount to keep
+   * @param {number} [qty=1] The amount to keep
+   *
+   * @throws {RangeError} End must be one of 'h' or 'l'
+   * @throws {RequiredArgumentError} Notation is required
+   * @throws {TypeError} qty must be a positive integer
    */
-  constructor(notation, end, qty) {
+  constructor(notation, end, qty = 1) {
     super(notation);
 
     this.end = end;
@@ -33,7 +41,9 @@ class KeepModifier extends Modifier {
   /**
    * Sets which end the rolls should be kept ("h" = High, "l" = Low)
    *
-   * @param value
+   * @param {string} value Either 'h' or 'l'
+   *
+   * @throws {RangeError} End must be one of 'h' or 'l'
    */
   set end(value) {
     if ((value !== 'h') && (value !== 'l')) {
@@ -49,7 +59,7 @@ class KeepModifier extends Modifier {
    * @returns {string}
    */
   get name() {
-    return `${super.name}-${this.end}`;
+    return `keep-${this.end}`;
   }
 
   /**
@@ -65,6 +75,8 @@ class KeepModifier extends Modifier {
    * Sets the quantity of dice that should be kept
    *
    * @param {number} value
+   *
+   * @throws {TypeError} qty must be a positive integer
    */
   set qty(value) {
     if (!diceUtils.isNumeric(value) || (value < 1)) {

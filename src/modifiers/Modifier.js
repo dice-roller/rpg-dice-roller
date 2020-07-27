@@ -1,9 +1,15 @@
 import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
 
+/**
+ * The base modifier class
+ */
 class Modifier {
   /**
+   * Create a Modifier
    *
-   * @param {string} notation
+   * @param {string} notation The modifier notation
+   *
+   * @throws {RequiredArgumentError} Notation is required
    */
   constructor(notation) {
     if (!notation) {
@@ -17,14 +23,16 @@ class Modifier {
     this.order = 999;
   }
 
+  /* eslint-disable class-methods-use-this */
   /**
    * Returns the name for the modifier
    *
    * @returns {string}
    */
   get name() {
-    return this.constructor.name;
+    return 'modifier';
   }
+  /* eslint-enable class-methods-use-this */
 
   /* eslint-disable class-methods-use-this */
   /**

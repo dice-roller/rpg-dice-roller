@@ -3,14 +3,20 @@ import ComparePoint from '../ComparePoint';
 
 const failureCPSymbol = Symbol('failure-cp');
 
+/**
+ * A target success / failure modifier
+ */
 class TargetModifier extends ComparisonModifier {
   /**
+   * Create a TargetModifier
    *
-   * @param {string} notation
-   * @param {ComparePoint} successCP
-   * @param {ComparePoint=} failureCP
+   * @param {string} notation The modifier notation
+   * @param {ComparePoint} successCP The success comparison object
+   * @param {ComparePoint} [failureCP=null] The failure comparison object
+   *
+   * @throws {TypeError} failure comparePoint must be instance of ComparePoint or null
    */
-  constructor(notation, successCP, failureCP) {
+  constructor(notation, successCP, failureCP = null) {
     super(notation, successCP);
 
     // set the failure compare point
@@ -30,9 +36,11 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Sets the compare point
+   * Sets the failure compare point
    *
-   * @param comparePoint
+   * @param {ComparePoint|null} comparePoint
+   *
+   * @throws {TypeError} failure comparePoint must be instance of ComparePoint or null
    */
   set failureComparePoint(comparePoint) {
     if (comparePoint && !(comparePoint instanceof ComparePoint)) {
@@ -41,6 +49,17 @@ class TargetModifier extends ComparisonModifier {
 
     this[failureCPSymbol] = comparePoint || null;
   }
+
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Returns the name for the modifier
+   *
+   * @returns {string}
+   */
+  get name() {
+    return 'target';
+  }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * Returns the success compare point for the modifier
@@ -54,7 +73,7 @@ class TargetModifier extends ComparisonModifier {
   /**
    * Sets the success compare point for the modifier
    *
-   * @param value
+   * @param {ComparePoint} value
    */
   set successComparePoint(value) {
     super.comparePoint = value;
@@ -65,7 +84,7 @@ class TargetModifier extends ComparisonModifier {
    * its corresponding state value:
    * success = 1, fail = -1, neither = 0
    *
-   * @param {number} value
+   * @param {number} value The number to compare against
    *
    * @returns {number}
    */
@@ -88,7 +107,8 @@ class TargetModifier extends ComparisonModifier {
    * is a success ONLY if it passes the success compare point.
    * A value could be neither a failure or a success.
    *
-   * @param value
+   * @param {number} value The number to compare against
+   *
    * @returns {boolean}
    */
   isFailure(value) {
@@ -99,7 +119,8 @@ class TargetModifier extends ComparisonModifier {
    * Returns true if the value doesn't match both the success compare point
    * and the failure compare point.
    *
-   * @param {number} value
+   * @param {number} value The number to compare against
+   *
    * @returns {boolean}
    */
   isNeutral(value) {
@@ -113,7 +134,7 @@ class TargetModifier extends ComparisonModifier {
    * is a failure ONLY if it passes the failure compare point.
    * A value could be neither a failure or a success.
    *
-   * @param {number} value
+   * @param {number} value The number to compare against
    *
    * @returns {boolean}
    */
