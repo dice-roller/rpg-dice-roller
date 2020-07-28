@@ -4,7 +4,7 @@ import { engines, generator } from './utilities/NumberGenerator';
 import DataFormatError from './exceptions/DataFormatError';
 import NotationError from './exceptions/NotationError';
 import Parser from './parser/Parser';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from './exceptions/RequiredArgumentError';
 import RollGroup from './RollGroup';
 import RollResults from './results/RollResults';
 import StandardDice from './dice/StandardDice';
@@ -86,7 +86,7 @@ class DiceRoll {
   /**
    * Create a DiceRoll, parse the notation and roll the dice
    *
-   * @param {string} notation The notation to roll
+   * @param {string|{}} notation The notation to roll
    *
    * @throws {NotationError} notation is invalid
    * @throws {RequiredArgumentError} notation is required
@@ -215,8 +215,12 @@ class DiceRoll {
    * @returns {number}
    */
   get maxTotal() {
+    if (!this[parsedNotationSymbol]) {
+      return 0;
+    }
+
     // only calculate the total if it has not already been done
-    if (!this[maxTotalSymbol] && this[parsedNotationSymbol]) {
+    if (!this[maxTotalSymbol]) {
       // roll the dice, forcing values to their maximum
       const rolls = this[rollMethodSymbol](engines.max);
 
@@ -225,7 +229,7 @@ class DiceRoll {
     }
 
     // return the total
-    return this[maxTotalSymbol] || 0;
+    return this[maxTotalSymbol];
   }
 
   /**
@@ -234,8 +238,12 @@ class DiceRoll {
    * @returns {number}
    */
   get minTotal() {
+    if (!this[parsedNotationSymbol]) {
+      return 0;
+    }
+
     // only calculate the total if it has not already been done
-    if (!this[minTotalSymbol] && this[parsedNotationSymbol]) {
+    if (!this[minTotalSymbol]) {
       // roll the dice, forcing values to their minimum
       const rolls = this[rollMethodSymbol](engines.min);
 
@@ -244,7 +252,7 @@ class DiceRoll {
     }
 
     // return the total
-    return this[minTotalSymbol] || 0;
+    return this[minTotalSymbol];
   }
 
   /**
@@ -253,7 +261,7 @@ class DiceRoll {
    * @returns {string}
    */
   get notation() {
-    return this[notationSymbol] || '';
+    return this[notationSymbol];
   }
 
   /**

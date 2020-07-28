@@ -1,0 +1,289 @@
+import { diceUtils, exportFormats } from '../../src/utilities/utils';
+
+describe('Export formats', () => {
+  test('contains all formats', () => {
+    expect(exportFormats).toBeInstanceOf(Object);
+
+    expect(exportFormats).toEqual({
+      BASE_64: expect.any(Number),
+      JSON: expect.any(Number),
+      OBJECT: expect.any(Number),
+    });
+  });
+});
+
+describe('Utilities', () => {
+  test('model structure', () => {
+    expect(diceUtils).toEqual(expect.objectContaining({
+      compareNumbers: expect.any(Function),
+      isBase64: expect.any(Function),
+      isJson: expect.any(Function),
+      isNumeric: expect.any(Function),
+      sumArray: expect.any(Function),
+      toFixed: expect.any(Function),
+    }));
+  });
+
+  describe('inNumeric', () => {
+    test('returns true for values of type number', () => {
+      expect(diceUtils.isNumeric(1)).toBe(true);
+      expect(diceUtils.isNumeric(0)).toBe(true);
+      expect(diceUtils.isNumeric(54)).toBe(true);
+      expect(diceUtils.isNumeric(3.56)).toBe(true);
+      expect(diceUtils.isNumeric(-156)).toBe(true);
+      expect(diceUtils.isNumeric(3890)).toBe(true);
+    });
+
+    test('returns true for numeric strings', () => {
+      expect(diceUtils.isNumeric('1')).toBe(true);
+      expect(diceUtils.isNumeric('0')).toBe(true);
+      expect(diceUtils.isNumeric('54')).toBe(true);
+      expect(diceUtils.isNumeric('3.56')).toBe(true);
+      expect(diceUtils.isNumeric('-156')).toBe(true);
+      expect(diceUtils.isNumeric('3890')).toBe(true);
+    });
+
+    test('returns false for non-numeric values', () => {
+      expect(diceUtils.isNumeric(NaN)).toBe(false);
+      expect(diceUtils.isNumeric('foo')).toBe(false);
+      expect(diceUtils.isNumeric({})).toBe(false);
+      expect(diceUtils.isNumeric([])).toBe(false);
+      expect(diceUtils.isNumeric(true)).toBe(false);
+      expect(diceUtils.isNumeric(false)).toBe(false);
+      expect(diceUtils.isNumeric(null)).toBe(false);
+      expect(diceUtils.isNumeric(undefined)).toBe(false);
+    });
+  });
+
+  describe('isBase64', () => {
+    test('returns true for base64 encoded string', () => {
+      let encodedString = btoa('foo');
+      expect(diceUtils.isBase64(encodedString)).toBe(true);
+
+      encodedString = btoa('{"foo": "bar"}');
+      expect(diceUtils.isBase64(encodedString)).toBe(true);
+
+      encodedString = btoa(true);
+      expect(diceUtils.isBase64(encodedString)).toBe(true);
+
+      encodedString = btoa({});
+      expect(diceUtils.isBase64(encodedString)).toBe(true);
+
+      encodedString = btoa(['foo', 'bar']);
+      expect(diceUtils.isBase64(encodedString)).toBe(true);
+    });
+
+    test('returns false for non-base64 encoded string', () => {
+      expect(diceUtils.isBase64(156)).toBe(false);
+      expect(diceUtils.isBase64('foo')).toBe(false);
+      expect(diceUtils.isBase64({})).toBe(false);
+      expect(diceUtils.isBase64([])).toBe(false);
+      expect(diceUtils.isBase64(true)).toBe(false);
+      expect(diceUtils.isBase64(false)).toBe(false);
+      expect(diceUtils.isBase64(null)).toBe(false);
+      expect(diceUtils.isBase64(undefined)).toBe(false);
+      expect(diceUtils.isBase64(NaN)).toBe(false);
+    });
+  });
+
+  describe('isJson', () => {
+    test('returns true for JSON encoded strings', () => {
+      expect(diceUtils.isJson(JSON.stringify({ foo: 'bar' }))).toBe(true);
+      expect(diceUtils.isJson(JSON.stringify(['foo', 'bar']))).toBe(true);
+      expect(diceUtils.isJson(JSON.stringify({}))).toBe(true);
+      expect(diceUtils.isJson(JSON.stringify([]))).toBe(true);
+    });
+
+    test('returns false for invalid strings', () => {
+      expect(diceUtils.isJson(JSON.stringify('foo'))).toBe(false);
+      expect(diceUtils.isJson(JSON.stringify(124))).toBe(false);
+      expect(diceUtils.isJson(JSON.stringify(true))).toBe(false);
+      expect(diceUtils.isJson(JSON.stringify(false))).toBe(false);
+    });
+
+    test('returns false for invalid data', () => {
+      expect(diceUtils.isJson()).toBe(false);
+      expect(diceUtils.isJson('foo')).toBe(false);
+      expect(diceUtils.isJson(124)).toBe(false);
+      expect(diceUtils.isJson(true)).toBe(false);
+      expect(diceUtils.isJson(false)).toBe(false);
+      expect(diceUtils.isJson([])).toBe(false);
+      expect(diceUtils.isJson({})).toBe(false);
+    });
+  });
+
+  describe('sumArray', () => {
+    test('Sums the values of an array', () => {
+      expect(diceUtils.sumArray([4, 6, 234, 14.05, -4])).toBeCloseTo(254.05);
+    });
+
+    test('Sums the values of an array of numerical strings', () => {
+      expect(diceUtils.sumArray(['4', '6', '234', '14.05', '-4'])).toBeCloseTo(254.05);
+    });
+
+    test('Non-numerical values are ignored / treated as zero', () => {
+      expect(diceUtils.sumArray([4, 5, 'foo', {}, 6])).toBe(15);
+    });
+
+    test('returns 0 if not an array', () => {
+      expect(diceUtils.sumArray('foo')).toBe(0);
+    });
+  });
+
+  describe('compareNumbers', () => {
+    test('returns false if no operator specified', () => {
+      expect(diceUtils.compareNumbers(1, 1)).toBe(false);
+      expect(diceUtils.compareNumbers(1, 45)).toBe(false);
+      expect(diceUtils.compareNumbers(4, 67)).toBe(false);
+      expect(diceUtils.compareNumbers(67, 67)).toBe(false);
+    });
+
+    test('returns false if operator is unrecognised', () => {
+      expect(diceUtils.compareNumbers(1, 1, 'foo')).toBe(false);
+      expect(diceUtils.compareNumbers(1, 45, {})).toBe(false);
+      expect(diceUtils.compareNumbers(4, 67, true)).toBe(false);
+      expect(diceUtils.compareNumbers(67, 67, false)).toBe(false);
+    });
+
+    describe('`=` and `==`', () => {
+      test('returns true if `a = b`', () => {
+        expect(diceUtils.compareNumbers(1, 1, '=')).toBe(true);
+        expect(diceUtils.compareNumbers(45, 45, '=')).toBe(true);
+        expect(diceUtils.compareNumbers(-1.03, -1.03, '=')).toBe(true);
+
+        expect(diceUtils.compareNumbers(1, 1, '==')).toBe(true);
+        expect(diceUtils.compareNumbers(45, 45, '==')).toBe(true);
+        expect(diceUtils.compareNumbers(-1.03, -1.03, '==')).toBe(true);
+      });
+
+      test('returns false if `a != b`', () => {
+        expect(diceUtils.compareNumbers(1, 4, '=')).toBe(false);
+        expect(diceUtils.compareNumbers(643, 0.45, '=')).toBe(false);
+        expect(diceUtils.compareNumbers(0, -1, '=')).toBe(false);
+
+        expect(diceUtils.compareNumbers(1, 4, '==')).toBe(false);
+        expect(diceUtils.compareNumbers(643, 0.45, '==')).toBe(false);
+        expect(diceUtils.compareNumbers(0, -1, '==')).toBe(false);
+      });
+    });
+
+    describe('`<`', () => {
+      test('returns true if `a < b`', () => {
+        expect(diceUtils.compareNumbers(1, 5, '<')).toBe(true);
+        expect(diceUtils.compareNumbers(-5, -4, '<')).toBe(true);
+        expect(diceUtils.compareNumbers(145.05, 145.06, '<')).toBe(true);
+      });
+
+      test('returns false if `a >= b`', () => {
+        expect(diceUtils.compareNumbers(1, 0, '<')).toBe(false);
+        expect(diceUtils.compareNumbers(-5, -16, '<')).toBe(false);
+        expect(diceUtils.compareNumbers(145.05, 145.04, '<')).toBe(false);
+
+        expect(diceUtils.compareNumbers(1, 1, '<')).toBe(false);
+        expect(diceUtils.compareNumbers(-5, -5, '<')).toBe(false);
+        expect(diceUtils.compareNumbers(145.05, 145.05, '<')).toBe(false);
+      });
+    });
+
+    describe('`>', () => {
+      test('returns true if `a > b`', () => {
+        expect(diceUtils.compareNumbers(5, 1, '>')).toBe(true);
+        expect(diceUtils.compareNumbers(-1, -5, '>')).toBe(true);
+        expect(diceUtils.compareNumbers(145.06, 145.05, '>')).toBe(true);
+      });
+
+      test('returns false if `a <= b`', () => {
+        expect(diceUtils.compareNumbers(0, 1, '>')).toBe(false);
+        expect(diceUtils.compareNumbers(-16, -5, '>')).toBe(false);
+        expect(diceUtils.compareNumbers(145.04, 145.05, '>')).toBe(false);
+
+        expect(diceUtils.compareNumbers(1, 1, '>')).toBe(false);
+        expect(diceUtils.compareNumbers(-5, -5, '>')).toBe(false);
+        expect(diceUtils.compareNumbers(145.05, 145.05, '>')).toBe(false);
+      });
+    });
+
+    describe('`<=', () => {
+      test('returns true if `a < b`', () => {
+        expect(diceUtils.compareNumbers(0, 1, '<=')).toBe(true);
+        expect(diceUtils.compareNumbers(-16, -5, '<=')).toBe(true);
+        expect(diceUtils.compareNumbers(145.04, 145.05, '<=')).toBe(true);
+      });
+
+      test('returns true if `a = b`', () => {
+        expect(diceUtils.compareNumbers(1, 1, '<=')).toBe(true);
+        expect(diceUtils.compareNumbers(-5, -5, '<=')).toBe(true);
+        expect(diceUtils.compareNumbers(145.05, 145.05, '<=')).toBe(true);
+      });
+
+      test('returns false if `a > b`', () => {
+        expect(diceUtils.compareNumbers(5, 1, '<=')).toBe(false);
+        expect(diceUtils.compareNumbers(-1, -5, '<=')).toBe(false);
+        expect(diceUtils.compareNumbers(145.06, 145.05, '<=')).toBe(false);
+      });
+    });
+
+    describe('`>=', () => {
+      test('returns true if `a > b`', () => {
+        expect(diceUtils.compareNumbers(5, 1, '>=')).toBe(true);
+        expect(diceUtils.compareNumbers(-1, -5, '>=')).toBe(true);
+        expect(diceUtils.compareNumbers(145.06, 145.05, '>=')).toBe(true);
+      });
+
+      test('returns true if `a = b`', () => {
+        expect(diceUtils.compareNumbers(1, 1, '>=')).toBe(true);
+        expect(diceUtils.compareNumbers(-5, -5, '>=')).toBe(true);
+        expect(diceUtils.compareNumbers(145.05, 145.05, '>=')).toBe(true);
+      });
+
+      test('returns false if `a < b`', () => {
+        expect(diceUtils.compareNumbers(0, 1, '>=')).toBe(false);
+        expect(diceUtils.compareNumbers(-16, -5, '>=')).toBe(false);
+        expect(diceUtils.compareNumbers(145.04, 145.05, '>=')).toBe(false);
+      });
+    });
+
+    describe('`!` and `!=`', () => {
+      test('returns true if `a != b`', () => {
+        expect(diceUtils.compareNumbers(1, 4, '!')).toBe(true);
+        expect(diceUtils.compareNumbers(643, 0.45, '!')).toBe(true);
+        expect(diceUtils.compareNumbers(0, -1, '!')).toBe(true);
+
+        expect(diceUtils.compareNumbers(1, 4, '!=')).toBe(true);
+        expect(diceUtils.compareNumbers(643, 0.45, '!=')).toBe(true);
+        expect(diceUtils.compareNumbers(0, -1, '!=')).toBe(true);
+      });
+
+      test('returns false if `a = b`', () => {
+        expect(diceUtils.compareNumbers(1, 1, '!')).toBe(false);
+        expect(diceUtils.compareNumbers(45, 45, '!')).toBe(false);
+        expect(diceUtils.compareNumbers(-1.03, -1.03, '!')).toBe(false);
+
+        expect(diceUtils.compareNumbers(1, 1, '!=')).toBe(false);
+        expect(diceUtils.compareNumbers(45, 45, '!=')).toBe(false);
+        expect(diceUtils.compareNumbers(-1.03, -1.03, '!=')).toBe(false);
+      });
+    });
+  });
+
+  describe('toFixed', () => {
+    test('`decPlaces` defaults to `0`', () => {
+      expect(diceUtils.toFixed(345.27649047)).toBe(345);
+    });
+
+    test('rounds to decimal places', () => {
+      expect(diceUtils.toFixed(345.27649047, 1)).toBeCloseTo(345.3);
+      expect(diceUtils.toFixed(345.27649047, 2)).toBeCloseTo(345.28);
+      expect(diceUtils.toFixed(345.27649047, 4)).toBeCloseTo(345.2764);
+      expect(diceUtils.toFixed(345.27649047, 8)).toBeCloseTo(345.27649047);
+    });
+
+    test('removes trailing zeros after decimal point', () => {
+      expect(diceUtils.toFixed(45.000, 4)).toBe(45);
+    });
+
+    test('nothing happens when rounding by more decimal places than number has', () => {
+      expect(diceUtils.toFixed(345.27649047, 15)).toBeCloseTo(345.27649047, 15);
+    });
+  });
+});

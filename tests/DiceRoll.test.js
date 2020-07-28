@@ -7,7 +7,7 @@ import Parser from '../src/parser/Parser';
 import StandardDice from '../src/dice/StandardDice';
 import RollResults from '../src/results/RollResults';
 import RollResult from '../src/results/RollResult';
-import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentError';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -767,6 +767,23 @@ describe('DiceRoll', () => {
 
     test('importing a DiceRoll object returns itself', () => {
       expect(DiceRoll.import(diceRoll)).toBe(diceRoll);
+    });
+
+    test('non-roll items are removed when importing notation.rolls', () => {
+      const exported = diceRoll.export(exportFormats.OBJECT);
+      // clone the rolls data
+      const dataToImport = {
+        notation: exported.notation,
+        rolls: [...exported.rolls],
+      };
+
+      // add some dummy invalid data
+      dataToImport.rolls.push(...['foo', 'bar']);
+
+      const importedRoll = DiceRoll.import(dataToImport);
+
+      expect(importedRoll).toBeInstanceOf(DiceRoll);
+      expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
     test('invalid format throws error', () => {

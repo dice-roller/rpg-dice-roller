@@ -23,7 +23,7 @@ class KeepModifier extends Modifier {
     super(notation);
 
     this.end = end;
-    this.qty = (qty || (qty === 0)) ? qty : 1;
+    this.qty = qty;
 
     // set the modifier's sort order
     this.order = 5;

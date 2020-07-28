@@ -152,7 +152,7 @@ class RollResult {
    * @returns {Set<string>}
    */
   get modifiers() {
-    return this[modifiersSymbol] || new Set();
+    return this[modifiersSymbol];
   }
 
   /**

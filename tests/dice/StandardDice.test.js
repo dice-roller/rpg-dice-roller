@@ -2,7 +2,7 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -59,6 +59,30 @@ describe('StandardDice', () => {
       expect(() => {
         new StandardDice('1d6', undefined);
       }).toThrow(RequiredArgumentError);
+    });
+
+    test('can set `min` in constructor', () => {
+      const die = new StandardDice('4d6', 6, 4, null, 3);
+
+      expect(die.min).toBe(3);
+    });
+
+    test('Non-numeric `min` is treated as `1`', () => {
+      const die = new StandardDice('4d6', 6, 4, null, 'foo');
+
+      expect(die.min).toBe(1);
+    });
+
+    test('can set `max` in constructor', () => {
+      const die = new StandardDice('4d6', 6, 4, null, null, 8);
+
+      expect(die.max).toBe(8);
+    });
+
+    test('Non-numeric `max` is treated as value of sides', () => {
+      const die = new StandardDice('4d6', 6, 4, null, null, 'foo');
+
+      expect(die.max).toBe(6);
     });
   });
 

@@ -2,7 +2,7 @@ import DiceRoller from '../src/DiceRoller';
 import DiceRoll from '../src/DiceRoll';
 import { exportFormats } from '../src';
 import NotationError from '../src/exceptions/NotationError';
-import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../src/exceptions/RequiredArgumentError';
 import DataFormatError from '../src/exceptions/DataFormatError';
 
 describe('DiceRoller', () => {
@@ -26,6 +26,18 @@ describe('DiceRoller', () => {
         toString: expect.any(Function),
         roll: expect.any(Function),
       }));
+    });
+
+    test('passing data in constructor passes it to `import`', () => {
+      const spy = jest.spyOn(DiceRoller.prototype, 'import');
+      const data = [new DiceRoll('4d6')];
+      roller = new DiceRoller(data);
+
+      expect(spy).toHaveBeenCalled();
+      expect(spy).toBeCalledWith(data);
+
+      // remove the spy
+      spy.mockRestore();
     });
   });
 
@@ -326,6 +338,12 @@ describe('DiceRoller', () => {
         importRoller.roll(...notations);
       });
 
+      test('data is required', () => {
+        expect(() => {
+          roller.import();
+        }).toThrow(RequiredArgumentError);
+      });
+
       test('can import JSON', () => {
         const data = importRoller.export(exportFormats.JSON);
 
@@ -346,6 +364,14 @@ describe('DiceRoller', () => {
         const data = importRoller.export(exportFormats.OBJECT);
 
         roller.import(data);
+
+        expect(roller.export(exportFormats.OBJECT)).toEqual(data);
+      });
+
+      test('can import data array of logs', () => {
+        const data = importRoller.export(exportFormats.OBJECT);
+
+        roller.import(data.log);
 
         expect(roller.export(exportFormats.OBJECT)).toEqual(data);
       });

@@ -1,6 +1,6 @@
 import { diceUtils } from './utilities/utils';
 import CompareOperatorError from './exceptions/CompareOperatorError';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from './exceptions/RequiredArgumentError';
 
 const operatorSymbol = Symbol('operator');
 const valueSymbol = Symbol('value');

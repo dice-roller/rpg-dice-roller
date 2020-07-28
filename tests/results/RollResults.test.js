@@ -2,8 +2,8 @@ import RollResults from '../../src/results/RollResults';
 import RollResult from '../../src/results/RollResult';
 
 describe('RollResults', () => {
-  let rolls; let
-    results;
+  let rolls;
+  let results;
 
   beforeEach(() => {
     rolls = [
@@ -46,6 +46,12 @@ describe('RollResults', () => {
 
       // remove the spy
       spy.mockRestore();
+    });
+
+    test('setting falsey in constructor sets to empty array', () => {
+      results = new RollResults(null);
+
+      expect(results.rolls).toEqual([]);
     });
 
     test('must be array', () => {

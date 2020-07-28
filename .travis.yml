@@ -8,8 +8,6 @@ branches:
     - master
     - develop
 script:
-  - npm run pretest
-  - npm run lint
   - npm run test:coveralls
 env:
   global:

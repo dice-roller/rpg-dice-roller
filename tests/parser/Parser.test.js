@@ -10,7 +10,7 @@ import * as parser from '../../src/parser/grammars/grammar';
 import Parser from '../../src/parser/Parser';
 import SortingModifier from '../../src/modifiers/SortingModifier';
 import TargetModifier from '../../src/modifiers/TargetModifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 import ReRollModifier from '../../src/modifiers/ReRollModifier';
 
 describe('Parser', () => {

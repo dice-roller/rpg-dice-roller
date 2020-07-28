@@ -2,7 +2,7 @@ import ComparePoint from '../../src/ComparePoint';
 import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import DieActionValueError from '../../src/exceptions/DieActionValueError';
 import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
+import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';

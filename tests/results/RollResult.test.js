@@ -64,6 +64,17 @@ describe('RollResult', () => {
       expect(result.initialValue).toBe(4);
       expect(result.calculationValue).toBe(2);
       expect(result.value).toBe(2);
+
+      // set the calculation value
+      result = new RollResult({
+        initialValue: 4,
+        value: 2,
+        calculationValue: 6,
+      });
+
+      expect(result.initialValue).toBe(4);
+      expect(result.calculationValue).toBe(6);
+      expect(result.value).toBe(2);
     });
   });
 
@@ -181,6 +192,34 @@ describe('RollResult', () => {
 
       expect(result.calculationValue).toBe(23);
       expect(result.value).toBe(3);
+    });
+
+    test('must be numeric', () => {
+      const result = new RollResult(45);
+
+      expect(() => {
+        result.value = 'foo';
+      }).toThrow(TypeError);
+
+      expect(() => {
+        result.value = true;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        result.value = false;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        result.value = {};
+      }).toThrow(TypeError);
+
+      expect(() => {
+        result.value = [];
+      }).toThrow(TypeError);
+
+      expect(() => {
+        result.value = null;
+      }).toThrow(TypeError);
     });
   });
 
@@ -452,6 +491,11 @@ describe('RollResult', () => {
 
       result.modifiers = ['target-success'];
       expect(result.modifierFlags).toEqual('*');
+    });
+
+    test('modifier flag defaults to modifier name if name not recognised', () => {
+      const result = new RollResult(4, ['foo', 'bar']);
+      expect(result.modifierFlags).toEqual('foobar');
     });
   });
 

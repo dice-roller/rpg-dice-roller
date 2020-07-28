@@ -32,7 +32,7 @@ class RollResults {
    * @returns {RollResult[]}
    */
   get rolls() {
-    return [...(this[rollsSymbol] || [])];
+    return [...this[rollsSymbol]];
   }
 
   /**
