@@ -32,7 +32,7 @@ class DropModifier extends KeepModifier {
   }
 
   /**
-   * Returns the min/max range of rolls to drop
+   * Returns the start and end (end exclusive) range of rolls to drop.
    *
    * @param {RollResults} _results
    *
@@ -40,6 +40,10 @@ class DropModifier extends KeepModifier {
    */
   rangeToDrop(_results) {
     // we're dropping, so we want to drop all dice that are inside of the qty range
+    if (this.end === 'h') {
+      return [_results.length - this.qty, _results.length];
+    }
+
     return [0, this.qty];
   }
 }
