@@ -9,8 +9,13 @@
   "module": "./lib/esm/bundle.js",
   "browser": "./lib/umd/bundle.js",
   "exports": {
-    "import": "./lib/esm/bundle.js",
-    "require": "./lib/umd/bundle.js"
+    ".": {
+      "import": "./lib/esm/bundle.js",
+      "require": "./lib/umd/bundle.js"
+    },
+    "./lib/umd/bundle.js": {
+      "require": "./lib/umd/bundle.js"
+    }
   },
   "types": "./types/index.d.ts",
   "repository": {
