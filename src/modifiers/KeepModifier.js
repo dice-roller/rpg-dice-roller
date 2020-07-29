@@ -87,7 +87,7 @@ class KeepModifier extends Modifier {
   }
 
   /**
-   * Returns the min/max range of rolls to drop
+   * Returns the start and end (end exclusive) range of rolls to drop.
    *
    * @param {RollResults} _results
    *
@@ -95,6 +95,10 @@ class KeepModifier extends Modifier {
    */
   rangeToDrop(_results) {
     // we're keeping, so we want to drop all dice that are outside of the qty range
+    if (this.end === 'h') {
+      return [0, _results.length - this.qty];
+    }
+
     return [this.qty, _results.length];
   }
 
@@ -114,8 +118,8 @@ class KeepModifier extends Modifier {
         value: roll.value,
         index,
       }))
-      // sort the list by value (Either ascending or descending depending on end)
-      .sort((a, b) => ((this.end === 'h') ? b.value - a.value : a.value - b.value))
+      // sort the list ascending by value
+      .sort((a, b) => a.value - b.value)
       .map((rollIndex) => rollIndex.index)
       // get the roll indexes to drop
       .slice(...this.rangeToDrop(results));
