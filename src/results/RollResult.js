@@ -21,7 +21,7 @@ class RollResult {
    */
   constructor(value, modifiers = [], useInTotal = true) {
     if (diceUtils.isNumeric(value)) {
-      this[initialValueSymbol] = parseInt(value, 10);
+      this[initialValueSymbol] = Number(value);
 
       this.modifiers = modifiers || [];
       this.useInTotal = useInTotal;
@@ -32,11 +32,11 @@ class RollResult {
         throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
-      this[initialValueSymbol] = parseInt(initialVal, 10);
+      this[initialValueSymbol] = Number(initialVal);
 
       if (
         diceUtils.isNumeric(value.value)
-        && (parseInt(value.value, 10) !== this[initialValueSymbol])
+        && (Number(value.value) !== this[initialValueSymbol])
       ) {
         this.value = value.value;
       }
@@ -50,6 +50,8 @@ class RollResult {
 
       this.modifiers = value.modifiers || modifiers || [];
       this.useInTotal = (typeof value.useInTotal === 'boolean') ? value.useInTotal : (useInTotal || false);
+    } else if (value === Infinity) {
+      throw new RangeError('Result value must be a finite number');
     } else {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
@@ -75,6 +77,9 @@ class RollResult {
    */
   set calculationValue(value) {
     const isNumeric = diceUtils.isNumeric(value);
+    if (value === Infinity) {
+      throw new RangeError('Result calculation value must be a finite number');
+    }
     if (value && !isNumeric) {
       throw new TypeError(`Result calculation value is invalid: ${value}`);
     }
@@ -214,11 +219,14 @@ class RollResult {
    * @throws {TypeError} value is invalid
    */
   set value(value) {
+    if (value === Infinity) {
+      throw new RangeError('Result value must be a finite number');
+    }
     if (!diceUtils.isNumeric(value)) {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
 
-    this[valueSymbol] = parseInt(value, 10);
+    this[valueSymbol] = Number(value);
   }
 
   /**
