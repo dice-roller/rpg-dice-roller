@@ -126,6 +126,47 @@ describe('Utilities', () => {
     });
   });
 
+  describe('isSafeNumber', () => {
+    test('returns true for values within the "safe" range', () => {
+      expect(diceUtils.isSafeNumber(1)).toBe(true);
+      expect(diceUtils.isSafeNumber(567689584)).toBe(true);
+      expect(diceUtils.isSafeNumber(721984.6432876523)).toBe(true);
+      expect(diceUtils.isSafeNumber(Number.MIN_SAFE_INTEGER + 1)).toBe(true);
+      expect(diceUtils.isSafeNumber(Number.MAX_SAFE_INTEGER - 1)).toBe(true);
+    });
+
+    test('returns true for the min', () => {
+      expect(diceUtils.isSafeNumber(Number.MIN_SAFE_INTEGER)).toBe(true);
+    });
+
+    test('returns true for the max', () => {
+      expect(diceUtils.isSafeNumber(Number.MAX_SAFE_INTEGER)).toBe(true);
+    });
+
+    test('returns false for numbers under the min', () => {
+      expect(diceUtils.isSafeNumber(Number.MIN_SAFE_INTEGER - 1)).toBe(false);
+      expect(diceUtils.isSafeNumber(Number.MIN_SAFE_INTEGER - 500)).toBe(false);
+      expect(diceUtils.isSafeNumber(Number.MIN_SAFE_INTEGER - 1564367.4325671)).toBe(false);
+    });
+
+    test('returns false for numbers over the max', () => {
+      expect(diceUtils.isSafeNumber(Number.MAX_SAFE_INTEGER + 1)).toBe(false);
+      expect(diceUtils.isSafeNumber(Number.MAX_SAFE_INTEGER + 500)).toBe(false);
+      expect(diceUtils.isSafeNumber(Number.MAX_SAFE_INTEGER + 1564367.432567)).toBe(false);
+      expect(diceUtils.isSafeNumber(Infinity)).toBe(false);
+    });
+
+    test('returns false for non-numeric values', () => {
+      expect(diceUtils.isSafeNumber('foo')).toBe(false);
+      expect(diceUtils.isSafeNumber([])).toBe(false);
+      expect(diceUtils.isSafeNumber({})).toBe(false);
+      expect(diceUtils.isSafeNumber(true)).toBe(false);
+      expect(diceUtils.isSafeNumber(false)).toBe(false);
+      expect(diceUtils.isSafeNumber(null)).toBe(false);
+      expect(diceUtils.isSafeNumber(undefined)).toBe(false);
+    });
+  });
+
   describe('sumArray', () => {
     test('Sums the values of an array', () => {
       expect(diceUtils.sumArray([4, 6, 234, 14.05, -4])).toBeCloseTo(254.05);

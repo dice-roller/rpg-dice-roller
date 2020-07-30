@@ -74,6 +74,79 @@ describe('StandardDice', () => {
     });
   });
 
+  describe('Sides', () => {
+    test('must be numeric or string', () => {
+      let die = new StandardDice('d1', 1);
+      expect(die.sides).toBe(1);
+
+      die = new StandardDice('d9', 'foo');
+      expect(die.sides).toBe('foo');
+
+      expect(() => {
+        new StandardDice('d6', {});
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('d6', []);
+      }).toThrow(TypeError);
+    });
+
+    describe('If numeric...', () => {
+      test('must be positive non-zero', () => {
+        let die = new StandardDice('d1', 1);
+        expect(die.sides).toBe(1);
+
+        die = new StandardDice('d9', 9);
+        expect(die.sides).toBe(9);
+
+        die = new StandardDice('d689', 689);
+        expect(die.sides).toBe(689);
+
+        expect(() => {
+          new StandardDice('d6', 0);
+        }).toThrow(RangeError);
+
+        expect(() => {
+          new StandardDice('d6', -42);
+        }).toThrow(RangeError);
+
+        expect(() => {
+          new StandardDice('d6', -1);
+        }).toThrow(RangeError);
+      });
+
+      test('can be float', () => {
+        let die = new StandardDice('d1', 5.67);
+        expect(die.sides).toBeCloseTo(5.67);
+
+        die = new StandardDice('d9', 589.138);
+        expect(die.sides).toBeCloseTo(589.138);
+
+        die = new StandardDice('d9', 13.5);
+        expect(die.sides).toBeCloseTo(13.5);
+      });
+
+      test('must be finite', () => {
+        expect(() => {
+          new StandardDice('4d6', Infinity);
+        }).toThrow(RangeError);
+      });
+
+      describe('"Safe" number', () => {
+        test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
+          const die = new StandardDice('4d6', Number.MAX_SAFE_INTEGER);
+          expect(die.sides).toBe(Number.MAX_SAFE_INTEGER);
+        });
+
+        test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
+          expect(() => {
+            new StandardDice('4d6', Number.MAX_SAFE_INTEGER + 1);
+          }).toThrow(RangeError);
+        });
+      });
+    });
+  });
+
   describe('Quantity', () => {
     test('must be numeric', () => {
       let die = new StandardDice('4d6', 6, 8);
@@ -109,15 +182,15 @@ describe('StandardDice', () => {
 
       expect(() => {
         die = new StandardDice('4d6', 6, 0);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, -42);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new StandardDice('4d6', 6, -1);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
     });
 
     test('float values are floored to integer', () => {
@@ -135,6 +208,19 @@ describe('StandardDice', () => {
       expect(() => {
         new StandardDice('4d6', 6, Infinity);
       }).toThrow(TypeError);
+    });
+
+    describe('"Safe" number', () => {
+      test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
+        const die = new StandardDice('4d6', 6, Number.MAX_SAFE_INTEGER);
+        expect(die.qty).toBe(Number.MAX_SAFE_INTEGER);
+      });
+
+      test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
+        expect(() => {
+          new StandardDice('4d6', 6, Number.MAX_SAFE_INTEGER + 1);
+        }).toThrow(RangeError);
+      });
     });
   });
 
@@ -180,6 +266,30 @@ describe('StandardDice', () => {
         new StandardDice('4d6', 6, 4, null, Infinity);
       }).toThrow(TypeError);
     });
+
+    describe('"Safe" number', () => {
+      test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
+        const die = new StandardDice('4d6', 6, 4, null, Number.MAX_SAFE_INTEGER);
+        expect(die.min).toBe(Number.MAX_SAFE_INTEGER);
+      });
+
+      test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
+        expect(() => {
+          new StandardDice('4d6', 6, 4, null, Number.MAX_SAFE_INTEGER + 1);
+        }).toThrow(RangeError);
+      });
+
+      test('can be equal to `Number.MIN_SAFE_INTEGER`', () => {
+        const die = new StandardDice('4d6', 6, 4, null, Number.MIN_SAFE_INTEGER);
+        expect(die.min).toBe(Number.MIN_SAFE_INTEGER);
+      });
+
+      test('cannot be less than `Number.MIN_SAFE_INTEGER`', () => {
+        expect(() => {
+          new StandardDice('4d6', 6, 4, null, Number.MIN_SAFE_INTEGER - 1);
+        }).toThrow(RangeError);
+      });
+    });
   });
 
   describe('Max', () => {
@@ -223,6 +333,30 @@ describe('StandardDice', () => {
       expect(() => {
         new StandardDice('4d6', 6, 4, null, 1, Infinity);
       }).toThrow(TypeError);
+    });
+
+    describe('"Safe" number', () => {
+      test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
+        const die = new StandardDice('4d6', 6, 4, null, 1, Number.MAX_SAFE_INTEGER);
+        expect(die.max).toBe(Number.MAX_SAFE_INTEGER);
+      });
+
+      test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
+        expect(() => {
+          new StandardDice('4d6', 6, 4, null, 1, Number.MAX_SAFE_INTEGER + 1);
+        }).toThrow(RangeError);
+      });
+
+      test('can be equal to `Number.MIN_SAFE_INTEGER`', () => {
+        const die = new StandardDice('4d6', 6, 4, null, 1, Number.MIN_SAFE_INTEGER);
+        expect(die.max).toBe(Number.MIN_SAFE_INTEGER);
+      });
+
+      test('cannot be less than `Number.MIN_SAFE_INTEGER`', () => {
+        expect(() => {
+          new StandardDice('4d6', 6, 4, null, 1, Number.MIN_SAFE_INTEGER - 1);
+        }).toThrow(RangeError);
+      });
     });
   });
 

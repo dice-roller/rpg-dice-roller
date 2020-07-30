@@ -5,13 +5,14 @@
  *
  * @type {Readonly<{
  *  compareNumbers(a: number, b: number, operator: string): boolean,
- *  toFixed(num: number, decPlaces: number=): number,
  *  generateNumber(min: number, max: number): number,
+ *  isBase64(val: string): boolean,
  *  isNumeric(val: *): boolean,
  *  isJson(val: string): boolean,
+ *  isSafeNumber(val: *): boolean,
  *  readonly sumArray(numbers: number[]): number,
- *  isBase64(val: string): boolean}>
- * }
+ *  toFixed(num: number, decPlaces: number=): number
+ * }>}
  */
 const diceUtils = Object.freeze({
   /**
@@ -57,6 +58,24 @@ const diceUtils = Object.freeze({
     } catch (e) {
       return false;
     }
+  },
+  /**
+   * Checks if the given value is a "safe" number.
+   * This means that it falls within the `Number.MAX_SAFE_INTEGER` and `Number.MIN_SAFE_INTEGER`
+   * values (Inclusive).
+   *
+   * @param {*} val
+   *
+   * @returns {boolean}
+   */
+  isSafeNumber(val) {
+    if (!this.isNumeric(val)) {
+      return false;
+    }
+
+    const castVal = Number(val);
+
+    return (castVal <= Number.MAX_SAFE_INTEGER) && (castVal >= Number.MIN_SAFE_INTEGER);
   },
   /**
    * @returns {function(number[]): number}
