@@ -154,6 +154,28 @@ describe('KeepModifier', () => {
         mod.qty = -1;
       }).toThrow(TypeError);
     });
+
+    test('float gets floored to integer', () => {
+      let mod = new KeepModifier('kh', 'h', 5.145);
+      expect(mod.qty).toBeCloseTo(5);
+
+      mod = new KeepModifier('kh', 'h', 12.7);
+      expect(mod.qty).toBeCloseTo(12);
+
+      mod = new KeepModifier('kh', 'h', 50.5);
+      expect(mod.qty).toBeCloseTo(50);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        new KeepModifier('kh', 'h', Infinity);
+      }).toThrow(RangeError);
+    });
+
+    test('can be very large number', () => {
+      const mod = new KeepModifier('kh', 'h', 99 ** 99);
+      expect(mod.qty).toBe(99 ** 99);
+    });
   });
 
   describe('Output', () => {

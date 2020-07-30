@@ -76,14 +76,17 @@ class KeepModifier extends Modifier {
    *
    * @param {number} value
    *
-   * @throws {TypeError} qty must be a positive integer
+   * @throws {TypeError} qty must be a positive finite integer
    */
   set qty(value) {
+    if (value === Infinity) {
+      throw new RangeError('qty must be a finite number');
+    }
     if (!diceUtils.isNumeric(value) || (value < 1)) {
-      throw new TypeError('qty must be a positive integer');
+      throw new TypeError('qty must be a positive finite integer');
     }
 
-    this[qtySymbol] = parseInt(value, 10);
+    this[qtySymbol] = Math.floor(value);
   }
 
   /**
