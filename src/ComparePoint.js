@@ -74,10 +74,10 @@ class ComparePoint {
    */
   set value(value) {
     if (!diceUtils.isNumeric(value)) {
-      throw new TypeError('value must be numeric');
+      throw new TypeError('value must be a finite number');
     }
 
-    this[valueSymbol] = parseInt(value, 10);
+    this[valueSymbol] = Number(value);
   }
 
   /**

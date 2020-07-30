@@ -15,14 +15,18 @@
  */
 const diceUtils = Object.freeze({
   /**
-   * Checks if the given value is a valid number
+   * Checks if the given value is a valid finite number
    *
    * @param {*} val
    *
    * @returns {boolean}
    */
   isNumeric(val) {
-    return !Array.isArray(val) && !Number.isNaN(val) && Number.isFinite(parseInt(val, 10));
+    if ((typeof val !== 'number') && (typeof val !== 'string')) {
+      return false;
+    }
+
+    return !Number.isNaN(val) && Number.isFinite(Number(val));
   },
   /**
    * Checks if the string is valid base64 encoded
@@ -74,18 +78,21 @@ const diceUtils = Object.freeze({
   },
   /**
    * Checks if `a` is comparative to `b` with the given operator.
-   * Returns true or false.
    *
-   * @param {number} a
-   * @param {number} b
+   * @param {number|string} a The number to compare with `b`
+   * @param {number|string} b The number to compare with `a`
    * @param {string} operator A valid comparative operator (=, <, >, <=, >=, !=)
    *
    * @returns {boolean}
    */
   compareNumbers(a, b, operator) {
-    const aNum = parseFloat(a);
-    const bNum = parseFloat(b);
+    const aNum = Number(a);
+    const bNum = Number(b);
     let result;
+
+    if (Number.isNaN(aNum) || Number.isNaN(bNum)) {
+      return false;
+    }
 
     switch (operator) {
       case '=':

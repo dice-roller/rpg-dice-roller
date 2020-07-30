@@ -24,7 +24,7 @@ describe('Utilities', () => {
     }));
   });
 
-  describe('inNumeric', () => {
+  describe('isNumeric', () => {
     test('returns true for values of type number', () => {
       expect(diceUtils.isNumeric(1)).toBe(true);
       expect(diceUtils.isNumeric(0)).toBe(true);
@@ -52,6 +52,20 @@ describe('Utilities', () => {
       expect(diceUtils.isNumeric(false)).toBe(false);
       expect(diceUtils.isNumeric(null)).toBe(false);
       expect(diceUtils.isNumeric(undefined)).toBe(false);
+    });
+
+    test('returns false for string containing both numeric and non-numeric values', () => {
+      expect(diceUtils.isNumeric('10foo')).toBe(false);
+      expect(diceUtils.isNumeric('foo10')).toBe(false);
+    });
+
+    test('returns true for very large numbers', () => {
+      expect(diceUtils.isNumeric(99 ** 99)).toBe(true);
+      expect(diceUtils.isNumeric((99 ** 99).toString())).toBe(true);
+    });
+
+    test('returns false for `Infinity`', () => {
+      expect(diceUtils.isNumeric(Infinity)).toBe(false);
     });
   });
 
@@ -143,6 +157,13 @@ describe('Utilities', () => {
       expect(diceUtils.compareNumbers(1, 45, {})).toBe(false);
       expect(diceUtils.compareNumbers(4, 67, true)).toBe(false);
       expect(diceUtils.compareNumbers(67, 67, false)).toBe(false);
+    });
+
+    test('returns false if values are not numeric', () => {
+      expect(diceUtils.compareNumbers('foo', 'foo', '=')).toBe(false);
+      expect(diceUtils.compareNumbers('foo', 'bar', '=')).toBe(false);
+      expect(diceUtils.compareNumbers('foo', 3, '=')).toBe(false);
+      expect(diceUtils.compareNumbers(3, 'foo', '=')).toBe(false);
     });
 
     describe('`=` and `==`', () => {
@@ -264,6 +285,60 @@ describe('Utilities', () => {
         expect(diceUtils.compareNumbers(-1.03, -1.03, '!=')).toBe(false);
       });
     });
+
+    describe('Very large numbers', () => {
+      describe('Infinity', () => {
+        test('can compare Infinity with itself', () => {
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '=')).toBe(true);
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '<=')).toBe(true);
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '>=')).toBe(true);
+
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '>')).toBe(false);
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '<')).toBe(false);
+          expect(diceUtils.compareNumbers(Infinity, Infinity, '!')).toBe(false);
+        });
+
+        test('can compare Infinity with other numbers', () => {
+          expect(diceUtils.compareNumbers(Infinity, 7, '>')).toBe(true);
+          expect(diceUtils.compareNumbers(Infinity, 99 ** 99, '>')).toBe(true);
+
+          expect(diceUtils.compareNumbers(Infinity, 7, '=')).toBe(false);
+          expect(diceUtils.compareNumbers(Infinity, 1000000, '=')).toBe(false);
+          expect(diceUtils.compareNumbers(Infinity, 99 ** 99, '=')).toBe(false);
+          expect(diceUtils.compareNumbers(Infinity, 99 ** 99, '<')).toBe(false);
+        });
+      });
+
+      describe('Unsafe integer `99^99`', () => {
+        // this is an important test - calling `parseInt(99 ** 99)` will incorrectly return `3`
+        test('does not get incorrectly rounded to `3`', () => {
+          expect(diceUtils.compareNumbers(99 ** 99, 3, '>')).toBe(true);
+          expect(diceUtils.compareNumbers(99 ** 99, Number.MAX_SAFE_INTEGER, '>')).toBe(true);
+
+          expect(diceUtils.compareNumbers(99 ** 99, 3, '=')).toBe(false);
+        });
+
+        test('can compare `99^99` with itself', () => {
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '=')).toBe(true);
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '<=')).toBe(true);
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '>=')).toBe(true);
+
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '>')).toBe(false);
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '<')).toBe(false);
+          expect(diceUtils.compareNumbers(99 ** 99, 99 ** 99, '!')).toBe(false);
+        });
+
+        test('can compare `99^99` with other numbers', () => {
+          expect(diceUtils.compareNumbers(99 ** 99, 900, '>')).toBe(true);
+          expect(diceUtils.compareNumbers(99 ** 99, 2, '>=')).toBe(true);
+          expect(diceUtils.compareNumbers(99 ** 99, 890, '!')).toBe(true);
+
+          expect(diceUtils.compareNumbers(99 ** 99, 56468, '=')).toBe(false);
+          expect(diceUtils.compareNumbers(99 ** 99, 0.45, '<')).toBe(false);
+          expect(diceUtils.compareNumbers(99 ** 99, -67, '<=')).toBe(false);
+        });
+      });
+    });
   });
 
   describe('toFixed', () => {
@@ -284,6 +359,23 @@ describe('Utilities', () => {
 
     test('nothing happens when rounding by more decimal places than number has', () => {
       expect(diceUtils.toFixed(345.27649047, 15)).toBeCloseTo(345.27649047, 15);
+    });
+
+    describe('very large numbers', () => {
+      // this is because `99^99 == 3.697296376497263e+197`,
+      // which is NOT "3 point ..." but a far greater number
+      test('does not strip decimal place in very large numbers that is part of the number', () => {
+        expect(diceUtils.toFixed(99 ** 99)).toBe(99 ** 99);
+        expect(diceUtils.toFixed(99 ** 99, 1)).toBe(99 ** 99);
+        expect(diceUtils.toFixed(99 ** 99, 5)).toBe(99 ** 99);
+        expect(diceUtils.toFixed(99 ** 99, 7)).toBe(99 ** 99);
+      });
+
+      test('Infinity is unmodified', () => {
+        expect(diceUtils.toFixed(Infinity)).toBe(Infinity);
+        expect(diceUtils.toFixed(Infinity, 1)).toBe(Infinity);
+        expect(diceUtils.toFixed(Infinity, 5)).toBe(Infinity);
+      });
     });
   });
 });
