@@ -67,27 +67,15 @@ describe('StandardDice', () => {
       expect(die.min).toBe(3);
     });
 
-    test('Non-numeric `min` is treated as `1`', () => {
-      const die = new StandardDice('4d6', 6, 4, null, 'foo');
-
-      expect(die.min).toBe(1);
-    });
-
     test('can set `max` in constructor', () => {
-      const die = new StandardDice('4d6', 6, 4, null, null, 8);
+      const die = new StandardDice('4d6', 6, 4, null, 1, 8);
 
       expect(die.max).toBe(8);
-    });
-
-    test('Non-numeric `max` is treated as value of sides', () => {
-      const die = new StandardDice('4d6', 6, 4, null, null, 'foo');
-
-      expect(die.max).toBe(6);
     });
   });
 
   describe('Quantity', () => {
-    test('qty must be numeric', () => {
+    test('must be numeric', () => {
       let die = new StandardDice('4d6', 6, 8);
       expect(die.qty).toBe(8);
 
@@ -112,7 +100,7 @@ describe('StandardDice', () => {
       }).toThrow(TypeError);
     });
 
-    test('qty must be positive non-zero', () => {
+    test('must be positive non-zero', () => {
       let die = new StandardDice('4d6', 6, 1);
       expect(die.qty).toBe(1);
 
@@ -129,6 +117,111 @@ describe('StandardDice', () => {
 
       expect(() => {
         die = new StandardDice('4d6', 6, -1);
+      }).toThrow(TypeError);
+    });
+
+    test('float values are floored to integer', () => {
+      let die = new StandardDice('4d6', 6, 8.1);
+      expect(die.qty).toBe(8);
+
+      die = new StandardDice('4d6', 6, 5.9);
+      expect(die.qty).toBe(5);
+
+      die = new StandardDice('4d6', 6, 67.5);
+      expect(die.qty).toBe(67);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        new StandardDice('4d6', 6, Infinity);
+      }).toThrow(TypeError);
+    });
+  });
+
+  describe('Min', () => {
+    test('must be numeric', () => {
+      const die = new StandardDice('4d6', 6, 8, null, 3);
+      expect(die.min).toBe(3);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 8, null, 'foo');
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 8, null, false);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 8, null, true);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 8, null, []);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 8, null, { min: 4 });
+      }).toThrow(TypeError);
+    });
+
+    test('float values are floored to integer', () => {
+      let die = new StandardDice('4d6', 6, 4, null, 4.23);
+      expect(die.min).toBe(4);
+
+      die = new StandardDice('4d6', 6, 4, null, -14.78);
+      expect(die.min).toBe(-14);
+
+      die = new StandardDice('4d6', 6, 4, null, 145.5);
+      expect(die.min).toBe(145);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        new StandardDice('4d6', 6, 4, null, Infinity);
+      }).toThrow(TypeError);
+    });
+  });
+
+  describe('Max', () => {
+    test('falsey is treated as value of sides', () => {
+      let die = new StandardDice('4d6', 6, 4, null, 1, false);
+      expect(die.max).toBe(6);
+
+      die = new StandardDice('4d6', 6, 4, null, 1, null);
+      expect(die.max).toBe(6);
+
+      die = new StandardDice('4d6', 6, 4, null, 1, undefined);
+      expect(die.max).toBe(6);
+    });
+
+    test('non-numeric throws an error', () => {
+      expect(() => {
+        new StandardDice('4d6', 6, 4, null, 1, 'foo');
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 4, null, 1, []);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new StandardDice('4d6', 6, 4, null, 1, {});
+      }).toThrow(TypeError);
+    });
+
+    test('float values are floored to integer', () => {
+      let die = new StandardDice('4d6', 6, 4, null, 1, 65.143);
+      expect(die.max).toBe(65);
+
+      die = new StandardDice('4d6', 6, 4, null, 1, -578.891);
+      expect(die.max).toBe(-578);
+
+      die = new StandardDice('4d6', 6, 4, null, 1, 4.5);
+      expect(die.max).toBe(4);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        new StandardDice('4d6', 6, 4, null, 1, Infinity);
       }).toThrow(TypeError);
     });
   });

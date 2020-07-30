@@ -35,10 +35,18 @@ class StandardDice {
   constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!notation) {
       throw new RequiredArgumentError('notation');
-    } else if (!sides) {
+    }
+    if (!sides) {
       throw new RequiredArgumentError('sides');
-    } else if (!diceUtils.isNumeric(qty) || (qty < 1)) {
+    }
+    if (!diceUtils.isNumeric(qty) || (qty < 1)) {
       throw new TypeError('qty must be a positive integer');
+    }
+    if (!diceUtils.isNumeric(min)) {
+      throw new TypeError('min must a finite number');
+    }
+    if (max && !diceUtils.isNumeric(max)) {
+      throw new TypeError('max must be a finite number');
     }
 
     this[notationSymbol] = notation;
@@ -49,8 +57,9 @@ class StandardDice {
       this.modifiers = modifiers;
     }
 
-    this[minSymbol] = diceUtils.isNumeric(min) ? parseInt(min, 10) : 1;
-    this[maxSymbol] = diceUtils.isNumeric(max) ? parseInt(max, 10) : sides;
+    this[minSymbol] = parseInt(min, 10);
+
+    this[maxSymbol] = max ? parseInt(max, 10) : sides;
   }
 
   /**
@@ -145,6 +154,7 @@ class StandardDice {
   get name() {
     return 'standard';
   }
+
   /* eslint-enable class-methods-use-this */
 
   /**
