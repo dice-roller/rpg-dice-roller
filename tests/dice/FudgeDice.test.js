@@ -144,15 +144,15 @@ describe('FudgeDice', () => {
 
       expect(() => {
         die = new FudgeDice('4dF', null, 0);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new FudgeDice('4dF', null, -42);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new FudgeDice('4dF', null, -1);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
     });
   });
 

@@ -10,7 +10,7 @@ class FudgeDice extends StandardDice {
    * Create a FudgeDice
    *
    * @param {string} notation The dice notation (e.g. '4dF')
-   * @param {number} [nonBlanks=2] The number of non-blanks the Fudge die should have
+   * @param {number} [nonBlanks=2] The number of non-blanks the Fudge die should have (1 or 2)
    * @param {number} [qty=1] The number of dice to roll (e.g. 4)
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
    *

@@ -289,19 +289,51 @@ describe('ComparePoint', () => {
       expect(cp.isMatch('4')).toBe(false);
     });
 
-    test('falsey values do not match against zero', () => {
-      const cp = new ComparePoint('=', 0);
-
-      expect(cp.isMatch(0)).toBe(true);
-      expect(cp.isMatch(null)).toBe(false);
-      expect(cp.isMatch(undefined)).toBe(false);
-    });
-
-    test('truthy values do not match against 1', () => {
+    test('truthy values match against 1', () => {
       const cp = new ComparePoint('=', 1);
 
       expect(cp.isMatch(1)).toBe(true);
-      expect(cp.isMatch(true)).toBe(false);
+      expect(cp.isMatch(true)).toBe(true);
+    });
+
+    test('falsey values match against zero', () => {
+      const cp = new ComparePoint('=', 0);
+
+      expect(cp.isMatch(0)).toBe(true);
+      expect(cp.isMatch(null)).toBe(true);
+    });
+
+    test('undefined does not match against zero', () => {
+      const cp = new ComparePoint('=', 0);
+      expect(cp.isMatch(undefined)).toBe(false);
+    });
+
+    describe('Very large numbers', () => {
+      test('can compare very large numbers as numbers', () => {
+        const cp = new ComparePoint('=', 99 ** 99);
+
+        expect(cp.isMatch(99 ** 99)).toBe(true);
+        expect(cp.isMatch(4)).toBe(false);
+      });
+
+      test('can compare very large numbers as strings', () => {
+        const cp = new ComparePoint('=', (99 ** 99).toString());
+        expect(cp.isMatch((99 ** 99).toString())).toBe(true);
+        expect(cp.isMatch('4')).toBe(false);
+      });
+
+      test('comparing very large numbers does not incorrectly round them', () => {
+        // check if 99^99 is greater than 4, because if incorrectly
+        // rounding (e.g parseInt) it converts it to `3`
+        const cp = new ComparePoint('>', 4);
+        expect(cp.isMatch(99 ** 99)).toBe(true);
+      });
+
+      test('comparing infinity throws error', () => {
+        expect(() => {
+          new ComparePoint('=', Infinity);
+        }).toThrow(TypeError);
+      });
     });
   });
 });

@@ -82,15 +82,15 @@ describe('PercentileDice', () => {
 
       expect(() => {
         die = new PercentileDice('4d%', 0);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new PercentileDice('4d%', -42);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
 
       expect(() => {
         die = new PercentileDice('4d%', -1);
-      }).toThrow(TypeError);
+      }).toThrow(RangeError);
     });
   });
 

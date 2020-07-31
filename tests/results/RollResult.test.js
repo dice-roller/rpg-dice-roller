@@ -92,6 +92,7 @@ describe('RollResult', () => {
       expect((new RollResult(-45)).initialValue).toBe(-45);
       expect((new RollResult(0)).initialValue).toBe(0);
       expect((new RollResult(360)).initialValue).toBe(360);
+      expect((new RollResult(43.256)).initialValue).toBeCloseTo(43.256);
 
       expect(() => {
         new RollResult('foo');
@@ -112,6 +113,16 @@ describe('RollResult', () => {
       expect(() => {
         new RollResult({ value: 'foo' });
       }).toThrow(TypeError);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        new RollResult(Infinity);
+      }).toThrow(RangeError);
+    });
+
+    test('can be very large number', () => {
+      expect((new RollResult(99 ** 99)).initialValue).toBe(99 ** 99);
     });
   });
 
@@ -155,6 +166,9 @@ describe('RollResult', () => {
 
       result.value = 245;
       expect(result.value).toBe(245);
+
+      result.value = 56.365;
+      expect(result.value).toBeCloseTo(56.365);
     });
 
     test('changing value does not affect initialValue', () => {
@@ -221,6 +235,19 @@ describe('RollResult', () => {
         result.value = null;
       }).toThrow(TypeError);
     });
+
+    test('must be finite', () => {
+      expect(() => {
+        (new RollResult(45)).value = Infinity;
+      }).toThrow(RangeError);
+    });
+
+    test('can be very large number', () => {
+      const result = new RollResult(3);
+
+      result.value = 99 ** 99;
+      expect(result.value).toBe(99 ** 99);
+    });
   });
 
   describe('Calculation Value', () => {
@@ -256,6 +283,9 @@ describe('RollResult', () => {
 
       result.calculationValue = 360;
       expect(result.calculationValue).toBe(360);
+
+      result.calculationValue = 78.35;
+      expect(result.calculationValue).toBeCloseTo(78.35);
 
       expect(() => {
         result.calculationValue = 'foo';
@@ -309,6 +339,19 @@ describe('RollResult', () => {
       expect(result.initialValue).toBe(45);
       expect(result.value).toBe(45);
       expect(result.calculationValue).toBe(3);
+    });
+
+    test('must be finite', () => {
+      expect(() => {
+        (new RollResult(45)).calculationValue = Infinity;
+      }).toThrow(RangeError);
+    });
+
+    test('can be very large number', () => {
+      const result = new RollResult(3);
+
+      result.calculationValue = 99 ** 99;
+      expect(result.calculationValue).toBe(99 ** 99);
     });
   });
 

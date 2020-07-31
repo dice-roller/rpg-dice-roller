@@ -35,10 +35,36 @@ class StandardDice {
   constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!notation) {
       throw new RequiredArgumentError('notation');
-    } else if (!sides) {
+    }
+
+    if (!sides && (sides !== 0)) {
       throw new RequiredArgumentError('sides');
-    } else if (!diceUtils.isNumeric(qty) || (qty < 1)) {
-      throw new TypeError('qty must be a positive integer');
+    } else if (sides === Infinity) {
+      throw new RangeError('numerical sides must be finite number');
+    } else if (diceUtils.isNumeric(sides)) {
+      if ((sides < 1) || !diceUtils.isSafeNumber(sides)) {
+        throw new RangeError('numerical sides must be a positive finite number');
+      }
+    } else if (typeof sides !== 'string') {
+      throw new TypeError('non-numerical sides must be a string');
+    }
+
+    if (!diceUtils.isNumeric(qty)) {
+      throw new TypeError('qty must be a positive finite integer');
+    } else if ((qty < 1) || !diceUtils.isSafeNumber(qty)) {
+      throw new RangeError('qty must be a positive finite integer');
+    }
+
+    if (!diceUtils.isNumeric(min)) {
+      throw new TypeError('min must a finite number');
+    } else if (!diceUtils.isSafeNumber(min)) {
+      throw new RangeError('min must a finite number');
+    }
+
+    if (max && !diceUtils.isNumeric(max)) {
+      throw new TypeError('max must a finite number');
+    } else if (max && !diceUtils.isSafeNumber(max)) {
+      throw new RangeError('max must a finite number');
     }
 
     this[notationSymbol] = notation;
@@ -49,8 +75,9 @@ class StandardDice {
       this.modifiers = modifiers;
     }
 
-    this[minSymbol] = diceUtils.isNumeric(min) ? parseInt(min, 10) : 1;
-    this[maxSymbol] = diceUtils.isNumeric(max) ? parseInt(max, 10) : sides;
+    this[minSymbol] = parseInt(min, 10);
+
+    this[maxSymbol] = max ? parseInt(max, 10) : sides;
   }
 
   /**
@@ -145,6 +172,7 @@ class StandardDice {
   get name() {
     return 'standard';
   }
+
   /* eslint-enable class-methods-use-this */
 
   /**
