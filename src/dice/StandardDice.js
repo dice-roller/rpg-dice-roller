@@ -51,8 +51,8 @@ class StandardDice {
 
     if (!diceUtils.isNumeric(qty)) {
       throw new TypeError('qty must be a positive finite integer');
-    } else if ((qty < 1) || !diceUtils.isSafeNumber(qty)) {
-      throw new RangeError('qty must be a positive finite integer');
+    } else if ((qty < 1) || (qty > 999)) {
+      throw new RangeError('qty must be between 1 and 999');
     }
 
     if (!diceUtils.isNumeric(min)) {

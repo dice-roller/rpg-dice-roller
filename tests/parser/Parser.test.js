@@ -623,16 +623,16 @@ describe('Parser', () => {
           }));
         });
 
-        test('keep highest for `23017d2kh1`', () => {
-          const parsed = Parser.parse('23017d2kh1');
+        test('keep highest for `897d2kh1`', () => {
+          const parsed = Parser.parse('897d2kh1');
 
           expect(parsed).toBeInstanceOf(Array);
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('23017d2');
+          expect(parsed[0].notation).toEqual('897d2');
           expect(parsed[0].sides).toEqual(2);
-          expect(parsed[0].qty).toEqual(23017);
+          expect(parsed[0].qty).toEqual(897);
 
           expect(parsed[0].modifiers.has('keep-h')).toBe(true);
 
@@ -1707,16 +1707,16 @@ describe('Parser', () => {
     });
 
     describe('Roll high', () => {
-      test('can roll with a stupidly high qty', () => {
-        const parsed = Parser.parse('9999999999d6');
+      test('can roll with a qty of 999', () => {
+        const parsed = Parser.parse('999d6');
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
         expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '9999999999d6',
+          notation: '999d6',
           sides: 6,
-          qty: 9999999999,
+          qty: 999,
         }));
       });
 
@@ -1733,16 +1733,16 @@ describe('Parser', () => {
         }));
       });
 
-      test('can roll with a stupidly high everything', () => {
-        const parsed = Parser.parse('9999999999d9999999999');
+      test('can roll with a qty of 999 and stupidly high sides', () => {
+        const parsed = Parser.parse('999d9999999999');
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
         expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '9999999999d9999999999',
+          notation: '999d9999999999',
           sides: 9999999999,
-          qty: 9999999999,
+          qty: 999,
         }));
       });
     });
