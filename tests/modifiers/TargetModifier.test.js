@@ -1,5 +1,5 @@
-import { StandardDice } from '../../src/Dice';
-import { ComparisonModifier, TargetModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/dice';
+import { ComparisonModifier, TargetModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';

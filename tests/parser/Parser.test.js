@@ -1,4 +1,5 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../src/Dice';
+import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice';
+import { RequiredArgumentError } from '../../src/exceptions';
 import {
   CriticalFailureModifier,
   CriticalSuccessModifier,
@@ -10,10 +11,9 @@ import {
   ReRollModifier,
   SortingModifier,
   TargetModifier,
-} from '../../src/Modifiers';
+} from '../../src/modifiers';
 import * as parser from '../../src/parser/grammars/grammar';
 import Parser from '../../src/parser/Parser';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('Parser', () => {
   describe('Initialisation', () => {

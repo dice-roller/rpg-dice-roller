@@ -1,7 +1,7 @@
-import { StandardDice } from '../../src/Dice';
-import { ComparisonModifier, ExplodeModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/dice';
+import { DieActionValueError } from '../../src/exceptions';
+import { ComparisonModifier, ExplodeModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import DieActionValueError from '../../src/exceptions/DieActionValueError';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 

@@ -1,5 +1,5 @@
+import { RequiredArgumentError } from '../exceptions';
 import * as parser from './grammars/grammar';
-import RequiredArgumentError from '../exceptions/RequiredArgumentError';
 
 /**
  * Takes notations and parses them to rolls

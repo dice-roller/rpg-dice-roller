@@ -1,4 +1,4 @@
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
+import { RequiredArgumentError } from '../../src/exceptions';
 
 describe('RequiredArgumentError', () => {
   test('outputs argument name in message', () => {

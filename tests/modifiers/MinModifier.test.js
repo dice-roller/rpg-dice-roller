@@ -1,6 +1,5 @@
-import { MinModifier } from '../../src/Modifiers';
-import Modifier from '../../src/modifiers/Modifier';
-import StandardDice from '../../src/dice/StandardDice';
+import { MinModifier, Modifier } from '../../src/modifiers';
+import { StandardDice } from '../../src/dice';
 import RollResults from '../../src/results/RollResults';
 
 describe('MinModifier', () => {

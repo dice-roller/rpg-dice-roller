@@ -1,13 +1,11 @@
 import math from 'mathjs-expression-parser';
-import { diceUtils, exportFormats } from './utilities/utils';
+import { StandardDice } from './dice';
+import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions';
 import { engines, generator } from './utilities/NumberGenerator';
-import DataFormatError from './exceptions/DataFormatError';
-import NotationError from './exceptions/NotationError';
+import { diceUtils, exportFormats } from './utilities/utils';
 import Parser from './parser/Parser';
-import RequiredArgumentError from './exceptions/RequiredArgumentError';
 import RollGroup from './RollGroup';
 import RollResults from './results/RollResults';
-import StandardDice from './dice/StandardDice';
 
 /**
  * Method for calculating the roll total

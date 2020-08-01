@@ -1,6 +1,6 @@
-import Modifier from '../../src/modifiers/Modifier';
+import { StandardDice } from '../../src/dice';
+import { Modifier } from '../../src/modifiers';
 import RollResults from '../../src/results/RollResults';
-import { StandardDice } from '../../src/Dice';
 
 describe('Modifier', () => {
   describe('Initialisation', () => {

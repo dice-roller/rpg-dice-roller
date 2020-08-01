@@ -1,9 +1,9 @@
-import StandardDice from '../../src/dice/StandardDice';
+import {
+  ExplodeModifier, KeepModifier, Modifier, SortingModifier,
+} from '../../src/modifiers';
+import { FudgeDice, StandardDice } from '../../src/dice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
-import Modifier from '../../src/modifiers/Modifier';
-import FudgeDice from '../../src/dice/FudgeDice';
-import { ExplodeModifier, KeepModifier, SortingModifier } from '../../src/Modifiers';
 import ComparePoint from '../../src/ComparePoint';
 
 describe('FudgeDice', () => {

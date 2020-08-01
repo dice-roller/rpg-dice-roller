@@ -1,9 +1,9 @@
-import { StandardDice } from '../../src/Dice';
-import { ComparisonModifier, ReRollModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/dice';
+import { DieActionValueError } from '../../src/exceptions';
+import { ComparisonModifier, ReRollModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import RollResults from '../../src/results/RollResults';
 import RollResult from '../../src/results/RollResult';
-import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import RollResults from '../../src/results/RollResults';
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {

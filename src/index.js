@@ -1,10 +1,11 @@
-import Parser from './parser/Parser';
+import { diceUtils, exportFormats } from './utilities/utils';
+import * as Dice from './dice';
+import * as Exceptions from './exceptions';
+import * as Modifiers from './modifiers';
+import * as NumberGenerator from './utilities/NumberGenerator';
 import DiceRoll from './DiceRoll';
 import DiceRoller from './DiceRoller';
-import { diceUtils, exportFormats } from './utilities/utils';
-import * as Dice from './Dice';
-import * as Modifiers from './Modifiers';
-import * as NumberGenerator from './utilities/NumberGenerator';
+import Parser from './parser/Parser';
 
 export {
   diceUtils,
@@ -12,6 +13,7 @@ export {
   Dice,
   DiceRoll,
   DiceRoller,
+  Exceptions,
   Modifiers,
   NumberGenerator,
   Parser,

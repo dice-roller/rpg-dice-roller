@@ -1,4 +1,4 @@
-import DieActionValueError from '../../src/exceptions/DieActionValueError';
+import { DieActionValueError } from '../../src/exceptions';
 
 describe('DieActionValueError', () => {
   test('outputs `die` in message', () => {

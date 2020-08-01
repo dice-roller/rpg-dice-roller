@@ -1,10 +1,9 @@
-import { ExplodeModifier, SortingModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/dice';
+import { RequiredArgumentError } from '../../src/exceptions';
+import { ExplodeModifier, Modifier, SortingModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import Modifier from '../../src/modifiers/Modifier';
-import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {

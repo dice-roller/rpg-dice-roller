@@ -1,8 +1,7 @@
-import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier';
+import { StandardDice } from '../../src/dice';
+import { ComparisonModifier, CriticalFailureModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
-import StandardDice from '../../src/dice/StandardDice';
 
 describe('CriticalFailureModifier', () => {
   describe('Initialisation', () => {
