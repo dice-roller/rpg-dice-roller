@@ -1,13 +1,15 @@
+import { ExplodeModifier, SortingModifier } from '../../src/Modifiers';
+import ComparePoint from '../../src/ComparePoint';
+import Modifier from '../../src/modifiers/Modifier';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
-import Modifier from '../../src/modifiers/Modifier';
 import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(die).toBeInstanceOf(StandardDice);
       expect(die).toEqual(expect.objectContaining({
@@ -25,7 +27,7 @@ describe('StandardDice', () => {
       }));
     });
 
-    test('constructor requires notation', () => {
+    test('constructor requires sides', () => {
       expect(() => {
         new StandardDice();
       }).toThrow(RequiredArgumentError);
@@ -43,32 +45,14 @@ describe('StandardDice', () => {
       }).toThrow(RequiredArgumentError);
     });
 
-    test('constructor requires sides', () => {
-      expect(() => {
-        new StandardDice('1d6');
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new StandardDice('1d6', false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new StandardDice('1d6', null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new StandardDice('1d6', undefined);
-      }).toThrow(RequiredArgumentError);
-    });
-
     test('can set `min` in constructor', () => {
-      const die = new StandardDice('4d6', 6, 4, null, 3);
+      const die = new StandardDice(6, 4, null, 3);
 
       expect(die.min).toBe(3);
     });
 
     test('can set `max` in constructor', () => {
-      const die = new StandardDice('4d6', 6, 4, null, 1, 8);
+      const die = new StandardDice(6, 4, null, 1, 8);
 
       expect(die.max).toBe(8);
     });
@@ -76,71 +60,71 @@ describe('StandardDice', () => {
 
   describe('Sides', () => {
     test('must be numeric or string', () => {
-      let die = new StandardDice('d1', 1);
+      let die = new StandardDice(1);
       expect(die.sides).toBe(1);
 
-      die = new StandardDice('d9', 'foo');
+      die = new StandardDice('foo');
       expect(die.sides).toBe('foo');
 
       expect(() => {
-        new StandardDice('d6', {});
+        new StandardDice({});
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('d6', []);
+        new StandardDice([]);
       }).toThrow(TypeError);
     });
 
     describe('If numeric...', () => {
       test('must be positive non-zero', () => {
-        let die = new StandardDice('d1', 1);
-        expect(die.sides).toBe(1);
+        let die = new StandardDice(45);
+        expect(die.sides).toBe(45);
 
-        die = new StandardDice('d9', 9);
+        die = new StandardDice(9);
         expect(die.sides).toBe(9);
 
-        die = new StandardDice('d689', 689);
+        die = new StandardDice(689);
         expect(die.sides).toBe(689);
 
         expect(() => {
-          new StandardDice('d6', 0);
+          new StandardDice(0);
         }).toThrow(RangeError);
 
         expect(() => {
-          new StandardDice('d6', -42);
+          new StandardDice(-42);
         }).toThrow(RangeError);
 
         expect(() => {
-          new StandardDice('d6', -1);
+          new StandardDice(-1);
         }).toThrow(RangeError);
       });
 
       test('can be float', () => {
-        let die = new StandardDice('d1', 5.67);
+        let die = new StandardDice(5.67);
         expect(die.sides).toBeCloseTo(5.67);
 
-        die = new StandardDice('d9', 589.138);
+        die = new StandardDice(589.138);
         expect(die.sides).toBeCloseTo(589.138);
 
-        die = new StandardDice('d9', 13.5);
+        die = new StandardDice(13.5);
         expect(die.sides).toBeCloseTo(13.5);
       });
 
       test('must be finite', () => {
         expect(() => {
-          new StandardDice('4d6', Infinity);
+          new StandardDice(Infinity);
         }).toThrow(RangeError);
       });
 
       describe('"Safe" number', () => {
         test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
-          const die = new StandardDice('4d6', Number.MAX_SAFE_INTEGER);
+          const die = new StandardDice(Number.MAX_SAFE_INTEGER);
           expect(die.sides).toBe(Number.MAX_SAFE_INTEGER);
         });
 
         test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
           expect(() => {
-            new StandardDice('4d6', Number.MAX_SAFE_INTEGER + 1);
+            new StandardDice(Number.MAX_SAFE_INTEGER + 1);
           }).toThrow(RangeError);
         });
       });
@@ -149,155 +133,155 @@ describe('StandardDice', () => {
 
   describe('Quantity', () => {
     test('must be numeric', () => {
-      let die = new StandardDice('4d6', 6, 8);
+      let die = new StandardDice(6, 8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 'foo');
+        die = new StandardDice(6, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, false);
+        die = new StandardDice(6, false);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, true);
+        die = new StandardDice(6, true);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, []);
+        die = new StandardDice(6, []);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, { qty: 4 });
+        die = new StandardDice(6, { qty: 4 });
       }).toThrow(TypeError);
     });
 
     test('must be positive non-zero', () => {
-      let die = new StandardDice('4d6', 6, 1);
+      let die = new StandardDice(6, 1);
       expect(die.qty).toBe(1);
 
-      die = new StandardDice('324d6', 6, 324);
+      die = new StandardDice(6, 324);
       expect(die.qty).toBe(324);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 0);
+        die = new StandardDice(6, 0);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, -42);
+        die = new StandardDice(6, -42);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, -1);
+        die = new StandardDice(6, -1);
       }).toThrow(RangeError);
     });
 
     test('cannot be greater than 999', () => {
-      let die = new StandardDice('4d6', 6, 999);
+      let die = new StandardDice(6, 999);
       expect(die.qty).toBe(999);
 
-      die = new StandardDice('324d6', 6, 998);
+      die = new StandardDice(6, 998);
       expect(die.qty).toBe(998);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 1000);
+        die = new StandardDice(6, 1000);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 1001);
+        die = new StandardDice(6, 1001);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 50000);
+        die = new StandardDice(6, 50000);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new StandardDice('4d6', 6, 9999);
+        die = new StandardDice(6, 9999);
       }).toThrow(RangeError);
     });
 
     test('float values are floored to integer', () => {
-      let die = new StandardDice('4d6', 6, 8.1);
+      let die = new StandardDice(6, 8.1);
       expect(die.qty).toBe(8);
 
-      die = new StandardDice('4d6', 6, 5.9);
+      die = new StandardDice(6, 5.9);
       expect(die.qty).toBe(5);
 
-      die = new StandardDice('4d6', 6, 67.5);
+      die = new StandardDice(6, 67.5);
       expect(die.qty).toBe(67);
     });
 
     test('must be finite', () => {
       expect(() => {
-        new StandardDice('4d6', 6, Infinity);
+        new StandardDice(6, Infinity);
       }).toThrow(TypeError);
     });
   });
 
   describe('Min', () => {
     test('must be numeric', () => {
-      const die = new StandardDice('4d6', 6, 8, null, 3);
+      const die = new StandardDice(6, 8, null, 3);
       expect(die.min).toBe(3);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, null, 'foo');
+        new StandardDice(6, 8, null, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, null, false);
+        new StandardDice(6, 8, null, false);
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, null, true);
+        new StandardDice(6, 8, null, true);
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, null, []);
+        new StandardDice(6, 8, null, []);
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, null, { min: 4 });
+        new StandardDice(6, 8, null, { min: 4 });
       }).toThrow(TypeError);
     });
 
     test('float values are floored to integer', () => {
-      let die = new StandardDice('4d6', 6, 4, null, 4.23);
+      let die = new StandardDice(6, 4, null, 4.23);
       expect(die.min).toBe(4);
 
-      die = new StandardDice('4d6', 6, 4, null, -14.78);
+      die = new StandardDice(6, 4, null, -14.78);
       expect(die.min).toBe(-14);
 
-      die = new StandardDice('4d6', 6, 4, null, 145.5);
+      die = new StandardDice(6, 4, null, 145.5);
       expect(die.min).toBe(145);
     });
 
     test('must be finite', () => {
       expect(() => {
-        new StandardDice('4d6', 6, 4, null, Infinity);
+        new StandardDice(6, 4, null, Infinity);
       }).toThrow(TypeError);
     });
 
     describe('"Safe" number', () => {
       test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
-        const die = new StandardDice('4d6', 6, 4, null, Number.MAX_SAFE_INTEGER);
+        const die = new StandardDice(6, 4, null, Number.MAX_SAFE_INTEGER);
         expect(die.min).toBe(Number.MAX_SAFE_INTEGER);
       });
 
       test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
         expect(() => {
-          new StandardDice('4d6', 6, 4, null, Number.MAX_SAFE_INTEGER + 1);
+          new StandardDice(6, 4, null, Number.MAX_SAFE_INTEGER + 1);
         }).toThrow(RangeError);
       });
 
       test('can be equal to `Number.MIN_SAFE_INTEGER`', () => {
-        const die = new StandardDice('4d6', 6, 4, null, Number.MIN_SAFE_INTEGER);
+        const die = new StandardDice(6, 4, null, Number.MIN_SAFE_INTEGER);
         expect(die.min).toBe(Number.MIN_SAFE_INTEGER);
       });
 
       test('cannot be less than `Number.MIN_SAFE_INTEGER`', () => {
         expect(() => {
-          new StandardDice('4d6', 6, 4, null, Number.MIN_SAFE_INTEGER - 1);
+          new StandardDice(6, 4, null, Number.MIN_SAFE_INTEGER - 1);
         }).toThrow(RangeError);
       });
     });
@@ -305,67 +289,67 @@ describe('StandardDice', () => {
 
   describe('Max', () => {
     test('falsey is treated as value of sides', () => {
-      let die = new StandardDice('4d6', 6, 4, null, 1, false);
+      let die = new StandardDice(6, 4, null, 1, false);
       expect(die.max).toBe(6);
 
-      die = new StandardDice('4d6', 6, 4, null, 1, null);
+      die = new StandardDice(6, 4, null, 1, null);
       expect(die.max).toBe(6);
 
-      die = new StandardDice('4d6', 6, 4, null, 1, undefined);
+      die = new StandardDice(6, 4, null, 1, undefined);
       expect(die.max).toBe(6);
     });
 
     test('non-numeric throws an error', () => {
       expect(() => {
-        new StandardDice('4d6', 6, 4, null, 1, 'foo');
+        new StandardDice(6, 4, null, 1, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 4, null, 1, []);
+        new StandardDice(6, 4, null, 1, []);
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 4, null, 1, {});
+        new StandardDice(6, 4, null, 1, {});
       }).toThrow(TypeError);
     });
 
     test('float values are floored to integer', () => {
-      let die = new StandardDice('4d6', 6, 4, null, 1, 65.143);
+      let die = new StandardDice(6, 4, null, 1, 65.143);
       expect(die.max).toBe(65);
 
-      die = new StandardDice('4d6', 6, 4, null, 1, -578.891);
+      die = new StandardDice(6, 4, null, 1, -578.891);
       expect(die.max).toBe(-578);
 
-      die = new StandardDice('4d6', 6, 4, null, 1, 4.5);
+      die = new StandardDice(6, 4, null, 1, 4.5);
       expect(die.max).toBe(4);
     });
 
     test('must be finite', () => {
       expect(() => {
-        new StandardDice('4d6', 6, 4, null, 1, Infinity);
+        new StandardDice(6, 4, null, 1, Infinity);
       }).toThrow(TypeError);
     });
 
     describe('"Safe" number', () => {
       test('can be equal to `Number.MAX_SAFE_INTEGER`', () => {
-        const die = new StandardDice('4d6', 6, 4, null, 1, Number.MAX_SAFE_INTEGER);
+        const die = new StandardDice(6, 4, null, 1, Number.MAX_SAFE_INTEGER);
         expect(die.max).toBe(Number.MAX_SAFE_INTEGER);
       });
 
       test('cannot be greater than `Number.MAX_SAFE_INTEGER`', () => {
         expect(() => {
-          new StandardDice('4d6', 6, 4, null, 1, Number.MAX_SAFE_INTEGER + 1);
+          new StandardDice(6, 4, null, 1, Number.MAX_SAFE_INTEGER + 1);
         }).toThrow(RangeError);
       });
 
       test('can be equal to `Number.MIN_SAFE_INTEGER`', () => {
-        const die = new StandardDice('4d6', 6, 4, null, 1, Number.MIN_SAFE_INTEGER);
+        const die = new StandardDice(6, 4, null, 1, Number.MIN_SAFE_INTEGER);
         expect(die.max).toBe(Number.MIN_SAFE_INTEGER);
       });
 
       test('cannot be less than `Number.MIN_SAFE_INTEGER`', () => {
         expect(() => {
-          new StandardDice('4d6', 6, 4, null, 1, Number.MIN_SAFE_INTEGER - 1);
+          new StandardDice(6, 4, null, 1, Number.MIN_SAFE_INTEGER - 1);
         }).toThrow(RangeError);
       });
     });
@@ -373,36 +357,36 @@ describe('StandardDice', () => {
 
   describe('Average', () => {
     test('average is correct for single die', () => {
-      let die = new StandardDice('d3', 3, 1);
+      let die = new StandardDice(3, 1);
       expect(die.average).toBe(2);
 
-      die = new StandardDice('d10', 10, 1);
+      die = new StandardDice(10, 1);
       expect(die.average).toBe(5.5);
 
-      die = new StandardDice('d1', 1, 1);
+      die = new StandardDice(1, 1);
       expect(die.average).toBe(1);
 
-      die = new StandardDice('d20', 20, 1);
+      die = new StandardDice(20, 1);
       expect(die.average).toBe(10.5);
 
-      die = new StandardDice('d45', 45, 1);
+      die = new StandardDice(45, 1);
       expect(die.average).toBe(23);
     });
 
     test('average is unaffected when rolling multiple', () => {
-      let die = new StandardDice('2d3', 3, 2);
+      let die = new StandardDice(3, 2);
       expect(die.average).toBe(2);
 
-      die = new StandardDice('400d10', 10, 400);
+      die = new StandardDice(10, 400);
       expect(die.average).toBe(5.5);
 
-      die = new StandardDice('56d1', 1, 56);
+      die = new StandardDice(1, 56);
       expect(die.average).toBe(1);
 
-      die = new StandardDice('12d20', 20, 12);
+      die = new StandardDice(20, 12);
       expect(die.average).toBe(10.5);
 
-      die = new StandardDice('145d45', 45, 145);
+      die = new StandardDice(45, 145);
       expect(die.average).toBe(23);
     });
   });
@@ -412,7 +396,7 @@ describe('StandardDice', () => {
       const spy = jest.spyOn(StandardDice.prototype, 'modifiers', 'set');
       const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
 
-      new StandardDice('4d6', 6, 8, modifiers);
+      new StandardDice(6, 8, modifiers);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -422,7 +406,7 @@ describe('StandardDice', () => {
 
     test('can set modifiers with Map', () => {
       const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
-      const die = new StandardDice('4d6', 6, 8);
+      const die = new StandardDice(6, 8);
 
       die.modifiers = modifiers;
 
@@ -432,7 +416,7 @@ describe('StandardDice', () => {
 
     test('can set modifiers with Object', () => {
       const modifier = new Modifier('m');
-      const die = new StandardDice('4d6', 6, 8);
+      const die = new StandardDice(6, 8);
 
       die.modifiers = { foo: modifier };
 
@@ -442,7 +426,7 @@ describe('StandardDice', () => {
 
     test('can set modifiers with Array', () => {
       const modifiers = [new Modifier('m')];
-      const die = new StandardDice('4d6', 6, 8);
+      const die = new StandardDice(6, 8);
 
       die.modifiers = modifiers;
 
@@ -452,26 +436,26 @@ describe('StandardDice', () => {
 
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
-        new StandardDice('4d6', 6, 8, 'foo');
+        new StandardDice(6, 8, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        new StandardDice('4d6', 6, 8, 351);
+        new StandardDice(6, 8, 351);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = new Map(Object.entries({ foo: 'bar' }));
-        new StandardDice('4d6', 6, 8, modifiers);
+        new StandardDice(6, 8, modifiers);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = { foo: 'bar' };
-        new StandardDice('4d6', 6, 8, modifiers);
+        new StandardDice(6, 8, modifiers);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = ['bar'];
-        new StandardDice('4d6', 6, 8, modifiers);
+        new StandardDice(6, 8, modifiers);
       }).toThrow(TypeError);
     });
 
@@ -487,7 +471,7 @@ describe('StandardDice', () => {
       mod4.order = 2;
 
       // create the dice instance
-      const die = new StandardDice('4d6', 6, 8);
+      const die = new StandardDice(6, 8);
 
       die.modifiers = {
         mod1, mod2, mod3, mod4,
@@ -503,9 +487,33 @@ describe('StandardDice', () => {
     });
   });
 
+  describe('Notation', () => {
+    test('simple notation', () => {
+      let die = new StandardDice(45, 167);
+      expect(die.notation).toEqual('167d45');
+
+      die = new StandardDice(20, 999);
+      expect(die.notation).toEqual('999d20');
+
+      die = new StandardDice(1, 10);
+      expect(die.notation).toEqual('10d1');
+    });
+
+    test('notation with modifiers', () => {
+      const modifiers = [
+        new SortingModifier(),
+        new ExplodeModifier(new ComparePoint('>', 3)),
+      ];
+
+      const die = new StandardDice(45, 167, modifiers);
+
+      expect(die.notation).toEqual('167d45!>3sa');
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -524,7 +532,7 @@ describe('StandardDice', () => {
     });
 
     test('String output is correct', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(die.toString()).toEqual('4d6');
     });
@@ -532,11 +540,11 @@ describe('StandardDice', () => {
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new StandardDice('1d6', 6)).rollOnce()).toBeInstanceOf(RollResult);
+      expect((new StandardDice(6)).rollOnce()).toBeInstanceOf(RollResult);
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {
-      const die = new StandardDice('1d6', 6);
+      const die = new StandardDice(6);
       const iterations = 1000;
 
       // run the test multiple times to try and ensure consistency
@@ -549,13 +557,13 @@ describe('StandardDice', () => {
     });
 
     test('roll return a RollResults object', () => {
-      expect((new StandardDice('1d6', 6)).roll()).toBeInstanceOf(RollResults);
+      expect((new StandardDice(6)).roll()).toBeInstanceOf(RollResults);
     });
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
       const spy = jest.spyOn(StandardDice.prototype, 'rollOnce');
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       // roll the dice
       die.roll();
@@ -567,7 +575,7 @@ describe('StandardDice', () => {
     });
 
     test('roll returns correct number of rolls', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(die.roll()).toHaveLength(4);
     });
@@ -575,7 +583,7 @@ describe('StandardDice', () => {
 
   describe('Readonly properties', () => {
     test('cannot change max value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.max = 450;
@@ -583,7 +591,7 @@ describe('StandardDice', () => {
     });
 
     test('cannot change min value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.min = 450;
@@ -591,7 +599,7 @@ describe('StandardDice', () => {
     });
 
     test('cannot change name value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.name = 'Foo';
@@ -599,7 +607,7 @@ describe('StandardDice', () => {
     });
 
     test('cannot change notation value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.notation = '6d4';
@@ -607,7 +615,7 @@ describe('StandardDice', () => {
     });
 
     test('cannot change qty value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.qty = 6;
@@ -615,7 +623,7 @@ describe('StandardDice', () => {
     });
 
     test('cannot change sides value', () => {
-      const die = new StandardDice('4d6', 6, 4);
+      const die = new StandardDice(6, 4);
 
       expect(() => {
         die.sides = 2;

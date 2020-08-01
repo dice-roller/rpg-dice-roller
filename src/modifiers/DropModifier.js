@@ -7,16 +7,14 @@ class DropModifier extends KeepModifier {
   /**
    * Create a DropModifier
    *
-   * @param {string} notation The modifier notation
    * @param {string} end Either `h|l` to drop highest or lowest
    * @param {number} [qty=1] The amount to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(notation, end, qty = 1) {
-    super(notation, end, qty);
+  constructor(end, qty = 1) {
+    super(end, qty);
 
     // set the modifier's sort order
     this.order = 6;
@@ -29,6 +27,15 @@ class DropModifier extends KeepModifier {
    */
   get name() {
     return `drop-${this.end}`;
+  }
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `d${this.end}${this.qty}`;
   }
 
   /**

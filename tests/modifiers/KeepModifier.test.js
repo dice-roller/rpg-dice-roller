@@ -1,20 +1,19 @@
-import KeepModifier from '../../src/modifiers/KeepModifier';
+import { KeepModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/Dice';
 import Modifier from '../../src/modifiers/Modifier';
 import RollResults from '../../src/results/RollResults';
-import StandardDice from '../../src/dice/StandardDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('KeepModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new KeepModifier('kh', 'h');
+      const mod = new KeepModifier('h');
 
       expect(mod).toBeInstanceOf(KeepModifier);
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         end: 'h',
         name: 'keep-h',
-        notation: 'kh',
+        notation: 'kh1',
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
@@ -22,39 +21,21 @@ describe('KeepModifier', () => {
       }));
     });
 
-    test('constructor requires notation', () => {
+    test('constructor requires end', () => {
       expect(() => {
         new KeepModifier();
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier(false);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier(null);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(RangeError);
 
       expect(() => {
         new KeepModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
-
-    test('constructor requires end', () => {
-      expect(() => {
-        new KeepModifier('kh');
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier('kh', false);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier('kh', null);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier('kh', undefined);
       }).toThrow(RangeError);
     });
   });
@@ -64,7 +45,7 @@ describe('KeepModifier', () => {
       const spy = jest.spyOn(KeepModifier.prototype, 'end', 'set');
 
       // create the ComparisonModifier
-      new KeepModifier('kh', 'h');
+      new KeepModifier('h');
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -73,19 +54,22 @@ describe('KeepModifier', () => {
     });
 
     test('can be changed', () => {
-      const mod = new KeepModifier('kh', 'l');
+      const mod = new KeepModifier('l');
 
       expect(mod.end).toEqual('l');
+      expect(mod.notation).toEqual('kl1');
 
       mod.end = 'h';
       expect(mod.end).toEqual('h');
+      expect(mod.notation).toEqual('kh1');
 
       mod.end = 'l';
       expect(mod.end).toEqual('l');
+      expect(mod.notation).toEqual('kl1');
     });
 
     test('must be "h" or "l"', () => {
-      const mod = new KeepModifier('kh', 'h');
+      const mod = new KeepModifier('h');
 
       expect(() => {
         mod.end = 0;
@@ -111,8 +95,9 @@ describe('KeepModifier', () => {
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      const mod = new KeepModifier('kh', 'h', 8);
+      const mod = new KeepModifier('h', 8);
       expect(mod.qty).toBe(8);
+      expect(mod.notation).toEqual('kh8');
 
       expect(() => {
         mod.qty = 'foo';
@@ -136,11 +121,13 @@ describe('KeepModifier', () => {
     });
 
     test('qty must be positive non-zero', () => {
-      let mod = new KeepModifier('kh', 'h', 1);
+      let mod = new KeepModifier('h', 1);
       expect(mod.qty).toBe(1);
+      expect(mod.notation).toEqual('kh1');
 
-      mod = new KeepModifier('kh', 'h', 324);
+      mod = new KeepModifier('h', 324);
       expect(mod.qty).toBe(324);
+      expect(mod.notation).toEqual('kh324');
 
       expect(() => {
         mod.qty = 0;
@@ -156,31 +143,51 @@ describe('KeepModifier', () => {
     });
 
     test('float gets floored to integer', () => {
-      let mod = new KeepModifier('kh', 'h', 5.145);
+      let mod = new KeepModifier('h', 5.145);
       expect(mod.qty).toBeCloseTo(5);
+      expect(mod.notation).toEqual('kh5');
 
-      mod = new KeepModifier('kh', 'h', 12.7);
+      mod = new KeepModifier('h', 12.7);
       expect(mod.qty).toBeCloseTo(12);
+      expect(mod.notation).toEqual('kh12');
 
-      mod = new KeepModifier('kh', 'h', 50.5);
+      mod = new KeepModifier('h', 50.5);
       expect(mod.qty).toBeCloseTo(50);
+      expect(mod.notation).toEqual('kh50');
     });
 
     test('must be finite', () => {
       expect(() => {
-        new KeepModifier('kh', 'h', Infinity);
+        new KeepModifier('h', Infinity);
       }).toThrow(RangeError);
     });
 
     test('can be very large number', () => {
-      const mod = new KeepModifier('kh', 'h', 99 ** 99);
+      const mod = new KeepModifier('h', 99 ** 99);
       expect(mod.qty).toBe(99 ** 99);
+      expect(mod.notation).toEqual(`kh${99 ** 99}`);
+    });
+  });
+
+  describe('Notation', () => {
+    test('simple notation', () => {
+      let mod = new KeepModifier('l', 35);
+      expect(mod.notation).toEqual('kl35');
+
+      mod = new KeepModifier('h', 90876684);
+      expect(mod.notation).toEqual('kh90876684');
+
+      mod = new KeepModifier('h', 7986);
+      expect(mod.notation).toEqual('kh7986');
+
+      mod = new KeepModifier('l', 2);
+      expect(mod.notation).toEqual('kl2');
     });
   });
 
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new KeepModifier('kl4', 'l', 4);
+      const mod = new KeepModifier('l', 4);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -195,7 +202,7 @@ describe('KeepModifier', () => {
     });
 
     test('toString output is correct', () => {
-      const mod = new KeepModifier('kh4', 'h', 4);
+      const mod = new KeepModifier('h', 4);
 
       expect(mod.toString()).toEqual('kh4');
     });
@@ -210,8 +217,8 @@ describe('KeepModifier', () => {
       results = new RollResults([
         8, 4, 2, 1, 6,
       ]);
-      die = new StandardDice('5d10', 10, 5);
-      mod = new KeepModifier('kh', 'h');
+      die = new StandardDice(10, 5);
+      mod = new KeepModifier('h');
     });
 
     test('returns RollResults object', () => {
@@ -460,7 +467,7 @@ describe('KeepModifier', () => {
 
   describe('Readonly properties', () => {
     test('cannot change name value', () => {
-      const mod = new KeepModifier('dl4', 'l');
+      const mod = new KeepModifier('l');
 
       expect(() => {
         mod.name = 'Foo';

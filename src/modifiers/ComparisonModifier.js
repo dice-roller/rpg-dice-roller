@@ -10,14 +10,12 @@ class ComparisonModifier extends Modifier {
   /**
    * Create a ComparisonModifier
    *
-   * @param {string} notation The modifier notation
-   * @param {ComparePoint} comparePoint The comparison object
+   * @param {ComparePoint} [comparePoint] The comparison object
    *
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} comparePoint must be a ComparePoint object
    */
-  constructor(notation, comparePoint) {
-    super(notation);
+  constructor(comparePoint) {
+    super();
 
     if (comparePoint) {
       this.comparePoint = comparePoint;
@@ -27,7 +25,7 @@ class ComparisonModifier extends Modifier {
   /**
    * Returns the compare point for the object
    *
-   * @returns {ComparePoint}
+   * @returns {ComparePoint|undefined}
    */
   get comparePoint() {
     return this[comparePointSymbol];
@@ -58,6 +56,15 @@ class ComparisonModifier extends Modifier {
     return 'comparison';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `${this.comparePoint || ''}`;
+  }
 
   /**
    * Checks whether value matches the compare point

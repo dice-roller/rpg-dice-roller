@@ -10,13 +10,12 @@ class MaxModifier extends Modifier {
   /**
    * Create a MaxModifier
    *
-   * @param {string} notation The modifier notation
    * @param {number} max The maximum value
    *
    * @throws {TypeError} max must be a number
    */
-  constructor(notation, max) {
-    super(notation);
+  constructor(max) {
+    super();
 
     this.max = max;
 
@@ -58,6 +57,15 @@ class MaxModifier extends Modifier {
     return 'max';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `max${this.max}`;
+  }
 
   /**
    * Runs the modifier on the rolls

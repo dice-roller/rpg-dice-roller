@@ -12,16 +12,14 @@ class ExplodeModifier extends ComparisonModifier {
   /**
    * Create an ExplodeModifier
    *
-   * @param {string} notation The modifier notation
    * @param {ComparePoint} [comparePoint=null] The comparison object
    * @param {boolean} [compound=false] Whether to compound or not
    * @param {boolean} [penetrate=false] Whether to penetrate or not
    *
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} comparePoint must be a ComparePoint object
    */
-  constructor(notation, comparePoint = null, compound = false, penetrate = false) {
-    super(notation, comparePoint);
+  constructor(comparePoint = null, compound = false, penetrate = false) {
+    super(comparePoint);
 
     this[compoundSymbol] = !!compound;
     this[penetrateSymbol] = !!penetrate;
@@ -49,6 +47,15 @@ class ExplodeModifier extends ComparisonModifier {
     return 'explode';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `!${this.compound ? '!' : ''}${this.penetrate ? 'p' : ''}${super.notation}`;
+  }
 
   /**
    * Whether the modifier should penetrate the results or not

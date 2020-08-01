@@ -9,13 +9,12 @@ class SortingModifier extends Modifier {
   /**
    * Create a SortingModifier
    *
-   * @param {string} notation The modifier notation
    * @param {string} [direction=a] The direction to sort in; either 'a' or 'd'
    *
    * @throws {RangeError} Direction must be 'a' or 'd'
    */
-  constructor(notation, direction = 'a') {
-    super(notation);
+  constructor(direction = 'a') {
+    super();
 
     this.direction = direction;
 
@@ -57,6 +56,15 @@ class SortingModifier extends Modifier {
     return 'sorting';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `s${this.direction}`;
+  }
 
   /**
    * Runs the modifier on the rolls

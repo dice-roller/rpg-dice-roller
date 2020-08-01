@@ -10,12 +10,11 @@ class ReRollModifier extends ComparisonModifier {
   /**
    * Create a ReRollModifier
    *
-   * @param {string} notation The modifier notation
    * @param {boolean} [once=false] Whether to only re-roll once or not
    * @param {ComparePoint} [comparePoint=null] The comparison object
    */
-  constructor(notation, once = false, comparePoint = null) {
-    super(notation, comparePoint);
+  constructor(once = false, comparePoint = null) {
+    super(comparePoint);
 
     this.once = !!once;
 
@@ -33,6 +32,15 @@ class ReRollModifier extends ComparisonModifier {
     return 're-roll';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `r${this.once ? 'o' : ''}${super.notation}`;
+  }
 
   /**
    * Returns whether the modifier should only re-roll once or not

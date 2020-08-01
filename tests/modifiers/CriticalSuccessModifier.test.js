@@ -1,14 +1,12 @@
-import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier';
+import { ComparisonModifier, CriticalSuccessModifier } from '../../src/Modifiers';
+import { StandardDice } from '../../src/Dice';
 import ComparePoint from '../../src/ComparePoint';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
-import StandardDice from '../../src/dice/StandardDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('CriticalSuccessModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new CriticalSuccessModifier('>8');
+      const mod = new CriticalSuccessModifier();
 
       expect(mod).toBeInstanceOf(CriticalSuccessModifier);
       expect(mod).toBeInstanceOf(ComparisonModifier);
@@ -16,44 +14,27 @@ describe('CriticalSuccessModifier', () => {
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
         name: 'critical-success',
-        notation: '>8',
+        notation: 'cs',
         toJSON: expect.any(Function),
         toString: expect.any(Function),
       }));
-    });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new CriticalSuccessModifier();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalSuccessModifier(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalSuccessModifier(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalSuccessModifier(undefined);
-      }).toThrow(RequiredArgumentError);
     });
   });
 
   describe('Compare point', () => {
     test('gets set in constructor', () => {
       const cp = new ComparePoint('>', 8);
-      const mod = new CriticalSuccessModifier('>8', cp);
+      const mod = new CriticalSuccessModifier(cp);
 
       expect(mod.comparePoint).toBe(cp);
+      expect(mod.notation).toEqual('cs>8');
     });
 
     test('setting in constructor calls setter', () => {
       const spy = jest.spyOn(CriticalSuccessModifier.prototype, 'comparePoint', 'set');
 
       // create the ComparisonModifier
-      new CriticalSuccessModifier('>8', new ComparePoint('>', 8));
+      new CriticalSuccessModifier(new ComparePoint('>', 8));
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -62,7 +43,7 @@ describe('CriticalSuccessModifier', () => {
     });
 
     test('must be instance of ComparePoint', () => {
-      const mod = new CriticalSuccessModifier('>8');
+      const mod = new CriticalSuccessModifier();
 
       expect(() => {
         mod.comparePoint = 'foo';
@@ -94,7 +75,7 @@ describe('CriticalSuccessModifier', () => {
     });
 
     test('cannot unset compare point', () => {
-      const mod = new CriticalSuccessModifier('>8');
+      const mod = new CriticalSuccessModifier();
 
       expect(() => {
         mod.comparePoint = null;
@@ -109,7 +90,7 @@ describe('CriticalSuccessModifier', () => {
   describe('Matching', () => {
     test('can match against values', () => {
       const spy = jest.spyOn(ComparePoint.prototype, 'isMatch');
-      const mod = new CriticalSuccessModifier('>8', new ComparePoint('>', 8));
+      const mod = new CriticalSuccessModifier(new ComparePoint('>', 8));
 
       // attempt to match
       expect(mod.isComparePoint(9)).toBe(true);
@@ -124,15 +105,28 @@ describe('CriticalSuccessModifier', () => {
     });
 
     test('with no ComparePoint return false', () => {
-      const mod = new CriticalSuccessModifier('>8');
+      const mod = new CriticalSuccessModifier();
 
       expect(mod.isComparePoint(9)).toBe(false);
     });
   });
 
+  describe('Notation', () => {
+    test('simple notation', () => {
+      let mod = new CriticalSuccessModifier(new ComparePoint('>', 57636.6457));
+      expect(mod.notation).toEqual('cs>57636.6457');
+
+      mod = new CriticalSuccessModifier(new ComparePoint('!=', 3));
+      expect(mod.notation).toEqual('cs!=3');
+
+      mod = new CriticalSuccessModifier(new ComparePoint('=', 157));
+      expect(mod.notation).toEqual('cs=157');
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new CriticalSuccessModifier('=4', new ComparePoint('=', 4));
+      const mod = new CriticalSuccessModifier(new ComparePoint('=', 4));
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -144,23 +138,23 @@ describe('CriticalSuccessModifier', () => {
           value: 4,
         },
         name: 'critical-success',
-        notation: '=4',
+        notation: 'cs=4',
         type: 'modifier',
       });
     });
 
     test('toString output is correct', () => {
-      const mod = new CriticalSuccessModifier('=4', new ComparePoint('=', 4));
+      const mod = new CriticalSuccessModifier(new ComparePoint('=', 4));
 
-      expect(mod.toString()).toEqual('=4');
+      expect(mod.toString()).toEqual('cs=4');
     });
   });
 
   describe('Run', () => {
     test('returns RollResults object', () => {
       const results = new RollResults();
-      const die = new StandardDice('2d6', 6, 2);
-      const mod = new CriticalSuccessModifier('=4', new ComparePoint('=', 4));
+      const die = new StandardDice(6, 2);
+      const mod = new CriticalSuccessModifier(new ComparePoint('=', 4));
 
       expect(mod.run(results, die)).toBe(results);
     });
@@ -170,9 +164,9 @@ describe('CriticalSuccessModifier', () => {
       const results = new RollResults([
         1, 2, 4, 8, 6,
       ]);
-      const mod = new CriticalSuccessModifier('>=6', new ComparePoint('>=', 6));
+      const mod = new CriticalSuccessModifier(new ComparePoint('>=', 6));
 
-      mod.run(results, new StandardDice('5d8', 6, 5));
+      mod.run(results, new StandardDice(6, 5));
 
       expect(spy).toHaveBeenCalledTimes(5);
 
@@ -184,8 +178,8 @@ describe('CriticalSuccessModifier', () => {
       const results = new RollResults([
         1, 2, 4, 8, 6,
       ]);
-      const mod = new CriticalSuccessModifier('>=6', new ComparePoint('>=', 6));
-      const modifiedRolls = mod.run(results, new StandardDice('5d8', 6, 5)).rolls;
+      const mod = new CriticalSuccessModifier(new ComparePoint('>=', 6));
+      const modifiedRolls = mod.run(results, new StandardDice(6, 5)).rolls;
 
       expect(modifiedRolls).toEqual([
         expect.objectContaining({
@@ -238,7 +232,7 @@ describe('CriticalSuccessModifier', () => {
 
   describe('Readonly properties', () => {
     test('cannot change name value', () => {
-      const mod = new CriticalSuccessModifier('=4');
+      const mod = new CriticalSuccessModifier();
 
       expect(() => {
         mod.name = 'Foo';
