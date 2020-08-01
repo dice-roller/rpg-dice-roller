@@ -1,64 +1,48 @@
-import SortingModifier from '../../src/modifiers/SortingModifier';
+import { StandardDice } from '../../src/Dice';
+import { SortingModifier } from '../../src/Modifiers';
 import Modifier from '../../src/modifiers/Modifier';
 import RollResults from '../../src/results/RollResults';
-import StandardDice from '../../src/dice/StandardDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('SortingModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new SortingModifier('s');
+      const mod = new SortingModifier();
 
       expect(mod).toBeInstanceOf(SortingModifier);
       expect(mod).toBeInstanceOf(Modifier);
       expect(mod).toEqual(expect.objectContaining({
         direction: 'a',
         name: 'sorting',
-        notation: 's',
+        notation: 'sa',
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
       }));
     });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new SortingModifier();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new SortingModifier(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new SortingModifier(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new SortingModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
   });
 
   describe('Direction', () => {
     test('gets set in constructor', () => {
-      const mod = new SortingModifier('sd', 'd');
+      const mod = new SortingModifier('d');
 
       expect(mod.direction).toEqual('d');
+      expect(mod.notation).toBe('sd');
     });
 
     test('can be changed', () => {
-      const mod = new SortingModifier('sa', 'a');
+      const mod = new SortingModifier('a');
 
       expect(mod.direction).toEqual('a');
+      expect(mod.notation).toBe('sa');
 
       mod.direction = 'd';
 
       expect(mod.direction).toEqual('d');
+      expect(mod.notation).toBe('sd');
     });
 
-    test('throws error if not set to `a` | `b`', () => {
-      const mod = new SortingModifier('s');
+    test('throws error if not set to `a` | `d`', () => {
+      const mod = new SortingModifier();
 
       expect(() => {
         mod.direction = 'foo';
@@ -94,9 +78,24 @@ describe('SortingModifier', () => {
     });
   });
 
+  describe('Notation', () => {
+    test('ascending', () => {
+      let mod = new SortingModifier();
+      expect(mod.notation).toEqual('sa');
+
+      mod = new SortingModifier('a');
+      expect(mod.notation).toEqual('sa');
+    });
+
+    test('descending', () => {
+      const mod = new SortingModifier('d');
+      expect(mod.notation).toEqual('sd');
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new SortingModifier('sd', 'd');
+      const mod = new SortingModifier('d');
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -110,22 +109,23 @@ describe('SortingModifier', () => {
     });
 
     test('toString output is correct', () => {
-      const mod = new SortingModifier('sa');
+      const mod = new SortingModifier();
 
       expect(mod.toString()).toEqual('sa');
     });
   });
 
   describe('Run', () => {
-    let mod; let die; let
-      results;
+    let mod;
+    let die;
+    let results;
 
     beforeEach(() => {
       results = new RollResults([
         8, 4, 2, 1, 6, 10,
       ]);
-      die = new StandardDice('6d10', 10, 6);
-      mod = new SortingModifier('a');
+      die = new StandardDice(10, 6);
+      mod = new SortingModifier();
     });
 
     test('returns RollResults object', () => {

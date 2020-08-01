@@ -9,7 +9,6 @@ import Modifier from '../modifiers/Modifier';
 import RequiredArgumentError from '../exceptions/RequiredArgumentError';
 
 const modifiersSymbol = Symbol('modifiers');
-const notationSymbol = Symbol('notation');
 const qtySymbol = Symbol('qty');
 const sidesSymbol = Symbol('sides');
 const minSymbol = Symbol('min-value');
@@ -22,21 +21,16 @@ class StandardDice {
   /**
    * Create a StandardDice
    *
-   * @param {string} notation The dice notation (e.g. '4d6')
    * @param {number} sides The number of sides the die has (.e.g 6)
    * @param {number} [qty=1] The number of dice to roll (e.g. 4)
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
    * @param {number|null} [min=1] The minimum possible roll value
    * @param {number|null} [max=null] The maximum possible roll value. Defaults to number of sides
    *
-   * @throws {RequiredArgumentError} Notation and sides are required
+   * @throws {RequiredArgumentError} sides is required
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
-  constructor(notation, sides, qty = 1, modifiers = null, min = 1, max = null) {
-    if (!notation) {
-      throw new RequiredArgumentError('notation');
-    }
-
+  constructor(sides, qty = 1, modifiers = null, min = 1, max = null) {
     if (!sides && (sides !== 0)) {
       throw new RequiredArgumentError('sides');
     } else if (sides === Infinity) {
@@ -67,7 +61,6 @@ class StandardDice {
       throw new RangeError('max must a finite number');
     }
 
-    this[notationSymbol] = notation;
     this[qtySymbol] = parseInt(qty, 10);
     this[sidesSymbol] = sides;
 
@@ -181,7 +174,13 @@ class StandardDice {
    * @returns {string}
    */
   get notation() {
-    return this[notationSymbol];
+    let notation = `${this.qty}d${this.sides}`;
+
+    if (this.modifiers && this.modifiers.size) {
+      notation += [...this.modifiers.values()].reduce((acc, modifier) => acc + modifier.notation, '');
+    }
+
+    return notation;
   }
 
   /**

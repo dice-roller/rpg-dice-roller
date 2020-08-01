@@ -7,14 +7,12 @@ class CriticalFailureModifier extends ComparisonModifier {
   /**
    * Create a CriticalFailureModifier
    *
-   * @param {string} notation The modifier notation
-   * @param {ComparePoint} comparePoint The comparison object
+   * @param {ComparePoint} [comparePoint] The comparison object
    *
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} comparePoint must be a ComparePoint object
    */
-  constructor(notation, comparePoint) {
-    super(notation, comparePoint);
+  constructor(comparePoint) {
+    super(comparePoint);
 
     // set the modifier's sort order
     this.order = 9;
@@ -30,6 +28,15 @@ class CriticalFailureModifier extends ComparisonModifier {
     return 'critical-failure';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `cf${super.notation}`;
+  }
 
   /**
    * Runs the modifier on the rolls

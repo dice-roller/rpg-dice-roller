@@ -10,14 +10,13 @@ class TargetModifier extends ComparisonModifier {
   /**
    * Create a TargetModifier
    *
-   * @param {string} notation The modifier notation
    * @param {ComparePoint} successCP The success comparison object
    * @param {ComparePoint} [failureCP=null] The failure comparison object
    *
    * @throws {TypeError} failure comparePoint must be instance of ComparePoint or null
    */
-  constructor(notation, successCP, failureCP = null) {
-    super(notation, successCP);
+  constructor(successCP, failureCP = null) {
+    super(successCP);
 
     // set the failure compare point
     this.failureComparePoint = failureCP;
@@ -60,6 +59,15 @@ class TargetModifier extends ComparisonModifier {
     return 'target';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `${super.notation}${this.failureComparePoint ? `f${this.failureComparePoint}` : ''}`;
+  }
 
   /**
    * Returns the success compare point for the modifier

@@ -1,6 +1,5 @@
-import MaxModifier from '../../src/modifiers/MaxModifier';
+import { MaxModifier } from '../../src/Modifiers';
 import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 
@@ -8,7 +7,7 @@ describe('MaxModifier', () => {
   let mod;
 
   beforeEach(() => {
-    mod = new MaxModifier('max3', 3);
+    mod = new MaxModifier(3);
   });
 
   describe('Initialisation', () => {
@@ -26,39 +25,21 @@ describe('MaxModifier', () => {
       }));
     });
 
-    test('constructor requires notation', () => {
+    test('constructor requires max', () => {
       expect(() => {
         new MaxModifier();
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MaxModifier(false);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MaxModifier(null);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MaxModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
-
-    test('constructor requires max', () => {
-      expect(() => {
-        new MaxModifier('max3');
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MaxModifier('max3', false);
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MaxModifier('max3', null);
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MaxModifier('max3', undefined);
       }).toThrow(TypeError);
     });
   });
@@ -66,12 +47,15 @@ describe('MaxModifier', () => {
   describe('Max', () => {
     test('can be changed', () => {
       expect(mod.max).toBe(3);
+      expect(mod.notation).toBe('max3');
 
       mod.max = 1;
       expect(mod.max).toBe(1);
+      expect(mod.notation).toBe('max1');
 
       mod.max = 23;
       expect(mod.max).toBe(23);
+      expect(mod.notation).toBe('max23');
     });
 
     test('must be numeric', () => {
@@ -91,17 +75,37 @@ describe('MaxModifier', () => {
     test('can be float', () => {
       mod.max = 4.5;
       expect(mod.max).toBeCloseTo(4.5);
+      expect(mod.notation).toBe('max4.5');
 
       mod.max = 300.6579;
       expect(mod.max).toBeCloseTo(300.6579);
+      expect(mod.notation).toBe('max300.6579');
     });
 
     test('can be negative', () => {
       mod.max = -10;
       expect(mod.max).toBe(-10);
+      expect(mod.notation).toBe('max-10');
 
       mod.max = -46.2;
       expect(mod.max).toBeCloseTo(-46.2);
+      expect(mod.notation).toBe('max-46.2');
+    });
+  });
+
+  describe('Notation', () => {
+    test('simple notation', () => {
+      mod = new MaxModifier(35);
+      expect(mod.notation).toEqual('max35');
+
+      mod = new MaxModifier(90876684);
+      expect(mod.notation).toEqual('max90876684');
+
+      mod = new MaxModifier(7986);
+      expect(mod.notation).toEqual('max7986');
+
+      mod = new MaxModifier(2);
+      expect(mod.notation).toEqual('max2');
     });
   });
 
@@ -128,7 +132,7 @@ describe('MaxModifier', () => {
       results = new RollResults([
         1, 4, 2, 1, 6,
       ]);
-      die = new StandardDice('5d10', 10, 5);
+      die = new StandardDice(10, 5);
     });
 
     test('returns RollResults object', () => {

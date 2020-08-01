@@ -3,12 +3,13 @@ import StandardDice from '../../src/dice/StandardDice';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
 import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
+import { ExplodeModifier, KeepModifier, SortingModifier } from '../../src/Modifiers';
+import ComparePoint from '../../src/ComparePoint';
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(4);
 
       // assert that the die is a PercentileDie and that it extends StandardDice
       expect(die).toBeInstanceOf(PercentileDice);
@@ -27,93 +28,75 @@ describe('PercentileDice', () => {
         toString: expect.any(Function),
       }));
     });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new PercentileDice();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new PercentileDice(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new PercentileDice(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new PercentileDice(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
   });
 
   describe('Quantity', () => {
     test('qty must be numeric', () => {
-      let die = new PercentileDice('4d%', 8);
+      let die = new PercentileDice(8);
       expect(die.qty).toBe(8);
 
       expect(() => {
-        die = new PercentileDice('4d%', 'foo');
+        die = new PercentileDice('foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', false);
+        die = new PercentileDice(false);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', true);
+        die = new PercentileDice(true);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', []);
+        die = new PercentileDice([]);
       }).toThrow(TypeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', { qty: 4 });
+        die = new PercentileDice({ qty: 4 });
       }).toThrow(TypeError);
     });
 
     test('qty must be positive non-zero', () => {
-      let die = new PercentileDice('4d%', 1);
+      let die = new PercentileDice(1);
       expect(die.qty).toBe(1);
 
-      die = new PercentileDice('4d%', 324);
+      die = new PercentileDice(324);
       expect(die.qty).toBe(324);
 
       expect(() => {
-        die = new PercentileDice('4d%', 0);
+        die = new PercentileDice(0);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', -42);
+        die = new PercentileDice(-42);
       }).toThrow(RangeError);
 
       expect(() => {
-        die = new PercentileDice('4d%', -1);
+        die = new PercentileDice(-1);
       }).toThrow(RangeError);
     });
   });
 
   describe('Average', () => {
     test('average is correct for single die', () => {
-      const die = new PercentileDice('d%');
+      const die = new PercentileDice();
       expect(die.average).toBe(50.5);
     });
 
     test('average is unaffected when rolling multiple', () => {
-      let die = new PercentileDice('2d%', 2);
+      let die = new PercentileDice(2);
       expect(die.average).toBe(50.5);
 
-      die = new PercentileDice('400d%', 400);
+      die = new PercentileDice(400);
       expect(die.average).toBe(50.5);
 
-      die = new PercentileDice('56d%', 56);
+      die = new PercentileDice(56);
       expect(die.average).toBe(50.5);
 
-      die = new PercentileDice('12d%', 12);
+      die = new PercentileDice(12);
       expect(die.average).toBe(50.5);
 
-      die = new PercentileDice('145d%', 145);
+      die = new PercentileDice(145);
       expect(die.average).toBe(50.5);
     });
   });
@@ -123,7 +106,7 @@ describe('PercentileDice', () => {
       const spy = jest.spyOn(PercentileDice.prototype, 'modifiers', 'set');
       const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
 
-      new PercentileDice('4d%', 1, modifiers);
+      new PercentileDice(1, modifiers);
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -133,7 +116,7 @@ describe('PercentileDice', () => {
 
     test('can set modifiers with Map', () => {
       const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
-      const die = new PercentileDice('4d%', 1);
+      const die = new PercentileDice();
 
       die.modifiers = modifiers;
 
@@ -143,7 +126,7 @@ describe('PercentileDice', () => {
 
     test('can set modifiers with Object', () => {
       const modifier = new Modifier('m');
-      const die = new PercentileDice('4d%', 1);
+      const die = new PercentileDice(1);
 
       die.modifiers = { foo: modifier };
 
@@ -153,7 +136,7 @@ describe('PercentileDice', () => {
 
     test('can set modifiers with Array', () => {
       const modifiers = [new Modifier('m')];
-      const die = new PercentileDice('4d%', 1);
+      const die = new PercentileDice(1);
 
       die.modifiers = modifiers;
 
@@ -163,26 +146,26 @@ describe('PercentileDice', () => {
 
     test('throws error if modifiers type is invalid', () => {
       expect(() => {
-        new PercentileDice('4d%', 1, 'foo');
+        new PercentileDice(1, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
-        new PercentileDice('4d%', 1, 351);
+        new PercentileDice(1, 351);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = new Map(Object.entries({ foo: 'bar' }));
-        new PercentileDice('4d%', 1, modifiers);
+        new PercentileDice(1, modifiers);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = { foo: 'bar' };
-        new PercentileDice('4d%', 1, modifiers);
+        new PercentileDice(1, modifiers);
       }).toThrow(TypeError);
 
       expect(() => {
         const modifiers = ['bar'];
-        new PercentileDice('4d%', 1, modifiers);
+        new PercentileDice(1, modifiers);
       }).toThrow(TypeError);
     });
 
@@ -198,7 +181,7 @@ describe('PercentileDice', () => {
       mod4.order = 2;
 
       // create the dice instance
-      const die = new PercentileDice('4d%', 1);
+      const die = new PercentileDice(1);
 
       die.modifiers = {
         mod1, mod2, mod3, mod4,
@@ -216,21 +199,69 @@ describe('PercentileDice', () => {
 
   describe('Sides', () => {
     test('returns `%`', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(4);
 
       expect(die.sides).toBe('%');
     });
 
     test('can be returned as `100`', () => {
-      const die = new PercentileDice('4d%', 4, null, true);
+      const die = new PercentileDice(4, null, true);
 
       expect(die.sides).toBe(100);
     });
   });
 
+  describe('Notation', () => {
+    test('simple notation `%`', () => {
+      let die = new PercentileDice(45);
+      expect(die.notation).toEqual('45d%');
+
+      die = new PercentileDice(999);
+      expect(die.notation).toEqual('999d%');
+
+      die = new PercentileDice(10);
+      expect(die.notation).toEqual('10d%');
+    });
+
+    test('simple notation `100`', () => {
+      let die = new PercentileDice(45, null, true);
+      expect(die.notation).toEqual('45d100');
+
+      die = new PercentileDice(999, null, true);
+      expect(die.notation).toEqual('999d100');
+
+      die = new PercentileDice(10, null, true);
+      expect(die.notation).toEqual('10d100');
+    });
+
+    test('notation with modifiers `%`', () => {
+      const modifiers = [
+        new KeepModifier('h', 1),
+        new SortingModifier(),
+        new ExplodeModifier(new ComparePoint('>', 3)),
+      ];
+
+      const die = new PercentileDice(36, modifiers);
+
+      expect(die.notation).toEqual('36d%!>3kh1sa');
+    });
+
+    test('notation with modifiers `100`', () => {
+      const modifiers = [
+        new KeepModifier('l', 2),
+        new SortingModifier('d'),
+        new ExplodeModifier(new ComparePoint('>=', 50)),
+      ];
+
+      const die = new PercentileDice(36, modifiers, true);
+
+      expect(die.notation).toEqual('36d100!>=50kl2sd');
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(6);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -241,33 +272,39 @@ describe('PercentileDice', () => {
         min: 1,
         modifiers: null,
         name: 'percentile',
-        notation: '4d%',
-        qty: 4,
+        notation: '6d%',
+        qty: 6,
         sides: '%',
         type: 'die',
       });
     });
 
     test('String output is correct', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(8);
 
-      expect(die.toString()).toEqual('4d%');
+      expect(die.toString()).toEqual('8d%');
     });
 
     test('can output sides as a number in JSON', () => {
-      const die = new PercentileDice('4d%', 4, null, true);
+      const die = new PercentileDice(10, null, true);
 
       expect(JSON.parse(JSON.stringify(die)).sides).toBe(100);
+    });
+
+    test('can output sides as a number in string', () => {
+      const die = new PercentileDice(10, null, true);
+
+      expect(die.toString()).toEqual('10d100');
     });
   });
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new PercentileDice('1d%', 1)).rollOnce()).toBeInstanceOf(RollResult);
+      expect((new PercentileDice()).rollOnce()).toBeInstanceOf(RollResult);
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {
-      const die = new PercentileDice('1d%', 1);
+      const die = new PercentileDice();
       const iterations = 1000;
 
       // run the test multiple times to try and ensure consistency
@@ -280,13 +317,13 @@ describe('PercentileDice', () => {
     });
 
     test('roll return a RollResults object', () => {
-      expect((new PercentileDice('1d%', 1)).roll()).toBeInstanceOf(RollResults);
+      expect((new PercentileDice()).roll()).toBeInstanceOf(RollResults);
     });
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
       const spy = jest.spyOn(PercentileDice.prototype, 'rollOnce');
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(4);
 
       // roll the dice
       die.roll();
@@ -298,7 +335,7 @@ describe('PercentileDice', () => {
     });
 
     test('roll returns correct number of rolls', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice(4);
 
       expect(die.roll()).toHaveLength(4);
     });
@@ -306,7 +343,7 @@ describe('PercentileDice', () => {
 
   describe('Readonly properties', () => {
     test('cannot change max value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.max = 450;
@@ -314,7 +351,7 @@ describe('PercentileDice', () => {
     });
 
     test('cannot change min value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.min = 450;
@@ -322,7 +359,7 @@ describe('PercentileDice', () => {
     });
 
     test('cannot change name value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.name = 'Foo';
@@ -330,7 +367,7 @@ describe('PercentileDice', () => {
     });
 
     test('cannot change notation value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.notation = '6d4';
@@ -338,7 +375,7 @@ describe('PercentileDice', () => {
     });
 
     test('cannot change qty value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.qty = 6;
@@ -346,7 +383,7 @@ describe('PercentileDice', () => {
     });
 
     test('cannot change sides value', () => {
-      const die = new PercentileDice('4d%', 4);
+      const die = new PercentileDice();
 
       expect(() => {
         die.sides = 2;

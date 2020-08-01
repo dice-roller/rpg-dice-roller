@@ -3,12 +3,11 @@ import ComparePoint from '../../src/ComparePoint';
 import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
 import RollResults from '../../src/results/RollResults';
 import StandardDice from '../../src/dice/StandardDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('CriticalFailureModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new CriticalFailureModifier('<2');
+      const mod = new CriticalFailureModifier();
 
       expect(mod).toBeInstanceOf(CriticalFailureModifier);
       expect(mod).toBeInstanceOf(ComparisonModifier);
@@ -16,44 +15,27 @@ describe('CriticalFailureModifier', () => {
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
         name: 'critical-failure',
-        notation: '<2',
+        notation: 'cf',
         toJSON: expect.any(Function),
         toString: expect.any(Function),
       }));
-    });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new CriticalFailureModifier();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalFailureModifier(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalFailureModifier(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new CriticalFailureModifier(undefined);
-      }).toThrow(RequiredArgumentError);
     });
   });
 
   describe('Compare point', () => {
     test('gets set in constructor', () => {
       const cp = new ComparePoint('>', 8);
-      const mod = new CriticalFailureModifier('>8', cp);
+      const mod = new CriticalFailureModifier(cp);
 
       expect(mod.comparePoint).toBe(cp);
+      expect(mod.notation).toEqual('cf>8');
     });
 
     test('setting in constructor calls setter', () => {
       const spy = jest.spyOn(CriticalFailureModifier.prototype, 'comparePoint', 'set');
 
-      // create the ComparisonModifier
-      new CriticalFailureModifier('>8', new ComparePoint('>', 8));
+      // create the modifier
+      new CriticalFailureModifier(new ComparePoint('>', 8));
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -62,7 +44,7 @@ describe('CriticalFailureModifier', () => {
     });
 
     test('must be instance of ComparePoint', () => {
-      const mod = new CriticalFailureModifier('>8');
+      const mod = new CriticalFailureModifier();
 
       expect(() => {
         mod.comparePoint = 'foo';
@@ -94,7 +76,7 @@ describe('CriticalFailureModifier', () => {
     });
 
     test('cannot unset compare point', () => {
-      const mod = new CriticalFailureModifier('>8');
+      const mod = new CriticalFailureModifier();
 
       expect(() => {
         mod.comparePoint = null;
@@ -109,7 +91,7 @@ describe('CriticalFailureModifier', () => {
   describe('Matching', () => {
     test('can match against values', () => {
       const spy = jest.spyOn(ComparePoint.prototype, 'isMatch');
-      const mod = new CriticalFailureModifier('>8', new ComparePoint('>', 8));
+      const mod = new CriticalFailureModifier(new ComparePoint('>', 8));
 
       // attempt to match
       expect(mod.isComparePoint(9)).toBe(true);
@@ -124,15 +106,28 @@ describe('CriticalFailureModifier', () => {
     });
 
     test('with no ComparePoint return false', () => {
-      const mod = new CriticalFailureModifier('>8');
+      const mod = new CriticalFailureModifier();
 
       expect(mod.isComparePoint(9)).toBe(false);
     });
   });
 
+  describe('Notation', () => {
+    test('simple notation', () => {
+      let mod = new CriticalFailureModifier(new ComparePoint('<', Number.MAX_SAFE_INTEGER));
+      expect(mod.notation).toEqual(`cf<${Number.MAX_SAFE_INTEGER}`);
+
+      mod = new CriticalFailureModifier(new ComparePoint('>=', -12.5676));
+      expect(mod.notation).toEqual('cf>=-12.5676');
+
+      mod = new CriticalFailureModifier(new ComparePoint('<=', 568));
+      expect(mod.notation).toEqual('cf<=568');
+    });
+  });
+
   describe('Output', () => {
     test('JSON output is correct', () => {
-      const mod = new CriticalFailureModifier('=4', new ComparePoint('=', 4));
+      const mod = new CriticalFailureModifier(new ComparePoint('=', 4));
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -144,23 +139,23 @@ describe('CriticalFailureModifier', () => {
           value: 4,
         },
         name: 'critical-failure',
-        notation: '=4',
+        notation: 'cf=4',
         type: 'modifier',
       });
     });
 
     test('toString output is correct', () => {
-      const mod = new CriticalFailureModifier('=4', new ComparePoint('=', 4));
+      const mod = new CriticalFailureModifier(new ComparePoint('>', 9));
 
-      expect(mod.toString()).toEqual('=4');
+      expect(mod.toString()).toEqual('cf>9');
     });
   });
 
   describe('Run', () => {
     test('returns RollResults object', () => {
       const results = new RollResults();
-      const die = new StandardDice('2d6', 6, 2);
-      const mod = new CriticalFailureModifier('=4', new ComparePoint('=', 4));
+      const die = new StandardDice(6, 2);
+      const mod = new CriticalFailureModifier(new ComparePoint('=', 4));
 
       expect(mod.run(results, die)).toBe(results);
     });
@@ -170,9 +165,9 @@ describe('CriticalFailureModifier', () => {
       const results = new RollResults([
         1, 2, 4, 8, 6,
       ]);
-      const mod = new CriticalFailureModifier('<=2', new ComparePoint('<=', 2));
+      const mod = new CriticalFailureModifier(new ComparePoint('<=', 2));
 
-      mod.run(results, new StandardDice('5d8', 6, 5));
+      mod.run(results, new StandardDice(6, 5));
 
       expect(spy).toHaveBeenCalledTimes(5);
 
@@ -184,8 +179,8 @@ describe('CriticalFailureModifier', () => {
       const results = new RollResults([
         1, 2, 4, 8, 6,
       ]);
-      const mod = new CriticalFailureModifier('<=2', new ComparePoint('<=', 2));
-      const modifiedRolls = mod.run(results, new StandardDice('5d8', 6, 5)).rolls;
+      const mod = new CriticalFailureModifier(new ComparePoint('<=', 2));
+      const modifiedRolls = mod.run(results, new StandardDice(6, 5)).rolls;
 
       expect(modifiedRolls).toEqual([
         expect.objectContaining({
@@ -238,7 +233,7 @@ describe('CriticalFailureModifier', () => {
 
   describe('Readonly properties', () => {
     test('cannot change name value', () => {
-      const mod = new CriticalFailureModifier('=4');
+      const mod = new CriticalFailureModifier();
 
       expect(() => {
         mod.name = 'Foo';

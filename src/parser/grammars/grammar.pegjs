@@ -34,17 +34,17 @@ Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
 
 StandardDie
   = qty:IntegerOrExpression? "d" sides:IntegerOrExpression {
-    return new Dice.StandardDice(text(), sides, qty || 1)
+    return new Dice.StandardDice(sides, qty || 1)
   }
 
 PercentileDie
   = qty:IntegerOrExpression? "d%" {
-    return new Dice.PercentileDice(text(), qty || 1);
+    return new Dice.PercentileDice(qty || 1);
   }
 
 FudgeDie
   = qty:IntegerOrExpression? "dF" sides:("." [12])? {
-    return new Dice.FudgeDice(text(), sides ? parseInt(sides[1], 10) : 2, qty || 1);
+    return new Dice.FudgeDice(sides ? parseInt(sides[1], 10) : 2, qty || 1);
   }
 
 
@@ -65,61 +65,61 @@ Modifier
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
   = "!" compound:"!"? penetrate:"p"? comparePoint:ComparePoint? {
-    return new Modifiers.ExplodeModifier(text(), comparePoint, !!compound, !!penetrate);
+    return new Modifiers.ExplodeModifier(comparePoint, !!compound, !!penetrate);
   }
 
 // Target / Success and Failure modifier
 TargetModifier
   = successCP:ComparePoint failureCP:FailComparePoint? {
-    return new Modifiers.TargetModifier(text(), successCP, failureCP);
+    return new Modifiers.TargetModifier(successCP, failureCP);
   }
 
 // Drop lowest/highest dice) - needs alternative syntax of `"-" ("h" | "l")`
 DropModifier
   = "d" end:[lh]? qty:IntegerNumber {
-    return new Modifiers.DropModifier(text(), end || 'l', qty);
+    return new Modifiers.DropModifier(end || 'l', qty);
   }
 
 // Keep lowest/highest dice) - needs alternative syntax of `"+" ("h" | "l")`
 KeepModifier
   = "k" end:[lh]? qty:IntegerNumber {
-    return new Modifiers.KeepModifier(text(), end || 'h', qty);
+    return new Modifiers.KeepModifier(end || 'h', qty);
   }
 
 // Maximum roll value
 MaxModifier
   = "max" max:FloatNumber {
-    return new Modifiers.MaxModifier(text(), max);
+    return new Modifiers.MaxModifier(max);
   }
 
 // Minimum roll value
 MinModifier
   = "min" min:FloatNumber {
-    return new Modifiers.MinModifier(text(), min);
+    return new Modifiers.MinModifier(min);
   }
 
 // Re-rolling Dice (Including Re-roll Once)
 ReRollModifier
   = "r" once:"o"? comparePoint:ComparePoint? {
-    return new Modifiers.ReRollModifier(text(), !!once, comparePoint);
+    return new Modifiers.ReRollModifier(!!once, comparePoint);
   }
 
 // Critical success setting
 CriticalSuccessModifier
   = "cs" comparePoint:ComparePoint {
-    return new Modifiers.CriticalSuccessModifier(text(), comparePoint);
+    return new Modifiers.CriticalSuccessModifier(comparePoint);
   }
 
 // Critical failure setting
 CriticalFailureModifier
   = "cf" comparePoint:ComparePoint {
-    return new Modifiers.CriticalFailureModifier(text(), comparePoint);
+    return new Modifiers.CriticalFailureModifier(comparePoint);
   }
 
 // Sort rolls when outputting
 SortingModifier
   = "s" dir:("a" / "d")? {
-    return new Modifiers.SortingModifier(text(), dir || 'a');
+    return new Modifiers.SortingModifier(dir || 'a');
   }
 
 

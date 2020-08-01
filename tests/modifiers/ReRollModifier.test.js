@@ -1,16 +1,14 @@
-import ReRollModifier from '../../src/modifiers/ReRollModifier';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import { StandardDice } from '../../src/Dice';
+import { ComparisonModifier, ReRollModifier } from '../../src/Modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 import RollResult from '../../src/results/RollResult';
 import DieActionValueError from '../../src/exceptions/DieActionValueError';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new ReRollModifier('r');
+      const mod = new ReRollModifier();
 
       expect(mod).toBeInstanceOf(ReRollModifier);
       expect(mod).toBeInstanceOf(ComparisonModifier);
@@ -25,39 +23,22 @@ describe('ReRollModifier', () => {
         toString: expect.any(Function),
       }));
     });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new ReRollModifier();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ReRollModifier(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ReRollModifier(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ReRollModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
   });
 
   describe('Compare Point', () => {
     test('gets set in constructor', () => {
       const cp = new ComparePoint('>', 8);
-      const mod = new ReRollModifier('r', false, cp);
+      const mod = new ReRollModifier(false, cp);
 
       expect(mod.comparePoint).toBe(cp);
+      expect(mod.notation).toBe('r>8');
     });
 
     test('setting in constructor calls setter in parent', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'comparePoint', 'set');
 
       // create the ComparisonModifier
-      new ReRollModifier('r', false, new ComparePoint('>', 8));
+      new ReRollModifier(false, new ComparePoint('>', 8));
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -69,7 +50,7 @@ describe('ReRollModifier', () => {
   describe('Matching', () => {
     test('isComparePoint uses parent', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'isComparePoint');
-      const mod = new ReRollModifier('r', false, new ComparePoint('>', 8));
+      const mod = new ReRollModifier(false, new ComparePoint('>', 8));
 
       // attempt to match
       expect(mod.isComparePoint(9)).toBe(true);
@@ -86,38 +67,71 @@ describe('ReRollModifier', () => {
 
   describe('Once', () => {
     test('gets set in constructor', () => {
-      const mod = new ReRollModifier('ro', true);
+      const mod = new ReRollModifier(true);
 
       expect(mod.once).toBe(true);
+      expect(mod.notation).toBe('ro');
     });
 
     test('can be changed', () => {
-      const mod = new ReRollModifier('ro', true);
+      const mod = new ReRollModifier(true);
 
       expect(mod.once).toBe(true);
+      expect(mod.notation).toBe('ro');
 
       mod.once = false;
 
       expect(mod.once).toBe(false);
+      expect(mod.notation).toBe('r');
     });
 
     test('cast to boolean', () => {
-      expect((new ReRollModifier('r', 'foo')).once).toBe(true);
-      expect((new ReRollModifier('r', '')).once).toBe(false);
-      expect((new ReRollModifier('r', '0')).once).toBe(true);
-      expect((new ReRollModifier('r', 0)).once).toBe(false);
-      expect((new ReRollModifier('r', 1)).once).toBe(true);
-      expect((new ReRollModifier('r', [])).once).toBe(true);
-      expect((new ReRollModifier('r', {})).once).toBe(true);
-      expect((new ReRollModifier('r', null)).once).toBe(false);
-      expect((new ReRollModifier('r', undefined)).once).toBe(false);
+      expect((new ReRollModifier('foo')).once).toBe(true);
+      expect((new ReRollModifier('')).once).toBe(false);
+      expect((new ReRollModifier('0')).once).toBe(true);
+      expect((new ReRollModifier(0)).once).toBe(false);
+      expect((new ReRollModifier(1)).once).toBe(true);
+      expect((new ReRollModifier([])).once).toBe(true);
+      expect((new ReRollModifier({})).once).toBe(true);
+      expect((new ReRollModifier(null)).once).toBe(false);
+      expect((new ReRollModifier(undefined)).once).toBe(false);
+    });
+  });
+
+  describe('Notation', () => {
+    test('unlimited', () => {
+      let mod = new ReRollModifier(false, new ComparePoint('>', 15));
+      expect(mod.notation).toEqual('r>15');
+
+      mod = new ReRollModifier(false, new ComparePoint('=', 6961));
+      expect(mod.notation).toEqual('r=6961');
+
+      mod = new ReRollModifier(false, new ComparePoint('<=', 189));
+      expect(mod.notation).toEqual('r<=189');
+
+      mod = new ReRollModifier(false, new ComparePoint('>=', 3));
+      expect(mod.notation).toEqual('r>=3');
+    });
+
+    test('once', () => {
+      let mod = new ReRollModifier(true, new ComparePoint('>', 15));
+      expect(mod.notation).toEqual('ro>15');
+
+      mod = new ReRollModifier(true, new ComparePoint('=', 6961));
+      expect(mod.notation).toEqual('ro=6961');
+
+      mod = new ReRollModifier(true, new ComparePoint('<=', 189));
+      expect(mod.notation).toEqual('ro<=189');
+
+      mod = new ReRollModifier(true, new ComparePoint('>=', 3));
+      expect(mod.notation).toEqual('ro>=3');
     });
   });
 
   describe('Output', () => {
     test('JSON output is correct', () => {
       const cp = new ComparePoint('<=', 3);
-      const mod = new ReRollModifier('ro<=3', true, cp);
+      const mod = new ReRollModifier(true, cp);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -132,7 +146,7 @@ describe('ReRollModifier', () => {
     });
 
     test('toString output is correct', () => {
-      const mod = new ReRollModifier('r>5');
+      const mod = new ReRollModifier(false, new ComparePoint('>', 5));
 
       expect(mod.toString()).toEqual('r>5');
     });
@@ -148,8 +162,8 @@ describe('ReRollModifier', () => {
       results = new RollResults([
         8, 4, 2, 1, 6, 10,
       ]);
-      die = new StandardDice('6d10', 10, 6);
-      mod = new ReRollModifier('r');
+      die = new StandardDice(10, 6);
+      mod = new ReRollModifier();
 
       spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(10))
@@ -305,7 +319,7 @@ describe('ReRollModifier', () => {
 
     test('re-rolling with d1 throws an error', () => {
       // create a 1 sided die
-      die = new StandardDice('6d1', 1, 6);
+      die = new StandardDice(1, 6);
 
       // set the modifier compare point
       mod.comparePoint = new ComparePoint('>=', 8);
@@ -329,7 +343,7 @@ describe('ReRollModifier', () => {
           results = new RollResults(Array(qty).fill(1));
 
           // create the dice
-          die = new StandardDice(`${qty}d10`, 10, qty);
+          die = new StandardDice(10, qty);
 
           // apply modifiers
           const { rolls } = mod.run(results, die);

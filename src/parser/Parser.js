@@ -2,7 +2,7 @@ import * as parser from './grammars/grammar';
 import RequiredArgumentError from '../exceptions/RequiredArgumentError';
 
 /**
- * A DiceParser object that takes notations and parses them to rolls
+ * Takes notations and parses them to rolls
  */
 class Parser {
   /**

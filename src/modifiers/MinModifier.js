@@ -10,13 +10,12 @@ class MinModifier extends Modifier {
   /**
    * Create a MinModifier
    *
-   * @param {string} notation The modifier notation
    * @param {number} min The minimum value
    *
    * @throws {TypeError} min must be a number
    */
-  constructor(notation, min) {
-    super(notation);
+  constructor(min) {
+    super();
 
     this.min = min;
 
@@ -58,6 +57,15 @@ class MinModifier extends Modifier {
     return 'min';
   }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Returns the modifier notation
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `min${this.min}`;
+  }
 
   /**
    * Runs the modifier on the rolls
