@@ -1,7 +1,6 @@
-import DiceRoll from './DiceRoll';
+import { DataFormatError, RequiredArgumentError } from './exceptions';
 import { diceUtils, exportFormats } from './utilities/utils';
-import RequiredArgumentError from './exceptions/RequiredArgumentError';
-import DataFormatError from './exceptions/DataFormatError';
+import DiceRoll from './DiceRoll';
 
 /**
  * history of log rolls

@@ -1,4 +1,4 @@
-import StandardDice from '../../src/dice/StandardDice';
+import { StandardDice } from '../../src/dice';
 import DiceRoll from '../../src/DiceRoll';
 
 describe('Modifiers', () => {

@@ -1,6 +1,5 @@
-import { KeepModifier } from '../../src/Modifiers';
-import { StandardDice } from '../../src/Dice';
-import Modifier from '../../src/modifiers/Modifier';
+import { StandardDice } from '../../src/dice';
+import { KeepModifier, Modifier } from '../../src/modifiers';
 import RollResults from '../../src/results/RollResults';
 
 describe('KeepModifier', () => {

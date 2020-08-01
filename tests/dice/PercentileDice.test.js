@@ -1,9 +1,9 @@
-import PercentileDice from '../../src/dice/PercentileDice';
-import StandardDice from '../../src/dice/StandardDice';
+import { PercentileDice, StandardDice } from '../../src/dice';
+import {
+  ExplodeModifier, KeepModifier, Modifier, SortingModifier,
+} from '../../src/modifiers';
 import RollResult from '../../src/results/RollResult';
 import RollResults from '../../src/results/RollResults';
-import Modifier from '../../src/modifiers/Modifier';
-import { ExplodeModifier, KeepModifier, SortingModifier } from '../../src/Modifiers';
 import ComparePoint from '../../src/ComparePoint';
 
 describe('PercentileDice', () => {

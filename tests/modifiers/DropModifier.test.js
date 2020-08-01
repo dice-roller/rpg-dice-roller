@@ -1,6 +1,5 @@
-import { StandardDice } from '../../src/Dice';
-import { DropModifier } from '../../src/Modifiers';
-import Modifier from '../../src/modifiers/Modifier';
+import { StandardDice } from '../../src/dice';
+import { DropModifier, Modifier } from '../../src/modifiers';
 import RollResults from '../../src/results/RollResults';
 
 describe('DropModifier', () => {

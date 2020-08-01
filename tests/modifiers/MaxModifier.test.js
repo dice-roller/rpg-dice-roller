@@ -1,6 +1,5 @@
-import { MaxModifier } from '../../src/Modifiers';
-import Modifier from '../../src/modifiers/Modifier';
-import StandardDice from '../../src/dice/StandardDice';
+import { StandardDice } from '../../src/dice';
+import { MaxModifier, Modifier } from '../../src/modifiers';
 import RollResults from '../../src/results/RollResults';
 
 describe('MaxModifier', () => {

@@ -1,6 +1,6 @@
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
+import { StandardDice } from '../../src/dice';
+import { ComparisonModifier } from '../../src/modifiers';
 import ComparePoint from '../../src/ComparePoint';
-import StandardDice from '../../src/dice/StandardDice';
 import RollResults from '../../src/results/RollResults';
 
 describe('ComparisonModifier', () => {

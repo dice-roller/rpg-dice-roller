@@ -1,5 +1,5 @@
-import { ComparisonModifier, CriticalSuccessModifier } from '../../src/Modifiers';
-import { StandardDice } from '../../src/Dice';
+import { ComparisonModifier, CriticalSuccessModifier } from '../../src/modifiers';
+import { StandardDice } from '../../src/dice';
 import ComparePoint from '../../src/ComparePoint';
 import RollResults from '../../src/results/RollResults';
 

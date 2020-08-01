@@ -1,6 +1,5 @@
-import { StandardDice } from '../../src/Dice';
-import { SortingModifier } from '../../src/Modifiers';
-import Modifier from '../../src/modifiers/Modifier';
+import { StandardDice } from '../../src/dice';
+import { Modifier, SortingModifier } from '../../src/modifiers';
 import RollResults from '../../src/results/RollResults';
 
 describe('SortingModifier', () => {
