@@ -26,7 +26,7 @@ const randomSymbol = Symbol('random');
  *
  * @since 4.2.0
  *
- * @type {{next(): number, range: number[]}}
+ * @type {{next(): number, range: number[],}}
  */
 const maxEngine = {
   /**
