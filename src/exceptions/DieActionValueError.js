@@ -3,9 +3,9 @@
  */
 class DieActionValueError extends Error {
   /**
-   * Create a DieActionValueError
+   * Create a `DieActionValueError`
    *
-   * @param {StandardDice} die The Dice object
+   * @param {StandardDice} die The die the action was on
    * @param {string|null} [action=null] The invalid action
    */
   constructor(die, action = null) {

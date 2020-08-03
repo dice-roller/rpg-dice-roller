@@ -4,12 +4,34 @@ const rollsSymbol = Symbol('rolls');
 
 /**
  * A collection of roll results
+ *
+ * ::: tip
+ * You will probably not need to create your own `RollResults` instances, unless you're importing
+ * rolls, but RollResults objects will be returned when rolling dice.
+ * :::
  */
 class RollResults {
   /**
-   * Create a RollResults
+   * Create a `RollResults` instance.
    *
-   * @param {RollResult[]|number[]} [rolls=[]]
+   * @example <caption>`RollResult` objects</caption>
+   * const results = new RollResults([
+   *  new RollResult(4),
+   *  new RollResult(3),
+   *  new RollResult(5),
+   * ]);
+   *
+   * @example <caption>Numerical results</caption>
+   * const results = new RollResults([4, 3, 5]);
+   *
+   * @example <caption>A mix</caption>
+   * const results = new RollResults([
+   *  new RollResult(4),
+   *  3,
+   *  new RollResult(5),
+   * ]);
+   *
+   * @param {RollResult[]|number[]} [rolls=[]] The roll results
    *
    * @throws {TypeError} Rolls must be an array
    */
@@ -18,7 +40,7 @@ class RollResults {
   }
 
   /**
-   * Returns the numbers of rolls
+   * The number of rolls.
    *
    * @returns {number}
    */
@@ -27,7 +49,7 @@ class RollResults {
   }
 
   /**
-   * Returns the rolls
+   * List of rolls.
    *
    * @returns {RollResult[]}
    */
@@ -36,7 +58,7 @@ class RollResults {
   }
 
   /**
-   * Sets the rolls
+   * Set the rolls.
    *
    * @param {RollResult[]|number[]} rolls
    *
@@ -56,7 +78,7 @@ class RollResults {
   }
 
   /**
-   * The total value of the rolls, taking in to consideration modifiers
+   * The total value of all the rolls after modifiers have been applied.
    *
    * @returns {number}
    */
@@ -65,7 +87,7 @@ class RollResults {
   }
 
   /**
-   * Adds a single roll to the list
+   * Add a single roll to the list.
    *
    * @param {RollResult|number} value
    */
@@ -76,9 +98,11 @@ class RollResults {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{rolls: RollResult[], value: number}}
    */
   toJSON() {
     const { rolls, value } = this;
@@ -90,7 +114,9 @@ class RollResults {
   }
 
   /**
-   * Returns the String representation of the object
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
    *
    * @returns {string}
    */

@@ -56,6 +56,8 @@ const parsedNotationSymbol = Symbol('parsed-notation');
  * Method for rolling dice
  *
  * @type {symbol}
+ *
+ * @private
  */
 const rollMethodSymbol = Symbol('roll-method');
 
@@ -78,13 +80,29 @@ const rollsSymbol = Symbol('rolls');
 const totalSymbol = Symbol('total');
 
 /**
- * A single DiceRoll
+ * A `DiceRoll` handles rolling of a single dice notation and storing it's result.
+ *
+ * @see {@link DiceRoller} if you need to keep a history of rolls
  */
 class DiceRoll {
   /**
-   * Create a DiceRoll, parse the notation and roll the dice
+   * Create a DiceRoll, parse the notation and roll the dice.
    *
-   * @param {string|{}} notation The notation to roll
+   * If `notation` is an object, it must contain a `notation` property that defines the notation.
+   * It can also have an optional array of `RollResults`, in the `rolls` property.
+   *
+   * @example <caption>String notation</caption>
+   * const roll = new DiceRoll('4d6');
+   *
+   * @example <caption>Object</caption>
+   * const roll = new DiceRoll({
+   *   notation: '4d6',
+   *   rolls: ..., // RollResults object or array of roll results
+   * });
+   *
+   * @param {string|{notation: string, rolls: RollResults[]}} notation The notation to roll
+   * @param {string} notation.notation If `notation is an object; the notation to roll
+   * @param {RollResults[]} [notation.rolls] If `notation is an object; the rolls to import
    *
    * @throws {NotationError} notation is invalid
    * @throws {RequiredArgumentError} notation is required
@@ -118,10 +136,12 @@ class DiceRoll {
               if (roll instanceof RollResults) {
                 // already a RollResults object
                 return roll;
-              } if (Array.isArray(roll)) {
+              }
+              if (Array.isArray(roll)) {
                 // array of values
                 return new RollResults(roll);
-              } if ((roll instanceof Object) && Array.isArray(roll.rolls)) {
+              }
+              if ((roll instanceof Object) && Array.isArray(roll.rolls)) {
                 // object with list of rolls
                 return new RollResults(roll.rolls);
               }
@@ -162,44 +182,10 @@ class DiceRoll {
     }
   }
 
-  /** ***********************
-   * Static Methods
-   ************************ */
-
   /**
-   * Imports the given dice roll data and builds an object from it.
+   * The average possible total for the notation.
    *
-   * Throws Error on failure
-   *
-   * @param {{}|string|DiceRoll} data The data to import
-   *
-   * @returns {DiceRoll}
-   *
-   * @throws {DataFormatError} data format is invalid
-   */
-  static import(data) {
-    if (!data) {
-      throw new RequiredArgumentError('data');
-    } else if (diceUtils.isJson(data)) {
-      // data is JSON format - parse and import
-      return DiceRoll.import(JSON.parse(data));
-    } else if (diceUtils.isBase64(data)) {
-      // data is base64 encoded - decode and import
-      return DiceRoll.import(atob(data));
-    } else if (typeof data === 'object') {
-      // if data is a `DiceRoll` return it, otherwise build it
-      return (data instanceof DiceRoll) ? data : new DiceRoll(data);
-    } else {
-      throw new DataFormatError(data);
-    }
-  }
-
-  /** ***********************
-   * Public Properties
-   ************************ */
-
-  /**
-   * Returns the average possible total for the notation
+   * @since 4.3.0
    *
    * @returns {number}
    */
@@ -208,7 +194,9 @@ class DiceRoll {
   }
 
   /**
-   * Returns the maximum possible total for the notation
+   * The maximum possible total for the notation.
+   *
+   * @since 4.3.0
    *
    * @returns {number}
    */
@@ -231,7 +219,9 @@ class DiceRoll {
   }
 
   /**
-   * Returns the minimum possible total for the notation
+   * The minimum possible total for the notation.
+   *
+   * @since 4.3.0
    *
    * @returns {number}
    */
@@ -254,7 +244,7 @@ class DiceRoll {
   }
 
   /**
-   * The dice notation
+   * The dice notation.
    *
    * @returns {string}
    */
@@ -263,7 +253,9 @@ class DiceRoll {
   }
 
   /**
-   * Returns the roll notation and rolls in the format of:
+   * String representation of the rolls
+   *
+   * @example
    * 2d20+1d6: [20,2]+[2] = 24
    *
    * @returns {string}
@@ -314,7 +306,7 @@ class DiceRoll {
   }
 
   /**
-   * Returns the roll total
+   * The roll total
    *
    * @returns {number}
    */
@@ -328,17 +320,15 @@ class DiceRoll {
     return this[totalSymbol] || 0;
   }
 
-  /** ***********************
-   * Public methods
-   ************************ */
-
   /**
-   * Exports the DiceRoll in the given format.
+   * Export the object in the given format.
    * If no format is specified, JSON is returned.
    *
-   * @param {number} [format=exportFormats.JSON] The format to export the data to
+   * @see {@link DiceRoll#toJSON}
    *
-   * @returns {string|null}
+   * @param {exportFormats} [format=exportFormats.JSON] The format to export the data as
+   *
+   * @returns {string|null} The exported data, in the specified format
    *
    * @throws {TypeError} Invalid export format
    */
@@ -357,21 +347,21 @@ class DiceRoll {
   }
 
   /**
-   * Returns whether the object has rolled dice or not
+   * Check whether the object has rolled dice or not
    *
-   * @returns {boolean}
+   * @returns {boolean} `True` if the object has rolls, `false` otherwise
    */
   hasRolls() {
     return !!(this[parsedNotationSymbol] && Array.isArray(this.rolls) && this.rolls.length);
   }
 
   /**
-   * Rolls the dice for the existing notation.
-   * This is useful if you want to re-roll the dice,
-   * for some reason, but it's usually better to
-   * create a new DiceRoll instance instead.
+   * Rolls the dice for the stored notation.
    *
-   * @returns {RollResults[]}
+   * This is called in the constructor, so you'll only need this if you want to re-roll the
+   * notation. However, it's usually better to create a new `DiceRoll` instance instead.
+   *
+   * @returns {RollResults[]} The results of the rolls
    */
   roll() {
     // reset the cached total
@@ -385,9 +375,19 @@ class DiceRoll {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  output: string,
+   *  total: number,
+   *  minTotal: number,
+   *  maxTotal: number,
+   *  notation: string,
+   *  rolls: RollResults[],
+   *  type: string
+   * }}
    */
   toJSON() {
     const {
@@ -406,24 +406,71 @@ class DiceRoll {
   }
 
   /**
-   * Returns the String representation of the object as the roll notation
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
    *
    * @returns {string}
+   *
+   * @see {@link DiceRoll#output}
    */
   toString() {
     return this.output;
   }
 
-  /** ***********************
-   * Private Methods
-   ************************ */
+  /**
+   * Create a new `DiceRoll` instance with the given data.
+   *
+   * `data` can be an object of data, a JSON / base64 encoded string of such data.
+   *
+   * The object must contain a `notation` property that defines the notation and, optionally, an
+   * array of RollResults, in the `rolls` property.
+   *
+   * @example <caption>Object</caption>
+   * DiceRoll.import({
+   *   notation: '4d6',
+   *   rolls: ..., // RollResults object or array of roll results
+   * });
+   *
+   * @example <caption>JSON</caption>
+   * DiceRoll.import('{"notation":"4d6","rolls":[...]}');
+   *
+   * @example <caption>Base64</caption>
+   * DiceRoll.import('eyJub3RhdGlvbiI6IjRkNiIsInJvbGxzIjpbXX0=');
+   *
+   * @param {{notation: string, rolls: RollResults[]}|string} data The data to import
+   * @param {string} data.notation If `notation` is an object; the notation to import
+   * @param {RollResults[]} [data.rolls] If `notation` is an object; the rolls to import
+   *
+   * @returns {DiceRoll} The new `DiceRoll` instance
+   *
+   * @throws {DataFormatError} data format is invalid
+   */
+  static import(data) {
+    if (!data) {
+      throw new RequiredArgumentError('data');
+    } else if (diceUtils.isJson(data)) {
+      // data is JSON format - parse and import
+      return DiceRoll.import(JSON.parse(data));
+    } else if (diceUtils.isBase64(data)) {
+      // data is base64 encoded - decode and import
+      return DiceRoll.import(atob(data));
+    } else if (typeof data === 'object') {
+      // if data is a `DiceRoll` return it, otherwise build it
+      return new DiceRoll(data);
+    } else {
+      throw new DataFormatError(data);
+    }
+  }
 
   /**
-   * Calculates the total roll value and returns it
+   * Calculate the total roll value and return it
    *
    * @private
    *
-   * @returns {Number}
+   * @param {RollResults[]} rolls
+   *
+   * @returns {Number} the roll total
    */
   [calculateTotalSymbol](rolls) {
     let formula = '';
@@ -453,15 +500,16 @@ class DiceRoll {
   }
 
   /**
-   * Rolls the dice and returns the result.
-   * If the engine is passed, it will be used for the
-   * number generation. The engine will be reset after use.
+   * Roll the dice and return the result.
+   *
+   * If the engine is passed, it will be used for the number generation for **this roll only**.
+   * The engine will be reset after use.
    *
    * @private
    *
    * @param {Engine|{next(): number}} [engine]
    *
-   * @returns {RollResults[]}
+   * @returns {RollResults[]} The result of the rolls
    *
    * @throws {TypeError} engine must have function `next()`
    */
