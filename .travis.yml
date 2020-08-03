@@ -10,19 +10,20 @@ branches:
     - feature/auto-generate-api-docs
 script:
   - npm run test:coveralls
-deploy:
-  before_deploy:
-    # build the API docs
-    - npm run build:docs
-  provider: releases
-  token: $GITHUB_TOKEN
-  repo: GreenImp/rpg-dice-roller-docs
-  file: docs/api/*
-  overwrite: true
-  draft: true
-  on:
-    # branch: master
-    all_branches: true
+  - npm run build:docs
+#deploy:
+#  before_deploy:
+#    # build the API docs
+#    - npm run build:docs
+#  provider: releases
+#  token: $GITHUB_TOKEN
+#  repo: GreenImp/rpg-dice-roller-docs
+#  file: docs/api/*
+#  overwrite: true
+#  draft: true
+#  on:
+#    # branch: master
+#    all_branches: true
 env:
   global:
     - COVERALLS_PARALLEL=true
