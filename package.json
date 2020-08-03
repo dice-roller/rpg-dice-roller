@@ -56,7 +56,8 @@
     "rollup-plugin-eslint": "^6.0.0",
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-terser": "^6.1.0",
-    "typescript": "^3.9.7"
+    "typescript": "^3.9.7",
+    "vuepress-jsdoc": "^3.2.0"
   },
   "dependencies": {
     "mathjs-expression-parser": "^1.0.2",
@@ -73,6 +74,7 @@
     "build:esm": "rollup --c --environment FORMAT:esm",
     "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
+    "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude parser/grammars/*.js,RollGroup.js",
     "prebuild": "npm run build:grammars",
     "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
     "lint": "eslint src/** tests/**",

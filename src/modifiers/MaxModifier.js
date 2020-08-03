@@ -4,11 +4,17 @@ import { diceUtils } from '../utilities/utils';
 const maxSymbol = Symbol('max');
 
 /**
- * A max number modifier
+ * A `MaxModifier` causes die rolls over a maximum value to be treated as the maximum value.
+ *
+ * @since 4.3.0
+ *
+ * @see {@link MinModifier} for the opposite of this modifier
+ *
+ * @extends {Modifier}
  */
 class MaxModifier extends Modifier {
   /**
-   * Create a MaxModifier
+   * Create a `MaxModifier` instance.
    *
    * @param {number} max The maximum value
    *
@@ -24,7 +30,7 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Returns the maximum value
+   * The maximum value.
    *
    * @returns {Number}
    */
@@ -33,7 +39,7 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Sets the maximum value
+   * Set the maximum value.
    *
    * @param {number} value
    *
@@ -49,9 +55,9 @@ class MaxModifier extends Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'max'
    */
   get name() {
     return 'max';
@@ -59,7 +65,7 @@ class MaxModifier extends Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -68,12 +74,12 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     const parsedResults = results;
@@ -93,9 +99,11 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string, max: Number}}
    */
   toJSON() {
     const { max } = this;

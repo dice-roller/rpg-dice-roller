@@ -1,11 +1,15 @@
 /**
- * The base modifier class
+ * A `Modifier` is the base modifier class that all others extend from.
+ *
+ * ::: warning Abstract class
+ * This is meant as an abstract class and should not be used directly.
+ * :::
+ *
+ * @abstract
  */
 class Modifier {
   /**
-   * Create a Modifier
-   *
-   * @throws {RequiredArgumentError} Notation is required
+   * Create a `Modifier` instance.
    */
   constructor() {
     // set the modifier's sort order
@@ -14,9 +18,9 @@ class Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'modifier'
    */
   get name() {
     return 'modifier';
@@ -25,7 +29,7 @@ class Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -36,9 +40,9 @@ class Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * The maximum number of iterations that the modifier can be applied to a single die roll
+   * The maximum number of iterations that the modifier can apply to a single die roll
    *
-   * @returns {number}
+   * @returns {number} `1000`
    */
   get maxIterations() {
     return 1000;
@@ -47,12 +51,12 @@ class Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     return results;
@@ -60,9 +64,11 @@ class Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string}}
    */
   toJSON() {
     const { notation, name } = this;
@@ -75,7 +81,11 @@ class Modifier {
   }
 
   /**
-   * Returns the String representation of the object
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
+   *
+   * @see {@link Modifier#notation}
    *
    * @returns {string}
    */

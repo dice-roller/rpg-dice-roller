@@ -1,14 +1,18 @@
 import KeepModifier from './KeepModifier';
 
 /**
- * A drop modifier
+ * A `DropModifier` will "drop" (Remove from total calculations) dice from a roll.
+ *
+ * @see {@link KeepModifier} for the opposite of this modifier
+ *
+ * @extends KeepModifier
  */
 class DropModifier extends KeepModifier {
   /**
-   * Create a DropModifier
+   * Create a `DropModifier` instance.
    *
    * @param {string} end Either `h|l` to drop highest or lowest
-   * @param {number} [qty=1] The amount to keep
+   * @param {number} [qty=1] The amount of dice to drop
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
@@ -21,16 +25,16 @@ class DropModifier extends KeepModifier {
   }
 
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'drop-l' or 'drop-h'
    */
   get name() {
     return `drop-${this.end}`;
   }
 
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -39,11 +43,11 @@ class DropModifier extends KeepModifier {
   }
 
   /**
-   * Returns the start and end (end exclusive) range of rolls to drop.
+   * Determine the start and end (end exclusive) range of rolls to drop.
    *
-   * @param {RollResults} _results
+   * @param {RollResults} _results The results to drop from
    *
-   * @returns {number[]}
+   * @returns {number[]} The min / max range to drop
    */
   rangeToDrop(_results) {
     // we're dropping, so we want to drop all dice that are inside of the qty range

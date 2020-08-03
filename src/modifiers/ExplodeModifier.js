@@ -6,17 +6,21 @@ const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');
 
 /**
- * An explode modifier
+ * An `ExplodeModifier` re-rolls dice that match a given test, and adds them to the results.
+ *
+ * @see {@link ReRollModifier} if you want to replace the old value with the new, rather than adding
+ *
+ * @extends ComparisonModifier
  */
 class ExplodeModifier extends ComparisonModifier {
   /**
-   * Create an ExplodeModifier
+   * Create an `ExplodeModifier` instance
    *
    * @param {ComparePoint} [comparePoint=null] The comparison object
    * @param {boolean} [compound=false] Whether to compound or not
    * @param {boolean} [penetrate=false] Whether to penetrate or not
    *
-   * @throws {TypeError} comparePoint must be a ComparePoint object
+   * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
   constructor(comparePoint = null, compound = false, penetrate = false) {
     super(comparePoint);
@@ -29,9 +33,9 @@ class ExplodeModifier extends ComparisonModifier {
   }
 
   /**
-   * Whether the modifier should compound the results or not
+   * Whether the modifier should compound the results or not.
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if it should compound, `false` otherwise
    */
   get compound() {
     return this[compoundSymbol];
@@ -39,9 +43,9 @@ class ExplodeModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'explode'
    */
   get name() {
     return 'explode';
@@ -49,7 +53,7 @@ class ExplodeModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -58,21 +62,21 @@ class ExplodeModifier extends ComparisonModifier {
   }
 
   /**
-   * Whether the modifier should penetrate the results or not
+   * Whether the modifier should penetrate the results or not.
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if it should penetrate, `false` otherwise
    */
   get penetrate() {
     return this[penetrateSymbol];
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
@@ -135,9 +139,18 @@ class ExplodeModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  notation: string,
+   *  name: string,
+   *  type: string,
+   *  comparePoint: (ComparePoint|undefined),
+   *  compound: boolean,
+   *  penetrate: boolean
+   * }}
    */
   toJSON() {
     const { compound, penetrate } = this;

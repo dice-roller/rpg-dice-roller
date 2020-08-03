@@ -3,13 +3,15 @@ import Modifier from './Modifier';
 const directionSymbol = Symbol('direction');
 
 /**
- * A sorting modifier
+ * A `SortingModifier` sorts roll results by their value, either ascending or descending.
+ *
+ * @extends ComparisonModifier
  */
 class SortingModifier extends Modifier {
   /**
-   * Create a SortingModifier
+   * Create a `SortingModifier` instance.
    *
-   * @param {string} [direction=a] The direction to sort in; either 'a' or 'd'
+   * @param {string} [direction=a] The direction to sort in; 'a' (Ascending) or 'd' (Descending)
    *
    * @throws {RangeError} Direction must be 'a' or 'd'
    */
@@ -23,7 +25,7 @@ class SortingModifier extends Modifier {
   }
 
   /**
-   * Returns the sort direction
+   * The sort direction.
    *
    * @returns {string} Either 'a' or 'd'
    */
@@ -32,9 +34,9 @@ class SortingModifier extends Modifier {
   }
 
   /**
-   * Sets the sort direction
+   * Set the sort direction.
    *
-   * @param {string} value Either 'a' or 'd'
+   * @param {string} value Either 'a' (Ascending) or 'd' (Descending)
    *
    * @throws {RangeError} Direction must be 'a' or 'd'
    */
@@ -48,9 +50,9 @@ class SortingModifier extends Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'sorting'
    */
   get name() {
     return 'sorting';
@@ -58,7 +60,7 @@ class SortingModifier extends Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -67,12 +69,12 @@ class SortingModifier extends Modifier {
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     const sortedResults = results;
@@ -89,9 +91,11 @@ class SortingModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string, direction: string}}
    */
   toJSON() {
     const { direction } = this;

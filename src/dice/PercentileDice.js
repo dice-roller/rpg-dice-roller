@@ -1,15 +1,17 @@
 import StandardDice from './StandardDice';
 
 /**
- * A percentile die
+ * Represents a percentile die.
+ *
+ * @extends StandardDice
  */
 class PercentileDice extends StandardDice {
   /**
-   * Create a PercentileDice
+   * Create a `PercentileDice` instance.
    *
-   * @param {number} [qty=1] The number of dice to roll (e.g. 4)
-   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
-   * @param {boolean} [sidesAsNumber=false] whether to show the sides as a number or percent symbol
+   * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
+   * @param {boolean} [sidesAsNumber=false] Whether to show the sides as `%` (default) or `100`
    *
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
@@ -21,9 +23,9 @@ class PercentileDice extends StandardDice {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the dice
+   * The name of the die.
    *
-   * @returns {string}
+   * @returns {string} 'percentile'
    */
   get name() {
     return 'percentile';
@@ -31,9 +33,9 @@ class PercentileDice extends StandardDice {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * The number of sides the dice has
+   * The number of sides the die has
    *
-   * @returns {number|string} Percent symbol if sidesAsNumber is false, or 100 otherwise
+   * @returns {number|string} `%` if `sidesAsNumber == false`, or `100` otherwise
    */
   get sides() {
     return this.sidesAsNumber ? super.sides : '%';

@@ -763,10 +763,6 @@ describe('DiceRoll', () => {
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
-    test('importing a DiceRoll object returns itself', () => {
-      expect(DiceRoll.import(diceRoll)).toBe(diceRoll);
-    });
-
     test('non-roll items are removed when importing notation.rolls', () => {
       const exported = diceRoll.export(exportFormats.OBJECT);
       // clone the rolls data

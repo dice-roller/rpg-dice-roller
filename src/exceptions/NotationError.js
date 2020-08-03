@@ -3,9 +3,9 @@
  */
 class NotationError extends Error {
   /**
-   * Create a NotationError
+   * Create a `NotationError`
    *
-   * @param {string} notation The invalid notation
+   * @param {*} notation The invalid notation
    */
   constructor(notation) {
     super(`Notation "${notation}" is invalid`);
