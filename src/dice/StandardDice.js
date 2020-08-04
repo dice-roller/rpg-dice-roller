@@ -13,17 +13,17 @@ const minSymbol = Symbol('min-value');
 const maxSymbol = Symbol('max-value');
 
 /**
- * A standard numerical die
+ * Represents a standard numerical die.
  */
 class StandardDice {
   /**
-   * Create a StandardDice
+   * Create a `StandardDice` instance.
    *
-   * @param {number} sides The number of sides the die has (.e.g 6)
-   * @param {number} [qty=1] The number of dice to roll (e.g. 4)
-   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
+   * @param {number} sides The number of sides the die has (.e.g `6`)
+   * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
    * @param {number|null} [min=1] The minimum possible roll value
-   * @param {number|null} [max=null] The maximum possible roll value. Defaults to number of sides
+   * @param {number|null} [max=null] The maximum possible roll value. Defaults to number of `sides`
    *
    * @throws {RequiredArgumentError} sides is required
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
@@ -72,7 +72,7 @@ class StandardDice {
   }
 
   /**
-   * The average value that the die can roll (Excluding modifiers)
+   * The average value that the die can roll (Excluding modifiers).
    *
    * @returns {number}
    */
@@ -81,7 +81,7 @@ class StandardDice {
   }
 
   /**
-   * The modifiers that affect this dice roll
+   * The modifiers that affect this die roll.
    *
    * @returns {Map<string, Modifier>|null}
    */
@@ -95,7 +95,7 @@ class StandardDice {
   }
 
   /**
-   * Sets the modifiers that affect this roll
+   * Set the modifiers that affect this roll.
    *
    * @param {Map<string, Modifier>|Modifier[]|{}|null} value
    *
@@ -137,7 +137,7 @@ class StandardDice {
   }
 
   /**
-   * The maximum value that can be rolled om the die
+   * The maximum value that can be rolled on the die, excluding modifiers.
    *
    * @returns {number}
    */
@@ -146,7 +146,7 @@ class StandardDice {
   }
 
   /**
-   * Returns the minimum value that can be rolled on the die
+   * The minimum value that can be rolled on the die, excluding modifiers.
    *
    * @returns {number}
    */
@@ -156,18 +156,17 @@ class StandardDice {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the dice
+   * The name of the die.
    *
-   * @returns {string}
+   * @returns {string} 'standard'
    */
   get name() {
     return 'standard';
   }
-
   /* eslint-enable class-methods-use-this */
 
   /**
-   * The dice notation for this dice roll
+   * The dice notation. e.g. `4d6!`
    *
    * @returns {string}
    */
@@ -182,7 +181,7 @@ class StandardDice {
   }
 
   /**
-   * Returns the number of dice that should be rolled.
+   * The number of dice that should be rolled.
    *
    * @returns {number}
    */
@@ -191,7 +190,7 @@ class StandardDice {
   }
 
   /**
-   * The number of sides the dice has
+   * The number of sides the die has.
    *
    * @returns {number}
    */
@@ -200,10 +199,9 @@ class StandardDice {
   }
 
   /**
-   * Rolls the dice, for the specified quantity and
-   * includes any modifiers, and returns the roll output
+   * Roll the dice for the specified quantity and apply any modifiers.
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The result of the roll
    */
   roll() {
     // create a result object to hold the rolls
@@ -224,18 +222,30 @@ class StandardDice {
   }
 
   /**
-   * Rolls a single die and returns the output value
+   * Roll a single die and return the value.
    *
-   * @returns {RollResult}
+   * @returns {RollResult} The value rolled
    */
   rollOnce() {
     return new RollResult(generator.integer(this.min, this.max));
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  average: number,
+   *  min: number,
+   *  max: number,
+   *  notation: string,
+   *  qty: number,
+   *  name: string,
+   *  sides: number,
+   *  modifiers: (Map<string, Modifier>|null),
+   *  type: string
+   * }}
    */
   toJSON() {
     const {
@@ -256,7 +266,11 @@ class StandardDice {
   }
 
   /**
-   * Returns the String representation of the object
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
+   *
+   * @see {@link StandardDice#notation}
    *
    * @returns {string}
    */

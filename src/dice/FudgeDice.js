@@ -3,15 +3,17 @@ import RollResult from '../results/RollResult';
 import StandardDice from './StandardDice';
 
 /**
- * A Fudge / Fate die
+ * Represents a Fudge / Fate type die.
+ *
+ * @extends StandardDice
  */
 class FudgeDice extends StandardDice {
   /**
-   * Create a FudgeDice
+   * Create a `FudgeDice` instance.
    *
-   * @param {number} [nonBlanks=2] The number of non-blanks the Fudge die should have (1 or 2)
-   * @param {number} [qty=1] The number of dice to roll (e.g. 4)
-   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=null]
+   * @param {number} [nonBlanks=2] The number of sides each symbol should cover (`1` or `2`)
+   * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
+   * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
    *
    * @throws {RangeError} nonBlanks must be 1 or 2
    * @throws {TypeError} modifiers must be valid
@@ -30,9 +32,9 @@ class FudgeDice extends StandardDice {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the dice
+   * The name of the die.
    *
-   * @returns {string}
+   * @returns {string} 'fudge'
    */
   get name() {
     return 'fudge';
@@ -40,27 +42,27 @@ class FudgeDice extends StandardDice {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * The number of sides that each symbol (+, -) covers
+   * The number of sides that each symbol (+, -) covers.
    *
-   * @returns {number}
+   * @returns {number} `1` or `2`
    */
   get nonBlanks() {
     return super.sides;
   }
 
   /**
-   * The number of sides the dice has
+   * The number of sides the die has.
    *
-   * @returns {string}
+   * @returns {string} 'F.2' or 'F.1'
    */
   get sides() {
     return `F.${this.nonBlanks}`;
   }
 
   /**
-   * Rolls a single die and returns the output value
+   * Roll a single die and return the value.
    *
-   * @returns {RollResult}
+   * @returns {RollResult} The value rolled
    */
   rollOnce() {
     let total = 0;

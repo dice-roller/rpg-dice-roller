@@ -1,15 +1,21 @@
 import ComparisonModifier from './ComparisonModifier';
 
 /**
- * A critical failure modifier
+ * A `CriticalFailureModifier` modifier flags values that match a comparison.
+ *
+ * Unlike most other modifiers, it doesn't affect the roll value, it simply "flags" matching rolls.
+ *
+ * @see {@link CriticalSuccessModifier} for the opposite of this modifier
+ *
+ * @extends ComparisonModifier
  */
 class CriticalFailureModifier extends ComparisonModifier {
   /**
-   * Create a CriticalFailureModifier
+   * Create a `CriticalFailureModifier` instance.
    *
    * @param {ComparePoint} [comparePoint] The comparison object
    *
-   * @throws {TypeError} comparePoint must be a ComparePoint object
+   * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
   constructor(comparePoint) {
     super(comparePoint);
@@ -20,9 +26,9 @@ class CriticalFailureModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'critical-failure'
    */
   get name() {
     return 'critical-failure';
@@ -30,7 +36,7 @@ class CriticalFailureModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns the modifier notation
+   * The modifier's notation.
    *
    * @returns {string}
    */
@@ -39,12 +45,12 @@ class CriticalFailureModifier extends ComparisonModifier {
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     results.rolls

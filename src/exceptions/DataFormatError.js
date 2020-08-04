@@ -3,7 +3,7 @@
  */
 class DataFormatError extends Error {
   /**
-   * Create a DataFormatError
+   * Create a `DataFormatError`
    *
    * @param {*} data The invalid data
    */
