@@ -13,11 +13,11 @@ const grammar = fs.readFileSync(`${dir}${sourceFilename}`).toString();
 const parser = pegjs.generate(grammar, { output: 'source', format: 'commonjs' });
 
 // convert parser to ES module
-const output = `import * as Dice from '../../dice';
+const output = `import math from 'mathjs-expression-parser';
+import * as Dice from '../../dice';
 import * as Modifiers from '../../modifiers';
 import ComparePoint from '../../ComparePoint';
 import RollGroup from '../../RollGroup';
-import math from 'mathjs-expression-parser';
 
 const module = {};
 
@@ -26,7 +26,8 @@ ${parser}
 export {
   peg$SyntaxError as SyntaxError,
   peg$parse as parse,
-}`;
+};
+`;
 
 // create the file
 fs.writeFileSync(`${dir}${outputFilename}`, output);

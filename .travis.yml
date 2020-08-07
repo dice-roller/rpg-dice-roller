@@ -8,7 +8,7 @@ branches:
     - master
     - develop
 script:
-  - npm run test:coveralls
+  - npm run test:coverage && coveralls < coverage/lcov.info
 env:
   global:
     - COVERALLS_PARALLEL=true
