@@ -1,4 +1,4 @@
-import ComparisonModifier from './ComparisonModifier';
+import ComparisonModifier from './ComparisonModifier.js';
 
 /**
  * A `CriticalSuccessModifier` modifier flags values that match a comparison.

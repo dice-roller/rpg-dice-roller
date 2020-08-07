@@ -1,5 +1,5 @@
-import Modifier from './Modifier';
-import ComparePoint from '../ComparePoint';
+import Modifier from './Modifier.js';
+import ComparePoint from '../ComparePoint.js';
 
 const comparePointSymbol = Symbol('compare-point');
 

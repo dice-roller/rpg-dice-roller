@@ -1,6 +1,6 @@
-import { DataFormatError, RequiredArgumentError } from './exceptions';
-import { diceUtils, exportFormats } from './utilities/utils';
-import DiceRoll from './DiceRoll';
+import { DataFormatError, RequiredArgumentError } from './exceptions/index.js';
+import { diceUtils, exportFormats } from './utilities/utils.js';
+import DiceRoll from './DiceRoll.js';
 
 /**
  * history of log rolls

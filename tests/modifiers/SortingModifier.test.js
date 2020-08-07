@@ -1,6 +1,6 @@
-import { StandardDice } from '../../src/dice';
-import { Modifier, SortingModifier } from '../../src/modifiers';
-import RollResults from '../../src/results/RollResults';
+import { StandardDice } from '../../src/dice/index.js';
+import { Modifier, SortingModifier } from '../../src/modifiers/index.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('SortingModifier', () => {
   describe('Initialisation', () => {

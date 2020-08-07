@@ -1,10 +1,10 @@
-import { PercentileDice, StandardDice } from '../../src/dice';
+import { PercentileDice, StandardDice } from '../../src/dice/index.js';
 import {
   ExplodeModifier, KeepModifier, Modifier, SortingModifier,
-} from '../../src/modifiers';
-import RollResult from '../../src/results/RollResult';
-import RollResults from '../../src/results/RollResults';
-import ComparePoint from '../../src/ComparePoint';
+} from '../../src/modifiers/index.js';
+import RollResult from '../../src/results/RollResult.js';
+import RollResults from '../../src/results/RollResults.js';
+import ComparePoint from '../../src/ComparePoint.js';
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {

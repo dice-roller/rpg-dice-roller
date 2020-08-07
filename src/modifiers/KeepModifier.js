@@ -1,5 +1,5 @@
-import Modifier from './Modifier';
-import { diceUtils } from '../utilities/utils';
+import Modifier from './Modifier.js';
+import { diceUtils } from '../utilities/utils.js';
 
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');

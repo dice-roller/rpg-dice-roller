@@ -1,4 +1,4 @@
-import { DieActionValueError } from '../../src/exceptions';
+import { DieActionValueError } from '../../src/exceptions/index.js';
 
 describe('DieActionValueError', () => {
   test('outputs `die` in message', () => {

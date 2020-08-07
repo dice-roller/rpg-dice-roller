@@ -1,4 +1,4 @@
-import StandardDice from './StandardDice';
+import StandardDice from './StandardDice.js';
 
 /**
  * Represents a percentile die.

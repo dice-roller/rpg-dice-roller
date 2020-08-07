@@ -1,6 +1,6 @@
-import { StandardDice } from '../../src/dice';
-import { DropModifier, Modifier } from '../../src/modifiers';
-import RollResults from '../../src/results/RollResults';
+import { StandardDice } from '../../src/dice/index.js';
+import { DropModifier, Modifier } from '../../src/modifiers/index.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('DropModifier', () => {
   describe('Initialisation', () => {

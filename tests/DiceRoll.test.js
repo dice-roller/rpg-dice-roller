@@ -1,11 +1,11 @@
 import math from 'mathjs-expression-parser';
-import { StandardDice } from '../src/dice';
-import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions';
-import { exportFormats } from '../src/utilities/utils';
-import DiceRoll from '../src/DiceRoll';
-import Parser from '../src/parser/Parser';
-import RollResult from '../src/results/RollResult';
-import RollResults from '../src/results/RollResults';
+import { StandardDice } from '../src/dice/index.js';
+import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
+import { exportFormats } from '../src/utilities/utils.js';
+import DiceRoll from '../src/DiceRoll.js';
+import Parser from '../src/parser/Parser.js';
+import RollResult from '../src/results/RollResult.js';
+import RollResults from '../src/results/RollResults.js';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {

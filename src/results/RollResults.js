@@ -1,4 +1,4 @@
-import RollResult from './RollResult';
+import RollResult from './RollResult.js';
 
 const rollsSymbol = Symbol('rolls');
 

@@ -1,5 +1,5 @@
-import { RequiredArgumentError } from '../exceptions';
-import * as parser from './grammars/grammar';
+import { RequiredArgumentError } from '../exceptions/index.js';
+import * as parser from './grammars/grammar.js';
 
 /**
  * The `Parser` takes a notation string and parses it into objects.
@@ -7,6 +7,7 @@ import * as parser from './grammars/grammar';
  * It is used internally by the DiceRoll object when rolling notation, but can be used by itself if
  * necessary.
  *
+ * @see {@link https://greenimp.github.io/rpg-dice-roller/guide/notation/}
  * @see {@link https://en.m.wikipedia.org/wiki/Dice_notation}
  */
 class Parser {

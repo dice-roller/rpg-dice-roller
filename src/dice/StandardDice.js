@@ -1,10 +1,10 @@
-import { RequiredArgumentError } from '../exceptions';
-import { ExplodeModifier, Modifier, ReRollModifier } from '../modifiers';
-import { generator } from '../utilities/NumberGenerator';
-import { diceUtils } from '../utilities/utils';
-import RollResult from '../results/RollResult';
-import RollResults from '../results/RollResults';
-import ComparePoint from '../ComparePoint';
+import { RequiredArgumentError } from '../exceptions/index.js';
+import { ExplodeModifier, Modifier, ReRollModifier } from '../modifiers/index.js';
+import { generator } from '../utilities/NumberGenerator.js';
+import { diceUtils } from '../utilities/utils.js';
+import RollResult from '../results/RollResult.js';
+import RollResults from '../results/RollResults.js';
+import ComparePoint from '../ComparePoint.js';
 
 const modifiersSymbol = Symbol('modifiers');
 const qtySymbol = Symbol('qty');

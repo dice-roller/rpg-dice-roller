@@ -14,10 +14,10 @@ const parser = pegjs.generate(grammar, { output: 'source', format: 'commonjs' })
 
 // convert parser to ES module
 const output = `import math from 'mathjs-expression-parser';
-import * as Dice from '../../dice';
-import * as Modifiers from '../../modifiers';
-import ComparePoint from '../../ComparePoint';
-import RollGroup from '../../RollGroup';
+import * as Dice from '../../dice/index.js';
+import * as Modifiers from '../../modifiers/index.js';
+import ComparePoint from '../../ComparePoint.js';
+import RollGroup from '../../RollGroup.js';
 
 const module = {};
 

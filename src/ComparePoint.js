@@ -1,5 +1,5 @@
-import { CompareOperatorError, RequiredArgumentError } from './exceptions';
-import { diceUtils } from './utilities/utils';
+import { CompareOperatorError, RequiredArgumentError } from './exceptions/index.js';
+import { diceUtils } from './utilities/utils.js';
 
 /**
  * The operator

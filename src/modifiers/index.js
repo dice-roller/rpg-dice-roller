@@ -1,15 +1,15 @@
-import ComparisonModifier from './ComparisonModifier';
-import CriticalFailureModifier from './CriticalFailureModifier';
-import CriticalSuccessModifier from './CriticalSuccessModifier';
-import DropModifier from './DropModifier';
-import ExplodeModifier from './ExplodeModifier';
-import KeepModifier from './KeepModifier';
-import MaxModifier from './MaxModifier';
-import MinModifier from './MinModifier';
-import Modifier from './Modifier';
-import ReRollModifier from './ReRollModifier';
-import SortingModifier from './SortingModifier';
-import TargetModifier from './TargetModifier';
+import ComparisonModifier from './ComparisonModifier.js';
+import CriticalFailureModifier from './CriticalFailureModifier.js';
+import CriticalSuccessModifier from './CriticalSuccessModifier.js';
+import DropModifier from './DropModifier.js';
+import ExplodeModifier from './ExplodeModifier.js';
+import KeepModifier from './KeepModifier.js';
+import MaxModifier from './MaxModifier.js';
+import MinModifier from './MinModifier.js';
+import Modifier from './Modifier.js';
+import ReRollModifier from './ReRollModifier.js';
+import SortingModifier from './SortingModifier.js';
+import TargetModifier from './TargetModifier.js';
 
 export {
   ComparisonModifier,

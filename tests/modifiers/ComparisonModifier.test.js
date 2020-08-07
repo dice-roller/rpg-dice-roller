@@ -1,7 +1,7 @@
-import { StandardDice } from '../../src/dice';
-import { ComparisonModifier } from '../../src/modifiers';
-import ComparePoint from '../../src/ComparePoint';
-import RollResults from '../../src/results/RollResults';
+import { StandardDice } from '../../src/dice/index.js';
+import { ComparisonModifier } from '../../src/modifiers/index.js';
+import ComparePoint from '../../src/ComparePoint.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('ComparisonModifier', () => {
   describe('Initialisation', () => {

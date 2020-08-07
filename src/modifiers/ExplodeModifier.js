@@ -1,6 +1,6 @@
-import { DieActionValueError } from '../exceptions';
-import { diceUtils } from '../utilities/utils';
-import ComparisonModifier from './ComparisonModifier';
+import { DieActionValueError } from '../exceptions/index.js';
+import { diceUtils } from '../utilities/utils.js';
+import ComparisonModifier from './ComparisonModifier.js';
 
 const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');

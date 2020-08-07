@@ -1,4 +1,4 @@
-import { diceUtils } from '../utilities/utils';
+import { diceUtils } from '../utilities/utils.js';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');

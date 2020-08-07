@@ -1,5 +1,5 @@
-import StandardDice from './StandardDice';
-import FudgeDice from './FudgeDice';
-import PercentileDice from './PercentileDice';
+import StandardDice from './StandardDice.js';
+import FudgeDice from './FudgeDice.js';
+import PercentileDice from './PercentileDice.js';
 
 export { FudgeDice, PercentileDice, StandardDice };

@@ -1,5 +1,5 @@
-import { StandardDice } from '../../src/dice';
-import DiceRoll from '../../src/DiceRoll';
+import { StandardDice } from '../../src/dice/index.js';
+import DiceRoll from '../../src/DiceRoll.js';
 
 describe('Modifiers', () => {
   test('does not duplicate drop modifier', () => {

@@ -1,5 +1,5 @@
-import RollResults from '../../src/results/RollResults';
-import RollResult from '../../src/results/RollResult';
+import RollResults from '../../src/results/RollResults.js';
+import RollResult from '../../src/results/RollResult.js';
 
 describe('RollResults', () => {
   let rolls;

@@ -1,10 +1,10 @@
 import {
   ExplodeModifier, KeepModifier, Modifier, SortingModifier,
-} from '../../src/modifiers';
-import { FudgeDice, StandardDice } from '../../src/dice';
-import RollResult from '../../src/results/RollResult';
-import RollResults from '../../src/results/RollResults';
-import ComparePoint from '../../src/ComparePoint';
+} from '../../src/modifiers/index.js';
+import { FudgeDice, StandardDice } from '../../src/dice/index.js';
+import RollResult from '../../src/results/RollResult.js';
+import RollResults from '../../src/results/RollResults.js';
+import ComparePoint from '../../src/ComparePoint.js';
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {

@@ -1,4 +1,4 @@
-import Modifier from './Modifier';
+import Modifier from './Modifier.js';
 
 const directionSymbol = Symbol('direction');
 

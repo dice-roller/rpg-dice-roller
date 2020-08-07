@@ -1,4 +1,4 @@
-import { DataFormatError } from '../../src/exceptions';
+import { DataFormatError } from '../../src/exceptions/index.js';
 
 describe('DataFormatError', () => {
   test('throws correct message', () => {

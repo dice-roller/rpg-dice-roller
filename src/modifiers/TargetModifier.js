@@ -1,5 +1,5 @@
-import ComparisonModifier from './ComparisonModifier';
-import ComparePoint from '../ComparePoint';
+import ComparisonModifier from './ComparisonModifier.js';
+import ComparePoint from '../ComparePoint.js';
 
 const failureCPSymbol = Symbol('failure-cp');
 

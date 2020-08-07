@@ -1,5 +1,5 @@
-import { DieActionValueError } from '../exceptions';
-import ComparisonModifier from './ComparisonModifier';
+import { DieActionValueError } from '../exceptions/index.js';
+import ComparisonModifier from './ComparisonModifier.js';
 
 const onceSymbol = Symbol('once');
 

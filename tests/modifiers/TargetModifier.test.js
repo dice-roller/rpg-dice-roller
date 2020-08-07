@@ -1,8 +1,8 @@
-import { StandardDice } from '../../src/dice';
-import { ComparisonModifier, TargetModifier } from '../../src/modifiers';
-import ComparePoint from '../../src/ComparePoint';
-import RollResult from '../../src/results/RollResult';
-import RollResults from '../../src/results/RollResults';
+import { StandardDice } from '../../src/dice/index.js';
+import { ComparisonModifier, TargetModifier } from '../../src/modifiers/index.js';
+import ComparePoint from '../../src/ComparePoint.js';
+import RollResult from '../../src/results/RollResult.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('TargetModifier', () => {
   let sCP;

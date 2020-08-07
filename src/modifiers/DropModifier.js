@@ -1,4 +1,4 @@
-import KeepModifier from './KeepModifier';
+import KeepModifier from './KeepModifier.js';
 
 /**
  * A `DropModifier` will "drop" (Remove from total calculations) dice from a roll.
