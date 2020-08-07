@@ -15,7 +15,10 @@
     },
     "./lib/umd/bundle.js": {
       "require": "./lib/umd/bundle.js"
-    }
+    },
+    "./src/": "./src/",
+    "./types/": "./types/",
+    "./package.json": "./package.json"
   },
   "types": "./types/index.d.ts",
   "repository": {
