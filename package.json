@@ -70,23 +70,19 @@
     "node": ">=12.0"
   },
   "scripts": {
-    "build": "npm run build:prod",
-    "build:prod": "npm run prebuild && npm run build:umd -- --environment BUILD:prod && npm run build:esm -- --environment BUILD:prod",
-    "build:dev": "npm run prebuild && npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
-    "build:umd": "rollup --c --environment FORMAT:umd",
-    "build:esm": "rollup --c --environment FORMAT:esm",
-    "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
+    "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
+    "build:dev": "npm run build:grammars && rollup --c --environment BUILD:dev",
     "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude parser/grammars/*.js,RollGroup.js",
-    "prebuild": "npm run build:grammars",
-    "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
+    "build:grammars": "node src/parser/grammars/generate.js",
+    "build:prod": "npm run build:grammars && rollup --c --environment BUILD:prod",
+    "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
-    "pretest": "npm run prebuild && npm run build:declaration && npm run lint",
+    "pretest": "npm run build:grammars && npm run build:declaration && npm run lint",
     "test": "jest",
-    "test:watch": "npm run pretest && jest --watchAll",
     "test:coverage": "npm run pretest && jest --coverage",
-    "test:coveralls": "npm run test:coverage && coveralls < coverage/lcov.info",
-    "prepublishOnly": "npm test && npm run build:prod && npm run build:dev"
+    "test:watch": "npm run pretest && jest --watchAll",
+    "prepublishOnly": "npm test && npm run build"
   }
 }
