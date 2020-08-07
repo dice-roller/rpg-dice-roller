@@ -7,8 +7,16 @@ branches:
   only:
     - master
     - develop
-script:
-  - npm run test:coverage && coveralls < coverage/lcov.info
+jobs:
+  include:
+    - stage: "test"
+      name: "General tests"
+      script: npm run test:coverage && coveralls < coverage/lcov.info
+    - stage: "Build"
+      name: "Typescript declaration build"
+      script: npm run build:declaration
+    - script: npm run build:docs
+      name: "Docs build"
 env:
   global:
     - COVERALLS_PARALLEL=true

@@ -79,7 +79,7 @@
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
-    "pretest": "npm run build:grammars && npm run build:declaration && npm run lint",
+    "pretest": "npm run build:grammars && npm run lint",
     "test": "jest",
     "test:coverage": "npm run pretest && jest --coverage",
     "test:watch": "npm run pretest && jest --watchAll",
