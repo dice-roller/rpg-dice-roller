@@ -168,7 +168,7 @@ class TargetModifier extends ComparisonModifier {
         // add the modifier flag
         if (this.isSuccess(roll.value)) {
           roll.modifiers.add('target-success');
-        } else if (this.isFailure(roll)) {
+        } else if (this.isFailure(roll.value)) {
           roll.modifiers.add('target-failure');
         }
 
