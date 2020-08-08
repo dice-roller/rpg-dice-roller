@@ -1,6 +1,7 @@
 import { DataFormatError, RequiredArgumentError } from './exceptions/index.js';
-import { diceUtils, exportFormats } from './utilities/utils.js';
+import { isBase64, isJson } from './utilities/utils.js';
 import DiceRoll from './DiceRoll.js';
+import exportFormats from './utilities/ExportFormats.js';
 
 /**
  * history of log rolls
@@ -124,10 +125,10 @@ class DiceRoller {
   import(data) {
     if (!data) {
       throw new RequiredArgumentError('data');
-    } else if (diceUtils.isJson(data)) {
+    } else if (isJson(data)) {
       // data is JSON - parse and import
       return this.import(JSON.parse(data));
-    } else if (diceUtils.isBase64(data)) {
+    } else if (isBase64(data)) {
       // data is base64 encoded - decode an import
       return this.import(atob(data));
     } else if (typeof data === 'object') {
@@ -161,7 +162,7 @@ class DiceRoller {
    * @example <caption>Single notation</caption>
    * diceRoller.roll('2d6');
    *
-   * @example <caption>Multiple notati== ons</caption>
+   * @example <caption>Multiple notations</caption>
    * roll('2d6', '4d10', 'd8+4d6');
    *
    * @param {...string} notations The notations to roll

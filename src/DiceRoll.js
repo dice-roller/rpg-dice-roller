@@ -2,10 +2,11 @@ import math from 'mathjs-expression-parser';
 import { StandardDice } from './dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
 import { engines, generator } from './utilities/NumberGenerator.js';
-import { diceUtils, exportFormats } from './utilities/utils.js';
+import { isBase64, isJson, toFixed } from './utilities/utils.js';
 import Parser from './parser/Parser.js';
 import RollGroup from './RollGroup.js';
 import RollResults from './results/RollResults.js';
+import exportFormats from './utilities/ExportFormats.js';
 
 /**
  * Method for calculating the roll total
@@ -449,10 +450,10 @@ class DiceRoll {
   static import(data) {
     if (!data) {
       throw new RequiredArgumentError('data');
-    } else if (diceUtils.isJson(data)) {
+    } else if (isJson(data)) {
       // data is JSON format - parse and import
       return DiceRoll.import(JSON.parse(data));
-    } else if (diceUtils.isBase64(data)) {
+    } else if (isBase64(data)) {
       // data is base64 encoded - decode and import
       return DiceRoll.import(atob(data));
     } else if (typeof data === 'object') {
@@ -496,7 +497,7 @@ class DiceRoll {
     });
 
     // if a total formula has been produced, evaluate it and round it to max 2 decimal places
-    return formula ? diceUtils.toFixed(math.eval(formula), 2) : 0;
+    return formula ? toFixed(math.eval(formula), 2) : 0;
   }
 
   /**
@@ -507,7 +508,7 @@ class DiceRoll {
    *
    * @private
    *
-   * @param {Engine|{next(): number}} [engine]
+   * @param {{next(): number}} [engine]
    *
    * @returns {RollResults[]} The result of the rolls
    *

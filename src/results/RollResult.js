@@ -1,4 +1,4 @@
-import { diceUtils } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/utils.js';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');
@@ -48,30 +48,30 @@ class RollResult {
    * @throws {TypeError} Result value, calculation value, or modifiers are invalid
    */
   constructor(value, modifiers = [], useInTotal = true) {
-    if (diceUtils.isNumeric(value)) {
+    if (isNumeric(value)) {
       this[initialValueSymbol] = Number(value);
 
       this.modifiers = modifiers || [];
       this.useInTotal = useInTotal;
     } else if (value && (typeof value === 'object') && !Array.isArray(value)) {
       // ensure that we have a valid value
-      const initialVal = diceUtils.isNumeric(value.initialValue) ? value.initialValue : value.value;
-      if (!diceUtils.isNumeric(initialVal)) {
+      const initialVal = isNumeric(value.initialValue) ? value.initialValue : value.value;
+      if (!isNumeric(initialVal)) {
         throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
       this[initialValueSymbol] = Number(initialVal);
 
       if (
-        diceUtils.isNumeric(value.value)
+        isNumeric(value.value)
         && (Number(value.value) !== this[initialValueSymbol])
       ) {
         this.value = value.value;
       }
 
       if (
-        diceUtils.isNumeric(value.calculationValue)
-        && (parseFloat(value.calculationValue) !== this.value)
+        isNumeric(value.calculationValue)
+        && (parseFloat(`${value.calculationValue}`) !== this.value)
       ) {
         this.calculationValue = value.calculationValue;
       }
@@ -92,7 +92,7 @@ class RollResult {
    * @returns {number}
    */
   get calculationValue() {
-    return diceUtils.isNumeric(this[calculationValueSymbol])
+    return isNumeric(this[calculationValueSymbol])
       ? parseFloat(this[calculationValueSymbol])
       : this.value;
   }
@@ -105,15 +105,15 @@ class RollResult {
    * @throws {TypeError} value is invalid
    */
   set calculationValue(value) {
-    const isNumeric = diceUtils.isNumeric(value);
+    const isValNumeric = isNumeric(value);
     if (value === Infinity) {
       throw new RangeError('Result calculation value must be a finite number');
     }
-    if (value && !isNumeric) {
+    if (value && !isValNumeric) {
       throw new TypeError(`Result calculation value is invalid: ${value}`);
     }
 
-    this[calculationValueSymbol] = isNumeric ? parseFloat(value) : null;
+    this[calculationValueSymbol] = isValNumeric ? parseFloat(`${value}`) : null;
   }
 
   /**
@@ -246,7 +246,7 @@ class RollResult {
    * @returns {number}
    */
   get value() {
-    return diceUtils.isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
+    return isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
   }
 
   /**
@@ -261,7 +261,7 @@ class RollResult {
     if (value === Infinity) {
       throw new RangeError('Result value must be a finite number');
     }
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
 

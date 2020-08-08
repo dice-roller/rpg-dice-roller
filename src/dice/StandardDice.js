@@ -1,7 +1,7 @@
 import { RequiredArgumentError } from '../exceptions/index.js';
 import { ExplodeModifier, Modifier, ReRollModifier } from '../modifiers/index.js';
 import { generator } from '../utilities/NumberGenerator.js';
-import { diceUtils } from '../utilities/utils.js';
+import { isNumeric, isSafeNumber } from '../utilities/utils.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import ComparePoint from '../ComparePoint.js';
@@ -33,33 +33,33 @@ class StandardDice {
       throw new RequiredArgumentError('sides');
     } else if (sides === Infinity) {
       throw new RangeError('numerical sides must be finite number');
-    } else if (diceUtils.isNumeric(sides)) {
-      if ((sides < 1) || !diceUtils.isSafeNumber(sides)) {
+    } else if (isNumeric(sides)) {
+      if ((sides < 1) || !isSafeNumber(sides)) {
         throw new RangeError('numerical sides must be a positive finite number');
       }
     } else if (typeof sides !== 'string') {
       throw new TypeError('non-numerical sides must be a string');
     }
 
-    if (!diceUtils.isNumeric(qty)) {
+    if (!isNumeric(qty)) {
       throw new TypeError('qty must be a positive finite integer');
     } else if ((qty < 1) || (qty > 999)) {
       throw new RangeError('qty must be between 1 and 999');
     }
 
-    if (!diceUtils.isNumeric(min)) {
+    if (!isNumeric(min)) {
       throw new TypeError('min must a finite number');
-    } else if (!diceUtils.isSafeNumber(min)) {
+    } else if (!isSafeNumber(min)) {
       throw new RangeError('min must a finite number');
     }
 
-    if (max && !diceUtils.isNumeric(max)) {
+    if (max && !isNumeric(max)) {
       throw new TypeError('max must a finite number');
-    } else if (max && !diceUtils.isSafeNumber(max)) {
+    } else if (max && !isSafeNumber(max)) {
       throw new RangeError('max must a finite number');
     }
 
-    this[qtySymbol] = parseInt(qty, 10);
+    this[qtySymbol] = parseInt(`${qty}`, 10);
     this[sidesSymbol] = sides;
 
     if (modifiers) {
@@ -68,7 +68,7 @@ class StandardDice {
 
     this[minSymbol] = parseInt(min, 10);
 
-    this[maxSymbol] = max ? parseInt(max, 10) : sides;
+    this[maxSymbol] = max ? parseInt(`${max}`, 10) : sides;
   }
 
   /**
