@@ -1,5 +1,5 @@
 import { DieActionValueError } from '../exceptions/index.js';
-import { diceUtils } from '../utilities/utils.js';
+import { sumArray } from '../utilities/utils.js';
 import ComparisonModifier from './ComparisonModifier.js';
 
 const compoundSymbol = Symbol('compound');
@@ -117,7 +117,7 @@ class ExplodeModifier extends ComparisonModifier {
         /* eslint-disable  no-param-reassign */
         if (this.compound && (subRolls.length > 1)) {
           // update the roll value and modifiers
-          roll.value = diceUtils.sumArray(subRolls.map((result) => result.value));
+          roll.value = sumArray(subRolls.map((result) => result.value));
           roll.modifiers = [
             'explode',
             'compound',

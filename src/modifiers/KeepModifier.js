@@ -1,5 +1,5 @@
+import { isNumeric } from '../utilities/utils.js';
 import Modifier from './Modifier.js';
-import { diceUtils } from '../utilities/utils.js';
 
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');
@@ -94,7 +94,7 @@ class KeepModifier extends Modifier {
     if (value === Infinity) {
       throw new RangeError('qty must be a finite number');
     }
-    if (!diceUtils.isNumeric(value) || (value < 1)) {
+    if (!isNumeric(value) || (value < 1)) {
       throw new TypeError('qty must be a positive finite integer');
     }
 

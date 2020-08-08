@@ -1,5 +1,5 @@
+import { isNumeric } from '../utilities/utils.js';
 import Modifier from './Modifier.js';
-import { diceUtils } from '../utilities/utils.js';
 
 const minSymbol = Symbol('min');
 
@@ -46,11 +46,11 @@ class MinModifier extends Modifier {
    * @throws {TypeError} min must be a number
    */
   set min(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError('min must be a number');
     }
 
-    this[minSymbol] = parseFloat(value);
+    this[minSymbol] = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */

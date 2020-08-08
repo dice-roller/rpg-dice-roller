@@ -1,5 +1,5 @@
 import { CompareOperatorError, RequiredArgumentError } from './exceptions/index.js';
-import { diceUtils } from './utilities/utils.js';
+import { compareNumbers, isNumeric } from './utilities/utils.js';
 
 /**
  * The operator
@@ -88,7 +88,7 @@ class ComparePoint {
    * @throws {TypeError} value must be numeric
    */
   set value(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError('value must be a finite number');
     }
 
@@ -112,7 +112,7 @@ class ComparePoint {
    * @returns {boolean} `true` if it is a match, `false` otherwise
    */
   isMatch(value) {
-    return diceUtils.compareNumbers(value, this.value, this.operator);
+    return compareNumbers(value, this.value, this.operator);
   }
 
   /**

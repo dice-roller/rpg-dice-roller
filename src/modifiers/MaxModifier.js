@@ -1,5 +1,5 @@
+import { isNumeric } from '../utilities/utils.js';
 import Modifier from './Modifier.js';
-import { diceUtils } from '../utilities/utils.js';
 
 const maxSymbol = Symbol('max');
 
@@ -46,11 +46,11 @@ class MaxModifier extends Modifier {
    * @throws {TypeError} max must be a number
    */
   set max(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError('max must be a number');
     }
 
-    this[maxSymbol] = parseFloat(value);
+    this[maxSymbol] = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */
