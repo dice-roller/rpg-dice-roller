@@ -1,18 +1,33 @@
-import { diceUtils } from './utilities/utils';
-import CompareOperatorError from './exceptions/CompareOperatorError';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
+import { CompareOperatorError, RequiredArgumentError } from './exceptions/index.js';
+import { compareNumbers, isNumeric } from './utilities/utils.js';
 
+/**
+ * The operator
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
 const operatorSymbol = Symbol('operator');
+
+/**
+ * The value
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
 const valueSymbol = Symbol('value');
 
 /**
- * A compare point
+ * A `ComparePoint` object compares numbers against each other.
+ * For example, _is 6 greater than 3_, or _is 8 equal to 10_.
  */
 class ComparePoint {
   /**
-   * Create a ComparePoint
+   * Create a `ComparePoint` instance.
    *
-   * @param {string} operator The comparison operator (e.g '=')
+   * @param {string} operator The comparison operator (One of `=`, `!=`, `<`, `>`, `<=`, `>=`)
    * @param {number} value The value to compare to
    *
    * @throws {CompareOperatorError} operator is invalid
@@ -31,20 +46,20 @@ class ComparePoint {
   }
 
   /**
-   * Checks if the operator is valid
+   * Check if the operator is valid.
    *
    * @param {string} operator
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if the operator is valid, `false` otherwise
    */
   static isValidOperator(operator) {
     return (typeof operator === 'string') && /^(?:[<>!]?=|[<>])$/.test(operator);
   }
 
   /**
-   * Sets the operator value
+   * Set the comparison operator.
    *
-   * @param {string} operator
+   * @param {string} operator One of `=`, `!=`, `<`, `>`, `<=`, `>=`
    *
    * @throws CompareOperatorError operator is invalid
    */
@@ -57,7 +72,7 @@ class ComparePoint {
   }
 
   /**
-   * Returns the comparison operator
+   * The comparison operator.
    *
    * @returns {string}
    */
@@ -66,22 +81,22 @@ class ComparePoint {
   }
 
   /**
-   * Sets the value
+   * Set the value.
    *
    * @param {number} value
    *
    * @throws {TypeError} value must be numeric
    */
   set value(value) {
-    if (!diceUtils.isNumeric(value)) {
-      throw new TypeError('value must be numeric');
+    if (!isNumeric(value)) {
+      throw new TypeError('value must be a finite number');
     }
 
-    this[valueSymbol] = parseInt(value, 10);
+    this[valueSymbol] = Number(value);
   }
 
   /**
-   * Returns the comparison value
+   * The comparison value
    *
    * @returns {number}
    */
@@ -90,20 +105,22 @@ class ComparePoint {
   }
 
   /**
-   * Checks whether value matches the compare point
+   * Check whether value matches the compare point
    *
-   * @param {number} value
+   * @param {number} value The number to compare
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if it is a match, `false` otherwise
    */
   isMatch(value) {
-    return diceUtils.compareNumbers(value, this.value, this.operator);
+    return compareNumbers(value, this.value, this.operator);
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{type: string, value: number, operator: string}}
    */
   toJSON() {
     const { operator, value } = this;
@@ -116,7 +133,9 @@ class ComparePoint {
   }
 
   /**
-   * Returns the String representation of the object
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
    *
    * @returns {string}
    */

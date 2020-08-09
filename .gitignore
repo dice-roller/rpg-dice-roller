@@ -11,17 +11,14 @@
 *~
 *.sass-cache
 
-
 # IOS/Mac specific
 *.DS_Store
-
 
 # ASP.NET/Windows specific
 Thumbs.db
 Desktop.ini
 [Oo]bj
 [Bb]in
-
 
 # Other OS or Editor folders/files
 ._*
@@ -36,7 +33,6 @@ nbproject
 *.sublime-workspace
 .idea
 
-
 # Package Managers
 node_modules
 bower_components
@@ -48,6 +44,8 @@ bower_components
 ## Compiled scripts
 /lib/*.js
 /lib/**/*.js
+/lib/*.map
+/lib/**/*.map
 /src/parser/grammars/grammar.js
 
 ## Compiled TypeScript
@@ -55,3 +53,6 @@ bower_components
 
 ## Testing
 /coverage
+
+## Docs
+/docs

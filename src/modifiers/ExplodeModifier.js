@@ -1,27 +1,29 @@
-import ComparisonModifier from './ComparisonModifier';
-import { diceUtils } from '../utilities/utils';
-import DieActionValueError from '../exceptions/DieActionValueError';
+import { DieActionValueError } from '../exceptions/index.js';
+import { sumArray } from '../utilities/utils.js';
+import ComparisonModifier from './ComparisonModifier.js';
 
 const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');
 
 /**
- * An explode modifier
+ * An `ExplodeModifier` re-rolls dice that match a given test, and adds them to the results.
+ *
+ * @see {@link ReRollModifier} if you want to replace the old value with the new, rather than adding
+ *
+ * @extends ComparisonModifier
  */
 class ExplodeModifier extends ComparisonModifier {
   /**
-   * Create an ExplodeModifier
+   * Create an `ExplodeModifier` instance
    *
-   * @param {string} notation The modifier notation
    * @param {ComparePoint} [comparePoint=null] The comparison object
    * @param {boolean} [compound=false] Whether to compound or not
    * @param {boolean} [penetrate=false] Whether to penetrate or not
    *
-   * @throws {RequiredArgumentError} Notation is required
-   * @throws {TypeError} comparePoint must be a ComparePoint object
+   * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(notation, comparePoint = null, compound = false, penetrate = false) {
-    super(notation, comparePoint);
+  constructor(comparePoint = null, compound = false, penetrate = false) {
+    super(comparePoint);
 
     this[compoundSymbol] = !!compound;
     this[penetrateSymbol] = !!penetrate;
@@ -31,9 +33,9 @@ class ExplodeModifier extends ComparisonModifier {
   }
 
   /**
-   * Whether the modifier should compound the results or not
+   * Whether the modifier should compound the results or not.
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if it should compound, `false` otherwise
    */
   get compound() {
     return this[compoundSymbol];
@@ -41,9 +43,9 @@ class ExplodeModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'explode'
    */
   get name() {
     return 'explode';
@@ -51,21 +53,30 @@ class ExplodeModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Whether the modifier should penetrate the results or not
+   * The modifier's notation.
    *
-   * @returns {boolean}
+   * @returns {string}
+   */
+  get notation() {
+    return `!${this.compound ? '!' : ''}${this.penetrate ? 'p' : ''}${super.notation}`;
+  }
+
+  /**
+   * Whether the modifier should penetrate the results or not.
+   *
+   * @returns {boolean} `true` if it should penetrate, `false` otherwise
    */
   get penetrate() {
     return this[penetrateSymbol];
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
@@ -106,7 +117,7 @@ class ExplodeModifier extends ComparisonModifier {
         /* eslint-disable  no-param-reassign */
         if (this.compound && (subRolls.length > 1)) {
           // update the roll value and modifiers
-          roll.value = diceUtils.sumArray(subRolls);
+          roll.value = sumArray(subRolls.map((result) => result.value));
           roll.modifiers = [
             'explode',
             'compound',
@@ -128,9 +139,18 @@ class ExplodeModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  notation: string,
+   *  name: string,
+   *  type: string,
+   *  comparePoint: (ComparePoint|undefined),
+   *  compound: boolean,
+   *  penetrate: boolean
+   * }}
    */
   toJSON() {
     const { compound, penetrate } = this;

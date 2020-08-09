@@ -4,6 +4,8 @@
 # Except for these
 !/lib/*.js
 !/lib/**/*.js
+!/lib/*.map
+!/lib/**/*.map
 !/types/*.d.ts
 !/types/**/*.d.ts
 !CONTRIBUTING.md

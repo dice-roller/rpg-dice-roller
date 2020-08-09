@@ -1,20 +1,24 @@
-import ComparisonModifier from './ComparisonModifier';
+import ComparisonModifier from './ComparisonModifier.js';
 
 /**
- * A critical failure modifier
+ * A `CriticalFailureModifier` modifier flags values that match a comparison.
+ *
+ * Unlike most other modifiers, it doesn't affect the roll value, it simply "flags" matching rolls.
+ *
+ * @see {@link CriticalSuccessModifier} for the opposite of this modifier
+ *
+ * @extends ComparisonModifier
  */
 class CriticalFailureModifier extends ComparisonModifier {
   /**
-   * Create a CriticalFailureModifier
+   * Create a `CriticalFailureModifier` instance.
    *
-   * @param {string} notation The modifier notation
-   * @param {ComparePoint} comparePoint The comparison object
+   * @param {ComparePoint} [comparePoint] The comparison object
    *
-   * @throws {RequiredArgumentError} Notation is required
-   * @throws {TypeError} comparePoint must be a ComparePoint object
+   * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(notation, comparePoint) {
-    super(notation, comparePoint);
+  constructor(comparePoint) {
+    super(comparePoint);
 
     // set the modifier's sort order
     this.order = 9;
@@ -22,9 +26,9 @@ class CriticalFailureModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'critical-failure'
    */
   get name() {
     return 'critical-failure';
@@ -32,12 +36,21 @@ class CriticalFailureModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Runs the modifier on the rolls
+   * The modifier's notation.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @returns {string}
+   */
+  get notation() {
+    return `cf${super.notation}`;
+  }
+
+  /**
+   * Run the modifier on the results.
    *
-   * @returns {RollResults}
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
+   *
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     results.rolls

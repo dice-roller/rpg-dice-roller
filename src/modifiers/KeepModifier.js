@@ -1,45 +1,48 @@
-import Modifier from './Modifier';
-import { diceUtils } from '../utilities/utils';
+import { isNumeric } from '../utilities/utils.js';
+import Modifier from './Modifier.js';
 
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');
 
 /**
- * A keep modifier
+ * A `KeepModifier` will "keep" dice from a roll, dropping (Remove from total calculations) all
+ * others.
+ *
+ * @see {@link DropModifier} for the opposite of this modifier
+ *
+ * @extends Modifier
  */
 class KeepModifier extends Modifier {
   /**
-   * Create a KeepModifier
+   * Create a `KeepModifier` instance
    *
-   * @param {string} notation The modifier notation
    * @param {string} end Either `h|l` to keep highest or lowest
-   * @param {number} [qty=1] The amount to keep
+   * @param {number} [qty=1] The amount dice to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(notation, end, qty = 1) {
-    super(notation);
+  constructor(end, qty = 1) {
+    super();
 
     this.end = end;
-    this.qty = (qty || (qty === 0)) ? qty : 1;
+    this.qty = qty;
 
     // set the modifier's sort order
     this.order = 5;
   }
 
   /**
-   * Returns which end the rolls should be kept ("h" = High, "l" = Low)
+   * Which end the rolls should be kept ("h" = High, "l" = Low).
    *
-   * @returns {string}
+   * @returns {string} 'h' or 'l'
    */
   get end() {
     return this[endSymbol];
   }
 
   /**
-   * Sets which end the rolls should be kept ("h" = High, "l" = Low)
+   * Set which end the rolls should be kept ("h" = High, "l" = Low).
    *
    * @param {string} value Either 'h' or 'l'
    *
@@ -54,16 +57,25 @@ class KeepModifier extends Modifier {
   }
 
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'keep-l' or 'keep-h'
    */
   get name() {
     return `keep-${this.end}`;
   }
 
   /**
-   * Returns the quantity of dice that should be kept
+   * The modifier's notation.
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `k${this.end}${this.qty}`;
+  }
+
+  /**
+   * The quantity of dice that should be kept.
    *
    * @returns {number}
    */
@@ -72,39 +84,46 @@ class KeepModifier extends Modifier {
   }
 
   /**
-   * Sets the quantity of dice that should be kept
+   * Set the quantity of dice that should be kept.
    *
    * @param {number} value
    *
-   * @throws {TypeError} qty must be a positive integer
+   * @throws {TypeError} qty must be a positive finite integer
    */
   set qty(value) {
-    if (!diceUtils.isNumeric(value) || (value < 1)) {
-      throw new TypeError('qty must be a positive integer');
+    if (value === Infinity) {
+      throw new RangeError('qty must be a finite number');
+    }
+    if (!isNumeric(value) || (value < 1)) {
+      throw new TypeError('qty must be a positive finite integer');
     }
 
-    this[qtySymbol] = parseInt(value, 10);
+    this[qtySymbol] = Math.floor(value);
   }
 
   /**
-   * Returns the min/max range of rolls to drop
+   * Determine the start and end (end exclusive) range of rolls to drop.
    *
-   * @param {RollResults} _results
+   * @param {RollResults} _results The results to drop from
    *
-   * @returns {number[]}
+   * @returns {number[]} The min / max range to drop
    */
   rangeToDrop(_results) {
     // we're keeping, so we want to drop all dice that are outside of the qty range
+    if (this.end === 'h') {
+      return [0, _results.length - this.qty];
+    }
+
     return [this.qty, _results.length];
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     // first clone the rolls so it doesn't affect the original array
@@ -114,8 +133,8 @@ class KeepModifier extends Modifier {
         value: roll.value,
         index,
       }))
-      // sort the list by value (Either ascending or descending depending on end)
-      .sort((a, b) => ((this.end === 'h') ? b.value - a.value : a.value - b.value))
+      // sort the list ascending by value
+      .sort((a, b) => a.value - b.value)
       .map((rollIndex) => rollIndex.index)
       // get the roll indexes to drop
       .slice(...this.rangeToDrop(results));
@@ -132,9 +151,11 @@ class KeepModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string, qty: number, end: string}}
    */
   toJSON() {
     const { end, qty } = this;

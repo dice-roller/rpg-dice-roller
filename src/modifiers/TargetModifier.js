@@ -1,23 +1,28 @@
-import ComparisonModifier from './ComparisonModifier';
-import ComparePoint from '../ComparePoint';
+import ComparisonModifier from './ComparisonModifier.js';
+import ComparePoint from '../ComparePoint.js';
 
 const failureCPSymbol = Symbol('failure-cp');
 
 /**
- * A target success / failure modifier
+ * A `TargetModifier` determines whether rolls are classed as a success, failure, or neutral.
+ *
+ * This modifies the roll values, depending on the state;
+ *
+ * success = `1`, failure = `-1`, neutral = `0`.
+ *
+ * @extends ComparisonModifier
  */
 class TargetModifier extends ComparisonModifier {
   /**
-   * Create a TargetModifier
+   * Create a `TargetModifier` instance.
    *
-   * @param {string} notation The modifier notation
    * @param {ComparePoint} successCP The success comparison object
    * @param {ComparePoint} [failureCP=null] The failure comparison object
    *
    * @throws {TypeError} failure comparePoint must be instance of ComparePoint or null
    */
-  constructor(notation, successCP, failureCP = null) {
-    super(notation, successCP);
+  constructor(successCP, failureCP = null) {
+    super(successCP);
 
     // set the failure compare point
     this.failureComparePoint = failureCP;
@@ -27,7 +32,7 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns the failure compare point for the modifier
+   * The failure compare point for the modifier
    *
    * @returns {ComparePoint|null}
    */
@@ -36,7 +41,7 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Sets the failure compare point
+   * Set the failure compare point
    *
    * @param {ComparePoint|null} comparePoint
    *
@@ -52,9 +57,9 @@ class TargetModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'target'
    */
   get name() {
     return 'target';
@@ -62,7 +67,16 @@ class TargetModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns the success compare point for the modifier
+   * The modifier's notation.
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `${super.notation}${this.failureComparePoint ? `f${this.failureComparePoint}` : ''}`;
+  }
+
+  /**
+   * The success compare point for the modifier
    *
    * @returns {ComparePoint}
    */
@@ -71,7 +85,7 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Sets the success compare point for the modifier
+   * Set the success compare point for the modifier
    *
    * @param {ComparePoint} value
    */
@@ -80,13 +94,11 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Checks if the value is a success/failure/neither and returns
-   * its corresponding state value:
-   * success = 1, fail = -1, neither = 0
+   * Check if the value is a success/failure/neither and return the corresponding state value.
    *
    * @param {number} value The number to compare against
    *
-   * @returns {number}
+   * @returns {number} success = `1`, failure = `-1`, neutral = `0`
    */
   getStateValue(value) {
     if (this.isSuccess(value)) {
@@ -101,10 +113,10 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns true if the value matches the failure compare point.
+   * Check if the `value` matches the failure compare point.
    *
-   * A response of `false` does NOT indicate a success. A value
-   * is a success ONLY if it passes the success compare point.
+   * A response of `false` does _NOT_ indicate a success.
+   * A value is a success _ONLY_ if it passes the success compare point.
    * A value could be neither a failure or a success.
    *
    * @param {number} value The number to compare against
@@ -116,22 +128,21 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns true if the value doesn't match both the success compare point
-   * and the failure compare point.
+   * Check if the `value` is neither a success or a failure.
    *
    * @param {number} value The number to compare against
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if the value doesn't match the success and failure compare points
    */
   isNeutral(value) {
     return !this.isSuccess(value) && !this.isFailure(value);
   }
 
   /**
-   * Returns true if the value matches the success compare point.
+   * Check if the `value` matches the success compare point.
    *
-   * A response of `false` does NOT indicate a failure. A value
-   * is a failure ONLY if it passes the failure compare point.
+   * A response of `false` does _NOT_ indicate a failure.
+   * A value is a failure _ONLY_ if it passes the failure compare point.
    * A value could be neither a failure or a success.
    *
    * @param {number} value The number to compare against
@@ -143,12 +154,12 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     // loop through each roll and see if it matches the target
@@ -157,7 +168,7 @@ class TargetModifier extends ComparisonModifier {
         // add the modifier flag
         if (this.isSuccess(roll.value)) {
           roll.modifiers.add('target-success');
-        } else if (this.isFailure(roll)) {
+        } else if (this.isFailure(roll.value)) {
           roll.modifiers.add('target-failure');
         }
 
@@ -172,9 +183,18 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  notation: string,
+   *  name: string,
+   *  type: string,
+   *  comparePoint: (ComparePoint|undefined),
+   *  failureComparePoint: (ComparePoint|null),
+   *  successComparePoint: ComparePoint
+   * }}
    */
   toJSON() {
     const { failureComparePoint, successComparePoint } = this;

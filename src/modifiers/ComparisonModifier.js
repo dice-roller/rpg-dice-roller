@@ -1,23 +1,36 @@
-import Modifier from './Modifier';
-import ComparePoint from '../ComparePoint';
+import Modifier from './Modifier.js';
+import ComparePoint from '../ComparePoint.js';
 
 const comparePointSymbol = Symbol('compare-point');
 
 /**
- * A comparison modifier
+ * A `ComparisonModifier` is the base modifier class for comparing values.
+ *
+ * ::: warning Abstract class
+ * This is meant as an abstract class and should not be used directly.
+ * You can use one of the extended modifiers, or extend the class yourself.
+ * :::
+ *
+ * @abstract
+ *
+ * @extends Modifier
+ *
+ * @see {@link CriticalFailureModifier}
+ * @see {@link CriticalSuccessModifier}
+ * @see {@link ExplodeModifier}
+ * @see {@link ReRollModifier}
+ * @see {@link TargetModifier}
  */
 class ComparisonModifier extends Modifier {
   /**
-   * Create a ComparisonModifier
+   * Create a `ComparisonModifier` instance.
    *
-   * @param {string} notation The modifier notation
-   * @param {ComparePoint} comparePoint The comparison object
+   * @param {ComparePoint} [comparePoint] The comparison object
    *
-   * @throws {RequiredArgumentError} Notation is required
-   * @throws {TypeError} comparePoint must be a ComparePoint object
+   * @throws {TypeError} `comparePoint` must be an instance of `ComparePoint` or `undefined`
    */
-  constructor(notation, comparePoint) {
-    super(notation);
+  constructor(comparePoint) {
+    super();
 
     if (comparePoint) {
       this.comparePoint = comparePoint;
@@ -25,20 +38,20 @@ class ComparisonModifier extends Modifier {
   }
 
   /**
-   * Returns the compare point for the object
+   * The compare point.
    *
-   * @returns {ComparePoint}
+   * @returns {ComparePoint|undefined}
    */
   get comparePoint() {
     return this[comparePointSymbol];
   }
 
   /**
-   * Sets the compare point
+   * Set the compare point.
    *
    * @param {ComparePoint} comparePoint
    *
-   * @throws {TypeError} value must be a ComparePoint object
+   * @throws {TypeError} value must be an instance of `ComparePoint`
    */
   set comparePoint(comparePoint) {
     if (!(comparePoint instanceof ComparePoint)) {
@@ -50,9 +63,9 @@ class ComparisonModifier extends Modifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'comparison'
    */
   get name() {
     return 'comparison';
@@ -60,11 +73,20 @@ class ComparisonModifier extends Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Checks whether value matches the compare point
+   * The modifier's notation.
+   *
+   * @returns {string}
+   */
+  get notation() {
+    return `${this.comparePoint || ''}`;
+  }
+
+  /**
+   * Check whether value matches the compare point or not.
    *
    * @param {number} value The value to compare with
    *
-   * @returns {boolean}
+   * @returns {boolean} `true` if the value matches, `false` otherwise
    */
   isComparePoint(value) {
     if (!this.comparePoint) {
@@ -75,9 +97,16 @@ class ComparisonModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  notation: string,
+   *  name: string,
+   *  type: string,
+   *  comparePoint: (ComparePoint|undefined)
+   * }}
    */
   toJSON() {
     const { comparePoint } = this;

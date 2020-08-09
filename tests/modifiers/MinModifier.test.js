@@ -1,14 +1,12 @@
-import MinModifier from '../../src/modifiers/MinModifier';
-import Modifier from '../../src/modifiers/Modifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
-import StandardDice from '../../src/dice/StandardDice';
-import RollResults from '../../src/results/RollResults';
+import { MinModifier, Modifier } from '../../src/modifiers/index.js';
+import { StandardDice } from '../../src/dice/index.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('MinModifier', () => {
   let mod;
 
   beforeEach(() => {
-    mod = new MinModifier('min3', 3);
+    mod = new MinModifier(3);
   });
 
   describe('Initialisation', () => {
@@ -26,39 +24,21 @@ describe('MinModifier', () => {
       }));
     });
 
-    test('constructor requires notation', () => {
+    test('constructor requires min', () => {
       expect(() => {
         new MinModifier();
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MinModifier(false);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MinModifier(null);
-      }).toThrow(RequiredArgumentError);
+      }).toThrow(TypeError);
 
       expect(() => {
         new MinModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
-
-    test('constructor requires min', () => {
-      expect(() => {
-        new MinModifier('min3');
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MinModifier('min3', false);
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MinModifier('min3', null);
-      }).toThrow(TypeError);
-
-      expect(() => {
-        new MinModifier('min3', undefined);
       }).toThrow(TypeError);
     });
   });
@@ -66,12 +46,15 @@ describe('MinModifier', () => {
   describe('Min', () => {
     test('can be changed', () => {
       expect(mod.min).toBe(3);
+      expect(mod.notation).toBe('min3');
 
       mod.min = 1;
       expect(mod.min).toBe(1);
+      expect(mod.notation).toBe('min1');
 
       mod.min = 23;
       expect(mod.min).toBe(23);
+      expect(mod.notation).toBe('min23');
     });
 
     test('must be numeric', () => {
@@ -91,17 +74,37 @@ describe('MinModifier', () => {
     test('can be float', () => {
       mod.min = 4.5;
       expect(mod.min).toBeCloseTo(4.5);
+      expect(mod.notation).toBe('min4.5');
 
       mod.min = 300.6579;
       expect(mod.min).toBeCloseTo(300.6579);
+      expect(mod.notation).toBe('min300.6579');
     });
 
     test('can be negative', () => {
       mod.min = -10;
       expect(mod.min).toBe(-10);
+      expect(mod.notation).toBe('min-10');
 
       mod.min = -46.2;
       expect(mod.min).toBeCloseTo(-46.2);
+      expect(mod.notation).toBe('min-46.2');
+    });
+  });
+
+  describe('Notation', () => {
+    test('simple notation', () => {
+      mod = new MinModifier(35);
+      expect(mod.notation).toEqual('min35');
+
+      mod = new MinModifier(90876684);
+      expect(mod.notation).toEqual('min90876684');
+
+      mod = new MinModifier(7986);
+      expect(mod.notation).toEqual('min7986');
+
+      mod = new MinModifier(2);
+      expect(mod.notation).toEqual('min2');
     });
   });
 
@@ -128,7 +131,7 @@ describe('MinModifier', () => {
       results = new RollResults([
         1, 4, 2, 1, 6,
       ]);
-      die = new StandardDice('5d10', 10, 5);
+      die = new StandardDice(10, 5);
     });
 
     test('returns RollResults object', () => {

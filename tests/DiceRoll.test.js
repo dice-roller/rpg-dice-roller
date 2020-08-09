@@ -1,13 +1,11 @@
 import math from 'mathjs-expression-parser';
-import { exportFormats } from '../src/utilities/utils';
-import DataFormatError from '../src/exceptions/DataFormatError';
-import DiceRoll from '../src/DiceRoll';
-import NotationError from '../src/exceptions/NotationError';
-import Parser from '../src/parser/Parser';
-import StandardDice from '../src/dice/StandardDice';
-import RollResults from '../src/results/RollResults';
-import RollResult from '../src/results/RollResult';
-import RequiredArgumentError from '../src/exceptions/RequiredArgumentErrorError';
+import { StandardDice } from '../src/dice/index.js';
+import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
+import DiceRoll from '../src/DiceRoll.js';
+import Parser from '../src/parser/Parser.js';
+import RollResult from '../src/results/RollResult.js';
+import RollResults from '../src/results/RollResults.js';
+import exportFormats from '../src/utilities/ExportFormats.js';
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -765,8 +763,21 @@ describe('DiceRoll', () => {
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
-    test('importing a DiceRoll object returns itself', () => {
-      expect(DiceRoll.import(diceRoll)).toBe(diceRoll);
+    test('non-roll items are removed when importing notation.rolls', () => {
+      const exported = diceRoll.export(exportFormats.OBJECT);
+      // clone the rolls data
+      const dataToImport = {
+        notation: exported.notation,
+        rolls: [...exported.rolls],
+      };
+
+      // add some dummy invalid data
+      dataToImport.rolls.push(...['foo', 'bar']);
+
+      const importedRoll = DiceRoll.import(dataToImport);
+
+      expect(importedRoll).toBeInstanceOf(DiceRoll);
+      expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
     test('invalid format throws error', () => {

@@ -2,15 +2,43 @@ import {
   browserCrypto, nodeCrypto, MersenneTwister19937, nativeMath, Random,
 } from 'random-js';
 
+/**
+ * The engine
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
 const engineSymbol = Symbol('engine');
+
+/**
+ * The random object
+ *
+ * @type {symbol}
+ *
+ * @private
+ */
 const randomSymbol = Symbol('random');
 
 /**
- * Engine that always returns tha maximum value, provided that it is supplied with the range
+ * Engine that always returns the maximum value.
+ * Used internally for calculating max roll values.
  *
- * @type {{next(): number, range: []}}
+ * @since 4.2.0
+ *
+ * @type {{next(): number, range: number[]}}
  */
 const maxEngine = {
+  /**
+   * The min / max number range (e.g. `[1, 10]`).
+   *
+   * This _must_ be set for the `next()` method to return the correct last index.
+   *
+   * @example
+   * maxEngine.range = [1, 10];
+   *
+   * @type {number[]}
+   */
   range: [],
   /**
    * Returns the maximum number index for the range
@@ -24,13 +52,16 @@ const maxEngine = {
 };
 
 /**
- * Engine that always returns the minimum value
+ * Engine that always returns the minimum value.
+ * Used internally for calculating min roll values.
+ *
+ * @since 4.2.0
  *
  * @type {{next(): number}}
  */
 const minEngine = {
   /**
-   * Returns the minimum number index, 0
+   * Returns the minimum number index, `0`
    *
    * @returns {number}
    */
@@ -40,7 +71,12 @@ const minEngine = {
 };
 
 /**
- * List of built-in number generator engines
+ * List of built-in number generator engines.
+ *
+ * @since 4.2.0
+ *
+ * @see This uses [random-js](https://github.com/ckknight/random-js).
+ * For details of the engines, check the [documentation](https://github.com/ckknight/random-js#engines).
  *
  * @type {{
  *  min: {next(): number},
@@ -61,11 +97,28 @@ const engines = {
 };
 
 /**
- * A random number generator
+ * The `NumberGenerator` is capable of generating random numbers.
+ *
+ * @since 4.2.0
+ *
+ * @see This uses [random-js](https://github.com/ckknight/random-js).
+ * For details of the engines, check the [documentation](https://github.com/ckknight/random-js#engines).
  */
 class NumberGenerator {
   /**
-   * Create a NumberGenerator
+   * Create a `NumberGenerator` instance.
+   *
+   * The `engine` can be any object that has a `next()` method, which returns a number.
+   *
+   * @example <caption>Built-in engine</caption>
+   * new NumberGenerator(engines.nodeCrypto);
+   *
+   * @example <caption>Custom engine</caption>
+   * new NumberGenerator({
+   *   next() {
+   *     // return a random number
+   *   },
+   * });
    *
    * @param {Engine|{next(): number}} [engine=nativeMath] The RNG engine to use
    *
@@ -76,7 +129,7 @@ class NumberGenerator {
   }
 
   /**
-   * Returns the current engine
+   * The current engine.
    *
    * @returns {Engine|{next(): number}}
    */
@@ -85,7 +138,21 @@ class NumberGenerator {
   }
 
   /**
-   * Sets the engine
+   * Set the engine.
+   *
+   * The `engine` can be any object that has a `next()` method, which returns a number.
+   *
+   * @example <caption>Built-in engine</caption>
+   * numberGenerator.engine = engines.nodeCrypto;
+   *
+   * @example <caption>Custom engine</caption>
+   * numberGenerator.engine = {
+   *   next() {
+   *     // return a random number
+   *   },
+   * });
+   *
+   * @see {@link engines}
    *
    * @param {Engine|{next(): number}} engine
    *
@@ -102,12 +169,12 @@ class NumberGenerator {
   }
 
   /**
-   * Returns a random integer within the inclusive range `[min, max]`
+   * Generate a random integer within the inclusive range `[min, max]`.
    *
    * @param {number} min The minimum integer value, inclusive.
    * @param {number} max The maximum integer value, inclusive.
    *
-   * @returns {number}
+   * @returns {number} The random integer
    */
   integer(min, max) {
     this[engineSymbol].range = [min, max];
@@ -116,13 +183,13 @@ class NumberGenerator {
   }
 
   /**
-   * Returns a floating-point value within [min, max) or [min, max]
+   * Returns a floating-point value within `[min, max)` or `[min, max]`.
    *
    * @param {number} min The minimum floating-point value, inclusive.
    * @param {number} max The maximum floating-point value.
-   * @param {boolean} [inclusive=false] If true, `max` will be inclusive.
+   * @param {boolean} [inclusive=false] If `true`, `max` will be inclusive.
    *
-   * @returns {number}
+   * @returns {number} The random floating-point value
    */
   real(min, max, inclusive = false) {
     this[engineSymbol].range = [min, max];

@@ -3,9 +3,9 @@
  */
 class CompareOperatorError extends TypeError {
   /**
-   * Create a CompareOperatorError
+   * Create a `CompareOperatorError`
    *
-   * @param {string} operator The invalid operator
+   * @param {*} operator The invalid operator
    */
   constructor(operator) {
     super(`Operator "${operator}" is invalid`);

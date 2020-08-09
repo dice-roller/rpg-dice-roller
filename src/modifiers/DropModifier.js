@@ -1,45 +1,60 @@
-import KeepModifier from './KeepModifier';
+import KeepModifier from './KeepModifier.js';
 
 /**
- * A drop modifier
+ * A `DropModifier` will "drop" (Remove from total calculations) dice from a roll.
+ *
+ * @see {@link KeepModifier} for the opposite of this modifier
+ *
+ * @extends KeepModifier
  */
 class DropModifier extends KeepModifier {
   /**
-   * Create a DropModifier
+   * Create a `DropModifier` instance.
    *
-   * @param {string} notation The modifier notation
    * @param {string} end Either `h|l` to drop highest or lowest
-   * @param {number} [qty=1] The amount to keep
+   * @param {number} [qty=1] The amount of dice to drop
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
-   * @throws {RequiredArgumentError} Notation is required
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(notation, end, qty = 1) {
-    super(notation, end, qty);
+  constructor(end, qty = 1) {
+    super(end, qty);
 
     // set the modifier's sort order
     this.order = 6;
   }
 
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'drop-l' or 'drop-h'
    */
   get name() {
     return `drop-${this.end}`;
   }
 
   /**
-   * Returns the min/max range of rolls to drop
+   * The modifier's notation.
    *
-   * @param {RollResults} _results
+   * @returns {string}
+   */
+  get notation() {
+    return `d${this.end}${this.qty}`;
+  }
+
+  /**
+   * Determine the start and end (end exclusive) range of rolls to drop.
    *
-   * @returns {number[]}
+   * @param {RollResults} _results The results to drop from
+   *
+   * @returns {number[]} The min / max range to drop
    */
   rangeToDrop(_results) {
     // we're dropping, so we want to drop all dice that are inside of the qty range
+    if (this.end === 'h') {
+      return [_results.length - this.qty, _results.length];
+    }
+
     return [0, this.qty];
   }
 }

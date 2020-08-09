@@ -1,21 +1,25 @@
-import ComparisonModifier from './ComparisonModifier';
-import DieActionValueError from '../exceptions/DieActionValueError';
+import { DieActionValueError } from '../exceptions/index.js';
+import ComparisonModifier from './ComparisonModifier.js';
 
 const onceSymbol = Symbol('once');
 
 /**
- * A Re-roll modifier
+ * A `ReRollModifier` re-rolls dice that match a given test, and replaces the new value with the old
+ * one.
+ *
+ * @see {@link ExplodeModifier} if you want to keep the old value as well
+ *
+ * @extends ComparisonModifier
  */
 class ReRollModifier extends ComparisonModifier {
   /**
-   * Create a ReRollModifier
+   * Create a `ReRollModifier` instance.
    *
-   * @param {string} notation The modifier notation
    * @param {boolean} [once=false] Whether to only re-roll once or not
    * @param {ComparePoint} [comparePoint=null] The comparison object
    */
-  constructor(notation, once = false, comparePoint = null) {
-    super(notation, comparePoint);
+  constructor(once = false, comparePoint = null) {
+    super(comparePoint);
 
     this.once = !!once;
 
@@ -25,9 +29,9 @@ class ReRollModifier extends ComparisonModifier {
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 're-roll'
    */
   get name() {
     return 're-roll';
@@ -35,16 +39,25 @@ class ReRollModifier extends ComparisonModifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Returns whether the modifier should only re-roll once or not
+   * The modifier's notation.
    *
-   * @returns {boolean}
+   * @returns {string}
+   */
+  get notation() {
+    return `r${this.once ? 'o' : ''}${super.notation}`;
+  }
+
+  /**
+   * Whether the modifier should only re-roll once or not.
+   *
+   * @returns {boolean} `true` if it should re-roll once, `false` otherwise
    */
   get once() {
     return !!this[onceSymbol];
   }
 
   /**
-   * Sets whether the modifier should only re-roll once or not
+   * Set whether the modifier should only re-roll once or not.
    *
    * @param {boolean} value
    */
@@ -53,12 +66,12 @@ class ReRollModifier extends ComparisonModifier {
   }
 
   /**
-   * Runs the modifier on the rolls
+   * Run the modifier on the results.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
    *
-   * @returns {RollResults}
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     // ensure that the dice can explode without going into an infinite loop
@@ -94,9 +107,17 @@ class ReRollModifier extends ComparisonModifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  notation: string,
+   *  name: string,
+   *  type: string,
+   *  comparePoint: (ComparePoint|undefined),
+   *  once: boolean
+   * }}
    */
   toJSON() {
     const { once } = this;

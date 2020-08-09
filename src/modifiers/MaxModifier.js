@@ -1,22 +1,27 @@
-import Modifier from './Modifier';
-import { diceUtils } from '../utilities/utils';
+import { isNumeric } from '../utilities/utils.js';
+import Modifier from './Modifier.js';
 
 const maxSymbol = Symbol('max');
 
 /**
- * A max number modifier
+ * A `MaxModifier` causes die rolls over a maximum value to be treated as the maximum value.
+ *
+ * @since 4.3.0
+ *
+ * @see {@link MinModifier} for the opposite of this modifier
+ *
+ * @extends {Modifier}
  */
 class MaxModifier extends Modifier {
   /**
-   * Create a MaxModifier
+   * Create a `MaxModifier` instance.
    *
-   * @param {string} notation The modifier notation
    * @param {number} max The maximum value
    *
    * @throws {TypeError} max must be a number
    */
-  constructor(notation, max) {
-    super(notation);
+  constructor(max) {
+    super();
 
     this.max = max;
 
@@ -25,7 +30,7 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Returns the maximum value
+   * The maximum value.
    *
    * @returns {Number}
    */
@@ -34,25 +39,25 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Sets the maximum value
+   * Set the maximum value.
    *
    * @param {number} value
    *
    * @throws {TypeError} max must be a number
    */
   set max(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError('max must be a number');
     }
 
-    this[maxSymbol] = parseFloat(value);
+    this[maxSymbol] = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'max'
    */
   get name() {
     return 'max';
@@ -60,12 +65,21 @@ class MaxModifier extends Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Runs the modifier on the rolls
+   * The modifier's notation.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @returns {string}
+   */
+  get notation() {
+    return `max${this.max}`;
+  }
+
+  /**
+   * Run the modifier on the results.
    *
-   * @returns {RollResults}
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
+   *
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     const parsedResults = results;
@@ -85,9 +99,11 @@ class MaxModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string, max: Number}}
    */
   toJSON() {
     const { max } = this;

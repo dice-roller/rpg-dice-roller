@@ -2,12 +2,25 @@
   "name": "rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
   "author": "GreenImp <info@greenimp.co.uk> (http://greenimp.co.uk)",
-  "version": "4.3.1",
+  "version": "4.4.0",
   "license": "MIT",
-  "main": "lib/esm/bundle.js",
-  "module": "lib/esm/bundle.js",
-  "browser": "lib/umd/bundle.js",
-  "types": "types/index.d.ts",
+  "type": "module",
+  "main": "./lib/esm/bundle.js",
+  "module": "./lib/esm/bundle.js",
+  "browser": "./lib/umd/bundle.js",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/bundle.js",
+      "require": "./lib/umd/bundle.js"
+    },
+    "./lib/umd/bundle.js": {
+      "require": "./lib/umd/bundle.js"
+    },
+    "./src/": "./src/",
+    "./types/": "./types/",
+    "./package.json": "./package.json"
+  },
+  "types": "./types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/GreenImp/rpg-dice-roller.git"
@@ -21,8 +34,12 @@
     "roller",
     "rpg",
     "roll",
-    "pathfinder",
     "d&d",
+    "dnd",
+    "random",
+    "prng",
+    "roleplay",
+    "pathfinder",
     "notation"
   ],
   "devDependencies": {
@@ -30,45 +47,42 @@
     "@babel/preset-env": "^7.10.4",
     "abab": "^2.0.3",
     "coveralls": "^3.1.0",
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
+    "eslint": "^7.5.0",
+    "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.20.2",
-    "jest": "^24.9.0",
+    "jest": "^26.1.0",
     "pegjs": "^0.10.0",
-    "rollup": "^1.32.1",
+    "rollup": "^2.23.0",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-commonjs": "^10.1.0",
     "rollup-plugin-eslint": "^6.0.0",
-    "rollup-plugin-node-resolve": "^4.2.4",
-    "rollup-plugin-terser": "^5.3.0",
-    "typescript": "^3.9.7"
+    "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-terser": "^6.1.0",
+    "typescript": "^3.9.7",
+    "vuepress-jsdoc": "^3.2.0"
   },
   "dependencies": {
     "mathjs-expression-parser": "^1.0.2",
     "random-js": "^2.1.0"
   },
   "engines": {
-    "node": ">=11.0"
+    "node": ">=12.0"
   },
   "scripts": {
-    "build": "npm run build:prod",
-    "build:prod": "npm run prebuild && npm run build:umd -- --environment BUILD:prod && npm run build:esm -- --environment BUILD:prod",
-    "build:dev": "npm run prebuild && npm run build:esm -- --environment BUILD:dev && npm run build:umd -- --environment BUILD:dev",
-    "build:umd": "rollup --c --environment FORMAT:umd",
-    "build:esm": "rollup --c --environment FORMAT:esm",
-    "build:grammars": "node --experimental-modules src/parser/grammars/generate.js",
+    "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
-    "prebuild": "npm run build:grammars",
-    "watch": "npm run prebuild && npm run build:esm -- --environment BUILD:dev -w",
+    "build:dev": "npm run build:grammars && rollup --c --environment BUILD:dev",
+    "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude parser/grammars/*.js,RollGroup.js",
+    "build:grammars": "node src/parser/grammars/generate.js",
+    "build:prod": "npm run build:grammars && rollup --c --environment BUILD:prod",
+    "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
-    "pretest": "npm run prebuild && npm run build:declaration",
-    "test": "npm run lint && jest /tests/",
-    "test:watch": "npm run lint && jest /tests/ --watchAll --coverage",
-    "test:coverage": "jest /tests/ --coverage",
-    "test:coveralls": "jest /tests/ --coverage && coveralls < coverage/lcov.info",
-    "prepublishOnly": "npm test && npm run build:prod && npm run build:dev"
-  },
-  "type": "module"
+    "pretest": "npm run build:grammars && npm run lint",
+    "test": "jest",
+    "test:coverage": "npm run pretest && jest --coverage",
+    "test:watch": "npm run pretest && jest --watchAll",
+    "prepublishOnly": "npm test && npm run build"
+  }
 }

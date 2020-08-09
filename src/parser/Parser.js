@@ -1,18 +1,22 @@
-import * as parser from './grammars/grammar';
-import RequiredArgumentError from '../exceptions/RequiredArgumentErrorError';
+import { RequiredArgumentError } from '../exceptions/index.js';
+import * as parser from './grammars/grammar.js';
 
 /**
- * A DiceParser object that takes notations and parses them to rolls
+ * The `Parser` takes a notation string and parses it into objects.
+ *
+ * It is used internally by the DiceRoll object when rolling notation, but can be used by itself if
+ * necessary.
+ *
+ * @see {@link https://greenimp.github.io/rpg-dice-roller/guide/notation/}
+ * @see {@link https://en.m.wikipedia.org/wiki/Dice_notation}
  */
 class Parser {
   /**
    * Parses the given dice notation and returns a list of dice and modifiers found
    *
-   * @link https://en.m.wikipedia.org/wiki/Dice_notation
-   *
    * @param {string} notation The notation to parse
    *
-   * @returns {[]}
+   * @returns {Array}
    *
    * @throws {RequiredArgumentError} Notation is required
    * @throws {SyntaxError} The notation syntax is invalid

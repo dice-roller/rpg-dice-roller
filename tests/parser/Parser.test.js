@@ -1,17 +1,19 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../src/Dice';
-import CriticalFailureModifier from '../../src/modifiers/CriticalFailureModifier';
-import CriticalSuccessModifier from '../../src/modifiers/CriticalSuccessModifier';
-import DropModifier from '../../src/modifiers/DropModifier';
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
-import KeepModifier from '../../src/modifiers/KeepModifier';
-import MaxModifier from '../../src/modifiers/MaxModifier';
-import MinModifier from '../../src/modifiers/MinModifier';
-import * as parser from '../../src/parser/grammars/grammar';
-import Parser from '../../src/parser/Parser';
-import SortingModifier from '../../src/modifiers/SortingModifier';
-import TargetModifier from '../../src/modifiers/TargetModifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
-import ReRollModifier from '../../src/modifiers/ReRollModifier';
+import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.js';
+import { RequiredArgumentError } from '../../src/exceptions/index.js';
+import {
+  CriticalFailureModifier,
+  CriticalSuccessModifier,
+  DropModifier,
+  ExplodeModifier,
+  KeepModifier,
+  MaxModifier,
+  MinModifier,
+  ReRollModifier,
+  SortingModifier,
+  TargetModifier,
+} from '../../src/modifiers/index.js';
+import * as parser from '../../src/parser/grammars/grammar.js';
+import Parser from '../../src/parser/Parser.js';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -68,12 +70,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: 'd6',
-          sides: 6,
-          qty: 1,
-        }));
+        expect(parsed[0].sides).toBe(6);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `5d10`', () => {
@@ -82,12 +81,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: '5d10',
-          sides: 10,
-          qty: 5,
-        }));
+        expect(parsed[0].sides).toBe(10);
+        expect(parsed[0].qty).toBe(5);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `4d20`', () => {
@@ -96,12 +92,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: '4d20',
-          sides: 20,
-          qty: 4,
-        }));
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(4);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `2d%`', () => {
@@ -110,12 +103,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(PercentileDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: '2d%',
-          sides: '%',
-          qty: 2,
-        }));
+        expect(parsed[0].sides).toBe('%');
+        expect(parsed[0].qty).toBe(2);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `4dF`', () => {
@@ -124,12 +114,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: '4dF',
-          sides: 'F.2',
-          qty: 4,
-        }));
+        expect(parsed[0].sides).toBe('F.2');
+        expect(parsed[0].qty).toBe(4);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `dF.2`', () => {
@@ -138,12 +125,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: 'dF.2',
-          sides: 'F.2',
-          qty: 1,
-        }));
+        expect(parsed[0].sides).toBe('F.2');
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('returns correct response for `10dF.1`', () => {
@@ -152,12 +136,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          modifiers: new Map(),
-          notation: '10dF.1',
-          sides: 'F.1',
-          qty: 10,
-        }));
+        expect(parsed[0].sides).toBe('F.1');
+        expect(parsed[0].qty).toBe(10);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('throws error for invalid Fudge die sides', () => {
@@ -212,7 +193,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('1d8');
           expect(parsed[0].sides).toEqual(8);
           expect(parsed[0].qty).toEqual(1);
 
@@ -221,7 +201,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('critical-failure');
           expect(mod).toBeInstanceOf(CriticalFailureModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'cf<4',
             comparePoint: expect.objectContaining({
               operator: '<',
               value: 4,
@@ -236,7 +215,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('3dF.1');
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(3);
 
@@ -245,7 +223,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('critical-failure');
           expect(mod).toBeInstanceOf(CriticalFailureModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'cf>8',
             comparePoint: expect.objectContaining({
               operator: '>',
               value: 8,
@@ -268,7 +245,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('8d45');
           expect(parsed[0].sides).toEqual(45);
           expect(parsed[0].qty).toEqual(8);
 
@@ -277,7 +253,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('critical-success');
           expect(mod).toBeInstanceOf(CriticalSuccessModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'cs=12',
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 12,
@@ -292,7 +267,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('36d152');
           expect(parsed[0].sides).toEqual(152);
           expect(parsed[0].qty).toEqual(36);
 
@@ -301,7 +275,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('critical-success');
           expect(mod).toBeInstanceOf(CriticalSuccessModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'cs!=45',
             comparePoint: expect.objectContaining({
               operator: '!=',
               value: 45,
@@ -324,7 +297,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('19d23');
           expect(parsed[0].sides).toEqual(23);
           expect(parsed[0].qty).toEqual(19);
 
@@ -333,7 +305,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('drop-l');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'd1',
             end: 'l',
             qty: 1,
           }));
@@ -346,7 +317,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(4);
 
@@ -355,7 +325,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('drop-l');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'dl1',
             end: 'l',
             qty: 1,
           }));
@@ -368,7 +337,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(PercentileDice);
 
-          expect(parsed[0].notation).toEqual('7d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(7);
 
@@ -377,7 +345,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('drop-l');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'd3',
             end: 'l',
             qty: 3,
           }));
@@ -390,7 +357,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d6');
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(4);
 
@@ -399,7 +365,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('drop-h');
           expect(mod).toBeInstanceOf(DropModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'dh2',
             end: 'h',
             qty: 2,
           }));
@@ -424,7 +389,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('d6');
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(1);
 
@@ -433,7 +397,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!',
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 6,
@@ -450,7 +413,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('2d7');
           expect(parsed[0].sides).toEqual(7);
           expect(parsed[0].qty).toEqual(2);
 
@@ -459,7 +421,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!!',
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 7,
@@ -476,7 +437,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(PercentileDice);
 
-          expect(parsed[0].notation).toEqual('5d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(5);
 
@@ -485,7 +445,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!p',
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 100,
@@ -502,7 +461,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('1dF');
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(1);
 
@@ -511,7 +469,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!!p',
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 1,
@@ -528,7 +485,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('4dF.2');
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(4);
 
@@ -537,7 +493,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!>=0',
             comparePoint: expect.objectContaining({
               operator: '>=',
               value: 0,
@@ -554,7 +509,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('dF.1');
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(1);
 
@@ -563,7 +517,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!!<=1',
             comparePoint: expect.objectContaining({
               operator: '<=',
               value: 1,
@@ -580,7 +533,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(PercentileDice);
 
-          expect(parsed[0].notation).toEqual('360d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(360);
 
@@ -589,7 +541,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!!p<50',
             comparePoint: expect.objectContaining({
               operator: '<',
               value: 50,
@@ -608,7 +559,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('d40601');
           expect(parsed[0].sides).toEqual(40601);
           expect(parsed[0].qty).toEqual(1);
 
@@ -616,33 +566,26 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('keep-h');
           expect(mod).toBeInstanceOf(KeepModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'k1',
-            end: 'h',
-            qty: 1,
-          }));
+          expect(mod.end).toBe('h');
+          expect(mod.qty).toBe(1);
         });
 
-        test('keep highest for `23017d2kh1`', () => {
-          const parsed = Parser.parse('23017d2kh1');
+        test('keep highest for `897d2kh1`', () => {
+          const parsed = Parser.parse('897d2kh1');
 
           expect(parsed).toBeInstanceOf(Array);
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('23017d2');
           expect(parsed[0].sides).toEqual(2);
-          expect(parsed[0].qty).toEqual(23017);
+          expect(parsed[0].qty).toEqual(897);
 
           expect(parsed[0].modifiers.has('keep-h')).toBe(true);
 
           const mod = parsed[0].modifiers.get('keep-h');
           expect(mod).toBeInstanceOf(KeepModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'kh1',
-            end: 'h',
-            qty: 1,
-          }));
+          expect(mod.end).toBe('h');
+          expect(mod.qty).toBe(1);
         });
 
         test('keep highest for `5dFk4`', () => {
@@ -652,7 +595,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('5dF');
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(5);
 
@@ -660,11 +602,8 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('keep-h');
           expect(mod).toBeInstanceOf(KeepModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'k4',
-            end: 'h',
-            qty: 4,
-          }));
+          expect(mod.end).toBe('h');
+          expect(mod.qty).toBe(4);
         });
 
         test('keep lowest for `10d%kl3`', () => {
@@ -674,7 +613,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('10d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(10);
 
@@ -682,11 +620,8 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('keep-l');
           expect(mod).toBeInstanceOf(KeepModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'kl3',
-            end: 'l',
-            qty: 3,
-          }));
+          expect(mod.end).toBe('l');
+          expect(mod.qty).toBe(3);
         });
       });
 
@@ -698,7 +633,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('2d6');
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(2);
 
@@ -706,10 +640,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('max');
           expect(mod).toBeInstanceOf(MaxModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            max: 3,
-            notation: 'max3',
-          }));
+          expect(mod.max).toBe(3);
         });
 
         test('max for `4d20max-12`', () => {
@@ -719,7 +650,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d20');
           expect(parsed[0].sides).toEqual(20);
           expect(parsed[0].qty).toEqual(4);
 
@@ -727,10 +657,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('max');
           expect(mod).toBeInstanceOf(MaxModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            max: -12,
-            notation: 'max-12',
-          }));
+          expect(mod.max).toBe(-12);
         });
 
         test('max for `6d%max50.45`', () => {
@@ -740,7 +667,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('6d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(6);
 
@@ -748,10 +674,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('max');
           expect(mod).toBeInstanceOf(MaxModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            max: 50.45,
-            notation: 'max50.45',
-          }));
+          expect(mod.max).toBe(50.45);
         });
 
         test('throws error if no max value', () => {
@@ -779,7 +702,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('2d6');
           expect(parsed[0].sides).toEqual(6);
           expect(parsed[0].qty).toEqual(2);
 
@@ -787,10 +709,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('min');
           expect(mod).toBeInstanceOf(MinModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            min: 3,
-            notation: 'min3',
-          }));
+          expect(mod.min).toBe(3);
         });
 
         test('min for `4d20min-12`', () => {
@@ -800,7 +719,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d20');
           expect(parsed[0].sides).toEqual(20);
           expect(parsed[0].qty).toEqual(4);
 
@@ -808,10 +726,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('min');
           expect(mod).toBeInstanceOf(MinModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            min: -12,
-            notation: 'min-12',
-          }));
+          expect(mod.min).toBe(-12);
         });
 
         test('min for `6d%min50.45`', () => {
@@ -821,7 +736,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('6d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(6);
 
@@ -829,10 +743,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('min');
           expect(mod).toBeInstanceOf(MinModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            min: 50.45,
-            notation: 'min50.45',
-          }));
+          expect(mod.min).toBe(50.45);
         });
 
         test('throws error if no min value', () => {
@@ -860,7 +771,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('5d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(5);
 
@@ -869,7 +779,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'r',
             once: false,
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -885,7 +794,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('12dF');
           expect(parsed[0].sides).toEqual('F.2');
           expect(parsed[0].qty).toEqual(12);
 
@@ -894,7 +802,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'r',
             once: false,
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -910,7 +817,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('2d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(2);
 
@@ -919,7 +825,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'r>80',
             once: false,
             comparePoint: expect.objectContaining({
               operator: '>',
@@ -935,7 +840,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('35dF.1');
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(35);
 
@@ -944,7 +848,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'ro',
             once: true,
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -960,7 +863,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('d64');
           expect(parsed[0].sides).toEqual(64);
           expect(parsed[0].qty).toEqual(1);
 
@@ -969,7 +871,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'ro<=35',
             once: true,
             comparePoint: expect.objectContaining({
               operator: '<=',
@@ -987,7 +888,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('10d5');
           expect(parsed[0].sides).toEqual(5);
           expect(parsed[0].qty).toEqual(10);
 
@@ -995,10 +895,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('sorting');
           expect(mod).toBeInstanceOf(SortingModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 's',
-            direction: 'a',
-          }));
+          expect(mod.direction).toBe('a');
         });
 
         test('sort ascending for 23dF.1sa', () => {
@@ -1008,7 +905,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].notation).toEqual('23dF.1');
           expect(parsed[0].sides).toEqual('F.1');
           expect(parsed[0].qty).toEqual(23);
 
@@ -1016,10 +912,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('sorting');
           expect(mod).toBeInstanceOf(SortingModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'sa',
-            direction: 'a',
-          }));
+          expect(mod.direction).toBe('a');
         });
 
         test('sort descending for 14d%sd', () => {
@@ -1029,7 +922,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(PercentileDice);
 
-          expect(parsed[0].notation).toEqual('14d%');
           expect(parsed[0].sides).toEqual('%');
           expect(parsed[0].qty).toEqual(14);
 
@@ -1037,10 +929,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('sorting');
           expect(mod).toBeInstanceOf(SortingModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'sd',
-            direction: 'd',
-          }));
+          expect(mod.direction).toBe('d');
         });
       });
 
@@ -1053,7 +942,6 @@ describe('Parser', () => {
             expect(parsed).toHaveLength(1);
             expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-            expect(parsed[0].notation).toEqual('8d45');
             expect(parsed[0].sides).toEqual(45);
             expect(parsed[0].qty).toEqual(8);
 
@@ -1062,7 +950,6 @@ describe('Parser', () => {
             const mod = parsed[0].modifiers.get('target');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
-              notation: '=21',
               successComparePoint: expect.objectContaining({
                 operator: '=',
                 value: 21,
@@ -1078,7 +965,6 @@ describe('Parser', () => {
             expect(parsed).toHaveLength(1);
             expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-            expect(parsed[0].notation).toEqual('dF');
             expect(parsed[0].sides).toEqual('F.2');
             expect(parsed[0].qty).toEqual(1);
 
@@ -1087,7 +973,6 @@ describe('Parser', () => {
             const mod = parsed[0].modifiers.get('target');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
-              notation: '>=0',
               successComparePoint: expect.objectContaining({
                 operator: '>=',
                 value: 0,
@@ -1105,7 +990,6 @@ describe('Parser', () => {
             expect(parsed).toHaveLength(1);
             expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-            expect(parsed[0].notation).toEqual('4d%');
             expect(parsed[0].sides).toEqual('%');
             expect(parsed[0].qty).toEqual(4);
 
@@ -1114,7 +998,6 @@ describe('Parser', () => {
             const mod = parsed[0].modifiers.get('target');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
-              notation: '>50f<40',
               successComparePoint: expect.objectContaining({
                 operator: '>',
                 value: 50,
@@ -1133,7 +1016,6 @@ describe('Parser', () => {
             expect(parsed).toHaveLength(1);
             expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-            expect(parsed[0].notation).toEqual('450dF.1');
             expect(parsed[0].sides).toEqual('F.1');
             expect(parsed[0].qty).toEqual(450);
 
@@ -1142,7 +1024,6 @@ describe('Parser', () => {
             const mod = parsed[0].modifiers.get('target');
             expect(mod).toBeInstanceOf(TargetModifier);
             expect(mod.toJSON()).toEqual(expect.objectContaining({
-              notation: '>0f!=1',
               successComparePoint: expect.objectContaining({
                 operator: '>',
                 value: 0,
@@ -1176,7 +1057,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('6d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(6);
 
@@ -1185,7 +1065,6 @@ describe('Parser', () => {
           let mod = parsed[0].modifiers.get('target');
           expect(mod).toBeInstanceOf(TargetModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '>=8',
             successComparePoint: expect.objectContaining({
               operator: '>=',
               value: 8,
@@ -1198,7 +1077,6 @@ describe('Parser', () => {
           mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!>=9',
             comparePoint: expect.objectContaining({
               operator: '>=',
               value: 9,
@@ -1216,7 +1094,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('6d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(6);
 
@@ -1225,7 +1102,6 @@ describe('Parser', () => {
           let mod = parsed[0].modifiers.get('target');
           expect(mod).toBeInstanceOf(TargetModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '>=8',
             successComparePoint: expect.objectContaining({
               operator: '>=',
               value: 8,
@@ -1238,7 +1114,6 @@ describe('Parser', () => {
           mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!>=9',
             comparePoint: expect.objectContaining({
               operator: '>=',
               value: 9,
@@ -1255,7 +1130,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('10d8');
           expect(parsed[0].sides).toEqual(8);
           expect(parsed[0].qty).toEqual(10);
 
@@ -1263,28 +1137,21 @@ describe('Parser', () => {
 
           let mod = parsed[0].modifiers.get('drop-h');
           expect(mod).toBeInstanceOf(DropModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'dh2',
-            end: 'h',
-            qty: 2,
-          }));
+          expect(mod.end).toBe('h');
+          expect(mod.qty).toBe(2);
 
           expect(parsed[0].modifiers.has('keep-l')).toBe(true);
 
           mod = parsed[0].modifiers.get('keep-l');
           expect(mod).toBeInstanceOf(KeepModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'kl3',
-            end: 'l',
-            qty: 3,
-          }));
+          expect(mod.end).toBe('l');
+          expect(mod.qty).toBe(3);
 
           expect(parsed[0].modifiers.has('re-roll')).toBe(true);
 
           mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: 'r!=5',
             once: false,
             comparePoint: expect.objectContaining({
               operator: '!=',
@@ -1300,7 +1167,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(4);
 
@@ -1308,19 +1174,13 @@ describe('Parser', () => {
 
           let mod = parsed[0].modifiers.get('min');
           expect(mod).toBeInstanceOf(MinModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            min: 3,
-            notation: 'min3',
-          }));
+          expect(mod.min).toBe(3);
 
           expect(parsed[0].modifiers.has('max')).toBe(true);
 
           mod = parsed[0].modifiers.get('max');
           expect(mod).toBeInstanceOf(MaxModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            max: 6,
-            notation: 'max6',
-          }));
+          expect(mod.max).toBe(6);
         });
 
         test('use Max followed by Min', () => {
@@ -1330,7 +1190,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('4d10');
           expect(parsed[0].sides).toEqual(10);
           expect(parsed[0].qty).toEqual(4);
 
@@ -1338,19 +1197,13 @@ describe('Parser', () => {
 
           let mod = parsed[0].modifiers.get('min');
           expect(mod).toBeInstanceOf(MinModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            min: 3,
-            notation: 'min3',
-          }));
+          expect(mod.min).toBe(3);
 
           expect(parsed[0].modifiers.has('max')).toBe(true);
 
           mod = parsed[0].modifiers.get('max');
           expect(mod).toBeInstanceOf(MaxModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            max: 6,
-            notation: 'max6',
-          }));
+          expect(mod.max).toBe(6);
         });
 
         test('multiple of the same operator just keeps the last one', () => {
@@ -1360,7 +1213,6 @@ describe('Parser', () => {
           expect(parsed).toHaveLength(1);
           expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].notation).toEqual('42d2');
           expect(parsed[0].sides).toEqual(2);
           expect(parsed[0].qty).toEqual(42);
 
@@ -1369,7 +1221,6 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            notation: '!p<5',
             comparePoint: expect.objectContaining({
               operator: '<',
               value: 5,
@@ -1388,11 +1239,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '(4*6)d6',
-          sides: 6,
-          qty: 24,
-        }));
+        expect(parsed[0].sides).toBe(6);
+        expect(parsed[0].qty).toBe(24);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('can parse `3d(5/2)`', () => {
@@ -1401,11 +1250,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '3d(5/2)',
-          sides: 2.5,
-          qty: 3,
-        }));
+        expect(parsed[0].sides).toBe(2.5);
+        expect(parsed[0].qty).toBe(3);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('can parse `(5^2*4)d(7%4)`', () => {
@@ -1414,11 +1261,9 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '(5^2*4)d(7%4)',
-          sides: 3,
-          qty: 100,
-        }));
+        expect(parsed[0].sides).toBe(3);
+        expect(parsed[0].qty).toBe(100);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
     });
 
@@ -1434,11 +1279,9 @@ describe('Parser', () => {
           expect(parsed[0]).toEqual(`${name}(`);
 
           expect(parsed[1]).toBeInstanceOf(StandardDice);
-          expect(parsed[1]).toEqual(expect.objectContaining({
-            notation: '4d6',
-            sides: 6,
-            qty: 4,
-          }));
+          expect(parsed[1].sides).toBe(6);
+          expect(parsed[1].qty).toBe(4);
+          expect(parsed[1].modifiers).toEqual(new Map());
 
           expect(parsed[2]).toEqual('/');
           expect(parsed[3]).toBe(3);
@@ -1463,11 +1306,9 @@ describe('Parser', () => {
           expect(parsed[0]).toEqual(`${name}(`);
 
           expect(parsed[1]).toBeInstanceOf(StandardDice);
-          expect(parsed[1]).toEqual(expect.objectContaining({
-            notation: '4d6',
-            sides: 6,
-            qty: 4,
-          }));
+          expect(parsed[1].sides).toBe(6);
+          expect(parsed[1].qty).toBe(4);
+          expect(parsed[1].modifiers).toEqual(new Map());
 
           expect(parsed[2]).toEqual(',');
           expect(parsed[3]).toBe(7);
@@ -1490,20 +1331,16 @@ describe('Parser', () => {
         expect(parsed).toHaveLength(3);
 
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '6d10',
-          sides: 10,
-          qty: 6,
-        }));
+        expect(parsed[0].sides).toBe(10);
+        expect(parsed[0].qty).toBe(6);
+        expect(parsed[0].modifiers).toEqual(new Map());
 
         expect(parsed[1]).toEqual('*');
 
         expect(parsed[2]).toBeInstanceOf(FudgeDice);
-        expect(parsed[2]).toEqual(expect.objectContaining({
-          notation: '4dF.1',
-          sides: 'F.1',
-          qty: 4,
-        }));
+        expect(parsed[2].sides).toBe('F.1');
+        expect(parsed[2].qty).toBe(4);
+        expect(parsed[2].modifiers).toEqual(new Map());
       });
 
       test('can parse `(10d7/2d3)*4`', () => {
@@ -1515,20 +1352,16 @@ describe('Parser', () => {
         expect(parsed[0]).toEqual('(');
 
         expect(parsed[1]).toBeInstanceOf(StandardDice);
-        expect(parsed[1]).toEqual(expect.objectContaining({
-          notation: '10d7',
-          sides: 7,
-          qty: 10,
-        }));
+        expect(parsed[1].sides).toBe(7);
+        expect(parsed[1].qty).toBe(10);
+        expect(parsed[1].modifiers).toEqual(new Map());
 
         expect(parsed[2]).toEqual('/');
 
         expect(parsed[3]).toBeInstanceOf(PercentileDice);
-        expect(parsed[3]).toEqual(expect.objectContaining({
-          notation: '2d%',
-          sides: '%',
-          qty: 2,
-        }));
+        expect(parsed[3].sides).toBe('%');
+        expect(parsed[3].qty).toBe(2);
+        expect(parsed[3].modifiers).toEqual(new Map());
 
         expect(parsed[4]).toEqual(')');
         expect(parsed[5]).toEqual('*');
@@ -1542,11 +1375,9 @@ describe('Parser', () => {
         expect(parsed).toHaveLength(7);
 
         expect(parsed[0]).toBeInstanceOf(PercentileDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: 'd%',
-          sides: '%',
-          qty: 1,
-        }));
+        expect(parsed[0].sides).toBe('%');
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
 
         expect(parsed[1]).toEqual('%');
         expect(parsed[2]).toEqual('(');
@@ -1567,11 +1398,9 @@ describe('Parser', () => {
         expect(parsed[2]).toEqual('^');
 
         expect(parsed[3]).toBeInstanceOf(FudgeDice);
-        expect(parsed[3]).toEqual(expect.objectContaining({
-          notation: '3dF',
-          sides: 'F.2',
-          qty: 3,
-        }));
+        expect(parsed[3].sides).toBe('F.2');
+        expect(parsed[3].qty).toBe(3);
+        expect(parsed[3].modifiers).toEqual(new Map());
 
         expect(parsed[4]).toEqual(')');
         expect(parsed[5]).toEqual('*');
@@ -1580,11 +1409,9 @@ describe('Parser', () => {
         expect(parsed[8]).toEqual('(');
 
         expect(parsed[9]).toBeInstanceOf(StandardDice);
-        expect(parsed[9]).toEqual(expect.objectContaining({
-          notation: '10d45',
-          sides: 45,
-          qty: 10,
-        }));
+        expect(parsed[9].sides).toBe(45);
+        expect(parsed[9].qty).toBe(10);
+        expect(parsed[9].modifiers).toEqual(new Map());
 
         expect(parsed[10]).toEqual('/');
         expect(parsed[11]).toEqual('(');
@@ -1604,11 +1431,9 @@ describe('Parser', () => {
         expect(parsed[0]).toEqual('(');
 
         expect(parsed[1]).toBeInstanceOf(StandardDice);
-        expect(parsed[1]).toEqual(expect.objectContaining({
-          notation: '(4*2)d10',
-          sides: 10,
-          qty: 8,
-        }));
+        expect(parsed[1].sides).toBe(10);
+        expect(parsed[1].qty).toBe(8);
+        expect(parsed[1].modifiers).toEqual(new Map());
 
         expect(parsed[2]).toEqual('/');
         expect(parsed[3]).toBe(4);
@@ -1619,11 +1444,9 @@ describe('Parser', () => {
         expect(parsed[8]).toEqual('(');
 
         expect(parsed[9]).toBeInstanceOf(PercentileDice);
-        expect(parsed[9]).toEqual(expect.objectContaining({
-          notation: 'd%',
-          sides: '%',
-          qty: 1,
-        }));
+        expect(parsed[9].sides).toBe('%');
+        expect(parsed[9].qty).toBe(1);
+        expect(parsed[9].modifiers).toEqual(new Map());
 
         expect(parsed[10]).toEqual('-');
         expect(parsed[11]).toBe(2);
@@ -1641,11 +1464,9 @@ describe('Parser', () => {
         expect(parsed[2]).toEqual('floor(');
 
         expect(parsed[3]).toBeInstanceOf(StandardDice);
-        expect(parsed[3]).toEqual(expect.objectContaining({
-          notation: '4d10',
-          sides: 10,
-          qty: 4,
-        }));
+        expect(parsed[3].sides).toBe(10);
+        expect(parsed[3].qty).toBe(4);
+        expect(parsed[3].modifiers).toEqual(new Map());
 
         expect(parsed[4]).toEqual('/');
         expect(parsed[5]).toBe(3.4);
@@ -1659,18 +1480,14 @@ describe('Parser', () => {
         expect(parsed).toHaveLength(7);
 
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '4d10',
-          sides: 10,
-          qty: 4,
-        }));
+        expect(parsed[0].sides).toBe(10);
+        expect(parsed[0].qty).toBe(4);
 
         expect(parsed[0].modifiers.has('explode')).toBe(true);
 
         let mod = parsed[0].modifiers.get('explode');
         expect(mod).toBeInstanceOf(ExplodeModifier);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
-          notation: '!!p',
           comparePoint: expect.objectContaining({
             operator: '=',
             value: 10,
@@ -1685,18 +1502,14 @@ describe('Parser', () => {
         expect(parsed[4]).toEqual('*');
 
         expect(parsed[5]).toBeInstanceOf(StandardDice);
-        expect(parsed[5]).toEqual(expect.objectContaining({
-          notation: 'd12',
-          sides: 12,
-          qty: 1,
-        }));
+        expect(parsed[5].sides).toBe(12);
+        expect(parsed[5].qty).toBe(1);
 
         expect(parsed[5].modifiers.has('re-roll')).toBe(true);
 
         mod = parsed[5].modifiers.get('re-roll');
         expect(mod).toBeInstanceOf(ReRollModifier);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
-          notation: 'r',
           once: false,
           comparePoint: expect.objectContaining({
             operator: '=',
@@ -1707,17 +1520,15 @@ describe('Parser', () => {
     });
 
     describe('Roll high', () => {
-      test('can roll with a stupidly high qty', () => {
-        const parsed = Parser.parse('9999999999d6');
+      test('can roll with a qty of 999', () => {
+        const parsed = Parser.parse('999d6');
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '9999999999d6',
-          sides: 6,
-          qty: 9999999999,
-        }));
+        expect(parsed[0].sides).toBe(6);
+        expect(parsed[0].qty).toBe(999);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('can roll with a stupidly high sides', () => {
@@ -1726,24 +1537,20 @@ describe('Parser', () => {
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: 'd9999999999',
-          sides: 9999999999,
-          qty: 1,
-        }));
+        expect(parsed[0].sides).toBe(9999999999);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
-      test('can roll with a stupidly high everything', () => {
-        const parsed = Parser.parse('9999999999d9999999999');
+      test('can roll with a qty of 999 and stupidly high sides', () => {
+        const parsed = Parser.parse('999d9999999999');
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '9999999999d9999999999',
-          sides: 9999999999,
-          qty: 9999999999,
-        }));
+        expect(parsed[0].sides).toBe(9999999999);
+        expect(parsed[0].qty).toBe(999);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
     });
 
@@ -1755,11 +1562,9 @@ describe('Parser', () => {
         expect(parsed).toHaveLength(3);
 
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '1d20',
-          sides: 20,
-          qty: 1,
-        }));
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
 
         expect(parsed[1]).toEqual('+');
         expect(parsed[2]).toBe(-5);
@@ -1775,11 +1580,9 @@ describe('Parser', () => {
         expect(parsed[1]).toEqual('*');
 
         expect(parsed[2]).toBeInstanceOf(StandardDice);
-        expect(parsed[2]).toEqual(expect.objectContaining({
-          notation: '1d20',
-          sides: 20,
-          qty: 1,
-        }));
+        expect(parsed[2].sides).toBe(20);
+        expect(parsed[2].qty).toBe(1);
+        expect(parsed[2].modifiers).toEqual(new Map());
       });
 
       test('can parse `(-2+5)d(6+-4)`', () => {
@@ -1787,12 +1590,11 @@ describe('Parser', () => {
 
         expect(parsed).toBeInstanceOf(Array);
         expect(parsed).toHaveLength(1);
+
         expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0]).toEqual(expect.objectContaining({
-          notation: '(-2+5)d(6+-4)',
-          sides: 2,
-          qty: 3,
-        }));
+        expect(parsed[0].sides).toBe(2);
+        expect(parsed[0].qty).toBe(3);
+        expect(parsed[0].modifiers).toEqual(new Map());
       });
 
       test('throws error when using negative values for die quantity', () => {

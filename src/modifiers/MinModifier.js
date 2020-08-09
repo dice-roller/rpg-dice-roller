@@ -1,22 +1,27 @@
-import Modifier from './Modifier';
-import { diceUtils } from '../utilities/utils';
+import { isNumeric } from '../utilities/utils.js';
+import Modifier from './Modifier.js';
 
 const minSymbol = Symbol('min');
 
 /**
- * A min number modifier
+ * A `MinModifier` causes die rolls under a minimum value to be treated as the minimum value.
+ *
+ * @since 4.3.0
+ *
+ * @see {@link MaxModifier} for the opposite of this modifier
+ *
+ * @extends {Modifier}
  */
 class MinModifier extends Modifier {
   /**
-   * Create a MinModifier
+   * Create a `MinModifier` instance.
    *
-   * @param {string} notation The modifier notation
    * @param {number} min The minimum value
    *
    * @throws {TypeError} min must be a number
    */
-  constructor(notation, min) {
-    super(notation);
+  constructor(min) {
+    super();
 
     this.min = min;
 
@@ -25,7 +30,7 @@ class MinModifier extends Modifier {
   }
 
   /**
-   * Returns the minimum value
+   * The minimum value.
    *
    * @returns {Number}
    */
@@ -34,25 +39,25 @@ class MinModifier extends Modifier {
   }
 
   /**
-   * Sets the minimum value
+   * Set the minimum value.
    *
    * @param {number} value
    *
    * @throws {TypeError} min must be a number
    */
   set min(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (!isNumeric(value)) {
       throw new TypeError('min must be a number');
     }
 
-    this[minSymbol] = parseFloat(value);
+    this[minSymbol] = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */
   /**
-   * Returns the name for the modifier
+   * The name of the modifier.
    *
-   * @returns {string}
+   * @returns {string} 'min'
    */
   get name() {
     return 'min';
@@ -60,12 +65,21 @@ class MinModifier extends Modifier {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * Runs the modifier on the rolls
+   * The modifier's notation.
    *
-   * @param {RollResults} results
-   * @param {StandardDice} _dice
+   * @returns {string}
+   */
+  get notation() {
+    return `min${this.min}`;
+  }
+
+  /**
+   * Run the modifier on the results.
    *
-   * @returns {RollResults}
+   * @param {RollResults} results The results to run the modifier against
+   * @param {StandardDice} _dice The die that the modifier is attached to
+   *
+   * @returns {RollResults} The modified results
    */
   run(results, _dice) {
     const parsedResults = results;
@@ -85,9 +99,11 @@ class MinModifier extends Modifier {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{notation: string, name: string, type: string, min: Number}}
    */
   toJSON() {
     const { min } = this;

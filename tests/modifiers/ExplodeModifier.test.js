@@ -1,16 +1,14 @@
-import ComparePoint from '../../src/ComparePoint';
-import ComparisonModifier from '../../src/modifiers/ComparisonModifier';
-import DieActionValueError from '../../src/exceptions/DieActionValueError';
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentErrorError';
-import RollResult from '../../src/results/RollResult';
-import RollResults from '../../src/results/RollResults';
-import StandardDice from '../../src/dice/StandardDice';
+import { StandardDice } from '../../src/dice/index.js';
+import { DieActionValueError } from '../../src/exceptions/index.js';
+import { ComparisonModifier, ExplodeModifier } from '../../src/modifiers/index.js';
+import ComparePoint from '../../src/ComparePoint.js';
+import RollResult from '../../src/results/RollResult.js';
+import RollResults from '../../src/results/RollResults.js';
 
 describe('ExplodeModifier', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
-      const mod = new ExplodeModifier('!');
+      const mod = new ExplodeModifier();
 
       expect(mod).toBeInstanceOf(ExplodeModifier);
       expect(mod).toBeInstanceOf(ComparisonModifier);
@@ -27,39 +25,22 @@ describe('ExplodeModifier', () => {
         toString: expect.any(Function),
       }));
     });
-
-    test('constructor requires notation', () => {
-      expect(() => {
-        new ExplodeModifier();
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ExplodeModifier(false);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ExplodeModifier(null);
-      }).toThrow(RequiredArgumentError);
-
-      expect(() => {
-        new ExplodeModifier(undefined);
-      }).toThrow(RequiredArgumentError);
-    });
   });
 
   describe('Compare Point', () => {
     test('gets set in constructor', () => {
-      const cp = new ComparePoint('>', 8);
-      const mod = new ExplodeModifier('!>8', cp);
+      const cp = new ComparePoint('=', 12);
+      const mod = new ExplodeModifier(cp);
 
       expect(mod.comparePoint).toBe(cp);
+      expect(mod.notation).toBe('!=12');
     });
 
     test('setting in constructor calls setter in parent', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'comparePoint', 'set');
 
       // create the ComparisonModifier
-      new ExplodeModifier('!>8', new ComparePoint('>', 8));
+      new ExplodeModifier(new ComparePoint('>', 8));
 
       expect(spy).toHaveBeenCalledTimes(1);
 
@@ -71,7 +52,7 @@ describe('ExplodeModifier', () => {
   describe('Matching', () => {
     test('isComparePoint uses parent', () => {
       const spy = jest.spyOn(ComparisonModifier.prototype, 'isComparePoint');
-      const mod = new ExplodeModifier('!>8', new ComparePoint('>', 8));
+      const mod = new ExplodeModifier(new ComparePoint('>', 8));
 
       // attempt to match
       expect(mod.isComparePoint(9)).toBe(true);
@@ -88,50 +69,98 @@ describe('ExplodeModifier', () => {
 
   describe('Compound', () => {
     test('gets set in constructor', () => {
-      const mod = new ExplodeModifier('!>8', null, true);
+      const mod = new ExplodeModifier(null, true);
 
       expect(mod.compound).toBe(true);
+      expect(mod.notation).toBe('!!');
     });
 
     test('cast to boolean', () => {
-      expect((new ExplodeModifier('!>8', null, false)).compound).toBe(false);
-      expect((new ExplodeModifier('!>8', null, 'foo')).compound).toBe(true);
-      expect((new ExplodeModifier('!>8', null, '')).compound).toBe(false);
-      expect((new ExplodeModifier('!>8', null, '0')).compound).toBe(true);
-      expect((new ExplodeModifier('!>8', null, 0)).compound).toBe(false);
-      expect((new ExplodeModifier('!>8', null, 1)).compound).toBe(true);
-      expect((new ExplodeModifier('!>8', null, [])).compound).toBe(true);
-      expect((new ExplodeModifier('!>8', null, {})).compound).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null)).compound).toBe(false);
-      expect((new ExplodeModifier('!>8', null, undefined)).compound).toBe(false);
+      expect((new ExplodeModifier(null, false)).compound).toBe(false);
+      expect((new ExplodeModifier(null, 'foo')).compound).toBe(true);
+      expect((new ExplodeModifier(null, '')).compound).toBe(false);
+      expect((new ExplodeModifier(null, '0')).compound).toBe(true);
+      expect((new ExplodeModifier(null, 0)).compound).toBe(false);
+      expect((new ExplodeModifier(null, 1)).compound).toBe(true);
+      expect((new ExplodeModifier(null, [])).compound).toBe(true);
+      expect((new ExplodeModifier(null, {})).compound).toBe(true);
+      expect((new ExplodeModifier(null, null)).compound).toBe(false);
+      expect((new ExplodeModifier(null, undefined)).compound).toBe(false);
     });
   });
 
   describe('Penetrate', () => {
     test('gets set in constructor', () => {
-      const mod = new ExplodeModifier('!>8', null, null, true);
+      const mod = new ExplodeModifier(null, null, true);
 
       expect(mod.penetrate).toBe(true);
+      expect(mod.notation).toBe('!p');
     });
 
     test('cast to boolean', () => {
-      expect((new ExplodeModifier('!>8', null, null, false)).penetrate).toBe(false);
-      expect((new ExplodeModifier('!>8', null, null, 'foo')).penetrate).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null, '')).penetrate).toBe(false);
-      expect((new ExplodeModifier('!>8', null, null, '0')).penetrate).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null, 0)).penetrate).toBe(false);
-      expect((new ExplodeModifier('!>8', null, null, 1)).penetrate).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null, [])).penetrate).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null, {})).penetrate).toBe(true);
-      expect((new ExplodeModifier('!>8', null, null, null)).penetrate).toBe(false);
-      expect((new ExplodeModifier('!>8', null, null, undefined)).penetrate).toBe(false);
+      expect((new ExplodeModifier(null, null, false)).penetrate).toBe(false);
+      expect((new ExplodeModifier(null, null, 'foo')).penetrate).toBe(true);
+      expect((new ExplodeModifier(null, null, '')).penetrate).toBe(false);
+      expect((new ExplodeModifier(null, null, '0')).penetrate).toBe(true);
+      expect((new ExplodeModifier(null, null, 0)).penetrate).toBe(false);
+      expect((new ExplodeModifier(null, null, 1)).penetrate).toBe(true);
+      expect((new ExplodeModifier(null, null, [])).penetrate).toBe(true);
+      expect((new ExplodeModifier(null, null, {})).penetrate).toBe(true);
+      expect((new ExplodeModifier(null, null, null)).penetrate).toBe(false);
+      expect((new ExplodeModifier(null, null, undefined)).penetrate).toBe(false);
+    });
+  });
+
+  describe('Notation', () => {
+    test('explode', () => {
+      let mod = new ExplodeModifier(new ComparePoint('>=', 45));
+      expect(mod.notation).toEqual('!>=45');
+
+      mod = new ExplodeModifier(new ComparePoint('<', 1));
+      expect(mod.notation).toEqual('!<1');
+
+      mod = new ExplodeModifier(new ComparePoint('<=', 678997595));
+      expect(mod.notation).toEqual('!<=678997595');
+    });
+
+    test('compound', () => {
+      let mod = new ExplodeModifier(new ComparePoint('>=', 16), true);
+      expect(mod.notation).toEqual('!!>=16');
+
+      mod = new ExplodeModifier(new ComparePoint('<', 79), true);
+      expect(mod.notation).toEqual('!!<79');
+
+      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true);
+      expect(mod.notation).toEqual('!!<=678997595');
+    });
+
+    test('penetrate', () => {
+      let mod = new ExplodeModifier(new ComparePoint('>=', 16), false, true);
+      expect(mod.notation).toEqual('!p>=16');
+
+      mod = new ExplodeModifier(new ComparePoint('<', 79), false, true);
+      expect(mod.notation).toEqual('!p<79');
+
+      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true);
+      expect(mod.notation).toEqual('!p<=678997595');
+    });
+
+    test('compound and penetrate', () => {
+      let mod = new ExplodeModifier(new ComparePoint('>=', 16), true, true);
+      expect(mod.notation).toEqual('!!p>=16');
+
+      mod = new ExplodeModifier(new ComparePoint('<', 79), true, true);
+      expect(mod.notation).toEqual('!!p<79');
+
+      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, true);
+      expect(mod.notation).toEqual('!!p<=678997595');
     });
   });
 
   describe('Output', () => {
     test('JSON output is correct', () => {
       const cp = new ComparePoint('<=', 3);
-      const mod = new ExplodeModifier('!!p<=3', cp, true, true);
+      const mod = new ExplodeModifier(cp, true, true);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -147,7 +176,8 @@ describe('ExplodeModifier', () => {
     });
 
     test('toString output is correct', () => {
-      const mod = new ExplodeModifier('!>5');
+      const cp = new ComparePoint('>', 5);
+      const mod = new ExplodeModifier(cp);
 
       expect(mod.toString()).toEqual('!>5');
     });
@@ -162,11 +192,10 @@ describe('ExplodeModifier', () => {
       results = new RollResults([
         8, 4, 2, 1, 6, 10,
       ]);
-      die = new StandardDice('6d10', 10, 6);
-      mod = new ExplodeModifier('!');
+      die = new StandardDice(10, 6);
+      mod = new ExplodeModifier();
 
       jest.spyOn(StandardDice.prototype, 'rollOnce')
-        // .mockResolvedValue(new RollResult(1));
         .mockImplementationOnce(() => new RollResult(10))
         .mockImplementationOnce(() => new RollResult(2))
         .mockImplementationOnce(() => new RollResult(5))
@@ -354,54 +383,46 @@ describe('ExplodeModifier', () => {
     });
 
     test('can compound with compare point `>5`', () => {
-      mod = new ExplodeModifier('!!', new ComparePoint('>', 5), true);
+      mod = new ExplodeModifier(new ComparePoint('>', 5), true);
 
       const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist
       expect(rolls.length).toEqual(6);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '!!',
-          modifiers: new Set(['explode', 'compound']),
-          value: 20,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '!!',
-          modifiers: new Set(['explode', 'compound']),
-          value: 11,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '!!',
-          modifiers: new Set(['explode', 'compound']),
-          value: 21,
-        }),
-      ]);
+
+      expect(rolls[0].initialValue).toBe(8);
+      expect(rolls[0].modifierFlags).toEqual('!!');
+      expect(rolls[0].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(rolls[0].value).toBe(20);
+
+      expect(rolls[1].initialValue).toBe(4);
+      expect(rolls[1].modifierFlags).toEqual('');
+      expect(rolls[1].modifiers).toEqual(new Set());
+      expect(rolls[1].value).toBe(4);
+
+      expect(rolls[2].initialValue).toBe(2);
+      expect(rolls[2].modifierFlags).toEqual('');
+      expect(rolls[2].modifiers).toEqual(new Set());
+      expect(rolls[2].value).toBe(2);
+
+      expect(rolls[3].initialValue).toBe(1);
+      expect(rolls[3].modifierFlags).toEqual('');
+      expect(rolls[3].modifiers).toEqual(new Set());
+      expect(rolls[3].value).toBe(1);
+
+      expect(rolls[4].initialValue).toBe(6);
+      expect(rolls[4].modifierFlags).toEqual('!!');
+      expect(rolls[4].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(rolls[4].value).toBe(11);
+
+      expect(rolls[5].initialValue).toBe(10);
+      expect(rolls[5].modifierFlags).toEqual('!!');
+      expect(rolls[5].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(rolls[5].value).toBe(21);
     });
 
     test('can penetrate with compare point `<=4`', () => {
-      mod = new ExplodeModifier('!p', new ComparePoint('<=', 4), false, true);
+      mod = new ExplodeModifier(new ComparePoint('<=', 4), false, true);
 
       const { rolls } = mod.run(results, die);
 
@@ -472,55 +493,47 @@ describe('ExplodeModifier', () => {
     });
 
     test('can compound and penetrate with compare point >6', () => {
-      mod = new ExplodeModifier('!!p', new ComparePoint('>', 6), true, true);
+      mod = new ExplodeModifier(new ComparePoint('>', 6), true, true);
 
       const { rolls } = mod.run(results, die);
 
       // assert that all the rolls exist
       expect(rolls.length).toEqual(6);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '!!p',
-          modifiers: new Set(['explode', 'compound', 'penetrate']),
-          value: 18,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '!!p',
-          modifiers: new Set(['explode', 'compound', 'penetrate']),
-          value: 14,
-        }),
-      ]);
+
+      expect(rolls[0].initialValue).toBe(8);
+      expect(rolls[0].modifierFlags).toEqual('!!p');
+      expect(rolls[0].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
+      expect(rolls[0].value).toBe(18);
+
+      expect(rolls[1].initialValue).toBe(4);
+      expect(rolls[1].modifierFlags).toEqual('');
+      expect(rolls[1].modifiers).toEqual(new Set());
+      expect(rolls[1].value).toBe(4);
+
+      expect(rolls[2].initialValue).toBe(2);
+      expect(rolls[2].modifierFlags).toEqual('');
+      expect(rolls[2].modifiers).toEqual(new Set());
+      expect(rolls[2].value).toBe(2);
+
+      expect(rolls[3].initialValue).toBe(1);
+      expect(rolls[3].modifierFlags).toEqual('');
+      expect(rolls[3].modifiers).toEqual(new Set());
+      expect(rolls[3].value).toBe(1);
+
+      expect(rolls[4].initialValue).toBe(6);
+      expect(rolls[4].modifierFlags).toEqual('');
+      expect(rolls[4].modifiers).toEqual(new Set());
+      expect(rolls[4].value).toBe(6);
+
+      expect(rolls[5].initialValue).toBe(10);
+      expect(rolls[5].modifierFlags).toEqual('!!p');
+      expect(rolls[5].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
+      expect(rolls[5].value).toBe(14);
     });
 
     test('exploding with d1 throws an error', () => {
       // create a 1 sided die
-      die = new StandardDice('6d1', 1, 6);
+      die = new StandardDice(1, 6);
 
       // set the modifier compare point
       mod.comparePoint = new ComparePoint('>=', 8);
@@ -544,7 +557,7 @@ describe('ExplodeModifier', () => {
           results = new RollResults(Array(qty).fill(1));
 
           // create the dice
-          die = new StandardDice(`${qty}d10`, 10, qty);
+          die = new StandardDice(10, qty);
 
           // apply modifiers
           const { rolls } = mod.run(results, die);
@@ -558,7 +571,7 @@ describe('ExplodeModifier', () => {
 
   describe('Readonly properties', () => {
     test('cannot change name value', () => {
-      const mod = new ExplodeModifier('!');
+      const mod = new ExplodeModifier();
 
       expect(() => {
         mod.name = 'Foo';
@@ -566,7 +579,7 @@ describe('ExplodeModifier', () => {
     });
 
     test('cannot change compound value', () => {
-      const mod = new ExplodeModifier('!');
+      const mod = new ExplodeModifier();
 
       expect(() => {
         mod.compound = true;
@@ -574,7 +587,7 @@ describe('ExplodeModifier', () => {
     });
 
     test('cannot change penetrate value', () => {
-      const mod = new ExplodeModifier('!');
+      const mod = new ExplodeModifier();
 
       expect(() => {
         mod.penetrate = true;

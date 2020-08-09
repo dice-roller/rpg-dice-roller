@@ -1,4 +1,4 @@
-import { diceUtils } from '../utilities/utils';
+import { isNumeric } from '../utilities/utils.js';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');
@@ -7,84 +7,122 @@ const useInTotalSymbol = Symbol('use-in-total');
 const valueSymbol = Symbol('value');
 
 /**
- * A single dice roll result
+ * A `RollResult` represents the value and applicable modifiers for a single die roll
+ *
+ * ::: tip
+ * You will probably not need to create your own `RollResult` instances, unless you're importing
+ * rolls, but `RollResult` objects will be returned when rolling dice.
+ * :::
  */
 class RollResult {
   /**
-   * Create a RollResult
+   * Create a `RollResult` instance.
    *
-   * @param {number|{value: Number, initialValue: number}} value The value rolled
+   * `value` can be a number, or an object containing a list of different values.
+   * This allows you to specify the `initialValue`, `value` and `calculationValue` with different
+   * values.
+   *
+   * @example <caption>Numerical value</caption>
+   * const result = new RollResult(4);
+   *
+   * @example <caption>Object value</caption>
+   * // must provide either `value` or `initialValue`
+   * // `calculationValue` is optional.
+   * const result = new RollResult({
+   *   value: 6,
+   *   initialValue: 4,
+   *   calculationValue: 8,
+   * });
+   *
+   * @example <caption>With modifiers</caption>
+   * const result = new RollResult(4, ['explode', 'critical-success']);
+   *
+   * @param {number|{value: number, initialValue: number, calculationValue: number}} value The value
+   * rolled
+   * @param {number} [value.value] The value with modifiers applied
+   * @param {number} [value.initialValue] The initial, unmodified value rolled
+   * @param {number} [value.calculationValue] The value used in calculations
    * @param {string[]|Set<string>} [modifiers=[]] List of modifier names that affect this roll
    * @param {boolean} [useInTotal=true] Whether to include the roll value when calculating totals
    *
    * @throws {TypeError} Result value, calculation value, or modifiers are invalid
    */
   constructor(value, modifiers = [], useInTotal = true) {
-    if (diceUtils.isNumeric(value)) {
-      this[initialValueSymbol] = parseInt(value, 10);
+    if (isNumeric(value)) {
+      this[initialValueSymbol] = Number(value);
 
       this.modifiers = modifiers || [];
       this.useInTotal = useInTotal;
     } else if (value && (typeof value === 'object') && !Array.isArray(value)) {
       // ensure that we have a valid value
-      const initialVal = diceUtils.isNumeric(value.initialValue) ? value.initialValue : value.value;
-      if (!diceUtils.isNumeric(initialVal)) {
+      const initialVal = isNumeric(value.initialValue) ? value.initialValue : value.value;
+      if (!isNumeric(initialVal)) {
         throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
-      this[initialValueSymbol] = parseInt(initialVal, 10);
+      this[initialValueSymbol] = Number(initialVal);
 
       if (
-        diceUtils.isNumeric(value.value)
-        && (parseInt(value.value, 10) !== this[initialValueSymbol])
+        isNumeric(value.value)
+        && (Number(value.value) !== this[initialValueSymbol])
       ) {
         this.value = value.value;
       }
 
       if (
-        diceUtils.isNumeric(value.calculationValue)
-        && (parseFloat(value.calculationValue) !== this.value)
+        isNumeric(value.calculationValue)
+        && (parseFloat(`${value.calculationValue}`) !== this.value)
       ) {
         this.calculationValue = value.calculationValue;
       }
 
       this.modifiers = value.modifiers || modifiers || [];
       this.useInTotal = (typeof value.useInTotal === 'boolean') ? value.useInTotal : (useInTotal || false);
+    } else if (value === Infinity) {
+      throw new RangeError('Result value must be a finite number');
     } else {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
   }
 
   /**
-   * Returns the value to use in calculations
+   * The value to use in calculations.
+   * This may be changed by modifiers.
    *
    * @returns {number}
    */
   get calculationValue() {
-    return diceUtils.isNumeric(this[calculationValueSymbol])
+    return isNumeric(this[calculationValueSymbol])
       ? parseFloat(this[calculationValueSymbol])
       : this.value;
   }
 
   /**
-   * Sets the value to use in calculations
+   * Set the value to use in calculations.
    *
    * @param {number} value
    *
    * @throws {TypeError} value is invalid
    */
   set calculationValue(value) {
-    const isNumeric = diceUtils.isNumeric(value);
-    if (value && !isNumeric) {
+    const isValNumeric = isNumeric(value);
+    if (value === Infinity) {
+      throw new RangeError('Result calculation value must be a finite number');
+    }
+    if (value && !isValNumeric) {
       throw new TypeError(`Result calculation value is invalid: ${value}`);
     }
 
-    this[calculationValueSymbol] = isNumeric ? parseFloat(value) : null;
+    this[calculationValueSymbol] = isValNumeric ? parseFloat(`${value}`) : null;
   }
 
   /**
    * The initial roll value before any modifiers.
-   * Not often used, you probably want `value` instead.
+   *
+   * Not used for calculations and is just for reference.
+   * You probably want `value` instead.
+   *
+   * @see {@link RollResult#value}
    *
    * @returns {number}
    */
@@ -93,7 +131,9 @@ class RollResult {
   }
 
   /**
-   * Returns the flags for the modifiers that affect the roll
+   * The visual flags for the modifiers that affect the roll.
+   *
+   * @see {@link RollResult#modifiers}
    *
    * @returns {string}
    */
@@ -147,16 +187,19 @@ class RollResult {
   }
 
   /**
-   * Returns the modifiers that affect the roll
+   * The names of modifiers that affect the roll.
    *
    * @returns {Set<string>}
    */
   get modifiers() {
-    return this[modifiersSymbol] || new Set();
+    return this[modifiersSymbol];
   }
 
   /**
-   * Set the modifiers that affect the roll
+   * Set the modifier names that affect the roll.
+   *
+   * @example
+   * rollResult.modifiers = ['explode', 're-roll'];
    *
    * @param {string[]|Set<string>} value
    *
@@ -180,7 +223,7 @@ class RollResult {
   }
 
   /**
-   * Returns whether to use the value in total calculations or not
+   * Whether to use the value in total calculations or not.
    *
    * @returns {boolean}
    */
@@ -189,7 +232,7 @@ class RollResult {
   }
 
   /**
-   * Sets whether to use the value in total calculations or not
+   * Set whether to use the value in total calculations or not.
    *
    * @param {boolean} value
    */
@@ -198,33 +241,47 @@ class RollResult {
   }
 
   /**
-   * Value of the roll after modifiers have affected it
+   * Value of the roll after modifiers have been applied.
    *
    * @returns {number}
    */
   get value() {
-    return diceUtils.isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
+    return isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
   }
 
   /**
-   * Sets the roll value
+   * Set the roll value.
    *
    * @param {number} value
    *
+   * @throws {RangeError} value must be finite
    * @throws {TypeError} value is invalid
    */
   set value(value) {
-    if (!diceUtils.isNumeric(value)) {
+    if (value === Infinity) {
+      throw new RangeError('Result value must be a finite number');
+    }
+    if (!isNumeric(value)) {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
 
-    this[valueSymbol] = parseInt(value, 10);
+    this[valueSymbol] = Number(value);
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Return an object for JSON serialising.
    *
-   * @returns {{}}
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{
+   *  calculationValue: number,
+   *  modifierFlags: string,
+   *  modifiers: string[],
+   *  type: string,
+   *  initialValue: number,
+   *  useInTotal: boolean,
+   *  value: number
+   * }}
    */
   toJSON() {
     const {
@@ -243,7 +300,9 @@ class RollResult {
   }
 
   /**
-   * Returns the String representation of the object
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
    *
    * @returns {string}
    */

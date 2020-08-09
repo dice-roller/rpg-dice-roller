@@ -1,43 +1,45 @@
-import DiceRoll from './DiceRoll';
-import { diceUtils, exportFormats } from './utilities/utils';
-import RequiredArgumentError from './exceptions/RequiredArgumentErrorError';
-import DataFormatError from './exceptions/DataFormatError';
+import { DataFormatError, RequiredArgumentError } from './exceptions/index.js';
+import { isBase64, isJson } from './utilities/utils.js';
+import DiceRoll from './DiceRoll.js';
+import exportFormats from './utilities/ExportFormats.js';
 
 /**
  * history of log rolls
  *
  * @type {symbol}
+ *
+ * @private
  */
 const logSymbol = Symbol('log');
 
 /**
- * A DiceRoller handles dice rolling functionality, keeps track of rolls and can output logs etc.
+ * A `DiceRoller` handles dice rolling functionality, keeps a history of rolls and can output logs
+ * etc.
+ *
+ * @see {@link DiceRoll} if you don't need to keep a log history of rolls
  */
 class DiceRoller {
   /**
-   * Create a DiceRoller
+   * Create a DiceRoller.
    *
-   * @param {{}} [data] The data to import
+   * The optional `data` property should be either an array of `DiceRoll` objects, or an object with
+   * a `log` property that contains the `DiceRoll` objects.
    *
-   * @throws {TypeError} data.log must be an array
+   * @param {{log: DiceRoll[]}|DiceRoll[]} [data] The data to import
+   * @param {DiceRoll[]} [data.log] If `data` is an object, it must contain an array of `DiceRoll`s
+   *
+   * @throws {TypeError} if data is an object, it must have a `log[]` property
    */
   constructor(data) {
     this[logSymbol] = [];
 
     if (data) {
-      if (Array.isArray(data.log)) {
-        // loop through each log entry and import it
-        data.log.forEach((roll) => {
-          this[logSymbol].push(DiceRoll.import(roll));
-        });
-      } else if (data.log) {
-        throw new TypeError('data.log must be an Array');
-      }
+      this.import(data);
     }
   }
 
   /**
-   * Returns the current roll log
+   * The list of roll logs.
    *
    * @returns {DiceRoll[]}
    */
@@ -46,18 +48,21 @@ class DiceRoller {
   }
 
   /**
-   * Returns the roll notation and rolls in the format of:
+   * String representation of the rolls in the log
+   *
+   * @example
    * 2d20+1d6: [20,2]+[2] = 24; 1d8: [6] = 6
    *
    * @returns {string}
    */
   get output() {
-    // return the log as a joined string
     return this.log.join('; ');
   }
 
   /**
-   * Returns the total for all the rolls
+   * The sum of all the rolls in the log
+   *
+   * @see {@link DiceRoller#log}
    *
    * @returns {number}
    */
@@ -66,49 +71,28 @@ class DiceRoller {
   }
 
   /**
-   * Takes the given data, imports it into a new DiceRoller instance
-   * and returns the DiceRoller
+   * Clear the roll history log.
    *
-   * @param data
-   *
-   * @param {string|{log: []}|[]} data
-   *
-   * @returns {DiceRoller}
-   *
-   * @throws {DataFormatError} data format invalid
-   * @throws {RequiredArgumentError} data is required
-   * @throws {TypeError} log must be an array
-   */
-  static import(data) {
-    // create a new DiceRoller object
-    const diceRoller = new DiceRoller();
-
-    // import the data
-    diceRoller.import(data);
-
-    // return the DiceRoller
-    return diceRoller;
-  }
-
-  /**
-   * Clears the roll history log
+   * @see {@link DiceRoller#log}
    */
   clearLog() {
     this[logSymbol].length = 0;
   }
 
   /**
-   * Exports the roll log in the given format.
+   * Export the object in the given format.
    * If no format is specified, JSON is returned.
    *
-   * @param {number} [format=exportFormats.JSON] The format to export the data to
+   * @see {@link DiceRoller#toJSON}
    *
-   * @returns {string|null}
+   * @param {exportFormats} [format=exportFormats#JSON] The format to export the data as
+   *
+   * @returns {string|null} The exported data, in the specified format
    *
    * @throws {TypeError} Invalid export format
    */
-  export(format) {
-    switch (format || exportFormats.JSON) {
+  export(format = exportFormats.JSON) {
+    switch (format) {
       case exportFormats.BASE_64:
         // JSON encode, then base64
         return btoa(this.export(exportFormats.JSON));
@@ -122,14 +106,17 @@ class DiceRoller {
   }
 
   /**
-   * Takes the given roll data and imports it into
-   * the existing DiceRoller, appending the rolls
-   * to the current roll log.
-   * Returns the roll log.
+   * Add the data to the existing [roll log]{@link DiceRoller#log}.
    *
-   * @param {string|{log: []}|[]} data
+   * `data` can be an array of `DiceRoll` objects, an object with a `log` property that contains
+   * `DiceRoll` objects, or a JSON / base64 encoded representation of either.
    *
-   * @returns {DiceRoll[]}
+   * @see {@link DiceRoller#log}
+   *
+   * @param {string|{log: DiceRoll[]}|DiceRoll[]} data The data to import
+   * @param {DiceRoll[]} [data.log] If `data` is an object, it must contain an array of `DiceRoll`s
+   *
+   * @returns {DiceRoll[]} The roll log
    *
    * @throws {DataFormatError} data format invalid
    * @throws {RequiredArgumentError} data is required
@@ -138,10 +125,10 @@ class DiceRoller {
   import(data) {
     if (!data) {
       throw new RequiredArgumentError('data');
-    } else if (diceUtils.isJson(data)) {
+    } else if (isJson(data)) {
       // data is JSON - parse and import
       return this.import(JSON.parse(data));
-    } else if (diceUtils.isBase64(data)) {
+    } else if (isBase64(data)) {
       // data is base64 encoded - decode an import
       return this.import(atob(data));
     } else if (typeof data === 'object') {
@@ -168,46 +155,23 @@ class DiceRoller {
   }
 
   /**
-   * Returns an object for JSON serialising
+   * Roll the given dice notation(s) and return the corresponding `DiceRoll` objects.
    *
-   * @returns {{}}
-   */
-  toJSON() {
-    const { log, output, total } = this;
-
-    return {
-      log,
-      output,
-      total,
-      type: 'dice-roller',
-    };
-  }
-
-  /**
-   * Returns the String representation
-   * of the object as the roll notations
+   * You can roll a single notation, or multiple at once.
    *
-   * @returns {string}
-   */
-  toString() {
-    return this.output;
-  }
-
-  /**
-   * Rolls the given dice notation(s) and returns them.
+   * @example <caption>Single notation</caption>
+   * diceRoller.roll('2d6');
    *
-   * You can roll multiple, separate notations at once by passing them as separate arguments like:
-   *
-   * ```
-   * roll('2d6', '4d10', 'd8');
-   * ```
-   *
-   * If only a single notation is passed, a single DiceRoll object will be returned.
-   * If multiple are provided then it will return an array of DiceRoll objects.
+   * @example <caption>Multiple notations</caption>
+   * roll('2d6', '4d10', 'd8+4d6');
    *
    * @param {...string} notations The notations to roll
    *
-   * @returns {DiceRoll|DiceRoll[]}
+   * @returns {DiceRoll|DiceRoll[]} If a single notation is passed, a single `DiceRoll` is returned,
+   * otherwise an array of `DiceRoll` objects is returned
+   *
+   * @throws {NotationError} notation is invalid
+   * @throws {RequiredArgumentError} notation is required
    */
   roll(...notations) {
     const filteredNotations = notations.filter(Boolean);
@@ -227,6 +191,65 @@ class DiceRoller {
     });
 
     return (rolls.length > 1) ? rolls : rolls[0];
+  }
+
+  /**
+   * Return an object for JSON serialising.
+   *
+   * This is called automatically when JSON encoding the object.
+   *
+   * @returns {{output: string, total: number, log: DiceRoll[], type: string}}
+   */
+  toJSON() {
+    const { log, output, total } = this;
+
+    return {
+      log,
+      output,
+      total,
+      type: 'dice-roller',
+    };
+  }
+
+  /**
+   * Return the String representation of the object.
+   *
+   * This is called automatically when casting the object to a string.
+   *
+   * @returns {string}
+   *
+   * @see {@link DiceRoller#output}
+   */
+  toString() {
+    return this.output;
+  }
+
+  /**
+   * Create a new `DiceRoller` instance with the given data.
+   *
+   * `data` can be an array of `DiceRoll` objects, an object with a `log` property that contains the
+   * `DiceRoll` objects, or a JSON / base64 encoded representation of either.
+   *
+   * @see instance method {@link DiceRoller#import}
+   *
+   * @param {string|{log: DiceRoll[]}|DiceRoll[]} data The data to import
+   * @param {DiceRoll[]} [data.log] If `data` is an object, it must contain an array of `DiceRoll`s
+   *
+   * @returns {DiceRoller} The new `DiceRoller` instance
+   *
+   * @throws {DataFormatError} data format invalid
+   * @throws {RequiredArgumentError} data is required
+   * @throws {TypeError} log must be an array
+   */
+  static import(data) {
+    // create a new DiceRoller object
+    const diceRoller = new DiceRoller();
+
+    // import the data
+    diceRoller.import(data);
+
+    // return the DiceRoller
+    return diceRoller;
   }
 }
 
