@@ -392,10 +392,11 @@ class DiceRoll {
    */
   toJSON() {
     const {
-      maxTotal, minTotal, notation, output, rolls, total,
+      averageTotal, maxTotal, minTotal, notation, output, rolls, total,
     } = this;
 
     return {
+      averageTotal,
       maxTotal,
       minTotal,
       notation,
