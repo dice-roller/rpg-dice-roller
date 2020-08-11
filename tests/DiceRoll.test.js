@@ -14,6 +14,7 @@ describe('DiceRoll', () => {
 
       expect(diceRoll).toBeInstanceOf(DiceRoll);
       expect(diceRoll).toEqual(expect.objectContaining({
+        averageTotal: expect.any(Number),
         export: expect.any(Function),
         hasRolls: expect.any(Function),
         maxTotal: expect.any(Number),
@@ -632,6 +633,7 @@ describe('DiceRoll', () => {
         // this allows us to check that the output is correct, but ignoring the order of the
         // returned properties
         expect(JSON.parse(JSON.stringify(diceRoll))).toEqual({
+          averageTotal: 18,
           maxTotal: 32,
           minTotal: 4,
           notation: diceRoll.notation,
