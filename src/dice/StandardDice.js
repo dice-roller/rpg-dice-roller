@@ -166,7 +166,7 @@ class StandardDice {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * The dice notation. e.g. `4d6!`
+   * The dice notation. e.g. `4d6!`.
    *
    * @returns {string}
    */
