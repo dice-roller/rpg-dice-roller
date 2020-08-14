@@ -3,7 +3,7 @@ import RollResult from './RollResult.js';
 const rollsSymbol = Symbol('rolls');
 
 /**
- * A collection of roll results
+ * A collection of die roll results
  *
  * ::: tip
  * You will probably not need to create your own `RollResults` instances, unless you're importing
@@ -36,11 +36,11 @@ class RollResults {
    * @throws {TypeError} Rolls must be an array
    */
   constructor(rolls = []) {
-    this.rolls = rolls || [];
+    this.rolls = rolls;
   }
 
   /**
-   * The number of rolls.
+   * The number of roll results.
    *
    * @returns {number}
    */
@@ -49,7 +49,7 @@ class RollResults {
   }
 
   /**
-   * List of rolls.
+   * List of roll results.
    *
    * @returns {RollResult[]}
    */
@@ -109,6 +109,7 @@ class RollResults {
 
     return {
       rolls,
+      type: 'roll-results',
       value,
     };
   }

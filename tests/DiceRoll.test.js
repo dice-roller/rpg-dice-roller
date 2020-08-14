@@ -170,10 +170,15 @@ describe('DiceRoll', () => {
       const results = diceRoll.roll();
 
       expect(results).toBeInstanceOf(Array);
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(7);
 
       expect(results[0]).toBeInstanceOf(RollResults);
-      expect(results[1]).toBeInstanceOf(RollResults);
+      expect(results[1]).toBe('*');
+      expect(results[2]).toBe('(');
+      expect(results[3]).toBe(5);
+      expect(results[4]).toBe('+');
+      expect(results[5]).toBeInstanceOf(RollResults);
+      expect(results[6]).toBe(')');
     });
 
     test('stores correct results', () => {
@@ -188,7 +193,15 @@ describe('DiceRoll', () => {
 
       const results = diceRoll.roll();
 
-      expect(results).toEqual([roll1, roll2]);
+      expect(results).toEqual([
+        roll1,
+        '*',
+        '(',
+        5,
+        '+',
+        roll2,
+        ')',
+      ]);
 
       jest.restoreAllMocks();
     });
@@ -326,7 +339,7 @@ describe('DiceRoll', () => {
       const diceRoll = new DiceRoll('4d8');
       const rolls = diceRoll.roll();
 
-      expect(diceRoll.rolls).toBe(rolls);
+      expect(diceRoll.rolls).toEqual(rolls);
     });
 
     test('cannot change value', () => {
@@ -348,7 +361,11 @@ describe('DiceRoll', () => {
     test('returns false if rolls do not exist', () => {
       const diceRoll = new DiceRoll('4+8');
 
+      jest.spyOn(diceRoll, 'rolls', 'get').mockImplementation(() => []);
+
       expect(diceRoll.hasRolls()).toBe(false);
+
+      jest.restoreAllMocks();
     });
   });
 
@@ -414,10 +431,10 @@ describe('DiceRoll', () => {
         jest.restoreAllMocks();
       });
 
-      test('returns 0 if no rolls', () => {
+      test('calculates correctly for math only rolls', () => {
         const diceRoll = new DiceRoll('4+8');
 
-        expect(diceRoll.total).toBe(0);
+        expect(diceRoll.total).toBe(12);
       });
 
       test('cannot change value', () => {
@@ -576,7 +593,7 @@ describe('DiceRoll', () => {
       jest.restoreAllMocks();
     });
 
-    test('Handles success / failure with normal rolls', () => {
+    test('can handle success / failure combined with normal rolls', () => {
       // mock the roll values
       jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(6))
@@ -594,10 +611,22 @@ describe('DiceRoll', () => {
       jest.restoreAllMocks();
     });
 
-    test('show message if no rolls', () => {
+    test('can handle math only roll', () => {
       const diceRoll = new DiceRoll('4+8');
 
-      expect(diceRoll.output).toBe('4+8: No dice rolled');
+      expect(diceRoll.output).toBe('4+8: 4+8 = 12');
+    });
+
+    test('returns "No dice rolled" if no rolls', () => {
+      jest.spyOn(DiceRoll.prototype, 'hasRolls')
+        .mockImplementation(() => false);
+
+      const notation = '4d6';
+      const diceRoller = new DiceRoll(notation);
+
+      expect(diceRoller.output).toEqual(`${notation}: No dice rolled`);
+
+      jest.restoreAllMocks();
     });
 
     describe('toJSON', () => {
@@ -735,23 +764,6 @@ describe('DiceRoll', () => {
     test('can import plain object', () => {
       const exported = diceRoll.export(exportFormats.OBJECT);
       const importedRoll = DiceRoll.import(exported);
-
-      expect(importedRoll).toBeInstanceOf(DiceRoll);
-      expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
-    });
-
-    test('non-roll items are removed when importing notation.rolls', () => {
-      const exported = diceRoll.export(exportFormats.OBJECT);
-      // clone the rolls data
-      const dataToImport = {
-        notation: exported.notation,
-        rolls: [...exported.rolls],
-      };
-
-      // add some dummy invalid data
-      dataToImport.rolls.push(...['foo', 'bar']);
-
-      const importedRoll = DiceRoll.import(dataToImport);
 
       expect(importedRoll).toBeInstanceOf(DiceRoll);
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);

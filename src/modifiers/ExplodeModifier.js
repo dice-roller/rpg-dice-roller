@@ -74,14 +74,14 @@ class ExplodeModifier extends ComparisonModifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
+  run(results, _context) {
     // ensure that the dice can explode without going into an infinite loop
-    if (_dice.min === _dice.max) {
-      throw new DieActionValueError(_dice, 'explode');
+    if (_context.min === _context.max) {
+      throw new DieActionValueError(_context, 'explode');
     }
 
     const parsedResults = results;
@@ -95,7 +95,7 @@ class ExplodeModifier extends ComparisonModifier {
         for (let i = 0; (i < this.maxIterations) && this.isComparePoint(compareValue); i++) {
           const prevRoll = subRolls[subRolls.length - 1];
           // roll the dice
-          const rollResult = _dice.rollOnce();
+          const rollResult = _context.rollOnce();
 
           // update the value to check against
           compareValue = rollResult.value;

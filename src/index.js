@@ -5,6 +5,7 @@ import * as NumberGenerator from './utilities/NumberGenerator.js';
 import DiceRoll from './DiceRoll.js';
 import DiceRoller from './DiceRoller.js';
 import Parser from './parser/Parser.js';
+import RollGroup from './RollGroup.js';
 import exportFormats from './utilities/ExportFormats.js';
 
 export {
@@ -16,4 +17,5 @@ export {
   Modifiers,
   NumberGenerator,
   Parser,
+  RollGroup,
 };

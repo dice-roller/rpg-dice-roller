@@ -19,24 +19,6 @@ describe('KeepModifier', () => {
         qty: 1,
       }));
     });
-
-    test('constructor requires end', () => {
-      expect(() => {
-        new KeepModifier();
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier(false);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier(null);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new KeepModifier(undefined);
-      }).toThrow(RangeError);
-    });
   });
 
   describe('End', () => {
@@ -89,6 +71,24 @@ describe('KeepModifier', () => {
       expect(() => {
         mod.end = { end: 'h' };
       }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = false;
+      }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = null;
+      }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = undefined;
+      }).toThrow(RangeError);
+    });
+
+    test('defaults to "h"', () => {
+      const mod = new KeepModifier();
+
+      expect(mod.end).toEqual('h');
     });
   });
 

@@ -11,13 +11,13 @@ class DropModifier extends KeepModifier {
   /**
    * Create a `DropModifier` instance.
    *
-   * @param {string} end Either `h|l` to drop highest or lowest
+   * @param {string} [end='l'] Either `h|l` to drop highest or lowest
    * @param {number} [qty=1] The amount of dice to drop
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(end, qty = 1) {
+  constructor(end = 'l', qty = 1) {
     super(end, qty);
 
     // set the modifier's sort order

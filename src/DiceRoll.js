@@ -1,21 +1,13 @@
 import { StandardDice } from './dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
-import { evaluate, toFixed } from './utilities/math.js';
+import { toFixed } from './utilities/math.js';
 import { engines, generator } from './utilities/NumberGenerator.js';
 import { isBase64, isJson } from './utilities/utils.js';
 import Parser from './parser/Parser.js';
 import RollGroup from './RollGroup.js';
 import RollResults from './results/RollResults.js';
+import ResultGroup from './results/ResultGroup.js';
 import exportFormats from './utilities/ExportFormats.js';
-
-/**
- * Method for calculating the roll total
- *
- * @type {symbol}
- *
- * @private
- */
-const calculateTotalSymbol = Symbol('calculateTotal');
 
 /**
  * The notation
@@ -45,13 +37,13 @@ const maxTotalSymbol = Symbol('maxTotal');
 const minTotalSymbol = Symbol('minTotal');
 
 /**
- * List of dice definition objects
+ * List of expressions to roll
  *
  * @type {symbol}
  *
  * @private
  */
-const parsedNotationSymbol = Symbol('parsed-notation');
+const expressionsSymbol = Symbol('expressions');
 
 /**
  * Method for rolling dice
@@ -72,6 +64,15 @@ const rollMethodSymbol = Symbol('roll-method');
 const rollsSymbol = Symbol('rolls');
 
 /**
+ * Set the rolls
+ *
+ * @private
+ *
+ * @type {symbol}
+ */
+const setRollsSymbol = Symbol('set-rolls');
+
+/**
  * The roll total
  *
  * @type {symbol}
@@ -79,6 +80,17 @@ const rollsSymbol = Symbol('rolls');
  * @private
  */
 const totalSymbol = Symbol('total');
+
+/**
+ * Calculate the total of all the results, fixed to a max of 2 digits after the decimal point.
+ *
+ * @private
+ *
+ * @param {ResultGroup} results
+ *
+ * @returns {Number} the results total
+ */
+const calculateTotal = (results) => toFixed(results.calculationValue, 2);
 
 /**
  * A `DiceRoll` handles rolling of a single dice notation and storing it's result.
@@ -101,13 +113,14 @@ class DiceRoll {
    *   rolls: ..., // RollResults object or array of roll results
    * });
    *
-   * @param {string|{notation: string, rolls: RollResults[]}} notation The notation to roll
+   * @param {string|{notation: string, rolls: ResultGroup|Array}} notation The notation to roll
    * @param {string} notation.notation If `notation is an object; the notation to roll
-   * @param {RollResults[]} [notation.rolls] If `notation is an object; the rolls to import
+   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number>} [notation.rolls] If
+   * `notation` is an object; the rolls to import
    *
    * @throws {NotationError} notation is invalid
    * @throws {RequiredArgumentError} notation is required
-   * @throws {TypeError} Rolls must be an array
+   * @throws {TypeError} Rolls must be an valid result object, or an array
    */
   constructor(notation) {
     if (!notation) {
@@ -115,7 +128,7 @@ class DiceRoll {
     }
 
     // initialise the parsed dice array
-    this[parsedNotationSymbol] = [];
+    this[expressionsSymbol] = [];
 
     if ((notation instanceof Object) && !Array.isArray(notation)) {
       // validate object
@@ -126,55 +139,27 @@ class DiceRoll {
       } else if (typeof notation.notation !== 'string') {
         throw new NotationError(notation.notation);
       } else if (notation.rolls) {
-        // we have rolls - validate them
-        if (!Array.isArray(notation.rolls)) {
-          // rolls is not an array
-          throw new TypeError(`Rolls must be an array: ${notation.rolls}`);
-        } else {
-          // if roll is a RollResults, return it, otherwise try to convert to a RollResults object
-          this[rollsSymbol] = notation.rolls
-            .map((roll) => {
-              if (roll instanceof RollResults) {
-                // already a RollResults object
-                return roll;
-              }
-              if (Array.isArray(roll)) {
-                // array of values
-                return new RollResults(roll);
-              }
-              if ((roll instanceof Object) && Array.isArray(roll.rolls)) {
-                // object with list of rolls
-                return new RollResults(roll.rolls);
-              }
-
-              return null;
-            })
-            .filter(Boolean);
-        }
+        // we have rolls - store them
+        this[setRollsSymbol](notation.rolls);
       }
 
       // store the notation
       this[notationSymbol] = notation.notation;
 
       // parse the notation
-      this[parsedNotationSymbol] = Parser.parse(this.notation);
+      this[expressionsSymbol] = Parser.parse(this.notation);
 
-      if (!this[rollsSymbol] || !this[rollsSymbol].length) {
-        // ensure rolls is an empty array
-        this[rollsSymbol] = [];
-
-        // roll the dice
+      if (!this.hasRolls()) {
+        // no rolls - roll the dice
         this.roll();
       }
     } else if (typeof notation === 'string') {
       // @todo see if we can assert that the notation is valid
       // store the notation
       this[notationSymbol] = notation;
-      // empty the current rolls
-      this[rollsSymbol] = [];
 
       // parse the notation
-      this[parsedNotationSymbol] = Parser.parse(this.notation);
+      this[expressionsSymbol] = Parser.parse(this.notation);
 
       // roll the dice
       this.roll();
@@ -202,7 +187,7 @@ class DiceRoll {
    * @returns {number}
    */
   get maxTotal() {
-    if (!this[parsedNotationSymbol]) {
+    if (!this[expressionsSymbol]) {
       return 0;
     }
 
@@ -212,7 +197,7 @@ class DiceRoll {
       const rolls = this[rollMethodSymbol](engines.max);
 
       // calculate the total
-      this[maxTotalSymbol] = this[calculateTotalSymbol](rolls);
+      this[maxTotalSymbol] = calculateTotal(rolls);
     }
 
     // return the total
@@ -227,7 +212,7 @@ class DiceRoll {
    * @returns {number}
    */
   get minTotal() {
-    if (!this[parsedNotationSymbol]) {
+    if (!this[expressionsSymbol]) {
       return 0;
     }
 
@@ -237,7 +222,7 @@ class DiceRoll {
       const rolls = this[rollMethodSymbol](engines.min);
 
       // calculate the total
-      this[minTotalSymbol] = this[calculateTotalSymbol](rolls);
+      this[minTotalSymbol] = calculateTotal(rolls);
     }
 
     // return the total
@@ -262,34 +247,10 @@ class DiceRoll {
    * @returns {string}
    */
   get output() {
-    let rollIndex = 0;
     let output = `${this.notation}: `;
 
     if (this.hasRolls()) {
-      output += this[parsedNotationSymbol]
-        .map((item) => {
-          if (item instanceof StandardDice) {
-            const rollResults = this.rolls[rollIndex] || null;
-
-            // increment the roll index
-            rollIndex += 1;
-
-            return rollResults;
-          }
-
-          if (item instanceof RollGroup) {
-            // @todo handle roll groups
-          }
-
-          return item;
-        })
-        // remove any empty values
-        .filter(Boolean)
-        // join into a single string
-        .join('');
-
-      // add the total
-      output += ` = ${this.total}`;
+      output += `${this[rollsSymbol]} = ${this.total}`;
     } else {
       output += 'No dice rolled';
     }
@@ -300,10 +261,10 @@ class DiceRoll {
   /**
    * The dice rolled for the notation
    *
-   * @returns {RollResults[]}
+   * @returns {Array.<ResultGroup|RollResults|string|number>}
    */
   get rolls() {
-    return this[rollsSymbol] || [];
+    return this[rollsSymbol] ? this[rollsSymbol].results : [];
   }
 
   /**
@@ -314,7 +275,7 @@ class DiceRoll {
   get total() {
     // only calculate the total if it has not already been done
     if (!this[totalSymbol] && this.hasRolls()) {
-      this[totalSymbol] = this[calculateTotalSymbol](this.rolls);
+      this[totalSymbol] = calculateTotal(this[rollsSymbol]);
     }
 
     // return the total
@@ -353,11 +314,11 @@ class DiceRoll {
    * @returns {boolean} `True` if the object has rolls, `false` otherwise
    */
   hasRolls() {
-    return !!(this[parsedNotationSymbol] && Array.isArray(this.rolls) && this.rolls.length);
+    return this[expressionsSymbol] && (this.rolls.length > 0);
   }
 
   /**
-   * Rolls the dice for the stored notation.
+   * Roll the dice for the stored notation.
    *
    * This is called in the constructor, so you'll only need this if you want to re-roll the
    * notation. However, it's usually better to create a new `DiceRoll` instance instead.
@@ -372,7 +333,7 @@ class DiceRoll {
     this[rollsSymbol] = this[rollMethodSymbol]();
 
     // return the rolls;
-    return this[rollsSymbol];
+    return this.rolls;
   }
 
   /**
@@ -431,7 +392,7 @@ class DiceRoll {
    * @example <caption>Object</caption>
    * DiceRoll.import({
    *   notation: '4d6',
-   *   rolls: ..., // RollResults object or array of roll results
+   *   rolls: ..., // ResultGroup object or array of roll results
    * });
    *
    * @example <caption>JSON</caption>
@@ -466,42 +427,6 @@ class DiceRoll {
   }
 
   /**
-   * Calculate the total roll value and return it
-   *
-   * @private
-   *
-   * @param {RollResults[]} rolls
-   *
-   * @returns {Number} the roll total
-   */
-  [calculateTotalSymbol](rolls) {
-    let formula = '';
-    let rollIndex = 0;
-
-    if (!rolls.length) {
-      return 0;
-    }
-
-    // loop through each roll and calculate the totals
-    this[parsedNotationSymbol].forEach((item) => {
-      // @todo need to handle roll groups
-      if (item instanceof StandardDice) {
-        // @todo should roll results be stored on their relevant parsed object?
-        // item is a die - total the rolls for it
-        formula += rolls[rollIndex] ? rolls[rollIndex].value : 0;
-
-        // increment the roll index and store the previous rolls / parsed die
-        rollIndex += 1;
-      } else {
-        formula += item;
-      }
-    });
-
-    // if a total formula has been produced, evaluate it and round it to max 2 decimal places
-    return formula ? toFixed(evaluate(formula), 2) : 0;
-  }
-
-  /**
    * Roll the dice and return the result.
    *
    * If the engine is passed, it will be used for the number generation for **this roll only**.
@@ -509,9 +434,9 @@ class DiceRoll {
    *
    * @private
    *
-   * @param {{next(): number}} [engine]
+   * @param {{next(): number}} [engine] The RNG engine to use for die rolls
    *
-   * @returns {RollResults[]} The result of the rolls
+   * @returns {ResultGroup} The result of the rolls
    *
    * @throws {TypeError} engine must have function `next()`
    */
@@ -524,21 +449,71 @@ class DiceRoll {
     }
 
     // roll the dice
-    const rolls = this[parsedNotationSymbol].map((item) => {
-      if ((item instanceof StandardDice) || (item instanceof RollGroup)) {
+    const results = new ResultGroup(this[expressionsSymbol].map((expression) => {
+      if ((expression instanceof StandardDice) || (expression instanceof RollGroup)) {
         // roll the object and return the value
-        return item.roll();
+        return expression.roll();
       }
 
-      return null;
-    }).filter(Boolean);
+      return expression;
+    }).filter(Boolean));
 
     if (engine) {
       // reset the engine
       generator.engine = oEngine;
     }
 
-    return rolls;
+    return results;
+  }
+
+  /**
+   * Set the rolls.
+   *
+   * @private
+   *
+   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array>} rolls
+   *
+   * @throws {TypeError} Rolls must be an valid result object, or an array
+   */
+  [setRollsSymbol](rolls) {
+    if (rolls instanceof ResultGroup) {
+      this[rollsSymbol] = rolls;
+    } else if (rolls instanceof RollResults) {
+      this[rollsSymbol] = new ResultGroup([rolls]);
+    } else if (Array.isArray(rolls)) {
+      this[rollsSymbol] = new ResultGroup(rolls.map((roll) => {
+        if ((roll instanceof ResultGroup) || (roll instanceof RollResults)) {
+          // already a RollResults object
+          return roll;
+        }
+
+        // @todo should this be a ResultGroup, or a RollResults?
+        if (Array.isArray(roll)) {
+          // array of values
+          return new RollResults(roll);
+        }
+
+        if (typeof roll === 'object') {
+          // a result group
+          if (Array.isArray(roll.results)) {
+            return new ResultGroup(
+              roll.results,
+              roll.modifiers || [],
+              roll.isRollGroup || false,
+              (typeof roll.useInTotal === 'boolean') ? roll.useInTotal : true,
+            );
+          }
+          // roll results
+          if (Array.isArray(roll.rolls)) {
+            return new RollResults(roll.rolls);
+          }
+        }
+
+        return roll;
+      }));
+    } else {
+      throw new TypeError('Rolls must be an valid result object, or an array');
+    }
   }
 }
 

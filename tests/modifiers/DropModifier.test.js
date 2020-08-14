@@ -19,24 +19,6 @@ describe('DropModifier', () => {
         qty: 1,
       }));
     });
-
-    test('constructor requires end', () => {
-      expect(() => {
-        new DropModifier();
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new DropModifier(false);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new DropModifier(null);
-      }).toThrow(RangeError);
-
-      expect(() => {
-        new DropModifier(undefined);
-      }).toThrow(RangeError);
-    });
   });
 
   describe('End', () => {
@@ -89,6 +71,24 @@ describe('DropModifier', () => {
       expect(() => {
         mod.end = { end: 'l' };
       }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = false;
+      }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = null;
+      }).toThrow(RangeError);
+
+      expect(() => {
+        mod.end = undefined;
+      }).toThrow(RangeError);
+    });
+
+    test('defaults to "l"', () => {
+      const mod = new DropModifier();
+
+      expect(mod.end).toEqual('l');
     });
   });
 

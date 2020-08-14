@@ -69,14 +69,14 @@ class ReRollModifier extends ComparisonModifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
+  run(results, _context) {
     // ensure that the dice can explode without going into an infinite loop
-    if (_dice.min === _dice.max) {
-      throw new DieActionValueError(_dice, 're-roll');
+    if (_context.min === _context.max) {
+      throw new DieActionValueError(_context, 're-roll');
     }
 
     results.rolls
@@ -85,7 +85,7 @@ class ReRollModifier extends ComparisonModifier {
         // unless we're only rolling once and have already re-rolled
         for (let i = 0; (i < this.maxIterations) && this.isComparePoint(roll.value); i++) {
           // re-roll the dice
-          const rollResult = _dice.rollOnce();
+          const rollResult = _context.rollOnce();
 
           // update the roll value (Unlike exploding, the original value is not kept)
           // eslint-disable-next-line no-param-reassign

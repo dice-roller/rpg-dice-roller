@@ -16,13 +16,13 @@ class KeepModifier extends Modifier {
   /**
    * Create a `KeepModifier` instance
    *
-   * @param {string} end Either `h|l` to keep highest or lowest
+   * @param {string} [end='h'] Either `h|l` to keep highest or lowest
    * @param {number} [qty=1] The amount dice to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(end, qty = 1) {
+  constructor(end = 'h', qty = 1) {
     super();
 
     this.end = end;
@@ -121,11 +121,11 @@ class KeepModifier extends Modifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
+  run(results, _context) {
     // first clone the rolls so it doesn't affect the original array
     const rollIndexes = [...results.rolls]
       // get a list of objects with roll values and original index
