@@ -73,7 +73,7 @@
     "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && rollup --c --environment BUILD:dev",
-    "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude ./parser/grammars,./RollGroup.js",
+    "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude ./parser/grammars",
     "build:grammars": "node src/parser/grammars/generate.js",
     "build:prod": "npm run build:grammars && rollup --c --environment BUILD:prod",
     "watch": "npm run build:dev -- -w",
