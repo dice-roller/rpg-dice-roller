@@ -1,8 +1,8 @@
-import math from 'mathjs-expression-parser';
 import { StandardDice } from './dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
+import { evaluate, toFixed } from './utilities/math.js';
 import { engines, generator } from './utilities/NumberGenerator.js';
-import { isBase64, isJson, toFixed } from './utilities/utils.js';
+import { isBase64, isJson } from './utilities/utils.js';
 import Parser from './parser/Parser.js';
 import RollGroup from './RollGroup.js';
 import RollResults from './results/RollResults.js';
@@ -498,7 +498,7 @@ class DiceRoll {
     });
 
     // if a total formula has been produced, evaluate it and round it to max 2 decimal places
-    return formula ? toFixed(math.eval(formula), 2) : 0;
+    return formula ? toFixed(evaluate(formula), 2) : 0;
   }
 
   /**

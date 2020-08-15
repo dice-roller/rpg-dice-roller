@@ -1,5 +1,5 @@
 import { DieActionValueError } from '../exceptions/index.js';
-import { sumArray } from '../utilities/utils.js';
+import { sumArray } from '../utilities/math.js';
 import ComparisonModifier from './ComparisonModifier.js';
 
 const compoundSymbol = Symbol('compound');

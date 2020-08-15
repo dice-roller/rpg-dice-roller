@@ -1,4 +1,3 @@
-import math from 'mathjs-expression-parser';
 import { StandardDice } from '../src/dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
 import DiceRoll from '../src/DiceRoll.js';
@@ -368,24 +367,6 @@ describe('DiceRoll', () => {
         spy.mockRestore();
       });
 
-      test('calls math.eval', () => {
-        // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'roll')
-          .mockImplementationOnce(() => new RollResults([6, 2, 5, 8]))
-          .mockImplementationOnce(() => new RollResults([3, 9]));
-
-        const diceRoll = new DiceRoll('4d8*(5+2d10)');
-        const spy = jest.spyOn(math, 'eval');
-
-        expect(diceRoll.total).toBe(357);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('21*(5+12)');
-
-        // remove the spy
-        spy.mockRestore();
-        jest.restoreAllMocks();
-      });
-
       test('equal to total roll values', () => {
         // mock the roll values
         const roll = new RollResults([6, 2, 5, 8]);
@@ -408,12 +389,9 @@ describe('DiceRoll', () => {
           .mockImplementationOnce(() => roll2);
 
         const diceRoll = new DiceRoll('4d8/(5+2)d6');
-        const spy = jest.spyOn(math, 'eval');
 
         // assert that the total matches
         expect(diceRoll.total).toBeCloseTo(0.68);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('17/25');
 
         jest.restoreAllMocks();
       });
@@ -429,12 +407,9 @@ describe('DiceRoll', () => {
           .mockImplementationOnce(() => new RollResult(9));
 
         const diceRoll = new DiceRoll('4d8dl2*(5+2d10kh1)');
-        const spy = jest.spyOn(math, 'eval');
 
         // assert that the total matches
         expect(diceRoll.total).toBe(196);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('14*(5+9)');
 
         jest.restoreAllMocks();
       });
