@@ -144,7 +144,7 @@ CompareOperator
 // Either a positive integer or an expression within parenthesis (Handy for dice qty or sides)
 IntegerOrExpression
   = IntegerNumber
-  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return math.eval(text()) }
+  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return evaluate(text()) }
 
 // Generic expression
 Expression

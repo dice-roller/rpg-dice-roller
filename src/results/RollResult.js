@@ -1,4 +1,4 @@
-import { isNumeric } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/math.js';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');

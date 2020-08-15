@@ -1,4 +1,3 @@
-import * as Utils from './utilities/utils.js';
 import * as Dice from './dice/index.js';
 import * as Exceptions from './exceptions/index.js';
 import * as Modifiers from './modifiers/index.js';
@@ -17,5 +16,4 @@ export {
   Modifiers,
   NumberGenerator,
   Parser,
-  Utils,
 };

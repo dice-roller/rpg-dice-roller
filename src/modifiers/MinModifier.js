@@ -1,4 +1,4 @@
-import { isNumeric } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/math.js';
 import Modifier from './Modifier.js';
 
 const minSymbol = Symbol('min');

@@ -1,7 +1,7 @@
 import { RequiredArgumentError } from '../exceptions/index.js';
 import { ExplodeModifier, Modifier, ReRollModifier } from '../modifiers/index.js';
+import { isNumeric, isSafeNumber } from '../utilities/math.js';
 import { generator } from '../utilities/NumberGenerator.js';
-import { isNumeric, isSafeNumber } from '../utilities/utils.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import ComparePoint from '../ComparePoint.js';
