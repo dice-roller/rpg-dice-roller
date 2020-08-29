@@ -179,54 +179,35 @@ describe('CriticalFailureModifier', () => {
         1, 2, 4, 8, 6,
       ]);
       const mod = new CriticalFailureModifier(new ComparePoint('<=', 2));
-      const modifiedRolls = mod.run(results, new StandardDice(6, 5)).rolls;
+      const modifiedResults = mod.run(results, new StandardDice(6, 5)).rolls;
 
-      expect(modifiedRolls).toEqual([
-        expect.objectContaining({
-          calculationValue: 1,
-          initialValue: 1,
-          modifierFlags: '__',
-          modifiers: new Set([
-            'critical-failure',
-          ]),
-          useInTotal: true,
-          value: 1,
-        }),
-        expect.objectContaining({
-          calculationValue: 2,
-          initialValue: 2,
-          modifierFlags: '__',
-          modifiers: new Set([
-            'critical-failure',
-          ]),
-          useInTotal: true,
-          value: 2,
-        }),
-        expect.objectContaining({
-          calculationValue: 4,
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 4,
-        }),
-        expect.objectContaining({
-          calculationValue: 8,
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 8,
-        }),
-        expect.objectContaining({
-          calculationValue: 6,
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 6,
-        }),
-      ]);
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(5);
+
+      expect(modifiedResults[0].calculationValue).toBe(1);
+      expect(modifiedResults[0].value).toBe(1);
+      expect(modifiedResults[0].useInTotal).toBe(true);
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['critical-failure']));
+
+      expect(modifiedResults[1].calculationValue).toBe(2);
+      expect(modifiedResults[1].value).toBe(2);
+      expect(modifiedResults[1].useInTotal).toBe(true);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['critical-failure']));
+
+      expect(modifiedResults[2].calculationValue).toBe(4);
+      expect(modifiedResults[2].value).toBe(4);
+      expect(modifiedResults[2].useInTotal).toBe(true);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].calculationValue).toBe(8);
+      expect(modifiedResults[3].value).toBe(8);
+      expect(modifiedResults[3].useInTotal).toBe(true);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].calculationValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].useInTotal).toBe(true);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
     });
   });
 

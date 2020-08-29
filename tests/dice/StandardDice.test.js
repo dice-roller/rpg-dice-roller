@@ -398,6 +398,7 @@ describe('StandardDice', () => {
       new StandardDice(6, 8, modifiers);
 
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(modifiers);
 
       // remove the spy
       spy.mockRestore();
@@ -555,7 +556,7 @@ describe('StandardDice', () => {
       }
     });
 
-    test('roll return a RollResults object', () => {
+    test('roll returns a RollResults object', () => {
       expect((new StandardDice(6)).roll()).toBeInstanceOf(RollResults);
     });
 
