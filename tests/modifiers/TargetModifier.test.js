@@ -1,8 +1,10 @@
 import { StandardDice } from '../../src/dice/index.js';
 import { ComparisonModifier, TargetModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';
+import ResultGroup from '../../src/results/ResultGroup.js';
 import RollResult from '../../src/results/RollResult.js';
 import RollResults from '../../src/results/RollResults.js';
+import RollGroup from '../../src/RollGroup.js';
 
 describe('TargetModifier', () => {
   let sCP;
@@ -301,87 +303,228 @@ describe('TargetModifier', () => {
   });
 
   describe('Run', () => {
-    let die; let
-      results;
+    let die;
+    let results;
 
-    beforeEach(() => {
-      results = new RollResults([
-        8, 4, 2, 9, 1, 6, 10,
-      ]);
-      die = new StandardDice(10, 6);
+    describe('Basic', () => {
+      beforeEach(() => {
+        results = new RollResults([8, 4, 2, 9, 1, 6, 10]);
+        die = new StandardDice(10, 6);
+      });
+
+      test('returns RollResults object', () => {
+        expect(mod.run(results, die)).toBe(results);
+      });
+
+      test('flags successes and failures', () => {
+        const { rolls } = mod.run(results, die);
+
+        expect(rolls).toBeInstanceOf(Array);
+        expect(rolls).toHaveLength(7);
+
+        expect(rolls[0]).toBeInstanceOf(RollResult);
+        expect(rolls[0].calculationValue).toBe(0);
+        expect(rolls[0].value).toBe(8);
+        expect(rolls[0].modifiers).toEqual(new Set());
+        expect(rolls[0].useInTotal).toBe(true);
+
+        expect(rolls[1]).toBeInstanceOf(RollResult);
+        expect(rolls[1].calculationValue).toBe(0);
+        expect(rolls[1].value).toBe(4);
+        expect(rolls[1].modifiers).toEqual(new Set());
+        expect(rolls[1].useInTotal).toBe(true);
+
+        expect(rolls[2]).toBeInstanceOf(RollResult);
+        expect(rolls[2].calculationValue).toBe(-1);
+        expect(rolls[2].value).toBe(2);
+        expect(rolls[2].modifiers).toEqual(new Set(['target-failure']));
+        expect(rolls[2].useInTotal).toBe(true);
+
+        expect(rolls[3]).toBeInstanceOf(RollResult);
+        expect(rolls[3].calculationValue).toBe(1);
+        expect(rolls[3].value).toBe(9);
+        expect(rolls[3].modifiers).toEqual(new Set(['target-success']));
+        expect(rolls[3].useInTotal).toBe(true);
+
+        expect(rolls[4]).toBeInstanceOf(RollResult);
+        expect(rolls[4].calculationValue).toBe(-1);
+        expect(rolls[4].value).toBe(1);
+        expect(rolls[4].modifiers).toEqual(new Set(['target-failure']));
+        expect(rolls[4].useInTotal).toBe(true);
+
+        expect(rolls[5]).toBeInstanceOf(RollResult);
+        expect(rolls[5].calculationValue).toBe(0);
+        expect(rolls[5].value).toBe(6);
+        expect(rolls[5].modifiers).toEqual(new Set());
+        expect(rolls[5].useInTotal).toBe(true);
+
+        expect(rolls[6]).toBeInstanceOf(RollResult);
+        expect(rolls[6].calculationValue).toBe(1);
+        expect(rolls[6].value).toBe(10);
+        expect(rolls[6].modifiers).toEqual(new Set(['target-success']));
+        expect(rolls[6].useInTotal).toBe(true);
+      });
     });
 
-    test('returns RollResults object', () => {
-      expect(mod.run(results, die)).toBe(results);
-    });
+    describe('Roll groups', () => {
+      let group;
 
-    test('flags successes and failures', () => {
-      const { rolls } = mod.run(results, die);
+      describe('Single sub-rolls', () => {
+        beforeEach(() => {
+          // equivalent to `{4d6+5}`
+          group = new RollGroup([
+            [
+              new StandardDice(6, 4),
+              '+',
+              5,
+            ],
+          ]);
 
-      expect(rolls.length).toEqual(7);
+          results = new ResultGroup([
+            // first sub-roll `4d6+5`
+            new ResultGroup([
+              // 4d6
+              new RollResults([4, 2, 6, 3]),
+              '+',
+              5,
+            ]),
+          ]);
+        });
 
-      expect(rolls[0]).toBeInstanceOf(RollResult);
-      expect(rolls[0]).toEqual(expect.objectContaining({
-        calculationValue: 0,
-        initialValue: 8,
-        modifierFlags: '',
-        value: 8,
-      }));
-      expect(rolls[0].modifiers).toEqual(new Set());
+        test('returns RollResults object', () => {
+          mod = new TargetModifier(new ComparePoint('>', 2));
+          expect(mod.run(results, group)).toBe(results);
+        });
 
-      expect(rolls[1]).toBeInstanceOf(RollResult);
-      expect(rolls[1]).toEqual(expect.objectContaining({
-        calculationValue: 0,
-        initialValue: 4,
-        modifierFlags: '',
-        value: 4,
-      }));
-      expect(rolls[1].modifiers).toEqual(new Set());
+        test('flags successes', () => {
+          mod = new TargetModifier(new ComparePoint('>', 10));
+          const modifiedResults = mod.run(results, group).results;
 
-      expect(rolls[2]).toBeInstanceOf(RollResult);
-      expect(rolls[2]).toEqual(expect.objectContaining({
-        calculationValue: -1,
-        initialValue: 2,
-        modifierFlags: '_',
-        value: 2,
-      }));
-      expect(rolls[2].modifiers).toEqual(new Set(['target-failure']));
+          expect(modifiedResults).toBeInstanceOf(Array);
+          expect(modifiedResults).toHaveLength(1);
 
-      expect(rolls[3]).toBeInstanceOf(RollResult);
-      expect(rolls[3]).toEqual(expect.objectContaining({
-        calculationValue: 1,
-        initialValue: 9,
-        modifierFlags: '*',
-        value: 9,
-      }));
-      expect(rolls[3].modifiers).toEqual(new Set(['target-success']));
+          expect(modifiedResults[0]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[0].calculationValue).toBe(1);
+          expect(modifiedResults[0].value).toBe(20);
+          expect(modifiedResults[0].modifiers).toEqual(new Set(['target-success']));
+          expect(modifiedResults[0].useInTotal).toBe(true);
+        });
 
-      expect(rolls[4]).toBeInstanceOf(RollResult);
-      expect(rolls[4]).toEqual(expect.objectContaining({
-        calculationValue: -1,
-        initialValue: 1,
-        modifierFlags: '_',
-        value: 1,
-      }));
-      expect(rolls[4].modifiers).toEqual(new Set(['target-failure']));
+        test('flags failures', () => {
+          mod = new TargetModifier(
+            new ComparePoint('>', 25),
+            new ComparePoint('<=', 20),
+          );
+          const modifiedResults = mod.run(results, group).results;
 
-      expect(rolls[5]).toBeInstanceOf(RollResult);
-      expect(rolls[5]).toEqual(expect.objectContaining({
-        calculationValue: 0,
-        initialValue: 6,
-        modifierFlags: '',
-        value: 6,
-      }));
-      expect(rolls[5].modifiers).toEqual(new Set());
+          expect(modifiedResults).toBeInstanceOf(Array);
+          expect(modifiedResults).toHaveLength(1);
 
-      expect(rolls[6]).toBeInstanceOf(RollResult);
-      expect(rolls[6]).toEqual(expect.objectContaining({
-        calculationValue: 1,
-        initialValue: 10,
-        modifierFlags: '*',
-        value: 10,
-      }));
-      expect(rolls[6].modifiers).toEqual(new Set(['target-success']));
+          expect(modifiedResults[0]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[0].calculationValue).toBe(-1);
+          expect(modifiedResults[0].value).toBe(20);
+          expect(modifiedResults[0].modifiers).toEqual(new Set(['target-failure']));
+          expect(modifiedResults[0].useInTotal).toBe(true);
+        });
+
+        test('flags neutral', () => {
+          mod = new TargetModifier(
+            new ComparePoint('>', 25),
+            new ComparePoint('<', 10),
+          );
+          const modifiedResults = mod.run(results, group).results;
+
+          expect(modifiedResults).toBeInstanceOf(Array);
+          expect(modifiedResults).toHaveLength(1);
+
+          expect(modifiedResults[0]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[0].calculationValue).toBe(0);
+          expect(modifiedResults[0].value).toBe(20);
+          expect(modifiedResults[0].modifiers).toEqual(new Set());
+          expect(modifiedResults[0].useInTotal).toBe(true);
+        });
+      });
+
+      describe('Multiple sub-rolls', () => {
+        beforeEach(() => {
+          // equivalent to `{4d6+2, 2/3d2, 2d8*1d2}`
+          group = new RollGroup([
+            [
+              new StandardDice(6, 4),
+              '+',
+              5,
+            ],
+            [
+              2,
+              '/',
+              new StandardDice(2, 3),
+            ],
+            [
+              new StandardDice(8, 2),
+              '*',
+              new StandardDice(2, 1),
+            ],
+          ]);
+
+          results = new ResultGroup([
+            // first sub-roll `4d6+2`
+            new ResultGroup([
+              // 4d6
+              new RollResults([4, 2, 6, 3]),
+              '+',
+              5,
+            ]),
+            // second sub-roll `2/3d2`
+            new ResultGroup([
+              2,
+              '/',
+              // 3d2
+              new RollResults([1, 1, 2]),
+            ]),
+            // third sub-roll `2d8*1d2`
+            new ResultGroup([
+              // 2d8
+              new RollResults([5, 8]),
+              '*',
+              // 1d2
+              new RollResults([2]),
+            ]),
+          ]);
+
+          sCP = new ComparePoint('>', 20);
+          fCP = new ComparePoint('<', 4);
+          mod = new TargetModifier(sCP, fCP);
+        });
+
+        test('returns RollResults object', () => {
+          expect(mod.run(results, group)).toBe(results);
+        });
+
+        test('flags successes and failures', () => {
+          const modifiedResults = mod.run(results, group).results;
+
+          expect(modifiedResults).toBeInstanceOf(Array);
+          expect(modifiedResults).toHaveLength(3);
+
+          expect(modifiedResults[0]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[0].calculationValue).toBe(0);
+          expect(modifiedResults[0].value).toBe(20);
+          expect(modifiedResults[0].modifiers).toEqual(new Set());
+          expect(modifiedResults[0].useInTotal).toBe(true);
+
+          expect(modifiedResults[1]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[1].calculationValue).toBe(-1);
+          expect(modifiedResults[1].value).toBe(0.5);
+          expect(modifiedResults[1].modifiers).toEqual(new Set(['target-failure']));
+          expect(modifiedResults[1].useInTotal).toBe(true);
+
+          expect(modifiedResults[2]).toBeInstanceOf(ResultGroup);
+          expect(modifiedResults[2].calculationValue).toBe(1);
+          expect(modifiedResults[2].value).toBe(26);
+          expect(modifiedResults[2].modifiers).toEqual(new Set(['target-success']));
+          expect(modifiedResults[2].useInTotal).toBe(true);
+        });
+      });
     });
   });
 });

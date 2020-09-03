@@ -5,20 +5,18 @@
 Main = Expression
 
 
-// Dice groups
-DiceGroup
+// Expression / roll groups
+RollGroup
   = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* {
-    return {
-      type: 'group',
-      notation: text(),
-      expressions: [
+    return new RollGroup(
+      [
         expr,
         ...exprs.map(v => v[3])
       ],
-      modifiers: Object.assign({}, ...modifiers.map(item => {
+      Object.assign({}, ...modifiers.map(item => {
         return {[item.name]: item};
-      })),
-    };
+      }))
+    );
   }
 
 
@@ -168,7 +166,7 @@ Factor
   / Dice
   / FloatNumber
   / l:"(" _ expr:Expression _ r:")" { return [l, ...expr, r] }
-  / DiceGroup
+  / RollGroup
 
 MathFunction
   = func:("abs" / "ceil" / "cos" / "exp" / "floor" / "log" / "round" / "sign" / "sin" / "sqrt" / "tan") "(" _ expr:Expression _ ")" {
