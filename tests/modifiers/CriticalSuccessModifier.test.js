@@ -181,52 +181,33 @@ describe('CriticalSuccessModifier', () => {
       const mod = new CriticalSuccessModifier(new ComparePoint('>=', 6));
       const modifiedRolls = mod.run(results, new StandardDice(6, 5)).rolls;
 
-      expect(modifiedRolls).toEqual([
-        expect.objectContaining({
-          calculationValue: 1,
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 1,
-        }),
-        expect.objectContaining({
-          calculationValue: 2,
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 2,
-        }),
-        expect.objectContaining({
-          calculationValue: 4,
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          useInTotal: true,
-          value: 4,
-        }),
-        expect.objectContaining({
-          calculationValue: 8,
-          initialValue: 8,
-          modifierFlags: '**',
-          modifiers: new Set([
-            'critical-success',
-          ]),
-          useInTotal: true,
-          value: 8,
-        }),
-        expect.objectContaining({
-          calculationValue: 6,
-          initialValue: 6,
-          modifierFlags: '**',
-          modifiers: new Set([
-            'critical-success',
-          ]),
-          useInTotal: true,
-          value: 6,
-        }),
-      ]);
+      expect(modifiedRolls).toBeInstanceOf(Array);
+      expect(modifiedRolls).toHaveLength(5);
+
+      expect(modifiedRolls[0].calculationValue).toBe(1);
+      expect(modifiedRolls[0].modifiers).toEqual(new Set());
+      expect(modifiedRolls[0].useInTotal).toBe(true);
+      expect(modifiedRolls[0].value).toBe(1);
+
+      expect(modifiedRolls[1].calculationValue).toBe(2);
+      expect(modifiedRolls[1].modifiers).toEqual(new Set());
+      expect(modifiedRolls[1].useInTotal).toBe(true);
+      expect(modifiedRolls[1].value).toBe(2);
+
+      expect(modifiedRolls[2].calculationValue).toBe(4);
+      expect(modifiedRolls[2].modifiers).toEqual(new Set());
+      expect(modifiedRolls[2].useInTotal).toBe(true);
+      expect(modifiedRolls[2].value).toBe(4);
+
+      expect(modifiedRolls[3].calculationValue).toBe(8);
+      expect(modifiedRolls[3].modifiers).toEqual(new Set(['critical-success']));
+      expect(modifiedRolls[3].useInTotal).toBe(true);
+      expect(modifiedRolls[3].value).toBe(8);
+
+      expect(modifiedRolls[4].calculationValue).toBe(6);
+      expect(modifiedRolls[4].modifiers).toEqual(new Set(['critical-success']));
+      expect(modifiedRolls[4].useInTotal).toBe(true);
+      expect(modifiedRolls[4].value).toBe(6);
     });
   });
 

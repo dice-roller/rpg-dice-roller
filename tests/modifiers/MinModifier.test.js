@@ -139,49 +139,49 @@ describe('MinModifier', () => {
     });
 
     test('rolls lower than min are changed to min', () => {
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      expect(rolls.length).toBe(5);
+      expect(modifiedResults).toHaveLength(5);
 
       // check the first roll
-      expect(rolls[0].initialValue).toBe(1);
-      expect(rolls[0].calculationValue).toBe(3);
-      expect(rolls[0].value).toBe(3);
-      expect(rolls[0].useInTotal).toBe(true);
-      expect(rolls[0].modifierFlags).toEqual('^');
-      expect(rolls[0].modifiers).toEqual(new Set(['min']));
+      expect(modifiedResults[0].initialValue).toBe(1);
+      expect(modifiedResults[0].calculationValue).toBe(3);
+      expect(modifiedResults[0].value).toBe(3);
+      expect(modifiedResults[0].useInTotal).toBe(true);
+      expect(modifiedResults[0].modifierFlags).toEqual('^');
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['min']));
 
       // check the second roll
-      expect(rolls[1].initialValue).toBe(4);
-      expect(rolls[1].calculationValue).toBe(4);
-      expect(rolls[1].value).toBe(4);
-      expect(rolls[1].useInTotal).toBe(true);
-      expect(rolls[1].modifierFlags).toEqual('');
-      expect(rolls[1].modifiers).toEqual(new Set());
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].calculationValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(4);
+      expect(modifiedResults[1].useInTotal).toBe(true);
+      expect(modifiedResults[1].modifierFlags).toEqual('');
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
 
       // check the third roll
-      expect(rolls[2].initialValue).toBe(2);
-      expect(rolls[2].calculationValue).toBe(3);
-      expect(rolls[2].value).toBe(3);
-      expect(rolls[2].useInTotal).toBe(true);
-      expect(rolls[2].modifierFlags).toEqual('^');
-      expect(rolls[2].modifiers).toEqual(new Set(['min']));
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].calculationValue).toBe(3);
+      expect(modifiedResults[2].value).toBe(3);
+      expect(modifiedResults[2].useInTotal).toBe(true);
+      expect(modifiedResults[2].modifierFlags).toEqual('^');
+      expect(modifiedResults[2].modifiers).toEqual(new Set(['min']));
 
       // check the fourth roll
-      expect(rolls[3].initialValue).toBe(1);
-      expect(rolls[3].calculationValue).toBe(3);
-      expect(rolls[3].value).toBe(3);
-      expect(rolls[3].useInTotal).toBe(true);
-      expect(rolls[3].modifierFlags).toEqual('^');
-      expect(rolls[3].modifiers).toEqual(new Set(['min']));
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].calculationValue).toBe(3);
+      expect(modifiedResults[3].value).toBe(3);
+      expect(modifiedResults[3].useInTotal).toBe(true);
+      expect(modifiedResults[3].modifierFlags).toEqual('^');
+      expect(modifiedResults[3].modifiers).toEqual(new Set(['min']));
 
       // check the fifth roll
-      expect(rolls[4].initialValue).toBe(6);
-      expect(rolls[4].calculationValue).toBe(6);
-      expect(rolls[4].value).toBe(6);
-      expect(rolls[4].useInTotal).toBe(true);
-      expect(rolls[4].modifierFlags).toEqual('');
-      expect(rolls[4].modifiers).toEqual(new Set());
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].calculationValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].useInTotal).toBe(true);
+      expect(modifiedResults[4].modifierFlags).toEqual('');
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
     });
   });
 

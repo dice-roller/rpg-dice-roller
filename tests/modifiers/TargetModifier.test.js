@@ -317,52 +317,52 @@ describe('TargetModifier', () => {
       });
 
       test('flags successes and failures', () => {
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(7);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(7);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(0);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set());
-        expect(rolls[0].useInTotal).toBe(true);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(0);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set());
+        expect(modifiedResults[0].useInTotal).toBe(true);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(0);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set());
-        expect(rolls[1].useInTotal).toBe(true);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(0);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set());
+        expect(modifiedResults[1].useInTotal).toBe(true);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(-1);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set(['target-failure']));
-        expect(rolls[2].useInTotal).toBe(true);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(-1);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set(['target-failure']));
+        expect(modifiedResults[2].useInTotal).toBe(true);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(9);
-        expect(rolls[3].modifiers).toEqual(new Set(['target-success']));
-        expect(rolls[3].useInTotal).toBe(true);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(9);
+        expect(modifiedResults[3].modifiers).toEqual(new Set(['target-success']));
+        expect(modifiedResults[3].useInTotal).toBe(true);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(-1);
-        expect(rolls[4].value).toBe(1);
-        expect(rolls[4].modifiers).toEqual(new Set(['target-failure']));
-        expect(rolls[4].useInTotal).toBe(true);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(-1);
+        expect(modifiedResults[4].value).toBe(1);
+        expect(modifiedResults[4].modifiers).toEqual(new Set(['target-failure']));
+        expect(modifiedResults[4].useInTotal).toBe(true);
 
-        expect(rolls[5]).toBeInstanceOf(RollResult);
-        expect(rolls[5].calculationValue).toBe(0);
-        expect(rolls[5].value).toBe(6);
-        expect(rolls[5].modifiers).toEqual(new Set());
-        expect(rolls[5].useInTotal).toBe(true);
+        expect(modifiedResults[5]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[5].calculationValue).toBe(0);
+        expect(modifiedResults[5].value).toBe(6);
+        expect(modifiedResults[5].modifiers).toEqual(new Set());
+        expect(modifiedResults[5].useInTotal).toBe(true);
 
-        expect(rolls[6]).toBeInstanceOf(RollResult);
-        expect(rolls[6].calculationValue).toBe(1);
-        expect(rolls[6].value).toBe(10);
-        expect(rolls[6].modifiers).toEqual(new Set(['target-success']));
-        expect(rolls[6].useInTotal).toBe(true);
+        expect(modifiedResults[6]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[6].calculationValue).toBe(1);
+        expect(modifiedResults[6].value).toBe(10);
+        expect(modifiedResults[6].modifiers).toEqual(new Set(['target-success']));
+        expect(modifiedResults[6].useInTotal).toBe(true);
       });
     });
 

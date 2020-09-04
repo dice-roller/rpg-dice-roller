@@ -238,120 +238,120 @@ describe('KeepModifier', () => {
       });
 
       test('can keep results from high end', () => {
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(5);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(5);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(8);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set());
-        expect(rolls[0].useInTotal).toBe(true);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(8);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set());
+        expect(modifiedResults[0].useInTotal).toBe(true);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(4);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[1].useInTotal).toBe(false);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(4);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[1].useInTotal).toBe(false);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(2);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[2].useInTotal).toBe(false);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(2);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[2].useInTotal).toBe(false);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(1);
-        expect(rolls[3].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[3].useInTotal).toBe(false);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(1);
+        expect(modifiedResults[3].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[3].useInTotal).toBe(false);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(6);
-        expect(rolls[4].value).toBe(6);
-        expect(rolls[4].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[4].useInTotal).toBe(false);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(6);
+        expect(modifiedResults[4].value).toBe(6);
+        expect(modifiedResults[4].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[4].useInTotal).toBe(false);
       });
 
       test('can keep multiple results from high end', () => {
         // set the qty
         mod.qty = 3;
 
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(5);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(5);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(8);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set());
-        expect(rolls[0].useInTotal).toBe(true);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(8);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set());
+        expect(modifiedResults[0].useInTotal).toBe(true);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(4);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set());
-        expect(rolls[1].useInTotal).toBe(true);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(4);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set());
+        expect(modifiedResults[1].useInTotal).toBe(true);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(2);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[2].useInTotal).toBe(false);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(2);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[2].useInTotal).toBe(false);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(1);
-        expect(rolls[3].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[3].useInTotal).toBe(false);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(1);
+        expect(modifiedResults[3].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[3].useInTotal).toBe(false);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(6);
-        expect(rolls[4].value).toBe(6);
-        expect(rolls[4].modifiers).toEqual(new Set());
-        expect(rolls[4].useInTotal).toBe(true);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(6);
+        expect(modifiedResults[4].value).toBe(6);
+        expect(modifiedResults[4].modifiers).toEqual(new Set());
+        expect(modifiedResults[4].useInTotal).toBe(true);
       });
 
       test('can keep results from low end', () => {
         // set the end to low
         mod.end = 'l';
 
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(5);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(5);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(8);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[0].useInTotal).toBe(false);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(8);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[0].useInTotal).toBe(false);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(4);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[1].useInTotal).toBe(false);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(4);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[1].useInTotal).toBe(false);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(2);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[2].useInTotal).toBe(false);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(2);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[2].useInTotal).toBe(false);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(1);
-        expect(rolls[3].modifiers).toEqual(new Set());
-        expect(rolls[3].useInTotal).toBe(true);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(1);
+        expect(modifiedResults[3].modifiers).toEqual(new Set());
+        expect(modifiedResults[3].useInTotal).toBe(true);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(6);
-        expect(rolls[4].value).toBe(6);
-        expect(rolls[4].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[4].useInTotal).toBe(false);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(6);
+        expect(modifiedResults[4].value).toBe(6);
+        expect(modifiedResults[4].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[4].useInTotal).toBe(false);
       });
 
       test('can keep multiple results from low end', () => {
@@ -360,80 +360,80 @@ describe('KeepModifier', () => {
         // set the qty
         mod.qty = 3;
 
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(5);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(5);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(8);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[0].useInTotal).toBe(false);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(8);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[0].useInTotal).toBe(false);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(4);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set());
-        expect(rolls[1].useInTotal).toBe(true);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(4);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set());
+        expect(modifiedResults[1].useInTotal).toBe(true);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(2);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set());
-        expect(rolls[2].useInTotal).toBe(true);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(2);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set());
+        expect(modifiedResults[2].useInTotal).toBe(true);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(1);
-        expect(rolls[3].modifiers).toEqual(new Set());
-        expect(rolls[3].useInTotal).toBe(true);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(1);
+        expect(modifiedResults[3].modifiers).toEqual(new Set());
+        expect(modifiedResults[3].useInTotal).toBe(true);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(6);
-        expect(rolls[4].value).toBe(6);
-        expect(rolls[4].modifiers).toEqual(new Set(['drop']));
-        expect(rolls[4].useInTotal).toBe(false);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(6);
+        expect(modifiedResults[4].value).toBe(6);
+        expect(modifiedResults[4].modifiers).toEqual(new Set(['drop']));
+        expect(modifiedResults[4].useInTotal).toBe(false);
       });
 
       test('keeping more than rolled keeps everything', () => {
         // set the qty
         mod.qty = 20;
 
-        const { rolls } = mod.run(results, die);
+        const modifiedResults = mod.run(results, die).rolls;
 
-        expect(rolls).toBeInstanceOf(Array);
-        expect(rolls).toHaveLength(5);
+        expect(modifiedResults).toBeInstanceOf(Array);
+        expect(modifiedResults).toHaveLength(5);
 
-        expect(rolls[0]).toBeInstanceOf(RollResult);
-        expect(rolls[0].calculationValue).toBe(8);
-        expect(rolls[0].value).toBe(8);
-        expect(rolls[0].modifiers).toEqual(new Set());
-        expect(rolls[0].useInTotal).toBe(true);
+        expect(modifiedResults[0]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[0].calculationValue).toBe(8);
+        expect(modifiedResults[0].value).toBe(8);
+        expect(modifiedResults[0].modifiers).toEqual(new Set());
+        expect(modifiedResults[0].useInTotal).toBe(true);
 
-        expect(rolls[1]).toBeInstanceOf(RollResult);
-        expect(rolls[1].calculationValue).toBe(4);
-        expect(rolls[1].value).toBe(4);
-        expect(rolls[1].modifiers).toEqual(new Set());
-        expect(rolls[1].useInTotal).toBe(true);
+        expect(modifiedResults[1]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[1].calculationValue).toBe(4);
+        expect(modifiedResults[1].value).toBe(4);
+        expect(modifiedResults[1].modifiers).toEqual(new Set());
+        expect(modifiedResults[1].useInTotal).toBe(true);
 
-        expect(rolls[2]).toBeInstanceOf(RollResult);
-        expect(rolls[2].calculationValue).toBe(2);
-        expect(rolls[2].value).toBe(2);
-        expect(rolls[2].modifiers).toEqual(new Set());
-        expect(rolls[2].useInTotal).toBe(true);
+        expect(modifiedResults[2]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[2].calculationValue).toBe(2);
+        expect(modifiedResults[2].value).toBe(2);
+        expect(modifiedResults[2].modifiers).toEqual(new Set());
+        expect(modifiedResults[2].useInTotal).toBe(true);
 
-        expect(rolls[3]).toBeInstanceOf(RollResult);
-        expect(rolls[3].calculationValue).toBe(1);
-        expect(rolls[3].value).toBe(1);
-        expect(rolls[3].modifiers).toEqual(new Set());
-        expect(rolls[3].useInTotal).toBe(true);
+        expect(modifiedResults[3]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[3].calculationValue).toBe(1);
+        expect(modifiedResults[3].value).toBe(1);
+        expect(modifiedResults[3].modifiers).toEqual(new Set());
+        expect(modifiedResults[3].useInTotal).toBe(true);
 
-        expect(rolls[4]).toBeInstanceOf(RollResult);
-        expect(rolls[4].calculationValue).toBe(6);
-        expect(rolls[4].value).toBe(6);
-        expect(rolls[4].modifiers).toEqual(new Set());
-        expect(rolls[4].useInTotal).toBe(true);
+        expect(modifiedResults[4]).toBeInstanceOf(RollResult);
+        expect(modifiedResults[4].calculationValue).toBe(6);
+        expect(modifiedResults[4].value).toBe(6);
+        expect(modifiedResults[4].modifiers).toEqual(new Set());
+        expect(modifiedResults[4].useInTotal).toBe(true);
       });
     });
 

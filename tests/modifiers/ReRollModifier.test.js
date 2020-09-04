@@ -182,139 +182,107 @@ describe('ReRollModifier', () => {
     });
 
     test('does not explode without compare point', () => {
-      expect(mod.run(results, die).rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      const modifiedResults = mod.run(results, die).rolls;
+
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(4);
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(2);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].value).toBe(1);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].value).toBe(10);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
     });
 
     test('can re-roll with compare point `<=4`', () => {
       mod.comparePoint = new ComparePoint('<=', 4);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      // assert that all the rolls exist, including the exploded ones
-      expect(rolls.length).toEqual(6);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: 'r',
-          modifiers: new Set(['re-roll']),
-          value: 10,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: 'r',
-          modifiers: new Set(['re-roll']),
-          value: 5,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: 'r',
-          modifiers: new Set(['re-roll']),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(10);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['re-roll']));
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(5);
+      expect(modifiedResults[2].modifiers).toEqual(new Set(['re-roll']));
+
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].value).toBe(8);
+      expect(modifiedResults[3].modifiers).toEqual(new Set(['re-roll']));
+
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].value).toBe(10);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
     });
 
     test('can re-roll once with compare point `<=4`', () => {
       mod.comparePoint = new ComparePoint('<=', 4);
       mod.once = true;
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      // assert that all the rolls exist, including the exploded ones
-      expect(rolls.length).toEqual(6);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: 'ro',
-          modifiers: new Set(['re-roll-once']),
-          value: 10,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: 'ro',
-          modifiers: new Set(['re-roll-once']),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: 'ro',
-          modifiers: new Set(['re-roll-once']),
-          value: 5,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].calculationValue).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(10);
+      expect(modifiedResults[1].calculationValue).toBe(10);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['re-roll-once']));
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(2);
+      expect(modifiedResults[2].calculationValue).toBe(2);
+      expect(modifiedResults[2].modifiers).toEqual(new Set(['re-roll-once']));
+
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].value).toBe(5);
+      expect(modifiedResults[3].calculationValue).toBe(5);
+      expect(modifiedResults[3].modifiers).toEqual(new Set(['re-roll-once']));
+
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].calculationValue).toBe(6);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].value).toBe(10);
+      expect(modifiedResults[5].calculationValue).toBe(10);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
     });
 
     test('re-rolling with d1 throws an error', () => {
@@ -346,10 +314,10 @@ describe('ReRollModifier', () => {
           die = new StandardDice(10, qty);
 
           // apply modifiers
-          const { rolls } = mod.run(results, die);
+          const modifiedResults = mod.run(results, die).rolls;
 
           // check that the roll length is correct (It shouldn't change)
-          expect(rolls.length).toEqual(qty);
+          expect(modifiedResults).toHaveLength(qty);
 
           // `StandardDice.rollOnce()` should be called once for each re-roll
           expect(spy).toHaveBeenCalledTimes(mod.maxIterations * qty);

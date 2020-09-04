@@ -187,7 +187,7 @@ class DiceRoll {
    * @returns {number}
    */
   get maxTotal() {
-    if (!this[expressionsSymbol]) {
+    if (!this.hasExpressions()) {
       return 0;
     }
 
@@ -212,7 +212,7 @@ class DiceRoll {
    * @returns {number}
    */
   get minTotal() {
-    if (!this[expressionsSymbol]) {
+    if (!this.hasExpressions()) {
       return 0;
     }
 
@@ -309,12 +309,21 @@ class DiceRoll {
   }
 
   /**
+   * Check whether the DiceRoll has expressions or not.
+   *
+   * @returns {boolean} `true` if the object has expressions, `false` otherwise
+   */
+  hasExpressions() {
+    return this[expressionsSymbol] && (this[expressionsSymbol].length > 0);
+  }
+
+  /**
    * Check whether the object has rolled dice or not
    *
-   * @returns {boolean} `True` if the object has rolls, `false` otherwise
+   * @returns {boolean} `true` if the object has rolls, `false` otherwise
    */
   hasRolls() {
-    return this[expressionsSymbol] && (this.rolls.length > 0);
+    return this.hasExpressions() && (this.rolls.length > 0);
   }
 
   /**

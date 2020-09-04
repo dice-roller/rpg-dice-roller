@@ -138,16 +138,16 @@ describe('RollResults', () => {
     test('length returns number of rolls', () => {
       results = new RollResults();
 
-      expect(results.length).toBe(0);
+      expect(results).toHaveLength(0);
 
       results.addRoll(4);
-      expect(results.length).toBe(1);
+      expect(results).toHaveLength(1);
 
       results.rolls = rolls;
-      expect(results.length).toBe(6);
+      expect(results).toHaveLength(6);
 
       results.rolls = [];
-      expect(results.length).toBe(0);
+      expect(results).toHaveLength(0);
     });
 
     test('cannot set length', () => {

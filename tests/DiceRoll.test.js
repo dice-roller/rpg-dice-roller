@@ -2,6 +2,7 @@ import { StandardDice } from '../src/dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
 import DiceRoll from '../src/DiceRoll.js';
 import Parser from '../src/parser/Parser.js';
+import ResultGroup from '../src/results/ResultGroup.js';
 import RollResult from '../src/results/RollResult.js';
 import RollResults from '../src/results/RollResults.js';
 import exportFormats from '../src/utilities/ExportFormats.js';
@@ -134,13 +135,14 @@ describe('DiceRoll', () => {
   describe('Roll', () => {
     test('constructor rolls notation', () => {
       const spy = jest.spyOn(DiceRoll.prototype, 'roll');
+      const notation = '4d8';
 
       // initialise with string notation
-      new DiceRoll('4d8');
+      new DiceRoll(notation);
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with string notation
-      new DiceRoll({ notation: '4d8' });
+      new DiceRoll({ notation });
       expect(spy).toHaveBeenCalledTimes(2);
 
       // remove the spy
@@ -478,6 +480,16 @@ describe('DiceRoll', () => {
         diceRoll = new DiceRoll('2d6ro=1');
         expect(diceRoll.minTotal).toBe(2);
       });
+
+      test('returns `0` if no expressions', () => {
+        const diceRoll = new DiceRoll('4d6');
+
+        jest.spyOn(diceRoll, 'hasExpressions').mockImplementation(() => false);
+
+        expect(diceRoll.minTotal).toBe(0);
+
+        jest.restoreAllMocks();
+      });
     });
 
     describe('Max Total', () => {
@@ -508,6 +520,16 @@ describe('DiceRoll', () => {
 
         diceRoll = new DiceRoll('2dF');
         expect(diceRoll.maxTotal).toBe(2);
+      });
+
+      test('returns `0` if no expressions', () => {
+        const diceRoll = new DiceRoll('4d6');
+
+        jest.spyOn(diceRoll, 'hasExpressions').mockImplementation(() => false);
+
+        expect(diceRoll.maxTotal).toBe(0);
+
+        jest.restoreAllMocks();
       });
     });
 
@@ -767,6 +789,34 @@ describe('DiceRoll', () => {
 
       expect(importedRoll).toBeInstanceOf(DiceRoll);
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
+    });
+
+    test('can import `RollGroup` object', () => {
+      const data = {
+        notation: diceRoll.notation,
+        rolls: new ResultGroup([
+          new RollResults([3, 6, 5, 1]),
+          '/',
+          7,
+          '+',
+          new RollResults([8, new RollResult(4, ['drop'], false)]),
+        ]),
+      };
+      const importedRoll = DiceRoll.import(data);
+
+      expect(importedRoll).toBeInstanceOf(DiceRoll);
+      expect(importedRoll.rolls).toEqual(data.rolls.results);
+    });
+
+    test('can import `RollResults` object', () => {
+      const data = {
+        notation: '4d6',
+        rolls: new RollResults([3, 6, 5, 1]),
+      };
+      const importedRoll = DiceRoll.import(data);
+
+      expect(importedRoll).toBeInstanceOf(DiceRoll);
+      expect(importedRoll.rolls).toEqual([data.rolls]);
     });
 
     test('invalid format throws error', () => {

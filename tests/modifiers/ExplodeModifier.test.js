@@ -212,323 +212,257 @@ describe('ExplodeModifier', () => {
     });
 
     test('does not explode without compare point', () => {
-      expect(mod.run(results, die).rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      const modifiedResults = mod.run(results, die).rolls;
+
+      // assert that all the rolls exist
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(4);
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(2);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].value).toBe(1);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].value).toBe(6);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].value).toBe(10);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
     });
 
     test('can explode with compare point `>=8`', () => {
       mod.comparePoint = new ComparePoint('>=', 8);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      // assert that all the rolls exist, including the exploded ones
-      expect(rolls.length).toEqual(9);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 10,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 10,
-        }),
-        expect.objectContaining({
-          initialValue: 5,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 5,
-        }),
-      ]);
+      // assert that all the rolls exist
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(9);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[1].initialValue).toBe(10);
+      expect(modifiedResults[1].value).toBe(10);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(2);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].initialValue).toBe(4);
+      expect(modifiedResults[3].value).toBe(4);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].initialValue).toBe(2);
+      expect(modifiedResults[4].value).toBe(2);
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[5].initialValue).toBe(1);
+      expect(modifiedResults[5].value).toBe(1);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[6].initialValue).toBe(6);
+      expect(modifiedResults[6].value).toBe(6);
+      expect(modifiedResults[6].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[7].initialValue).toBe(10);
+      expect(modifiedResults[7].value).toBe(10);
+      expect(modifiedResults[7].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[8].initialValue).toBe(5);
+      expect(modifiedResults[8].value).toBe(5);
+      expect(modifiedResults[8].modifiers).toEqual(new Set());
     });
 
     test('can explode with compare point `<3`', () => {
       mod.comparePoint = new ComparePoint('<', 3);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      // assert that all the rolls exist, including the exploded ones
-      expect(rolls.length).toEqual(9);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '!',
-          modifiers: new Set(['explode']),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 5,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 5,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      // assert that all the rolls exist
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(9);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(4);
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].value).toBe(2);
+      expect(modifiedResults[2].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[3].initialValue).toBe(10);
+      expect(modifiedResults[3].value).toBe(10);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].initialValue).toBe(1);
+      expect(modifiedResults[4].value).toBe(1);
+      expect(modifiedResults[4].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[5].initialValue).toBe(2);
+      expect(modifiedResults[5].value).toBe(2);
+      expect(modifiedResults[5].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[6].initialValue).toBe(5);
+      expect(modifiedResults[6].value).toBe(5);
+      expect(modifiedResults[6].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[7].initialValue).toBe(6);
+      expect(modifiedResults[7].value).toBe(6);
+      expect(modifiedResults[7].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[8].initialValue).toBe(10);
+      expect(modifiedResults[8].value).toBe(10);
+      expect(modifiedResults[8].modifiers).toEqual(new Set());
     });
 
     test('can compound with compare point `>5`', () => {
       mod = new ExplodeModifier(new ComparePoint('>', 5), true);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
       // assert that all the rolls exist
-      expect(rolls.length).toEqual(6);
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
 
-      expect(rolls[0].initialValue).toBe(8);
-      expect(rolls[0].modifierFlags).toEqual('!!');
-      expect(rolls[0].modifiers).toEqual(new Set(['explode', 'compound']));
-      expect(rolls[0].value).toBe(20);
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].modifierFlags).toEqual('!!');
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(modifiedResults[0].value).toBe(20);
 
-      expect(rolls[1].initialValue).toBe(4);
-      expect(rolls[1].modifierFlags).toEqual('');
-      expect(rolls[1].modifiers).toEqual(new Set());
-      expect(rolls[1].value).toBe(4);
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].modifierFlags).toEqual('');
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
+      expect(modifiedResults[1].value).toBe(4);
 
-      expect(rolls[2].initialValue).toBe(2);
-      expect(rolls[2].modifierFlags).toEqual('');
-      expect(rolls[2].modifiers).toEqual(new Set());
-      expect(rolls[2].value).toBe(2);
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].modifierFlags).toEqual('');
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+      expect(modifiedResults[2].value).toBe(2);
 
-      expect(rolls[3].initialValue).toBe(1);
-      expect(rolls[3].modifierFlags).toEqual('');
-      expect(rolls[3].modifiers).toEqual(new Set());
-      expect(rolls[3].value).toBe(1);
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].modifierFlags).toEqual('');
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+      expect(modifiedResults[3].value).toBe(1);
 
-      expect(rolls[4].initialValue).toBe(6);
-      expect(rolls[4].modifierFlags).toEqual('!!');
-      expect(rolls[4].modifiers).toEqual(new Set(['explode', 'compound']));
-      expect(rolls[4].value).toBe(11);
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].modifierFlags).toEqual('!!');
+      expect(modifiedResults[4].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(modifiedResults[4].value).toBe(11);
 
-      expect(rolls[5].initialValue).toBe(10);
-      expect(rolls[5].modifierFlags).toEqual('!!');
-      expect(rolls[5].modifiers).toEqual(new Set(['explode', 'compound']));
-      expect(rolls[5].value).toBe(21);
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].modifierFlags).toEqual('!!');
+      expect(modifiedResults[5].modifiers).toEqual(new Set(['explode', 'compound']));
+      expect(modifiedResults[5].value).toBe(21);
     });
 
     test('can penetrate with compare point `<=4`', () => {
       mod = new ExplodeModifier(new ComparePoint('<=', 4), false, true);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
-      // assert that all the rolls exist, including the exploded ones
-      expect(rolls.length).toEqual(10);
-      expect(rolls).toEqual([
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 8,
-        }),
-        expect.objectContaining({
-          initialValue: 4,
-          modifierFlags: '!p',
-          modifiers: new Set(['explode', 'penetrate']),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 9,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '!p',
-          modifiers: new Set(['explode', 'penetrate']),
-          value: 2,
-        }),
-        expect.objectContaining({
-          initialValue: 2,
-          modifierFlags: '!p',
-          modifiers: new Set(['explode', 'penetrate']),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 5,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 4,
-        }),
-        expect.objectContaining({
-          initialValue: 1,
-          modifierFlags: '!p',
-          modifiers: new Set(['explode', 'penetrate']),
-          value: 1,
-        }),
-        expect.objectContaining({
-          initialValue: 8,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 7,
-        }),
-        expect.objectContaining({
-          initialValue: 6,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 6,
-        }),
-        expect.objectContaining({
-          initialValue: 10,
-          modifierFlags: '',
-          modifiers: new Set(),
-          value: 10,
-        }),
-      ]);
+      // assert that all the rolls exist
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(10);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].value).toBe(4);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['explode', 'penetrate']));
+
+      expect(modifiedResults[2].initialValue).toBe(10);
+      expect(modifiedResults[2].value).toBe(9);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].initialValue).toBe(2);
+      expect(modifiedResults[3].value).toBe(2);
+      expect(modifiedResults[3].modifiers).toEqual(new Set(['explode', 'penetrate']));
+
+      expect(modifiedResults[4].initialValue).toBe(2);
+      expect(modifiedResults[4].value).toBe(1);
+      expect(modifiedResults[4].modifiers).toEqual(new Set(['explode', 'penetrate']));
+
+      expect(modifiedResults[5].initialValue).toBe(5);
+      expect(modifiedResults[5].value).toBe(4);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[6].initialValue).toBe(1);
+      expect(modifiedResults[6].value).toBe(1);
+      expect(modifiedResults[6].modifiers).toEqual(new Set(['explode', 'penetrate']));
+
+      expect(modifiedResults[7].initialValue).toBe(8);
+      expect(modifiedResults[7].value).toBe(7);
+      expect(modifiedResults[7].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[8].initialValue).toBe(6);
+      expect(modifiedResults[8].value).toBe(6);
+      expect(modifiedResults[8].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[9].initialValue).toBe(10);
+      expect(modifiedResults[9].value).toBe(10);
+      expect(modifiedResults[9].modifiers).toEqual(new Set());
     });
 
     test('can compound and penetrate with compare point >6', () => {
       mod = new ExplodeModifier(new ComparePoint('>', 6), true, true);
 
-      const { rolls } = mod.run(results, die);
+      const modifiedResults = mod.run(results, die).rolls;
 
       // assert that all the rolls exist
-      expect(rolls.length).toEqual(6);
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(6);
 
-      expect(rolls[0].initialValue).toBe(8);
-      expect(rolls[0].modifierFlags).toEqual('!!p');
-      expect(rolls[0].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
-      expect(rolls[0].value).toBe(18);
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].modifierFlags).toEqual('!!p');
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
+      expect(modifiedResults[0].value).toBe(18);
 
-      expect(rolls[1].initialValue).toBe(4);
-      expect(rolls[1].modifierFlags).toEqual('');
-      expect(rolls[1].modifiers).toEqual(new Set());
-      expect(rolls[1].value).toBe(4);
+      expect(modifiedResults[1].initialValue).toBe(4);
+      expect(modifiedResults[1].modifierFlags).toEqual('');
+      expect(modifiedResults[1].modifiers).toEqual(new Set());
+      expect(modifiedResults[1].value).toBe(4);
 
-      expect(rolls[2].initialValue).toBe(2);
-      expect(rolls[2].modifierFlags).toEqual('');
-      expect(rolls[2].modifiers).toEqual(new Set());
-      expect(rolls[2].value).toBe(2);
+      expect(modifiedResults[2].initialValue).toBe(2);
+      expect(modifiedResults[2].modifierFlags).toEqual('');
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+      expect(modifiedResults[2].value).toBe(2);
 
-      expect(rolls[3].initialValue).toBe(1);
-      expect(rolls[3].modifierFlags).toEqual('');
-      expect(rolls[3].modifiers).toEqual(new Set());
-      expect(rolls[3].value).toBe(1);
+      expect(modifiedResults[3].initialValue).toBe(1);
+      expect(modifiedResults[3].modifierFlags).toEqual('');
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+      expect(modifiedResults[3].value).toBe(1);
 
-      expect(rolls[4].initialValue).toBe(6);
-      expect(rolls[4].modifierFlags).toEqual('');
-      expect(rolls[4].modifiers).toEqual(new Set());
-      expect(rolls[4].value).toBe(6);
+      expect(modifiedResults[4].initialValue).toBe(6);
+      expect(modifiedResults[4].modifierFlags).toEqual('');
+      expect(modifiedResults[4].modifiers).toEqual(new Set());
+      expect(modifiedResults[4].value).toBe(6);
 
-      expect(rolls[5].initialValue).toBe(10);
-      expect(rolls[5].modifierFlags).toEqual('!!p');
-      expect(rolls[5].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
-      expect(rolls[5].value).toBe(14);
+      expect(modifiedResults[5].initialValue).toBe(10);
+      expect(modifiedResults[5].modifierFlags).toEqual('!!p');
+      expect(modifiedResults[5].modifiers).toEqual(new Set(['explode', 'compound', 'penetrate']));
+      expect(modifiedResults[5].value).toBe(14);
     });
 
     test('exploding with d1 throws an error', () => {
@@ -560,10 +494,10 @@ describe('ExplodeModifier', () => {
           die = new StandardDice(10, qty);
 
           // apply modifiers
-          const { rolls } = mod.run(results, die);
+          const modifiedResults = mod.run(results, die).rolls;
 
           // check that the roll length is correct
-          expect(rolls.length).toEqual((mod.maxIterations + 1) * qty);
+          expect(modifiedResults).toHaveLength((mod.maxIterations + 1) * qty);
         }
       });
     });
