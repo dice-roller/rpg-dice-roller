@@ -21,10 +21,9 @@ const flags = {
  * @param {...Modifier|string} modifiers
  *
  * @returns {string}
- *
- * @todo need a better way of mapping modifiers to symbols
  */
 const getModifierFlags = (...modifiers) => (
+  // @todo need a better way of mapping modifiers to symbols
   [...modifiers].reduce((acc, modifier) => {
     let name;
 

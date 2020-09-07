@@ -10,13 +10,13 @@ const useInTotalSymbol = Symbol('use-in-total');
 
 /**
  * A collection of results and expressions.
- * Usually used to represent the results of a {@link RollGroup} instance.
+ * Usually used to represent the results of a `RollGroup` instance.
  *
  * This can contain `ResultGroup`, `RollResults`, operators, and plain numbers.
  *
  * ::: tip
  * You will probably not need to create your own `ResultGroup` instances, unless you're importing
- * rolls, but `ResultGroup` objects will be returned when rolling dice.
+ * rolls, but `ResultGroup` objects will be returned when rolling group rolls.
  * :::
  *
  * @since 5.0.0

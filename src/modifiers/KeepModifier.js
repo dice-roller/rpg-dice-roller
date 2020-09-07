@@ -18,7 +18,7 @@ class KeepModifier extends Modifier {
   /**
    * Create a `KeepModifier` instance
    *
-   * @param {string} [end='h'] Either `h|l` to keep highest or lowest
+   * @param {string} [end=h] Either `h|l` to keep highest or lowest
    * @param {number} [qty=1] The amount dice to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'

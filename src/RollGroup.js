@@ -11,7 +11,7 @@ const expressionsSymbol = Symbol('expressions');
  *
  * A sub-roll is just simple roll notation (e.g. `4d6`, `2d10*3`, `5/10d20`)
  *
- * @example <caption>`{4d6+4, 5*2d%}k1`</caption>
+ * @example <caption>`{4d6+4, 2d%/5}k1`</caption>
  * const expressions = [
  *   [
  *     new StandardDice(6, 4),
@@ -19,9 +19,9 @@ const expressionsSymbol = Symbol('expressions');
  *     4,
  *   ],
  *   [
- *     5,
- *     '*',
  *     new PercentileDice(2),
+ *     '/',
+ *     5,
  *   ],
  * ];
  *
@@ -158,7 +158,7 @@ class RollGroup {
   /**
    * Run the sub-roll expressions for the group.
    *
-   * @example <caption>`{4d6+4/1d6, 3*2d10}k1`</caption>
+   * @example <caption>`{4d6+4/1d6, 2d10/3}k1`</caption>
    * ResultGroup {
    *   results: [
    *     // sub-roll 1 - 4d6+4/1d6
@@ -192,11 +192,9 @@ class RollGroup {
    *         }
    *       ]
    *     },
-   *     // sub-roll 2 - 3*2d10
+   *     // sub-roll 2 - 2d10/3
    *     ResultGroup {
    *       results: [
-   *         3,
-   *         '*',
    *         RollResults {
    *           rolls: [
    *             RollResults {
@@ -206,7 +204,9 @@ class RollGroup {
    *               9
    *             }
    *           ]
-   *         }
+   *         },
+   *         '/',
+   *         3
    *       ]
    *     }
    *   ]

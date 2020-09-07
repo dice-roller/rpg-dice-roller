@@ -120,7 +120,7 @@ class DiceRoll {
    *
    * @throws {NotationError} notation is invalid
    * @throws {RequiredArgumentError} notation is required
-   * @throws {TypeError} Rolls must be an valid result object, or an array
+   * @throws {TypeError} Rolls must be a valid result object, or an array
    */
   constructor(notation) {
     if (!notation) {
@@ -482,7 +482,7 @@ class DiceRoll {
    *
    * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array>} rolls
    *
-   * @throws {TypeError} Rolls must be an valid result object, or an array
+   * @throws {TypeError} Rolls must be a valid result object, or an array
    */
   [setRollsSymbol](rolls) {
     if (rolls instanceof ResultGroup) {
@@ -521,7 +521,7 @@ class DiceRoll {
         return roll;
       }));
     } else {
-      throw new TypeError('Rolls must be an valid result object, or an array');
+      throw new TypeError('Rolls must be a valid result object, or an array');
     }
   }
 }

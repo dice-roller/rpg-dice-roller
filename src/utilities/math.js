@@ -3,6 +3,18 @@ import math from 'mathjs-expression-parser';
 /**
  * Check if `a` is comparative to `b` with the given operator.
  *
+ * @example <caption>Is `a` greater than `b`?</caption>
+ * const a = 4;
+ * const b = 2;
+ *
+ * compareNumber(a, b, '>'); // true
+ *
+ * @example <caption>Is `a` equal to `b`?</caption>
+ * const a = 4;
+ * const b = 2;
+ *
+ * compareNumber(a, b, '='); // false
+ *
  * @param {number} a The number to compare with `b`
  * @param {number} b The number to compare with `a`
  * @param {string} operator A valid comparative operator: `=, <, >, <=, >=, !=`
