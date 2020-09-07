@@ -19,7 +19,7 @@ const useInTotalSymbol = Symbol('use-in-total');
  * rolls, but `ResultGroup` objects will be returned when rolling group rolls.
  * :::
  *
- * @since 5.0.0
+ * @since 4.5.0
  */
 class ResultGroup {
   /**

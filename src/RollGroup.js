@@ -31,7 +31,7 @@ const expressionsSymbol = Symbol('expressions');
  *
  * const group = new RollGroup(expressions, modifiers);
  *
- * @since 5.0.0
+ * @since 4.5.0
  */
 class RollGroup {
   /**
