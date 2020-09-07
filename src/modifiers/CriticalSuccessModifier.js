@@ -48,11 +48,11 @@ class CriticalSuccessModifier extends ComparisonModifier {
    * Runs the modifier on the rolls.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults}
    */
-  run(results, _dice) {
+  run(results, _context) {
     // loop through each roll and see if it's a critical success
     results.rolls
       .forEach((roll) => {

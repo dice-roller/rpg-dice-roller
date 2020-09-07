@@ -1,4 +1,4 @@
-import { isNumeric } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/math.js';
 import Modifier from './Modifier.js';
 
 const minSymbol = Symbol('min');
@@ -77,11 +77,11 @@ class MinModifier extends Modifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
+  run(results, _context) {
     const parsedResults = results;
 
     parsedResults.rolls = results.rolls.map((roll) => {

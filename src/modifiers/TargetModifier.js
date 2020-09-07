@@ -1,5 +1,6 @@
 import ComparisonModifier from './ComparisonModifier.js';
 import ComparePoint from '../ComparePoint.js';
+import ResultGroup from '../results/ResultGroup.js';
 
 const failureCPSymbol = Symbol('failure-cp');
 
@@ -157,14 +158,22 @@ class TargetModifier extends ComparisonModifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
+  run(results, _context) {
+    let rolls;
+
+    if (results instanceof ResultGroup) {
+      rolls = results.results;
+    } else {
+      rolls = results.rolls;
+    }
+
     // loop through each roll and see if it matches the target
-    results.rolls
-      .map((roll) => {
+    rolls
+      .forEach((roll) => {
         // add the modifier flag
         if (this.isSuccess(roll.value)) {
           roll.modifiers.add('target-success');
@@ -175,8 +184,6 @@ class TargetModifier extends ComparisonModifier {
         // set the value to the success state value
         // eslint-disable-next-line no-param-reassign
         roll.calculationValue = this.getStateValue(roll.value);
-
-        return roll;
       });
 
     return results;

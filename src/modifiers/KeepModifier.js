@@ -1,5 +1,7 @@
-import { isNumeric } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/math.js';
 import Modifier from './Modifier.js';
+import ResultGroup from '../results/ResultGroup.js';
+import RollResults from '../results/RollResults.js';
 
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');
@@ -16,13 +18,13 @@ class KeepModifier extends Modifier {
   /**
    * Create a `KeepModifier` instance
    *
-   * @param {string} end Either `h|l` to keep highest or lowest
+   * @param {string} [end=h] Either `h|l` to keep highest or lowest
    * @param {number} [qty=1] The amount dice to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(end, qty = 1) {
+  constructor(end = 'h', qty = 1) {
     super();
 
     this.end = end;
@@ -120,28 +122,67 @@ class KeepModifier extends Modifier {
   /**
    * Run the modifier on the results.
    *
-   * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {ResultGroup|RollResults} results The results to run the modifier against
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
-   * @returns {RollResults} The modified results
+   * @returns {ResultGroup|RollResults} The modified results
    */
-  run(results, _dice) {
-    // first clone the rolls so it doesn't affect the original array
-    const rollIndexes = [...results.rolls]
-      // get a list of objects with roll values and original index
-      .map((roll, index) => ({
-        value: roll.value,
-        index,
-      }))
+  run(results, _context) {
+    let modifiedRolls;
+    let rollIndexes;
+
+    if (results instanceof ResultGroup) {
+      modifiedRolls = results.results;
+
+      if ((modifiedRolls.length === 1) && (modifiedRolls[0] instanceof ResultGroup)) {
+        // single sub-roll - get all the dice rolled and their 2d indexes
+        rollIndexes = modifiedRolls[0].results.map((result, index) => {
+          if (result instanceof RollResults) {
+            return result.rolls.map((subResult, subIndex) => ({
+              value: subResult.value,
+              index: [index, subIndex],
+            }));
+          }
+
+          return null;
+        }).flat().filter(Boolean);
+      } else {
+        rollIndexes = [...modifiedRolls]
+          // get a list of objects with roll values and original index
+          .map((roll, index) => ({
+            value: roll.value,
+            index,
+          }));
+      }
+    } else {
+      modifiedRolls = results.rolls;
+
+      rollIndexes = [...modifiedRolls]
+        // get a list of objects with roll values and original index
+        .map((roll, index) => ({
+          value: roll.value,
+          index,
+        }));
+    }
+
+    // determine the indexes that need to be dropped
+    rollIndexes = rollIndexes
       // sort the list ascending by value
       .sort((a, b) => a.value - b.value)
       .map((rollIndex) => rollIndex.index)
       // get the roll indexes to drop
-      .slice(...this.rangeToDrop(results));
+      .slice(...this.rangeToDrop(rollIndexes));
 
     // loop through all of our dice to drop and flag them as such
     rollIndexes.forEach((rollIndex) => {
-      const roll = results.rolls[rollIndex];
+      let roll;
+
+      if (Array.isArray(rollIndex)) {
+        // array of indexes (e.g. single sub-roll in a group roll)
+        roll = modifiedRolls[0].results[rollIndex[0]].rolls[rollIndex[1]];
+      } else {
+        roll = modifiedRolls[rollIndex];
+      }
 
       roll.modifiers.add('drop');
       roll.useInTotal = false;

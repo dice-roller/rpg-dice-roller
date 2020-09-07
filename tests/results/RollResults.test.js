@@ -21,13 +21,13 @@ describe('RollResults', () => {
   describe('Initialisation', () => {
     test('model structure', () => {
       expect(results).toBeInstanceOf(RollResults);
-      expect(results).toEqual(expect.objectContaining({
-        length: 6,
-        rolls,
-        value: 31,
-        toJSON: expect.any(Function),
-        toString: expect.any(Function),
-      }));
+
+      expect(results.addRoll).toBeInstanceOf(Function);
+      expect(results).toHaveLength(6);
+      expect(results.rolls).toEqual(rolls);
+      expect(results.value).toBe(31);
+      expect(results.toJSON).toBeInstanceOf(Function);
+      expect(results.toString).toBeInstanceOf(Function);
     });
   });
 
@@ -43,13 +43,14 @@ describe('RollResults', () => {
       new RollResults(rolls);
 
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(rolls);
 
       // remove the spy
       spy.mockRestore();
     });
 
-    test('setting falsey in constructor sets to empty array', () => {
-      results = new RollResults(null);
+    test('defaults to empty array', () => {
+      results = new RollResults();
 
       expect(results.rolls).toEqual([]);
     });
@@ -90,7 +91,7 @@ describe('RollResults', () => {
       }).toThrow(TypeError);
     });
 
-    test('accepts list of RollResult objects', () => {
+    test('accepts `RollResult` objects', () => {
       results = new RollResults();
 
       results.rolls = rolls;
@@ -117,6 +118,10 @@ describe('RollResults', () => {
       expect(() => {
         results.rolls = [34, 'foo'];
       }).toThrow(TypeError);
+
+      expect(() => {
+        results.rolls = [{ foo: 'bar' }];
+      }).toThrow(TypeError);
     });
 
     test('can append to rolls', () => {
@@ -133,16 +138,16 @@ describe('RollResults', () => {
     test('length returns number of rolls', () => {
       results = new RollResults();
 
-      expect(results.length).toBe(0);
+      expect(results).toHaveLength(0);
 
       results.addRoll(4);
-      expect(results.length).toBe(1);
+      expect(results).toHaveLength(1);
 
       results.rolls = rolls;
-      expect(results.length).toBe(6);
+      expect(results).toHaveLength(6);
 
       results.rolls = [];
-      expect(results.length).toBe(0);
+      expect(results).toHaveLength(0);
     });
 
     test('cannot set length', () => {
@@ -178,7 +183,7 @@ describe('RollResults', () => {
       expect(results.value).toEqual(23);
     });
 
-    test('uses RollResult calculationValue', () => {
+    test('uses `RollResult` `calculationValue`', () => {
       results = new RollResults();
 
       // store the current value as the calculation value
@@ -237,6 +242,7 @@ describe('RollResults', () => {
             value: 10,
           }),
         ],
+        type: 'roll-results',
         value: 31,
       });
     });
@@ -245,7 +251,7 @@ describe('RollResults', () => {
       expect(results.toString()).toEqual('[8, 4, 2, 1, 6, 10]');
     });
 
-    test('toString calls RollResult toString method', () => {
+    test('toString calls `RollResult` toString method', () => {
       const spy = jest.spyOn(RollResult.prototype, 'toString');
 
       results.toString();

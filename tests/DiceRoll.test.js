@@ -1,8 +1,8 @@
-import math from 'mathjs-expression-parser';
 import { StandardDice } from '../src/dice/index.js';
 import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
 import DiceRoll from '../src/DiceRoll.js';
 import Parser from '../src/parser/Parser.js';
+import ResultGroup from '../src/results/ResultGroup.js';
 import RollResult from '../src/results/RollResult.js';
 import RollResults from '../src/results/RollResults.js';
 import exportFormats from '../src/utilities/ExportFormats.js';
@@ -135,13 +135,14 @@ describe('DiceRoll', () => {
   describe('Roll', () => {
     test('constructor rolls notation', () => {
       const spy = jest.spyOn(DiceRoll.prototype, 'roll');
+      const notation = '4d8';
 
       // initialise with string notation
-      new DiceRoll('4d8');
+      new DiceRoll(notation);
       expect(spy).toHaveBeenCalledTimes(1);
 
       // initialise with string notation
-      new DiceRoll({ notation: '4d8' });
+      new DiceRoll({ notation });
       expect(spy).toHaveBeenCalledTimes(2);
 
       // remove the spy
@@ -171,10 +172,15 @@ describe('DiceRoll', () => {
       const results = diceRoll.roll();
 
       expect(results).toBeInstanceOf(Array);
-      expect(results).toHaveLength(2);
+      expect(results).toHaveLength(7);
 
       expect(results[0]).toBeInstanceOf(RollResults);
-      expect(results[1]).toBeInstanceOf(RollResults);
+      expect(results[1]).toBe('*');
+      expect(results[2]).toBe('(');
+      expect(results[3]).toBe(5);
+      expect(results[4]).toBe('+');
+      expect(results[5]).toBeInstanceOf(RollResults);
+      expect(results[6]).toBe(')');
     });
 
     test('stores correct results', () => {
@@ -189,7 +195,15 @@ describe('DiceRoll', () => {
 
       const results = diceRoll.roll();
 
-      expect(results).toEqual([roll1, roll2]);
+      expect(results).toEqual([
+        roll1,
+        '*',
+        '(',
+        5,
+        '+',
+        roll2,
+        ')',
+      ]);
 
       jest.restoreAllMocks();
     });
@@ -327,7 +341,7 @@ describe('DiceRoll', () => {
       const diceRoll = new DiceRoll('4d8');
       const rolls = diceRoll.roll();
 
-      expect(diceRoll.rolls).toBe(rolls);
+      expect(diceRoll.rolls).toEqual(rolls);
     });
 
     test('cannot change value', () => {
@@ -349,7 +363,11 @@ describe('DiceRoll', () => {
     test('returns false if rolls do not exist', () => {
       const diceRoll = new DiceRoll('4+8');
 
+      jest.spyOn(diceRoll, 'rolls', 'get').mockImplementation(() => []);
+
       expect(diceRoll.hasRolls()).toBe(false);
+
+      jest.restoreAllMocks();
     });
   });
 
@@ -366,24 +384,6 @@ describe('DiceRoll', () => {
 
         // remove the spy
         spy.mockRestore();
-      });
-
-      test('calls math.eval', () => {
-        // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'roll')
-          .mockImplementationOnce(() => new RollResults([6, 2, 5, 8]))
-          .mockImplementationOnce(() => new RollResults([3, 9]));
-
-        const diceRoll = new DiceRoll('4d8*(5+2d10)');
-        const spy = jest.spyOn(math, 'eval');
-
-        expect(diceRoll.total).toBe(357);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('21*(5+12)');
-
-        // remove the spy
-        spy.mockRestore();
-        jest.restoreAllMocks();
       });
 
       test('equal to total roll values', () => {
@@ -408,12 +408,9 @@ describe('DiceRoll', () => {
           .mockImplementationOnce(() => roll2);
 
         const diceRoll = new DiceRoll('4d8/(5+2)d6');
-        const spy = jest.spyOn(math, 'eval');
 
         // assert that the total matches
         expect(diceRoll.total).toBeCloseTo(0.68);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('17/25');
 
         jest.restoreAllMocks();
       });
@@ -429,20 +426,17 @@ describe('DiceRoll', () => {
           .mockImplementationOnce(() => new RollResult(9));
 
         const diceRoll = new DiceRoll('4d8dl2*(5+2d10kh1)');
-        const spy = jest.spyOn(math, 'eval');
 
         // assert that the total matches
         expect(diceRoll.total).toBe(196);
-        expect(spy).toHaveBeenCalledTimes(1);
-        expect(spy).toHaveBeenCalledWith('14*(5+9)');
 
         jest.restoreAllMocks();
       });
 
-      test('returns 0 if no rolls', () => {
+      test('calculates correctly for math only rolls', () => {
         const diceRoll = new DiceRoll('4+8');
 
-        expect(diceRoll.total).toBe(0);
+        expect(diceRoll.total).toBe(12);
       });
 
       test('cannot change value', () => {
@@ -486,6 +480,16 @@ describe('DiceRoll', () => {
         diceRoll = new DiceRoll('2d6ro=1');
         expect(diceRoll.minTotal).toBe(2);
       });
+
+      test('returns `0` if no expressions', () => {
+        const diceRoll = new DiceRoll('4d6');
+
+        jest.spyOn(diceRoll, 'hasExpressions').mockImplementation(() => false);
+
+        expect(diceRoll.minTotal).toBe(0);
+
+        jest.restoreAllMocks();
+      });
     });
 
     describe('Max Total', () => {
@@ -516,6 +520,16 @@ describe('DiceRoll', () => {
 
         diceRoll = new DiceRoll('2dF');
         expect(diceRoll.maxTotal).toBe(2);
+      });
+
+      test('returns `0` if no expressions', () => {
+        const diceRoll = new DiceRoll('4d6');
+
+        jest.spyOn(diceRoll, 'hasExpressions').mockImplementation(() => false);
+
+        expect(diceRoll.maxTotal).toBe(0);
+
+        jest.restoreAllMocks();
       });
     });
 
@@ -601,7 +615,7 @@ describe('DiceRoll', () => {
       jest.restoreAllMocks();
     });
 
-    test('Handles success / failure with normal rolls', () => {
+    test('can handle success / failure combined with normal rolls', () => {
       // mock the roll values
       jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(6))
@@ -619,10 +633,22 @@ describe('DiceRoll', () => {
       jest.restoreAllMocks();
     });
 
-    test('show message if no rolls', () => {
+    test('can handle math only roll', () => {
       const diceRoll = new DiceRoll('4+8');
 
-      expect(diceRoll.output).toBe('4+8: No dice rolled');
+      expect(diceRoll.output).toBe('4+8: 4+8 = 12');
+    });
+
+    test('returns "No dice rolled" if no rolls', () => {
+      jest.spyOn(DiceRoll.prototype, 'hasRolls')
+        .mockImplementation(() => false);
+
+      const notation = '4d6';
+      const diceRoller = new DiceRoll(notation);
+
+      expect(diceRoller.output).toEqual(`${notation}: No dice rolled`);
+
+      jest.restoreAllMocks();
     });
 
     describe('toJSON', () => {
@@ -765,21 +791,32 @@ describe('DiceRoll', () => {
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
-    test('non-roll items are removed when importing notation.rolls', () => {
-      const exported = diceRoll.export(exportFormats.OBJECT);
-      // clone the rolls data
-      const dataToImport = {
-        notation: exported.notation,
-        rolls: [...exported.rolls],
+    test('can import `RollGroup` object', () => {
+      const data = {
+        notation: diceRoll.notation,
+        rolls: new ResultGroup([
+          new RollResults([3, 6, 5, 1]),
+          '/',
+          7,
+          '+',
+          new RollResults([8, new RollResult(4, ['drop'], false)]),
+        ]),
       };
-
-      // add some dummy invalid data
-      dataToImport.rolls.push(...['foo', 'bar']);
-
-      const importedRoll = DiceRoll.import(dataToImport);
+      const importedRoll = DiceRoll.import(data);
 
       expect(importedRoll).toBeInstanceOf(DiceRoll);
-      expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
+      expect(importedRoll.rolls).toEqual(data.rolls.results);
+    });
+
+    test('can import `RollResults` object', () => {
+      const data = {
+        notation: '4d6',
+        rolls: new RollResults([3, 6, 5, 1]),
+      };
+      const importedRoll = DiceRoll.import(data);
+
+      expect(importedRoll).toBeInstanceOf(DiceRoll);
+      expect(importedRoll.rolls).toEqual([data.rolls]);
     });
 
     test('invalid format throws error', () => {

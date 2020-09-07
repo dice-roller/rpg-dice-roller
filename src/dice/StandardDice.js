@@ -1,10 +1,12 @@
 import { RequiredArgumentError } from '../exceptions/index.js';
-import { ExplodeModifier, Modifier, ReRollModifier } from '../modifiers/index.js';
+import { isNumeric, isSafeNumber } from '../utilities/math.js';
 import { generator } from '../utilities/NumberGenerator.js';
-import { isNumeric, isSafeNumber } from '../utilities/utils.js';
+import ComparePoint from '../ComparePoint.js';
+import ExplodeModifier from '../modifiers/ExplodeModifier.js';
+import Modifier from '../modifiers/Modifier.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
-import ComparePoint from '../ComparePoint.js';
+import ReRollModifier from '../modifiers/ReRollModifier.js';
 
 const modifiersSymbol = Symbol('modifiers');
 const qtySymbol = Symbol('qty');
@@ -166,7 +168,7 @@ class StandardDice {
   /* eslint-enable class-methods-use-this */
 
   /**
-   * The dice notation. e.g. `4d6!`
+   * The dice notation. e.g. `4d6!`.
    *
    * @returns {string}
    */

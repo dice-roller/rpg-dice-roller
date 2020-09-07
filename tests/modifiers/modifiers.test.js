@@ -9,21 +9,23 @@ describe('Modifiers', () => {
       .mockImplementationOnce(() => 4)
       .mockImplementationOnce(() => 6);
     const roll = new DiceRoll(notation).rolls[0];
+    const results = roll.rolls;
 
-    expect(roll.rolls).toHaveLength(3);
+    expect(results).toBeInstanceOf(Array);
+    expect(results).toHaveLength(3);
 
-    expect(roll.rolls[0].value).toBe(1);
-    expect(roll.rolls[0].useInTotal).toBe(false);
-    expect(roll.rolls[0].modifiers.size).toBe(1);
-    expect([...roll.rolls[0].modifiers][0]).toEqual('drop');
+    expect(results[0].value).toBe(1);
+    expect(results[0].useInTotal).toBe(false);
+    expect(results[0].modifiers.size).toBe(1);
+    expect([...results[0].modifiers][0]).toEqual('drop');
 
-    expect(roll.rolls[1].value).toBe(4);
-    expect(roll.rolls[1].useInTotal).toBe(true);
-    expect(roll.rolls[1].modifiers.size).toBe(0);
+    expect(results[1].value).toBe(4);
+    expect(results[1].useInTotal).toBe(true);
+    expect(results[1].modifiers.size).toBe(0);
 
-    expect(roll.rolls[2].value).toBe(6);
-    expect(roll.rolls[2].useInTotal).toBe(true);
-    expect(roll.rolls[2].modifiers.size).toBe(0);
+    expect(results[2].value).toBe(6);
+    expect(results[2].useInTotal).toBe(true);
+    expect(results[2].modifiers.size).toBe(0);
 
     // remove the spy
     spy.mockRestore();
@@ -36,21 +38,22 @@ describe('Modifiers', () => {
       .mockImplementationOnce(() => 6)
       .mockImplementationOnce(() => 5);
     const roll = new DiceRoll(notation).rolls[0];
+    const results = roll.rolls;
 
-    expect(roll.rolls).toHaveLength(3);
+    expect(results).toHaveLength(3);
 
-    expect(roll.rolls[0].value).toBe(5);
-    expect(roll.rolls[0].useInTotal).toBe(false);
-    expect(roll.rolls[0].modifiers.size).toBe(1);
-    expect([...roll.rolls[0].modifiers][0]).toEqual('drop');
+    expect(results[0].value).toBe(5);
+    expect(results[0].useInTotal).toBe(false);
+    expect(results[0].modifiers.size).toBe(1);
+    expect([...results[0].modifiers][0]).toEqual('drop');
 
-    expect(roll.rolls[1].value).toBe(6);
-    expect(roll.rolls[1].useInTotal).toBe(true);
-    expect(roll.rolls[1].modifiers.size).toBe(0);
+    expect(results[1].value).toBe(6);
+    expect(results[1].useInTotal).toBe(true);
+    expect(results[1].modifiers.size).toBe(0);
 
-    expect(roll.rolls[2].value).toBe(5);
-    expect(roll.rolls[2].useInTotal).toBe(true);
-    expect(roll.rolls[2].modifiers.size).toBe(0);
+    expect(results[2].value).toBe(5);
+    expect(results[2].useInTotal).toBe(true);
+    expect(results[2].modifiers.size).toBe(0);
 
     // remove the spy
     spy.mockRestore();

@@ -13,7 +13,8 @@ const grammar = fs.readFileSync(`${dir}${sourceFilename}`).toString();
 const parser = pegjs.generate(grammar, { output: 'source', format: 'commonjs' });
 
 // convert parser to ES module
-const output = `import math from 'mathjs-expression-parser';
+const output = `
+import { evaluate } from '../../utilities/math.js';
 import * as Dice from '../../dice/index.js';
 import * as Modifiers from '../../modifiers/index.js';
 import ComparePoint from '../../ComparePoint.js';

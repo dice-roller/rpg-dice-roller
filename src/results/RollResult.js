@@ -1,4 +1,5 @@
-import { isNumeric } from '../utilities/utils.js';
+import { isNumeric } from '../utilities/math.js';
+import getModifierFlags from '../modifiers/modifier-flags.js';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');
@@ -138,52 +139,7 @@ class RollResult {
    * @returns {string}
    */
   get modifierFlags() {
-    // @todo need a better way of mapping modifiers to symbols
-    return [...this.modifiers].reduce((acc, modifier) => {
-      let flag;
-
-      switch (modifier) {
-        case 'compound':
-        case 'explode':
-          flag = '!';
-          break;
-        case 'critical-failure':
-          flag = '__';
-          break;
-        case 'critical-success':
-          flag = '**';
-          break;
-        case 'drop':
-          flag = 'd';
-          break;
-        case 'max':
-          flag = 'v';
-          break;
-        case 'min':
-          flag = '^';
-          break;
-        case 'penetrate':
-          flag = 'p';
-          break;
-        case 're-roll':
-          flag = 'r';
-          break;
-        case 're-roll-once':
-          flag = 'ro';
-          break;
-        case 'target-failure':
-          flag = '_';
-          break;
-        case 'target-success':
-          flag = '*';
-          break;
-        default:
-          flag = modifier;
-          break;
-      }
-
-      return acc + flag;
-    }, '');
+    return getModifierFlags(...this.modifiers);
   }
 
   /**

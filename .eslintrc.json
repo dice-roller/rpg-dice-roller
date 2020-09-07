@@ -15,7 +15,9 @@
         {
             "files": ["tests/*.js", "tests/**/*.js"],
             "globals": {
+                "afterAll": "readonly",
                 "afterEach": "readonly",
+                "beforeAll": "readonly",
                 "beforeEach": "readonly",
                 "describe": "readonly",
                 "expect": "readonly",

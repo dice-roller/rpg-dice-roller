@@ -1,4 +1,6 @@
 import Modifier from './Modifier.js';
+import ResultGroup from '../results/ResultGroup.js';
+import RollResults from '../results/RollResults.js';
 
 const directionSymbol = Symbol('direction');
 
@@ -72,14 +74,21 @@ class SortingModifier extends Modifier {
    * Run the modifier on the results.
    *
    * @param {RollResults} results The results to run the modifier against
-   * @param {StandardDice} _dice The die that the modifier is attached to
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _dice) {
-    const sortedResults = results;
+  run(results, _context) {
+    let resultsKey;
 
-    sortedResults.rolls = results.rolls.sort((a, b) => {
+    if (results instanceof ResultGroup) {
+      resultsKey = 'results';
+    } else {
+      resultsKey = 'rolls';
+    }
+
+    /* eslint-disable no-param-reassign */
+    results[resultsKey] = results[resultsKey].sort((a, b) => {
       if (this.direction === 'd') {
         return b.value - a.value;
       }
@@ -87,7 +96,19 @@ class SortingModifier extends Modifier {
       return a.value - b.value;
     });
 
-    return sortedResults;
+    // if result group, we also need to sort any die rolls in th sub-rolls
+    if (results instanceof ResultGroup) {
+      results[resultsKey] = results[resultsKey].map((subRoll) => {
+        if ((subRoll instanceof ResultGroup) || (subRoll instanceof RollResults)) {
+          return this.run(subRoll, _context);
+        }
+
+        return subRoll;
+      });
+    }
+    /* eslint-enable */
+
+    return results;
   }
 
   /**
