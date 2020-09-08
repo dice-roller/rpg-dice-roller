@@ -113,7 +113,8 @@ class DiceRoll {
    *   rolls: ..., // RollResults object or array of roll results
    * });
    *
-   * @param {string|{notation: string, rolls: ResultGroup|Array}} notation The notation to roll
+   * @param {string|{notation: string, rolls: ResultGroup|Array<ResultGroup>}} notation The
+   * notation to roll
    * @param {string} notation.notation If `notation is an object; the notation to roll
    * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number>} [notation.rolls] If
    * `notation` is an object; the rolls to import
