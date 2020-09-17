@@ -31,7 +31,7 @@ class RollResults {
    *  new RollResult(5),
    * ]);
    *
-   * @param {RollResult[]|number[]} [rolls=[]] The roll results
+   * @param {Array.<RollResult|number>} [rolls=[]] The roll results
    *
    * @throws {TypeError} Rolls must be an array
    */

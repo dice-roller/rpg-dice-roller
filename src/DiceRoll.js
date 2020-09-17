@@ -98,6 +98,7 @@ const calculateTotal = (results) => toFixed(results.calculationValue, 2);
  * @see {@link DiceRoller} if you need to keep a history of rolls
  */
 class DiceRoll {
+  /* eslint-disable max-len */
   /**
    * Create a DiceRoll, parse the notation and roll the dice.
    *
@@ -113,7 +114,7 @@ class DiceRoll {
    *   rolls: ..., // RollResults object or array of roll results
    * });
    *
-   * @param {string|{notation: string, rolls: ResultGroup|Array}} notation The notation to roll
+   * @param {string|{notation: string, rolls: ResultGroup|Array.<ResultGroup|RollResults|string|number>}} notation The notation to roll
    * @param {string} notation.notation If `notation is an object; the notation to roll
    * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number>} [notation.rolls] If
    * `notation` is an object; the rolls to import
@@ -167,6 +168,7 @@ class DiceRoll {
       throw new NotationError(notation);
     }
   }
+  /* eslint-enable max-len */
 
   /**
    * The average possible total for the notation.
@@ -475,12 +477,13 @@ class DiceRoll {
     return results;
   }
 
+  /* eslint-disable max-len */
   /**
    * Set the rolls.
    *
    * @private
    *
-   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array>} rolls
+   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array.<RollResult|number>>} rolls
    *
    * @throws {TypeError} Rolls must be a valid result object, or an array
    */
@@ -524,6 +527,7 @@ class DiceRoll {
       throw new TypeError('Rolls must be a valid result object, or an array');
     }
   }
+  /* eslint-enable max-len */
 }
 
 export default DiceRoll;
