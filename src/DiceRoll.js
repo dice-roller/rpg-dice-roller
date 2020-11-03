@@ -460,14 +460,17 @@ class DiceRoll {
     }
 
     // roll the dice
-    const results = new ResultGroup(this[expressionsSymbol].map((expression) => {
-      if ((expression instanceof StandardDice) || (expression instanceof RollGroup)) {
-        // roll the object and return the value
-        return expression.roll();
-      }
+    const results = new ResultGroup(this[expressionsSymbol]
+      .map((expression) => {
+        if ((expression instanceof StandardDice) || (expression instanceof RollGroup)) {
+          // roll the object and return the value
+          return expression.roll();
+        }
 
-      return expression;
-    }).filter(Boolean));
+        return expression;
+      })
+      // filter out empty values (e.g. whitespace)
+      .filter((value) => !!value || (value === 0)));
 
     if (engine) {
       // reset the engine
