@@ -1609,5 +1609,67 @@ describe('Parser', () => {
         }).toThrow(parser.SyntaxError);
       });
     });
+
+    describe('Decimals', () => {
+      test('roll `1d20+1.45', () => {
+        const parsed = Parser.parse('1d20+1.45');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
+
+        expect(parsed[1]).toEqual('+');
+        expect(parsed[2]).toBe(1.45);
+      });
+
+      test('roll `1d20*0.20', () => {
+        const parsed = Parser.parse('1d20*0.20');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
+
+        expect(parsed[1]).toEqual('*');
+        expect(parsed[2]).toBe(0.20);
+      });
+
+      test('roll `1d20/6.02', () => {
+        const parsed = Parser.parse('1d20/6.02');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
+
+        expect(parsed[1]).toEqual('/');
+        expect(parsed[2]).toBe(6.02);
+      });
+
+      test('roll `1d20+0', () => {
+        const parsed = Parser.parse('1d20+0');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(3);
+
+        expect(parsed[0]).toBeInstanceOf(StandardDice);
+        expect(parsed[0].sides).toBe(20);
+        expect(parsed[0].qty).toBe(1);
+        expect(parsed[0].modifiers).toEqual(new Map());
+
+        expect(parsed[1]).toEqual('+');
+        expect(parsed[2]).toBe(0);
+      });
+    });
   });
 });
