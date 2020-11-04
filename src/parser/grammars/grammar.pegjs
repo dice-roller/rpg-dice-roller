@@ -23,7 +23,7 @@ RollGroup
 
 // Dice
 
-Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* descriptions:__ {
+Dice = die:(StandardDie / PercentileDie / FudgeDie / ArbitraryDie) modifiers:Modifier* descriptions:__ {
   die.modifiers = Object.assign({}, ...modifiers.map(item => {
     return {[item.name]: item};
   }));
@@ -34,19 +34,27 @@ Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* descript
 }
 
 StandardDie
-  = qty:IntegerOrExpression? "d" sides:IntegerOrExpression {
+  = qty:DiceQty? "d" sides:IntegerOrExpression {
     return new Dice.StandardDice(sides, qty || 1)
   }
 
 PercentileDie
-  = qty:IntegerOrExpression? "d%" {
+  = qty:DiceQty? "d%" {
     return new Dice.PercentileDice(qty || 1);
   }
 
 FudgeDie
-  = qty:IntegerOrExpression? "dF" sides:("." [12])? {
+  = qty:DiceQty? "dF" sides:("." [12])? {
     return new Dice.FudgeDice(sides ? parseInt(sides[1], 10) : 2, qty || 1);
   }
+
+ArbitraryDie
+  = qty:DiceQty? "d{" _ sides:SimpleExpressionRangeGroup _ "}" {
+    return new Dice.ArbitraryDice(sides, qty || 1);
+  }
+
+DiceQty
+  = IntegerOrExpression
 
 
 // Modifiers
@@ -90,13 +98,13 @@ KeepModifier
 
 // Maximum roll value
 MaxModifier
-  = "max" max:FloatNumber {
+  = "max" max:(FloatNumber / NegativeFloatNumber) {
     return new Modifiers.MaxModifier(max);
   }
 
 // Minimum roll value
 MinModifier
-  = "min" min:FloatNumber {
+  = "min" min:(FloatNumber / NegativeFloatNumber) {
     return new Modifiers.MinModifier(min);
   }
 
@@ -136,7 +144,7 @@ FailComparePoint
   = "f" comparePoint:ComparePoint { return comparePoint }
 
 ComparePoint
-  = operator:CompareOperator value:FloatNumber {
+  = operator:CompareOperator value:(FloatNumber / NegativeFloatNumber) {
     return new ComparePoint(operator, value);
   }
 
@@ -148,10 +156,30 @@ CompareOperator
  * Mathematical
  */
 
+// A comma separated group of integer / expression ranges
+SimpleExpressionRangeGroup
+  = expr:(SimpleExpressionRange / SimpleExpression) exprs:(_ "," _ (SimpleExpressionRange / SimpleExpression))* {
+    return [
+      expr,
+      ...exprs.map(v => v[3]),
+    ];
+  }
+
+// An expression range (e.g. `2...6`, `4:8`, `10:5:40`)
+SimpleExpressionRange
+  = start:SimpleExpression _ step:RangeStep _ end:SimpleExpression {
+    return { start, step, end };
+  }
+
+// Range step (Defaults to `1` if no value provided)
+RangeStep
+  = ":" step:(_ FloatNumber _ ":")? { return step?.[1] || 1 }
+  / "..." { return 1 }
+
 // Either a positive integer or an expression within parenthesis (Handy for dice qty or sides)
 IntegerOrExpression
   = IntegerNumber
-  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return evaluate(text()) }
+  / l:"(" _ expr:SimpleExpression _ r:")" { return evaluate(text()) }
 
 // Generic expression
 Expression
@@ -164,16 +192,37 @@ Expression
         .map(([, value, , factor]) => {
           return [
             value,
-            factor
+            factor,
           ];
         }).flat(2)
     ]
   }
 
+SimpleExpression
+  = head:SimpleFactor tail:(_ Operator _ SimpleFactor)* {
+    head = Array.isArray(head) ? head : [head];
+
+    return [
+      ...head,
+      ...tail
+        .map(([, value, , factor]) => {
+          return [
+            value,
+            factor,
+          ];
+        }).flat(2)
+    ];
+  }
+
+SimpleFactor
+  = FloatNumber
+  / NegativeFloatNumber
+  / l:"(" _ expr:SimpleExpression _ r:")" { return [l, ...expr, r] }
+
 Factor
   = MathFunction
   / Dice
-  / FloatNumber
+  / SimpleFactor
   / l:"(" _ expr:Expression _ r:")" { return [l, ...expr, r] }
   / RollGroup
 
@@ -195,8 +244,11 @@ MathFunction
     ];
   }
 
+NegativeFloatNumber
+  = "-" FloatNumber { return parseFloat(text()) }
+
 FloatNumber
-  = "-"? Number ([.] Number)? { return parseFloat(text()) }
+  = Number ([.] Number)? { return parseFloat(text()) }
 
 IntegerNumber
   = [1-9] [0-9]* { return parseInt(text(), 10) }

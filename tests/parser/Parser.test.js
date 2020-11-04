@@ -1,4 +1,9 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.js';
+import {
+  ArbitraryDice,
+  FudgeDice,
+  PercentileDice,
+  StandardDice,
+} from '../../src/dice/index.js';
 import { RequiredArgumentError } from '../../src/exceptions/index.js';
 import {
   CriticalFailureModifier,
@@ -66,103 +71,224 @@ describe('Parser', () => {
 
   describe('Parsing', () => {
     describe('Basic dice', () => {
-      test('returns correct response for `d6`', () => {
-        const parsed = Parser.parse('d6');
+      describe('Standard dice', () => {
+        test('returns correct response for `d6`', () => {
+          const parsed = Parser.parse('d6');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0].sides).toBe(6);
-        expect(parsed[0].qty).toBe(1);
-        expect(parsed[0].modifiers).toEqual(new Map());
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+          expect(parsed[0].sides).toBe(6);
+          expect(parsed[0].qty).toBe(1);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
+
+        test('returns correct response for `5d10`', () => {
+          const parsed = Parser.parse('5d10');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+          expect(parsed[0].sides).toBe(10);
+          expect(parsed[0].qty).toBe(5);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
+
+        test('returns correct response for `4d20`', () => {
+          const parsed = Parser.parse('4d20');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+          expect(parsed[0].sides).toBe(20);
+          expect(parsed[0].qty).toBe(4);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
       });
 
-      test('returns correct response for `5d10`', () => {
-        const parsed = Parser.parse('5d10');
+      describe('Percentile dice', () => {
+        test('returns correct response for `2d%`', () => {
+          const parsed = Parser.parse('2d%');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0].sides).toBe(10);
-        expect(parsed[0].qty).toBe(5);
-        expect(parsed[0].modifiers).toEqual(new Map());
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(PercentileDice);
+          expect(parsed[0].sides).toBe('%');
+          expect(parsed[0].qty).toBe(2);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
       });
 
-      test('returns correct response for `4d20`', () => {
-        const parsed = Parser.parse('4d20');
+      describe('Fudge dice', () => {
+        test('returns correct response for `4dF`', () => {
+          const parsed = Parser.parse('4dF');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(StandardDice);
-        expect(parsed[0].sides).toBe(20);
-        expect(parsed[0].qty).toBe(4);
-        expect(parsed[0].modifiers).toEqual(new Map());
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+          expect(parsed[0].sides).toBe('F.2');
+          expect(parsed[0].qty).toBe(4);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
+
+        test('returns correct response for `dF.2`', () => {
+          const parsed = Parser.parse('dF.2');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+          expect(parsed[0].sides).toBe('F.2');
+          expect(parsed[0].qty).toBe(1);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
+
+        test('returns correct response for `10dF.1`', () => {
+          const parsed = Parser.parse('10dF.1');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+          expect(parsed[0].sides).toBe('F.1');
+          expect(parsed[0].qty).toBe(10);
+          expect(parsed[0].modifiers).toEqual(new Map());
+        });
+
+        test('throws error for invalid Fudge die sides', () => {
+          expect(() => {
+            Parser.parse('dF.3');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('dF.4');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('dF.0');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('dF.67');
+          }).toThrow(parser.SyntaxError);
+
+          expect(() => {
+            Parser.parse('dF.foo');
+          }).toThrow(parser.SyntaxError);
+        });
       });
 
-      test('returns correct response for `2d%`', () => {
-        const parsed = Parser.parse('2d%');
+      describe('Arbitrary dice', () => {
+        describe('Single range', () => {
+          test('returns correct response for `4d{2:8}`', () => {
+            const parsed = Parser.parse('4d{2:8}');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(PercentileDice);
-        expect(parsed[0].sides).toBe('%');
-        expect(parsed[0].qty).toBe(2);
-        expect(parsed[0].modifiers).toEqual(new Map());
-      });
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
 
-      test('returns correct response for `4dF`', () => {
-        const parsed = Parser.parse('4dF');
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('2:8');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0].sides).toBe('F.2');
-        expect(parsed[0].qty).toBe(4);
-        expect(parsed[0].modifiers).toEqual(new Map());
-      });
+            expect(parsed[0].qty).toBe(4);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
 
-      test('returns correct response for `dF.2`', () => {
-        const parsed = Parser.parse('dF.2');
+          test('returns correct response for `1d{0:4}`', () => {
+            const parsed = Parser.parse('1d{0:4}');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0].sides).toBe('F.2');
-        expect(parsed[0].qty).toBe(1);
-        expect(parsed[0].modifiers).toEqual(new Map());
-      });
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
 
-      test('returns correct response for `10dF.1`', () => {
-        const parsed = Parser.parse('10dF.1');
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('0:4');
 
-        expect(parsed).toBeInstanceOf(Array);
-        expect(parsed).toHaveLength(1);
-        expect(parsed[0]).toBeInstanceOf(FudgeDice);
-        expect(parsed[0].sides).toBe('F.1');
-        expect(parsed[0].qty).toBe(10);
-        expect(parsed[0].modifiers).toEqual(new Map());
-      });
+            expect(parsed[0].qty).toBe(1);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
 
-      test('throws error for invalid Fudge die sides', () => {
-        expect(() => {
-          Parser.parse('dF.3');
-        }).toThrow(parser.SyntaxError);
+          test('returns correct response for `3d{-2...6}`', () => {
+            const parsed = Parser.parse('3d{-2...6}');
 
-        expect(() => {
-          Parser.parse('dF.4');
-        }).toThrow(parser.SyntaxError);
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
 
-        expect(() => {
-          Parser.parse('dF.0');
-        }).toThrow(parser.SyntaxError);
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('-2:6');
 
-        expect(() => {
-          Parser.parse('dF.67');
-        }).toThrow(parser.SyntaxError);
+            expect(parsed[0].qty).toBe(3);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
 
-        expect(() => {
-          Parser.parse('dF.foo');
-        }).toThrow(parser.SyntaxError);
+          test('returns correct response for `6d{4.6...9.6}`', () => {
+            const parsed = Parser.parse('6d{4.6...9.6}');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
+
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('4.6...9.6');
+
+            expect(parsed[0].qty).toBe(6);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
+
+          test('returns correct response for `45d{3.6:0.2:7.9}`', () => {
+            const parsed = Parser.parse('45d{3.6:0.2:7.9}');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
+
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('3.6:0.2:7.9');
+
+            expect(parsed[0].qty).toBe(45);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
+
+          test('returns correct response for `16d{4-5}`', () => {
+            const parsed = Parser.parse('16d{4-5}');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
+
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(1);
+            expect(parsed[0].sides[0]).toBe('4-5');
+
+            expect(parsed[0].qty).toBe(16);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
+        });
+
+        describe('Multiple ranges', () => {
+          test('returns correct response for `12d{34:60, 4...8, 95, -47, 27*4-(3/2)}`', () => {
+            const parsed = Parser.parse('12d{34:60, 4...8, 95, -47, 27*4-(3/2)}');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(ArbitraryDice);
+
+            expect(parsed[0].sides).toBeInstanceOf(Array);
+            expect(parsed[0].sides).toHaveLength(5);
+            expect(parsed[0].sides[0]).toBe('34:60');
+            expect(parsed[0].sides[1]).toBe('4:8');
+            expect(parsed[0].sides[2]).toBe('95');
+            expect(parsed[0].sides[3]).toBe('-47');
+            expect(parsed[0].sides[4]).toBe('27*4-(3/2)');
+
+            expect(parsed[0].qty).toBe(12);
+            expect(parsed[0].modifiers).toEqual(new Map());
+          });
+        });
       });
 
       test('sides cannot start with 0', () => {
