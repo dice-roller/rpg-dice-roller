@@ -101,6 +101,7 @@ describe('TargetModifier', () => {
       mod = new TargetModifier(sCP, fCP);
 
       expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(fCP);
 
       // remove the spy
       spy.mockRestore();

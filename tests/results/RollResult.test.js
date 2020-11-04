@@ -530,10 +530,10 @@ describe('RollResult', () => {
       expect(result.modifierFlags).toEqual('ro');
 
       result.modifiers = ['target-failure'];
-      expect(result.modifierFlags).toEqual('_');
+      expect(result.modifierFlags).toEqual('-');
 
       result.modifiers = ['target-success'];
-      expect(result.modifierFlags).toEqual('*');
+      expect(result.modifierFlags).toEqual('+');
     });
 
     test('modifier flag defaults to modifier name if name not recognised', () => {
