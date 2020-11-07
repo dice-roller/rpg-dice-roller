@@ -386,7 +386,7 @@ describe('DiceRoll', () => {
         spy.mockRestore();
       });
 
-      test('equal to total roll values', () => {
+      test('equal to total roll value for single roll `4d8`', () => {
         // mock the roll values
         const roll = new RollResults([6, 2, 5, 8]);
         jest.spyOn(StandardDice.prototype, 'roll').mockImplementation(() => roll);
@@ -399,13 +399,24 @@ describe('DiceRoll', () => {
         jest.restoreAllMocks();
       });
 
-      test('equal to rolls with equation', () => {
+      test('equal to total roll for multiple rolls `4d8*(5+2d10)`', () => {
         // mock the roll values
-        const roll1 = new RollResults([3, 2, 7, 5]);
-        const roll2 = new RollResults([5, 2, 4, 2, 1, 6, 5]);
         jest.spyOn(StandardDice.prototype, 'roll')
-          .mockImplementationOnce(() => roll1)
-          .mockImplementationOnce(() => roll2);
+          .mockImplementationOnce(() => new RollResults([6, 2, 5, 8]))
+          .mockImplementationOnce(() => new RollResults([3, 9]));
+
+        const diceRoll = new DiceRoll('4d8*(5+2d10)');
+
+        expect(diceRoll.total).toBe(357);
+
+        jest.restoreAllMocks();
+      });
+
+      test('equal to rolls with equation `4d8/(5+2)d6`', () => {
+        // mock the roll values
+        jest.spyOn(StandardDice.prototype, 'roll')
+          .mockImplementationOnce(() => new RollResults([3, 2, 7, 5]))
+          .mockImplementationOnce(() => new RollResults([5, 2, 4, 2, 1, 6, 5]));
 
         const diceRoll = new DiceRoll('4d8/(5+2)d6');
 
