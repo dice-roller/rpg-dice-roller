@@ -44,16 +44,16 @@
     "notation"
   ],
   "devDependencies": {
-    "@babel/core": "^7.10.5",
-    "@babel/preset-env": "^7.10.4",
-    "abab": "^2.0.3",
+    "@babel/core": "^7.12.3",
+    "@babel/preset-env": "^7.12.1",
+    "abab": "^2.0.5",
     "coveralls": "^3.1.0",
-    "eslint": "^7.5.0",
-    "eslint-config-airbnb-base": "^14.2.0",
-    "eslint-plugin-import": "^2.20.2",
-    "jest": "^26.1.0",
+    "eslint": "^7.13.0",
+    "eslint-config-airbnb-base": "^14.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "jest": "^26.6.3",
     "pegjs": "^0.10.0",
-    "rollup": "^2.23.0",
+    "rollup": "^2.33.1",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-commonjs": "^10.1.0",
@@ -64,7 +64,7 @@
     "vuepress-jsdoc": "^3.2.0"
   },
   "dependencies": {
-    "mathjs-expression-parser": "^1.0.2",
+    "mathjs": "^8.0.0",
     "random-js": "^2.1.0"
   },
   "engines": {

@@ -12,6 +12,10 @@ const production = !process.env.BUILD || (process.env.BUILD === 'prod');
 const inputPath = 'src/index.js';
 const outputPath = (format, minify = false) => `lib/${format}/bundle${minify ? '.min' : ''}.js`;
 const packageName = 'rpgDiceRoller';
+const globals = {
+  mathjs: 'math',
+  'random-js': 'Random',
+};
 
 /**
  * Returns a list of common plugins
@@ -45,8 +49,12 @@ export default [
     output: {
       file: outputPath('esm', production),
       format: 'esm',
+      // map external dependencies to variables
+      globals,
     },
     plugins: plugins(false, production),
+    // indicate which modules should be treated as external
+    external: ['mathjs'],
   },
   // UMD
   {
@@ -55,7 +63,11 @@ export default [
       file: outputPath('umd', production),
       format: 'umd',
       name: packageName,
+      // map external dependencies to variables
+      globals,
     },
     plugins: plugins(true, production),
+    // indicate which modules should be treated as external
+    external: ['mathjs', 'random-js'],
   },
 ];
