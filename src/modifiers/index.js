@@ -7,6 +7,7 @@ import KeepModifier from './KeepModifier.js';
 import MaxModifier from './MaxModifier.js';
 import MinModifier from './MinModifier.js';
 import Modifier from './Modifier.js';
+import MultiplyModifier from './MultiplyModifier.js';
 import ReRollModifier from './ReRollModifier.js';
 import SortingModifier from './SortingModifier.js';
 import TargetModifier from './TargetModifier.js';
@@ -21,6 +22,7 @@ export {
   MaxModifier,
   MinModifier,
   Modifier,
+  MultiplyModifier,
   ReRollModifier,
   SortingModifier,
   TargetModifier,

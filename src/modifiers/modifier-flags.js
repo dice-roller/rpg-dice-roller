@@ -8,11 +8,12 @@ const flags = {
   drop: 'd',
   max: 'v',
   min: '^',
+  multiply: '*',
   penetrate: 'p',
   're-roll': 'r',
   're-roll-once': 'ro',
-  'target-failure': '_',
-  'target-success': '*',
+  'target-failure': '-',
+  'target-success': '+',
 };
 
 /**

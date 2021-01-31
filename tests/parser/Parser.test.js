@@ -8,12 +8,14 @@ import {
   KeepModifier,
   MaxModifier,
   MinModifier,
+  MultiplyModifier,
   ReRollModifier,
   SortingModifier,
   TargetModifier,
 } from '../../src/modifiers/index.js';
 import * as parser from '../../src/parser/grammars/grammar.js';
 import Parser from '../../src/parser/Parser.js';
+import ComparePoint from '../../src/ComparePoint.js';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -763,6 +765,120 @@ describe('Parser', () => {
         });
       });
 
+      describe('Multiply', () => {
+        describe('No compare point', () => {
+          test('multiply for `3d8mul6`', () => {
+            const parsed = Parser.parse('3d8mul6');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(8);
+            expect(parsed[0].qty).toEqual(3);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(6);
+            expect(mod.comparePoint).toBe(undefined);
+          });
+
+          test('multiply for `12dF.2mul-3.01`', () => {
+            const parsed = Parser.parse('12dF.2mul-3.01');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(FudgeDice);
+
+            expect(parsed[0].sides).toEqual('F.2');
+            expect(parsed[0].qty).toEqual(12);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBeCloseTo(-3.01);
+            expect(mod.comparePoint).toBe(undefined);
+          });
+
+          test('multiply for `4d%mul0`', () => {
+            const parsed = Parser.parse('4d%mul0');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(PercentileDice);
+
+            expect(parsed[0].sides).toEqual('%');
+            expect(parsed[0].qty).toEqual(4);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBeCloseTo(0);
+            expect(mod.comparePoint).toBe(undefined);
+          });
+        });
+
+        describe('With compare point', () => {
+          test('multiply for `2d10mul2>8`', () => {
+            const parsed = Parser.parse('2d10mul2>8');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(10);
+            expect(parsed[0].qty).toEqual(2);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(2);
+            expect(mod.comparePoint).toEqual(new ComparePoint('>', 8));
+          });
+
+          test('multiply for `67d%mul897!=4`', () => {
+            const parsed = Parser.parse('67d%mul897!=4');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual('%');
+            expect(parsed[0].qty).toEqual(67);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(897);
+            expect(mod.comparePoint).toEqual(new ComparePoint('!=', 4));
+          });
+
+          test('multiply for `13dF.1mul-4.005<1`', () => {
+            const parsed = Parser.parse('13dF.1mul-4.005<1');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual('F.1');
+            expect(parsed[0].qty).toEqual(13);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(-4.005);
+            expect(mod.comparePoint).toEqual(new ComparePoint('<', 1));
+          });
+        });
+      });
+
       describe('Re-roll', () => {
         test('re-roll for `5d10r`', () => {
           const parsed = Parser.parse('5d10r');
@@ -949,13 +1065,8 @@ describe('Parser', () => {
 
             const mod = parsed[0].modifiers.get('target');
             expect(mod).toBeInstanceOf(TargetModifier);
-            expect(mod.toJSON()).toEqual(expect.objectContaining({
-              successComparePoint: expect.objectContaining({
-                operator: '=',
-                value: 21,
-              }),
-              failureComparePoint: null,
-            }));
+            expect(mod.successComparePoint).toEqual(new ComparePoint('=', 21));
+            expect(mod.failureComparePoint).toBe(null);
           });
 
           test('success for `dF>=0`', () => {
@@ -1034,18 +1145,18 @@ describe('Parser', () => {
               }),
             }));
           });
-        });
 
-        test('must proceed success compare point', () => {
-          // can't have failure before success
-          expect(() => {
-            Parser.parse('2d6f<=3>4');
-          }).toThrow(parser.SyntaxError);
+          test('must proceed success compare point', () => {
+            // can't have failure before success
+            expect(() => {
+              Parser.parse('2d6f<=3>4');
+            }).toThrow(parser.SyntaxError);
 
-          // can't have failure without success
-          expect(() => {
-            Parser.parse('4d7f!=2');
-          }).toThrow(parser.SyntaxError);
+            // can't have failure without success
+            expect(() => {
+              Parser.parse('4d7f!=2');
+            }).toThrow(parser.SyntaxError);
+          });
         });
       });
 
@@ -1206,7 +1317,55 @@ describe('Parser', () => {
           expect(mod.max).toBe(6);
         });
 
-        test('multiple of the same operator just keeps the last one', () => {
+        describe('Target modifier and multiply modifier together', () => {
+          test('`3d8>7mul6`', () => {
+            const parsed = Parser.parse('3d8>7mul6');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(8);
+            expect(parsed[0].qty).toEqual(3);
+
+            expect(parsed[0].modifiers.has('target')).toBe(true);
+            let mod = parsed[0].modifiers.get('target');
+            expect(mod).toBeInstanceOf(TargetModifier);
+            expect(mod.successComparePoint).toEqual(new ComparePoint('>', 7));
+            expect(mod.failureComparePoint).toBe(null);
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+            mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(6);
+            expect(mod.comparePoint).toBe(undefined);
+          });
+
+          test('`2d10=10f<=3mul4>8`', () => {
+            const parsed = Parser.parse('2d10=10f<=3mul4>8');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(10);
+            expect(parsed[0].qty).toEqual(2);
+
+            expect(parsed[0].modifiers.has('target')).toBe(true);
+            let mod = parsed[0].modifiers.get('target');
+            expect(mod).toBeInstanceOf(TargetModifier);
+            expect(mod.successComparePoint).toEqual(new ComparePoint('=', 10));
+            expect(mod.failureComparePoint).toEqual(new ComparePoint('<=', 3));
+
+            expect(parsed[0].modifiers.has('multiply')).toBe(true);
+            mod = parsed[0].modifiers.get('multiply');
+            expect(mod).toBeInstanceOf(MultiplyModifier);
+            expect(mod.factor).toBe(4);
+            expect(mod.comparePoint).toEqual(new ComparePoint('>', 8));
+          });
+        });
+
+        test('multiple of the same modifier just keeps the last one', () => {
           const parsed = Parser.parse('42d2!=6!!>4!p<5');
 
           expect(parsed).toBeInstanceOf(Array);

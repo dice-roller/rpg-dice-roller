@@ -621,7 +621,7 @@ describe('DiceRoll', () => {
       const notation = '4d6>5f<=2';
       const diceRoller = new DiceRoll(notation);
 
-      expect(diceRoller.output).toEqual(`${notation}: [6*, 2_, 5, 8*] = 1`);
+      expect(diceRoller.output).toEqual(`${notation}: [6+, 2-, 5, 8+] = 1`);
 
       jest.restoreAllMocks();
     });
@@ -639,7 +639,7 @@ describe('DiceRoll', () => {
       const notation = '4d6>5f<=2+2d6';
       const diceRoller = new DiceRoll(notation);
 
-      expect(diceRoller.output).toEqual(`${notation}: [6*, 2_, 5, 8*]+[3, 5] = 9`);
+      expect(diceRoller.output).toEqual(`${notation}: [6+, 2-, 5, 8+]+[3, 5] = 9`);
 
       jest.restoreAllMocks();
     });

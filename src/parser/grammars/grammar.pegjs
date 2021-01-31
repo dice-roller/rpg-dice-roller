@@ -59,6 +59,7 @@ Modifier
   / SortingModifier
   / MaxModifier
   / MinModifier
+  / MultiplyModifier
 
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
@@ -94,6 +95,12 @@ MaxModifier
 MinModifier
   = "min" min:FloatNumber {
     return new Modifiers.MinModifier(min);
+  }
+
+// Multiply roll values
+MultiplyModifier
+  = "mul" factor:FloatNumber comparePoint:ComparePoint? {
+    return new Modifiers.MultiplyModifier(factor, comparePoint);
   }
 
 // Re-rolling Dice (Including Re-roll Once)

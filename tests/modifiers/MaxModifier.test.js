@@ -24,7 +24,7 @@ describe('MaxModifier', () => {
       }));
     });
 
-    test('constructor requires max', () => {
+    test('constructor requires `max`', () => {
       expect(() => {
         new MaxModifier();
       }).toThrow(TypeError);

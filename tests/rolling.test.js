@@ -124,100 +124,6 @@ describe('Rolling', () => {
       spy.mockRestore();
     });
 
-    test('roll `3d6cs>3cf<3`', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => 5)
-        .mockImplementationOnce(() => 4)
-        .mockImplementationOnce(() => 1);
-      const roll = roller.roll('3d6cs>3cf<3');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('3d6cs>3cf<3');
-      expect(roll.total).toBe(10);
-      expect(roll.output).toEqual('3d6cs>3cf<3: [5**, 4**, 1__] = 10');
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
-    test('roll `4d6sd`', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => 4)
-        .mockImplementationOnce(() => 6)
-        .mockImplementationOnce(() => 5)
-        .mockImplementationOnce(() => 1);
-      const roll = roller.roll('4d6sd');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('4d6sd');
-      expect(roll.total).toBe(16);
-      expect(roll.output).toEqual('4d6sd: [6, 5, 4, 1] = 16');
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
-    test('roll `2d6r<=4`', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        // die 1
-        .mockImplementationOnce(() => new RollResult(4))
-        // die 2
-        .mockImplementationOnce(() => new RollResult(5))
-        // re-roll
-        .mockImplementationOnce(() => new RollResult(6));
-      const roll = roller.roll('2d6r<=4');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('2d6r<=4');
-      expect(roll.total).toBe(11);
-      expect(roll.output).toEqual('2d6r<=4: [6r, 5] = 11');
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
-    test('roll `6d10>=8!>=9`', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => new RollResult(4))
-        .mockImplementationOnce(() => new RollResult(5))
-        .mockImplementationOnce(() => new RollResult(6))
-        .mockImplementationOnce(() => new RollResult(3))
-        .mockImplementationOnce(() => new RollResult(10))
-        .mockImplementationOnce(() => new RollResult(8))
-        // explode
-        .mockImplementationOnce(() => new RollResult(6));
-      const roll = roller.roll('6d10>=8!>=9');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('6d10>=8!>=9');
-      expect(roll.total).toBe(2);
-      expect(roll.output).toEqual('6d10>=8!>=9: [4, 5, 6, 3, 10!*, 6, 8*] = 2');
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
-    test('roll `6d10!>=9>=8`', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => new RollResult(4))
-        .mockImplementationOnce(() => new RollResult(5))
-        .mockImplementationOnce(() => new RollResult(6))
-        .mockImplementationOnce(() => new RollResult(3))
-        .mockImplementationOnce(() => new RollResult(10))
-        .mockImplementationOnce(() => new RollResult(8))
-        // explode
-        .mockImplementationOnce(() => new RollResult(6));
-      const roll = roller.roll('6d10!>=9>=8');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('6d10!>=9>=8');
-      expect(roll.total).toBe(2);
-      expect(roll.output).toEqual('6d10!>=9>=8: [4, 5, 6, 3, 10!*, 6, 8*] = 2');
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
     test('roll `(4d10^7)*6d(3*2)`', () => {
       const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
@@ -290,25 +196,6 @@ describe('Rolling', () => {
       spy.mockRestore();
     });
 
-    test('roll `6d10min3max6', () => {
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
-        .mockImplementationOnce(() => new RollResult(10))
-        .mockImplementationOnce(() => new RollResult(2))
-        .mockImplementationOnce(() => new RollResult(3))
-        .mockImplementationOnce(() => new RollResult(7))
-        .mockImplementationOnce(() => new RollResult(1))
-        .mockImplementationOnce(() => new RollResult(9));
-      const roll = roller.roll('6d10min3max6');
-
-      expect(roll).toBeInstanceOf(DiceRoll);
-      expect(roll.notation).toEqual('6d10min3max6');
-      expect(roll.output).toEqual('6d10min3max6: [6v, 3^, 3, 6v, 3^, 6v] = 27');
-      expect(roll.total).toBe(27);
-
-      // remove the spy
-      spy.mockRestore();
-    });
-
     test('roll `1d20+1.45', () => {
       const rolls = new RollResults([8]);
       const spy = jest.spyOn(StandardDice.prototype, 'roll')
@@ -376,6 +263,157 @@ describe('Rolling', () => {
 
       // remove the spy
       spy.mockRestore();
+    });
+
+    describe('modifiers', () => {
+      test('roll `3d6cs>3cf<3`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => 5)
+          .mockImplementationOnce(() => 4)
+          .mockImplementationOnce(() => 1);
+        const roll = roller.roll('3d6cs>3cf<3');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('3d6cs>3cf<3');
+        expect(roll.total).toBe(10);
+        expect(roll.output).toEqual('3d6cs>3cf<3: [5**, 4**, 1__] = 10');
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `4d6sd`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => 4)
+          .mockImplementationOnce(() => 6)
+          .mockImplementationOnce(() => 5)
+          .mockImplementationOnce(() => 1);
+        const roll = roller.roll('4d6sd');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('4d6sd');
+        expect(roll.total).toBe(16);
+        expect(roll.output).toEqual('4d6sd: [6, 5, 4, 1] = 16');
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `2d6r<=4`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          // die 1
+          .mockImplementationOnce(() => new RollResult(4))
+          // die 2
+          .mockImplementationOnce(() => new RollResult(5))
+          // re-roll
+          .mockImplementationOnce(() => new RollResult(6));
+        const roll = roller.roll('2d6r<=4');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('2d6r<=4');
+        expect(roll.total).toBe(11);
+        expect(roll.output).toEqual('2d6r<=4: [6r, 5] = 11');
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `6d10>=8!>=9`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(4))
+          .mockImplementationOnce(() => new RollResult(5))
+          .mockImplementationOnce(() => new RollResult(6))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(10))
+          .mockImplementationOnce(() => new RollResult(8))
+          // explode
+          .mockImplementationOnce(() => new RollResult(6));
+        const roll = roller.roll('6d10>=8!>=9');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('6d10>=8!>=9');
+        expect(roll.total).toBe(2);
+        expect(roll.output).toEqual('6d10>=8!>=9: [4, 5, 6, 3, 10!+, 6, 8+] = 2');
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `6d10!>=9>=8`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(4))
+          .mockImplementationOnce(() => new RollResult(5))
+          .mockImplementationOnce(() => new RollResult(6))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(10))
+          .mockImplementationOnce(() => new RollResult(8))
+          // explode
+          .mockImplementationOnce(() => new RollResult(6));
+        const roll = roller.roll('6d10!>=9>=8');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('6d10!>=9>=8');
+        expect(roll.total).toBe(2);
+        expect(roll.output).toEqual('6d10!>=9>=8: [4, 5, 6, 3, 10!+, 6, 8+] = 2');
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `6d10min3max6`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(10))
+          .mockImplementationOnce(() => new RollResult(2))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(7))
+          .mockImplementationOnce(() => new RollResult(1))
+          .mockImplementationOnce(() => new RollResult(9));
+        const roll = roller.roll('6d10min3max6');
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual('6d10min3max6');
+        expect(roll.output).toEqual('6d10min3max6: [6v, 3^, 3, 6v, 3^, 6v] = 27');
+        expect(roll.total).toBe(27);
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `3d8mul6`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(5))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(7));
+        const notation = '3d8mul6';
+        const roll = roller.roll(notation);
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual(notation);
+        expect(roll.output).toEqual(`${notation}: [5*, 3*, 7*] = 90`);
+        expect(roll.total).toBe(90);
+
+        // remove the spy
+        spy.mockRestore();
+      });
+
+      test('roll `5d10>=7mul2=10`', () => {
+        const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+          .mockImplementationOnce(() => new RollResult(10))
+          .mockImplementationOnce(() => new RollResult(3))
+          .mockImplementationOnce(() => new RollResult(7))
+          .mockImplementationOnce(() => new RollResult(2))
+          .mockImplementationOnce(() => new RollResult(8));
+        const notation = '5d10>=7mul2=10';
+        const roll = roller.roll(notation);
+
+        expect(roll).toBeInstanceOf(DiceRoll);
+        expect(roll.notation).toEqual(notation);
+        expect(roll.output).toEqual(`${notation}: [10+*, 3, 7+, 2, 8+] = 4`);
+        expect(roll.total).toBe(4);
+
+        // remove the spy
+        spy.mockRestore();
+      });
     });
   });
 
@@ -640,7 +678,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3])*} = 1`);
+            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3])+} = 1`);
             expect(roll.total).toBe(1);
 
             // remove the spy
@@ -672,7 +710,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)*, 20/[8, 6], [3]-1} = 1`);
+            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)+, 20/[8, 6], [3]-1} = 1`);
             expect(roll.total).toBeCloseTo(1);
 
             // remove the spy
@@ -689,7 +727,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {[4, 5, 1, 3]+5, (20/[8, 6])*, ([3]-1)*} = 2`);
+            expect(roll.output).toEqual(`${notation}: {[4, 5, 1, 3]+5, (20/[8, 6])+, ([3]-1)+} = 2`);
             expect(roll.total).toBeCloseTo(2);
 
             // remove the spy
@@ -706,7 +744,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3])_} = -1`);
+            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3])-} = -1`);
             expect(roll.total).toBe(-1);
 
             // remove the spy
@@ -723,7 +761,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)*, (20/[8, 6])_, ([3]-1)_} = -1`);
+            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)+, (20/[8, 6])-, ([3]-1)-} = -1`);
             expect(roll.total).toBeCloseTo(-1);
 
             // remove the spy
@@ -757,7 +795,7 @@ describe('Rolling', () => {
 
             expect(roll).toBeInstanceOf(DiceRoll);
             expect(roll.notation).toEqual(notation);
-            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)*, (20/[8, 6])_, [3]-1} = 0`);
+            expect(roll.output).toEqual(`${notation}: {([4, 5, 1, 3]+5)+, (20/[8, 6])-, [3]-1} = 0`);
             expect(roll.total).toBeCloseTo(0);
 
             // remove the spy

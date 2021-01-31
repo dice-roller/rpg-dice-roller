@@ -315,10 +315,10 @@ describe('ResultGroup', () => {
       expect(group.modifierFlags).toEqual('ro');
 
       group.modifiers = ['target-failure'];
-      expect(group.modifierFlags).toEqual('_');
+      expect(group.modifierFlags).toEqual('-');
 
       group.modifiers = ['target-success'];
-      expect(group.modifierFlags).toEqual('*');
+      expect(group.modifierFlags).toEqual('+');
     });
 
     test('modifier flag defaults to modifier name if name not recognised', () => {

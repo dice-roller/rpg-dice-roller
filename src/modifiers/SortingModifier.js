@@ -23,7 +23,7 @@ class SortingModifier extends Modifier {
     this.direction = direction;
 
     // set the modifier's sort order
-    this.order = 10;
+    this.order = 11;
   }
 
   /**
