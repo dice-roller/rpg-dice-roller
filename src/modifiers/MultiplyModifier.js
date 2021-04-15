@@ -3,7 +3,34 @@ import ComparisonModifier from './ComparisonModifier.js';
 
 const factorSymbol = Symbol('factor');
 
+/*
+const notation = '5d10>=7mul2=10';
+const roll = roller.roll(notation);
+
+expect(roll).toBeInstanceOf(DiceRoll);
+expect(roll.notation).toEqual(notation);
+expect(roll.output).toEqual(`${notation}: [10+*, 3, 7+, 2, 8+] = 4`);
+*/
+/**
+ * A `MultiplyModifier` multiplies individual roles by a given factor.
+ *
+ * @extends ComparisonModifier
+ */
 class MultiplyModifier extends ComparisonModifier {
+  /**
+   * Create a `MultiplyModifier` instance.
+   *
+   * Unlike the multiplication operator (e.g. `2d6*3`), which would multiply the total by the
+   * factor, this multiplies each individual roll, before adding them together.
+   *
+   * It also works with {@link TargetModifier}, to multiply the success / failure values.
+   *
+   * @example <caption>`5d6mul3`</caption>
+   * new MultiplyModifier(3);
+   *
+   * @param {Number} factor The multiplication factor
+   * @param {ComparePoint} [comparePoint] The comparison object
+   */
   constructor(factor, comparePoint = null) {
     super(comparePoint);
 
