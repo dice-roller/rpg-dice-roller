@@ -1,6 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies, no-console */
 import fs from 'fs';
-import pegjs from 'pegjs';
+import peggy from 'peggy';
 
 const dir = './src/parser/grammars/';
 const sourceFilename = 'grammar.pegjs';
@@ -10,7 +10,7 @@ const outputFilename = 'grammar.js';
 const grammar = fs.readFileSync(`${dir}${sourceFilename}`).toString();
 
 // generate the parser (as CommonJS)
-const parser = pegjs.generate(grammar, { output: 'source', format: 'commonjs' });
+const parser = peggy.generate(grammar, { output: 'source', format: 'commonjs' });
 
 // convert parser to ES module
 const output = `
