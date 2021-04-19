@@ -28,7 +28,7 @@
   "bugs": {
     "url": "https://github.com/GreenImp/rpg-dice-roller/issues"
   },
-  "homepage": "https://github.com/GreenImp/rpg-dice-roller",
+  "homepage": "https://greenimp.github.io/rpg-dice-roller/",
   "funding": "https://github.com/sponsors/GreenImp",
   "keywords": [
     "dice",
@@ -52,7 +52,7 @@
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",
     "jest": "^26.6.3",
-    "pegjs": "^0.10.0",
+    "peggy": "^1.0.0",
     "rollup": "^2.45.2",
     "rollup-plugin-babel": "^4.4.0",
     "rollup-plugin-banner": "^0.2.1",
@@ -75,7 +75,7 @@
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && rollup --c --environment BUILD:dev",
     "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude ./parser/grammars",
-    "build:grammars": "node src/parser/grammars/generate.js",
+    "build:grammars": "./node_modules/peggy/bin/peggy --format es --dependency '{ evaluate }:../../utilities/math.js' --dependency '* as Dice:../../dice/index.js' --dependency '* as Modifiers:../../modifiers/index.js' --dependency 'ComparePoint:../../ComparePoint.js' --dependency 'RollGroup:../../RollGroup.js' ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && rollup --c --environment BUILD:prod",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
