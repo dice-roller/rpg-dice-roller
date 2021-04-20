@@ -1,4 +1,3 @@
-import math from 'mathjs-expression-parser';
 import * as mathUtils from '../../src/utilities/math.js';
 
 describe('Math utils', () => {
@@ -10,21 +9,6 @@ describe('Math utils', () => {
       sumArray: expect.any(Function),
       toFixed: expect.any(Function),
     }));
-  });
-
-  describe('evaluate', () => {
-    test('calls mathjs eval', () => {
-      const spy = jest.spyOn(math, 'eval');
-      const equation = '21*(5+12)';
-
-      expect(mathUtils.evaluate(equation)).toBe(357);
-      expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(equation);
-
-      // remove the spy
-      spy.mockRestore();
-      jest.restoreAllMocks();
-    });
   });
 
   describe('isNumeric', () => {
