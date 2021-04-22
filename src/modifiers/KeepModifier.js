@@ -96,6 +96,7 @@ class KeepModifier extends Modifier {
     if (value === Infinity) {
       throw new RangeError('qty must be a finite number');
     }
+
     if (!isNumeric(value) || (value < 1)) {
       throw new TypeError('qty must be a positive finite integer');
     }

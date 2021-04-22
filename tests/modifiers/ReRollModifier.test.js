@@ -15,6 +15,7 @@ describe('ReRollModifier', () => {
       expect(mod).toEqual(expect.objectContaining({
         comparePoint: undefined,
         isComparePoint: expect.any(Function),
+        maxIterations: ReRollModifier.defaultMaxIterations,
         name: 're-roll',
         notation: 'r',
         once: false,
@@ -299,7 +300,7 @@ describe('ReRollModifier', () => {
 
     describe('Iteration limit', () => {
       test('has iteration limit', () => {
-        expect(mod.maxIterations).toBe(1000);
+        expect(mod.maxIterations).toBe(ReRollModifier.defaultMaxIterations);
       });
 
       test('infinite re-roll stops at iteration limit `r>0`', () => {

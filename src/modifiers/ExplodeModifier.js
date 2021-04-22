@@ -19,11 +19,12 @@ class ExplodeModifier extends ComparisonModifier {
    * @param {ComparePoint} [comparePoint=null] The comparison object
    * @param {boolean} [compound=false] Whether to compound or not
    * @param {boolean} [penetrate=false] Whether to penetrate or not
+   * @param {number|null} [limit=null] The maximum iteration limit per roll.
    *
    * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(comparePoint = null, compound = false, penetrate = false) {
-    super(comparePoint);
+  constructor(comparePoint = null, compound = false, penetrate = false, limit = null) {
+    super(comparePoint, limit);
 
     this[compoundSymbol] = !!compound;
     this[penetrateSymbol] = !!penetrate;
@@ -58,7 +59,14 @@ class ExplodeModifier extends ComparisonModifier {
    * @returns {string}
    */
   get notation() {
-    return `!${this.compound ? '!' : ''}${this.penetrate ? 'p' : ''}${super.notation}`;
+    let notation = `!${this.compound ? '!' : ''}${this.penetrate ? 'p' : ''}`;
+
+    // if the max iterations has been changed, add it to the notation
+    if (this.maxIterations && (this.maxIterations !== this.constructor.defaultMaxIterations)) {
+      notation = `${notation}${this.maxIterations}`;
+    }
+
+    return `${notation}${super.notation}`;
   }
 
   /**
@@ -153,12 +161,13 @@ class ExplodeModifier extends ComparisonModifier {
    * }}
    */
   toJSON() {
-    const { compound, penetrate } = this;
+    const { compound, maxIterations, penetrate } = this;
 
     return Object.assign(
       super.toJSON(),
       {
         compound,
+        maxIterations,
         penetrate,
       },
     );

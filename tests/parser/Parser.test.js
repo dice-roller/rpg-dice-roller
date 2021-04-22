@@ -597,6 +597,158 @@ describe('Parser', () => {
             penetrate: true,
           }));
         });
+
+        describe('Change max iterations', () => {
+          test('explode `d6!4`', () => {
+            const parsed = Parser.parse('d6!4');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(6);
+            expect(parsed[0].qty).toEqual(1);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '=',
+                value: 6,
+              }),
+              compound: false,
+              maxIterations: 4,
+              penetrate: false,
+            }));
+          });
+
+          test('compound `2d7!!678`', () => {
+            const parsed = Parser.parse('2d7!!678');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(7);
+            expect(parsed[0].qty).toEqual(2);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '=',
+                value: 7,
+              }),
+              compound: true,
+              maxIterations: 678,
+              penetrate: false,
+            }));
+          });
+
+          test('penetrate `5d%!p95`', () => {
+            const parsed = Parser.parse('5d%!p95');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(PercentileDice);
+
+            expect(parsed[0].sides).toEqual('%');
+            expect(parsed[0].qty).toEqual(5);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '=',
+                value: 100,
+              }),
+              compound: false,
+              maxIterations: 95,
+              penetrate: true,
+            }));
+          });
+
+          test('can explode with  compare point `4dF.2!1>=0', () => {
+            const parsed = Parser.parse('4dF.2!1>=0');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(FudgeDice);
+
+            expect(parsed[0].sides).toEqual('F.2');
+            expect(parsed[0].qty).toEqual(4);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '>=',
+                value: 0,
+              }),
+              compound: false,
+              maxIterations: 1,
+              penetrate: false,
+            }));
+          });
+
+          test('can explode with  compare point `dF.1!!2<=1', () => {
+            const parsed = Parser.parse('dF.1!!2<=1');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(FudgeDice);
+
+            expect(parsed[0].sides).toEqual('F.1');
+            expect(parsed[0].qty).toEqual(1);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '<=',
+                value: 1,
+              }),
+              compound: true,
+              maxIterations: 2,
+              penetrate: false,
+            }));
+          });
+
+          test('can explode with  compare point `360d%!!p192<50', () => {
+            const parsed = Parser.parse('360d%!!p192<50');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(PercentileDice);
+
+            expect(parsed[0].sides).toEqual('%');
+            expect(parsed[0].qty).toEqual(360);
+
+            expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('explode');
+            expect(mod).toBeInstanceOf(ExplodeModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              comparePoint: expect.objectContaining({
+                operator: '<',
+                value: 50,
+              }),
+              compound: true,
+              maxIterations: 192,
+              penetrate: true,
+            }));
+          });
+        });
       });
 
       describe('Keep', () => {

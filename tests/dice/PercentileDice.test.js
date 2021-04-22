@@ -106,7 +106,7 @@ describe('PercentileDice', () => {
   describe('Modifiers', () => {
     test('setting modifiers in constructor calls setter', () => {
       const spy = jest.spyOn(PercentileDice.prototype, 'modifiers', 'set');
-      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
+      const modifiers = new Map(Object.entries({ foo: new Modifier() }));
 
       new PercentileDice(1, modifiers);
 
@@ -117,7 +117,7 @@ describe('PercentileDice', () => {
     });
 
     test('can set modifiers with Map', () => {
-      const modifiers = new Map(Object.entries({ foo: new Modifier('m') }));
+      const modifiers = new Map(Object.entries({ foo: new Modifier() }));
       const die = new PercentileDice();
 
       die.modifiers = modifiers;
@@ -127,7 +127,7 @@ describe('PercentileDice', () => {
     });
 
     test('can set modifiers with Object', () => {
-      const modifier = new Modifier('m');
+      const modifier = new Modifier();
       const die = new PercentileDice(1);
 
       die.modifiers = { foo: modifier };
@@ -137,7 +137,7 @@ describe('PercentileDice', () => {
     });
 
     test('can set modifiers with Array', () => {
-      const modifiers = [new Modifier('m')];
+      const modifiers = [new Modifier()];
       const die = new PercentileDice(1);
 
       die.modifiers = modifiers;
@@ -173,13 +173,13 @@ describe('PercentileDice', () => {
 
     test('modifiers list always returns in correct order', () => {
       // create modifiers and define their order
-      const mod1 = new Modifier('m1');
+      const mod1 = new Modifier();
       mod1.order = 4;
-      const mod2 = new Modifier('m2');
+      const mod2 = new Modifier();
       mod2.order = 3;
-      const mod3 = new Modifier('m3');
+      const mod3 = new Modifier();
       mod3.order = 1;
-      const mod4 = new Modifier('m4');
+      const mod4 = new Modifier();
       mod4.order = 2;
 
       // create the dice instance

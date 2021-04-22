@@ -288,13 +288,13 @@ describe('RollGroup', () => {
 
     test('modifiers list always returns in correct order', () => {
       // create modifiers and define their order
-      const mod1 = new Modifier('m1');
+      const mod1 = new Modifier();
       mod1.order = 4;
-      const mod2 = new Modifier('m2');
+      const mod2 = new Modifier();
       mod2.order = 3;
-      const mod3 = new Modifier('m3');
+      const mod3 = new Modifier();
       mod3.order = 1;
-      const mod4 = new Modifier('m4');
+      const mod4 = new Modifier();
       mod4.order = 2;
 
       // create the dice instance

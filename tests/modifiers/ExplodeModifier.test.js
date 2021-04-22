@@ -17,7 +17,7 @@ describe('ExplodeModifier', () => {
         compound: false,
         isComparePoint: expect.any(Function),
         penetrate: false,
-        maxIterations: 1000,
+        maxIterations: ExplodeModifier.defaultMaxIterations,
         name: 'explode',
         notation: '!',
         run: expect.any(Function),
@@ -111,68 +111,129 @@ describe('ExplodeModifier', () => {
     });
   });
 
+  describe('Limit', () => {
+    test('gets set in constructor', () => {
+      const mod = new ExplodeModifier(null, null, null, 3);
+
+      expect(mod.maxIterations).toBe(3);
+      expect(mod.notation).toBe('!3');
+    });
+  });
+
   describe('Notation', () => {
-    test('explode', () => {
-      let mod = new ExplodeModifier(new ComparePoint('>=', 45));
-      expect(mod.notation).toEqual('!>=45');
+    describe('explode', () => {
+      test('without limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 45));
+        expect(mod.notation).toEqual('!>=45');
 
-      mod = new ExplodeModifier(new ComparePoint('<', 1));
-      expect(mod.notation).toEqual('!<1');
+        mod = new ExplodeModifier(new ComparePoint('<', 1));
+        expect(mod.notation).toEqual('!<1');
 
-      mod = new ExplodeModifier(new ComparePoint('<=', 678997595));
-      expect(mod.notation).toEqual('!<=678997595');
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595));
+        expect(mod.notation).toEqual('!<=678997595');
 
-      mod = new ExplodeModifier(new ComparePoint('<>', 567));
-      expect(mod.notation).toEqual('!<>567');
+        mod = new ExplodeModifier(new ComparePoint('<>', 567));
+        expect(mod.notation).toEqual('!<>567');
+      });
+
+      test('with limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 45), false, false, 34);
+        expect(mod.notation).toEqual('!34>=45');
+
+        mod = new ExplodeModifier(new ComparePoint('<', 1), false, false, 6);
+        expect(mod.notation).toEqual('!6<1');
+
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, false, 798);
+        expect(mod.notation).toEqual('!798<=678997595');
+      });
     });
 
-    test('compound', () => {
-      let mod = new ExplodeModifier(new ComparePoint('>=', 16), true);
-      expect(mod.notation).toEqual('!!>=16');
+    describe('compound', () => {
+      test('without limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), true);
+        expect(mod.notation).toEqual('!!>=16');
 
-      mod = new ExplodeModifier(new ComparePoint('<', 79), true);
-      expect(mod.notation).toEqual('!!<79');
+        mod = new ExplodeModifier(new ComparePoint('<', 79), true);
+        expect(mod.notation).toEqual('!!<79');
 
-      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true);
-      expect(mod.notation).toEqual('!!<=678997595');
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true);
+        expect(mod.notation).toEqual('!!<=678997595');
 
-      mod = new ExplodeModifier(new ComparePoint('<>', 51), true);
-      expect(mod.notation).toEqual('!!<>51');
+        mod = new ExplodeModifier(new ComparePoint('<>', 51), true);
+        expect(mod.notation).toEqual('!!<>51');
+      });
+
+      test('with limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), true, false, 67);
+        expect(mod.notation).toEqual('!!67>=16');
+
+        mod = new ExplodeModifier(new ComparePoint('<', 79), true, false, 891);
+        expect(mod.notation).toEqual('!!891<79');
+
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, false, 15);
+        expect(mod.notation).toEqual('!!15<=678997595');
+      });
     });
 
-    test('penetrate', () => {
-      let mod = new ExplodeModifier(new ComparePoint('>=', 16), false, true);
-      expect(mod.notation).toEqual('!p>=16');
+    describe('penetrate', () => {
+      test('without limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), false, true);
+        expect(mod.notation).toEqual('!p>=16');
 
-      mod = new ExplodeModifier(new ComparePoint('<', 79), false, true);
-      expect(mod.notation).toEqual('!p<79');
+        mod = new ExplodeModifier(new ComparePoint('<', 79), false, true);
+        expect(mod.notation).toEqual('!p<79');
 
-      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true);
-      expect(mod.notation).toEqual('!p<=678997595');
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true);
+        expect(mod.notation).toEqual('!p<=678997595');
 
-      mod = new ExplodeModifier(new ComparePoint('<>', 1983746), false, true);
-      expect(mod.notation).toEqual('!p<>1983746');
+        mod = new ExplodeModifier(new ComparePoint('<>', 1983746), false, true);
+        expect(mod.notation).toEqual('!p<>1983746');
+      });
+
+      test('with limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), false, true, 82);
+        expect(mod.notation).toEqual('!p82>=16');
+
+        mod = new ExplodeModifier(new ComparePoint('<', 79), false, true, 678);
+        expect(mod.notation).toEqual('!p678<79');
+
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true, 1);
+        expect(mod.notation).toEqual('!p1<=678997595');
+      });
     });
 
-    test('compound and penetrate', () => {
-      let mod = new ExplodeModifier(new ComparePoint('>=', 16), true, true);
-      expect(mod.notation).toEqual('!!p>=16');
+    describe('compound and penetrate', () => {
+      test('without limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), true, true);
+        expect(mod.notation).toEqual('!!p>=16');
 
-      mod = new ExplodeModifier(new ComparePoint('<', 79), true, true);
-      expect(mod.notation).toEqual('!!p<79');
+        mod = new ExplodeModifier(new ComparePoint('<', 79), true, true);
+        expect(mod.notation).toEqual('!!p<79');
 
-      mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, true);
-      expect(mod.notation).toEqual('!!p<=678997595');
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, true);
+        expect(mod.notation).toEqual('!!p<=678997595');
 
-      mod = new ExplodeModifier(new ComparePoint('<>', 18943), true, true);
-      expect(mod.notation).toEqual('!!p<>18943');
+        mod = new ExplodeModifier(new ComparePoint('<>', 18943), true, true);
+        expect(mod.notation).toEqual('!!p<>18943');
+      });
+
+      test('with limit', () => {
+        let mod = new ExplodeModifier(new ComparePoint('>=', 16), true, true, 7);
+        expect(mod.notation).toEqual('!!p7>=16');
+
+        mod = new ExplodeModifier(new ComparePoint('<', 79), true, true, 68);
+        expect(mod.notation).toEqual('!!p68<79');
+
+        mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, true, 309);
+        expect(mod.notation).toEqual('!!p309<=678997595');
+      });
     });
   });
 
   describe('Output', () => {
     test('JSON output is correct', () => {
       const cp = new ComparePoint('<=', 3);
-      const mod = new ExplodeModifier(cp, true, true);
+      const mod = new ExplodeModifier(cp, true, true, 56);
 
       // json encode, to get the encoded string, then decode so we can compare the object
       // this allows us to check that the output is correct, but ignoring the order of the
@@ -180,9 +241,10 @@ describe('ExplodeModifier', () => {
       expect(JSON.parse(JSON.stringify(mod))).toEqual({
         comparePoint: cp.toJSON(),
         compound: true,
-        penetrate: true,
+        maxIterations: 56,
         name: 'explode',
-        notation: '!!p<=3',
+        notation: '!!p56<=3',
+        penetrate: true,
         type: 'modifier',
       });
     });
@@ -573,7 +635,7 @@ describe('ExplodeModifier', () => {
 
     describe('Iteration limit', () => {
       test('has iteration limit', () => {
-        expect(mod.maxIterations).toBe(1000);
+        expect(mod.maxIterations).toBe(ExplodeModifier.defaultMaxIterations);
       });
 
       test('infinite explode stops at iteration limit `!>0`', () => {

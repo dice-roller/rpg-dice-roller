@@ -26,11 +26,12 @@ class ComparisonModifier extends Modifier {
    * Create a `ComparisonModifier` instance.
    *
    * @param {ComparePoint} [comparePoint] The comparison object
+   * @param {number|null} [limit=null] The maximum iteration limit per roll.
    *
    * @throws {TypeError} `comparePoint` must be an instance of `ComparePoint` or `undefined`
    */
-  constructor(comparePoint) {
-    super();
+  constructor(comparePoint, limit = null) {
+    super(limit);
 
     if (comparePoint) {
       this.comparePoint = comparePoint;
