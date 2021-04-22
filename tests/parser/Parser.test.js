@@ -749,6 +749,31 @@ describe('Parser', () => {
             }));
           });
         });
+
+        test('max iterations of "o" is cast to `1`', () => {
+          const parsed = Parser.parse('d6!o');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual(6);
+          expect(parsed[0].qty).toEqual(1);
+
+          expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('explode');
+          expect(mod).toBeInstanceOf(ExplodeModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            comparePoint: expect.objectContaining({
+              operator: '=',
+              value: 6,
+            }),
+            compound: false,
+            maxIterations: 1,
+            penetrate: false,
+          }));
+        });
       });
 
       describe('Keep', () => {

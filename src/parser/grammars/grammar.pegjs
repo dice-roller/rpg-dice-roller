@@ -143,7 +143,7 @@ ComparePoint
 CompareOperator
   = "!=" / "<=" / ">=" / "=" / "<>" / ">" / "<"
 
-IterationLimit = IntegerNumber
+IterationLimit = IntegerNumber / "o" { return 1 }
 
 
 /**

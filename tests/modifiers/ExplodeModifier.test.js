@@ -198,7 +198,7 @@ describe('ExplodeModifier', () => {
         expect(mod.notation).toEqual('!p678<79');
 
         mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true, 1);
-        expect(mod.notation).toEqual('!p1<=678997595');
+        expect(mod.notation).toEqual('!po<=678997595');
       });
     });
 

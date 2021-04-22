@@ -63,7 +63,7 @@ class ExplodeModifier extends ComparisonModifier {
 
     // if the max iterations has been changed, add it to the notation
     if (this.maxIterations && (this.maxIterations !== this.constructor.defaultMaxIterations)) {
-      notation = `${notation}${this.maxIterations}`;
+      notation = `${notation}${(this.maxIterations === 1) ? 'o' : this.maxIterations}`;
     }
 
     return `${notation}${super.notation}`;
