@@ -102,8 +102,8 @@ MinModifier
 
 // Re-rolling Dice (Including Re-roll Once)
 ReRollModifier
-  = "r" once:"o"? comparePoint:ComparePoint? {
-    return new Modifiers.ReRollModifier(!!once, comparePoint);
+  = "r" iterationLimit:IterationLimit? comparePoint:ComparePoint? {
+    return new Modifiers.ReRollModifier(iterationLimit, comparePoint);
   }
 
 UniqueModifier

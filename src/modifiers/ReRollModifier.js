@@ -1,8 +1,6 @@
 import { DieActionValueError } from '../exceptions/index.js';
 import ComparisonModifier from './ComparisonModifier.js';
 
-const onceSymbol = Symbol('once');
-
 /**
  * A `ReRollModifier` re-rolls dice that match a given test, and replaces the new value with the old
  * one.
@@ -15,13 +13,13 @@ class ReRollModifier extends ComparisonModifier {
   /**
    * Create a `ReRollModifier` instance.
    *
-   * @param {boolean} [once=false] Whether to only re-roll once or not
+   * @param {number|boolean} [limit=null] The maximum iteration limit per roll.
    * @param {ComparePoint} [comparePoint=null] The comparison object
    */
-  constructor(once = false, comparePoint = null) {
+  constructor(limit = null, comparePoint = null) {
     super(comparePoint);
 
-    this.once = !!once;
+    this.maxIterations = (limit === true) ? 1 : limit;
 
     // set the modifier's sort order
     this.order = 4;
@@ -44,25 +42,34 @@ class ReRollModifier extends ComparisonModifier {
    * @returns {string}
    */
   get notation() {
-    return `r${this.once ? 'o' : ''}${super.notation}`;
+    let notation = 'r';
+
+    // if the max iterations has been changed, add it to the notation
+    if (this.maxIterations && (this.maxIterations !== this.constructor.defaultMaxIterations)) {
+      notation = `${notation}${(this.maxIterations === 1) ? 'o' : this.maxIterations}`;
+    }
+
+    return `${notation}${super.notation}`;
   }
 
   /**
    * Whether the modifier should only re-roll once or not.
    *
+   * @deprecated use {@link ReRollModifier#maxIterations} instead.
    * @returns {boolean} `true` if it should re-roll once, `false` otherwise
    */
   get once() {
-    return !!this[onceSymbol];
+    return this.maxIterations === 1;
   }
 
   /**
    * Set whether the modifier should only re-roll once or not.
    *
+   * @deprecated use {@link ReRollModifier#maxIterations} instead.
    * @param {boolean} value
    */
   set once(value) {
-    this[onceSymbol] = !!value;
+    this.maxIterations = value ? 1 : null;
   }
 
   /**
@@ -92,12 +99,7 @@ class ReRollModifier extends ComparisonModifier {
           roll.value = rollResult.value;
 
           // add the re-roll modifier flag
-          roll.modifiers.add(`re-roll${this.once ? '-once' : ''}`);
-
-          // stop the loop if we're only re-rolling once
-          if (this.once) {
-            break;
-          }
+          roll.modifiers.add(`re-roll${(this.maxIterations === 1) ? '-once' : ''}`);
         }
 
         return roll;
@@ -116,15 +118,17 @@ class ReRollModifier extends ComparisonModifier {
    *  name: string,
    *  type: string,
    *  comparePoint: (ComparePoint|undefined),
+   *  maxIterations: number,
    *  once: boolean
    * }}
    */
   toJSON() {
-    const { once } = this;
+    const { maxIterations, once } = this;
 
     return Object.assign(
       super.toJSON(),
       {
+        maxIterations,
         once,
       },
     );

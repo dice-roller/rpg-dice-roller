@@ -1004,7 +1004,7 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            once: false,
+            maxIterations: ReRollModifier.defaultMaxIterations,
             comparePoint: expect.objectContaining({
               operator: '=',
               value: 1,
@@ -1027,7 +1027,7 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            once: false,
+            maxIterations: ReRollModifier.defaultMaxIterations,
             comparePoint: expect.objectContaining({
               operator: '=',
               value: -1,
@@ -1050,7 +1050,7 @@ describe('Parser', () => {
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
-            once: false,
+            maxIterations: ReRollModifier.defaultMaxIterations,
             comparePoint: expect.objectContaining({
               operator: '>',
               value: 80,
@@ -1058,50 +1058,98 @@ describe('Parser', () => {
           }));
         });
 
-        test('re-roll once for `35dF.1ro`', () => {
-          const parsed = Parser.parse('35dF.1ro');
+        describe('Change max iterations', () => {
+          test('re-roll once for `35dF.1ro`', () => {
+            const parsed = Parser.parse('35dF.1ro');
 
-          expect(parsed).toBeInstanceOf(Array);
-          expect(parsed).toHaveLength(1);
-          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(FudgeDice);
 
-          expect(parsed[0].sides).toEqual('F.1');
-          expect(parsed[0].qty).toEqual(35);
+            expect(parsed[0].sides).toEqual('F.1');
+            expect(parsed[0].qty).toEqual(35);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+            expect(parsed[0].modifiers.has('re-roll')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
-          expect(mod).toBeInstanceOf(ReRollModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            once: true,
-            comparePoint: expect.objectContaining({
-              operator: '=',
-              value: -1,
-            }),
-          }));
-        });
+            const mod = parsed[0].modifiers.get('re-roll');
+            expect(mod).toBeInstanceOf(ReRollModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              maxIterations: 1,
+              comparePoint: expect.objectContaining({
+                operator: '=',
+                value: -1,
+              }),
+            }));
+          });
 
-        test('re-roll once for `d64ro<=35`', () => {
-          const parsed = Parser.parse('d64ro<=35');
+          test('re-roll once for `d64ro<=35`', () => {
+            const parsed = Parser.parse('d64ro<=35');
 
-          expect(parsed).toBeInstanceOf(Array);
-          expect(parsed).toHaveLength(1);
-          expect(parsed[0]).toBeInstanceOf(StandardDice);
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
 
-          expect(parsed[0].sides).toEqual(64);
-          expect(parsed[0].qty).toEqual(1);
+            expect(parsed[0].sides).toEqual(64);
+            expect(parsed[0].qty).toEqual(1);
 
-          expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+            expect(parsed[0].modifiers.has('re-roll')).toBe(true);
 
-          const mod = parsed[0].modifiers.get('re-roll');
-          expect(mod).toBeInstanceOf(ReRollModifier);
-          expect(mod.toJSON()).toEqual(expect.objectContaining({
-            once: true,
-            comparePoint: expect.objectContaining({
-              operator: '<=',
-              value: 35,
-            }),
-          }));
+            const mod = parsed[0].modifiers.get('re-roll');
+            expect(mod).toBeInstanceOf(ReRollModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              maxIterations: 1,
+              comparePoint: expect.objectContaining({
+                operator: '<=',
+                value: 35,
+              }),
+            }));
+          });
+
+          test('re-roll `10d4r345>3`', () => {
+            const parsed = Parser.parse('10d4r345>3');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual(4);
+            expect(parsed[0].qty).toEqual(10);
+
+            expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('re-roll');
+            expect(mod).toBeInstanceOf(ReRollModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              maxIterations: 345,
+              comparePoint: expect.objectContaining({
+                operator: '>',
+                value: 3,
+              }),
+            }));
+          });
+
+          test('re-roll `4d%r12`', () => {
+            const parsed = Parser.parse('4d%r12');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(PercentileDice);
+
+            expect(parsed[0].sides).toBe('%');
+            expect(parsed[0].qty).toEqual(4);
+
+            expect(parsed[0].modifiers.has('re-roll')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('re-roll');
+            expect(mod).toBeInstanceOf(ReRollModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              maxIterations: 12,
+              comparePoint: expect.objectContaining({
+                operator: '=',
+                value: 1,
+              }),
+            }));
+          });
         });
       });
 
