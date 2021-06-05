@@ -218,6 +218,28 @@ describe('Rolling', () => {
       spy.mockRestore();
     });
 
+    test('roll `2d10!<>8`', () => {
+      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+        .mockImplementationOnce(() => new RollResult(4))
+        .mockImplementationOnce(() => new RollResult(5))
+
+        // explode
+        .mockImplementationOnce(() => new RollResult(6))
+        .mockImplementationOnce(() => new RollResult(3))
+        .mockImplementationOnce(() => new RollResult(10))
+        .mockImplementationOnce(() => new RollResult(8))
+        .mockImplementationOnce(() => new RollResult(8));
+      const roll = roller.roll('2d10!<>8');
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('2d10!<>8');
+      expect(roll.total).toBe(44);
+      expect(roll.output).toEqual('2d10!<>8: [4!, 6!, 3!, 10!, 8, 5!, 8] = 44');
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
     test('roll `(4d10^7)*6d(3*2)`', () => {
       const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))

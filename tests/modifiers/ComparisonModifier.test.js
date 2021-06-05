@@ -118,6 +118,9 @@ describe('ComparisonModifier', () => {
       mod = new ComparisonModifier(new ComparePoint('!=', 4.78));
       expect(mod.notation).toEqual('!=4.78');
 
+      mod = new ComparisonModifier(new ComparePoint('<>', -76));
+      expect(mod.notation).toEqual('<>-76');
+
       mod = new ComparisonModifier(new ComparePoint('<=', 568));
       expect(mod.notation).toEqual('<=568');
     });

@@ -27,7 +27,7 @@ class ComparePoint {
   /**
    * Create a `ComparePoint` instance.
    *
-   * @param {string} operator The comparison operator (One of `=`, `!=`, `<`, `>`, `<=`, `>=`)
+   * @param {string} operator The comparison operator (One of `=`, `!=`, `<>`, `<`, `>`, `<=`, `>=`)
    * @param {number} value The value to compare to
    *
    * @throws {CompareOperatorError} operator is invalid
@@ -53,13 +53,13 @@ class ComparePoint {
    * @returns {boolean} `true` if the operator is valid, `false` otherwise
    */
   static isValidOperator(operator) {
-    return (typeof operator === 'string') && /^(?:[<>!]?=|[<>])$/.test(operator);
+    return (typeof operator === 'string') && /^(?:[<>!]?=|[<>]|<>)$/.test(operator);
   }
 
   /**
    * Set the comparison operator.
    *
-   * @param {string} operator One of `=`, `!=`, `<`, `>`, `<=`, `>=`
+   * @param {string} operator One of `=`, `!=`, `<>`, `<`, `>`, `<=`, `>=`
    *
    * @throws CompareOperatorError operator is invalid
    */

@@ -121,6 +121,9 @@ describe('ExplodeModifier', () => {
 
       mod = new ExplodeModifier(new ComparePoint('<=', 678997595));
       expect(mod.notation).toEqual('!<=678997595');
+
+      mod = new ExplodeModifier(new ComparePoint('<>', 567));
+      expect(mod.notation).toEqual('!<>567');
     });
 
     test('compound', () => {
@@ -132,6 +135,9 @@ describe('ExplodeModifier', () => {
 
       mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true);
       expect(mod.notation).toEqual('!!<=678997595');
+
+      mod = new ExplodeModifier(new ComparePoint('<>', 51), true);
+      expect(mod.notation).toEqual('!!<>51');
     });
 
     test('penetrate', () => {
@@ -143,6 +149,9 @@ describe('ExplodeModifier', () => {
 
       mod = new ExplodeModifier(new ComparePoint('<=', 678997595), false, true);
       expect(mod.notation).toEqual('!p<=678997595');
+
+      mod = new ExplodeModifier(new ComparePoint('<>', 1983746), false, true);
+      expect(mod.notation).toEqual('!p<>1983746');
     });
 
     test('compound and penetrate', () => {
@@ -154,6 +163,9 @@ describe('ExplodeModifier', () => {
 
       mod = new ExplodeModifier(new ComparePoint('<=', 678997595), true, true);
       expect(mod.notation).toEqual('!!p<=678997595');
+
+      mod = new ExplodeModifier(new ComparePoint('<>', 18943), true, true);
+      expect(mod.notation).toEqual('!!p<>18943');
     });
   });
 
@@ -333,6 +345,88 @@ describe('ExplodeModifier', () => {
       expect(modifiedResults[8].initialValue).toBe(10);
       expect(modifiedResults[8].value).toBe(10);
       expect(modifiedResults[8].modifiers).toEqual(new Set());
+    });
+
+    test('can explode with compare point `<>4`', () => {
+      jest.restoreAllMocks();
+      jest.spyOn(StandardDice.prototype, 'rollOnce')
+        .mockImplementationOnce(() => new RollResult(10))
+        .mockImplementationOnce(() => new RollResult(4))
+        .mockImplementationOnce(() => new RollResult(4))
+        .mockImplementationOnce(() => new RollResult(5))
+        .mockImplementationOnce(() => new RollResult(4))
+        .mockImplementationOnce(() => new RollResult(8))
+        .mockImplementationOnce(() => new RollResult(3))
+        .mockImplementationOnce(() => new RollResult(4))
+        .mockImplementationOnce(() => new RollResult(4));
+
+      mod.comparePoint = new ComparePoint('<>', 4);
+
+      const modifiedResults = mod.run(results, die).rolls;
+
+      // assert that all the rolls exist
+      expect(modifiedResults).toBeInstanceOf(Array);
+      expect(modifiedResults).toHaveLength(15);
+
+      expect(modifiedResults[0].initialValue).toBe(8);
+      expect(modifiedResults[0].value).toBe(8);
+      expect(modifiedResults[0].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[1].initialValue).toBe(10);
+      expect(modifiedResults[1].value).toBe(10);
+      expect(modifiedResults[1].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[2].initialValue).toBe(4);
+      expect(modifiedResults[2].value).toBe(4);
+      expect(modifiedResults[2].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[3].initialValue).toBe(4);
+      expect(modifiedResults[3].value).toBe(4);
+      expect(modifiedResults[3].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[4].initialValue).toBe(2);
+      expect(modifiedResults[4].value).toBe(2);
+      expect(modifiedResults[4].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[5].initialValue).toBe(4);
+      expect(modifiedResults[5].value).toBe(4);
+      expect(modifiedResults[5].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[6].initialValue).toBe(1);
+      expect(modifiedResults[6].value).toBe(1);
+      expect(modifiedResults[6].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[7].initialValue).toBe(5);
+      expect(modifiedResults[7].value).toBe(5);
+      expect(modifiedResults[7].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[8].initialValue).toBe(4);
+      expect(modifiedResults[8].value).toBe(4);
+      expect(modifiedResults[8].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[9].initialValue).toBe(6);
+      expect(modifiedResults[9].value).toBe(6);
+      expect(modifiedResults[9].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[10].initialValue).toBe(8);
+      expect(modifiedResults[10].value).toBe(8);
+      expect(modifiedResults[10].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[11].initialValue).toBe(3);
+      expect(modifiedResults[11].value).toBe(3);
+      expect(modifiedResults[11].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[12].initialValue).toBe(4);
+      expect(modifiedResults[12].value).toBe(4);
+      expect(modifiedResults[12].modifiers).toEqual(new Set());
+
+      expect(modifiedResults[13].initialValue).toBe(10);
+      expect(modifiedResults[13].value).toBe(10);
+      expect(modifiedResults[13].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[14].initialValue).toBe(4);
+      expect(modifiedResults[14].value).toBe(4);
+      expect(modifiedResults[14].modifiers).toEqual(new Set());
     });
 
     test('can compound with compare point `>5`', () => {
