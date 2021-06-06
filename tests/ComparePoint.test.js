@@ -62,6 +62,7 @@ describe('ComparePoint', () => {
       expect(ComparePoint.isValidOperator('<')).toBe(true);
       expect(ComparePoint.isValidOperator('<=')).toBe(true);
       expect(ComparePoint.isValidOperator('!=')).toBe(true);
+      expect(ComparePoint.isValidOperator('<>')).toBe(true);
 
       expect(ComparePoint.isValidOperator(0)).toBe(false);
       expect(ComparePoint.isValidOperator([])).toBe(false);
@@ -101,7 +102,11 @@ describe('ComparePoint', () => {
       expect(cp.operator).toEqual('!=');
       expect(spy).toHaveBeenCalledWith('!=');
 
-      expect(spy).toHaveBeenCalledTimes(6);
+      cp = new ComparePoint('<>', 1);
+      expect(cp.operator).toEqual('<>');
+      expect(spy).toHaveBeenCalledWith('<>');
+
+      expect(spy).toHaveBeenCalledTimes(7);
       // remove the spy
       spy.mockRestore();
     });
@@ -272,13 +277,24 @@ describe('ComparePoint', () => {
       expect(cp.isMatch(1)).toBe(true);
     });
 
-    test('can match not equal to', () => {
-      const cp = new ComparePoint('!=', 5);
+    describe('can match not equal to', () => {
+      test('!=', () => {
+        const cp = new ComparePoint('!=', 5);
 
-      expect(cp.isMatch(4)).toBe(true);
-      expect(cp.isMatch(5)).toBe(false);
-      expect(cp.isMatch(6)).toBe(true);
-      expect(cp.isMatch(1)).toBe(true);
+        expect(cp.isMatch(4)).toBe(true);
+        expect(cp.isMatch(5)).toBe(false);
+        expect(cp.isMatch(6)).toBe(true);
+        expect(cp.isMatch(1)).toBe(true);
+      });
+
+      test('<>', () => {
+        const cp = new ComparePoint('<>', 5);
+
+        expect(cp.isMatch(4)).toBe(true);
+        expect(cp.isMatch(5)).toBe(false);
+        expect(cp.isMatch(6)).toBe(true);
+        expect(cp.isMatch(1)).toBe(true);
+      });
     });
 
     test('can match exact numeric strings', () => {

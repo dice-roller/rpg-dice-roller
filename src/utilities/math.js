@@ -17,7 +17,7 @@ import { evaluate as mathEval } from 'mathjs';
  *
  * @param {number} a The number to compare with `b`
  * @param {number} b The number to compare with `a`
- * @param {string} operator A valid comparative operator: `=, <, >, <=, >=, !=`
+ * @param {string} operator A valid comparative operator: `=, <, >, <=, >=, !=, <>`
  *
  * @returns {boolean} `true` if the comparison matches, `false` otherwise
  */
@@ -49,6 +49,7 @@ const compareNumbers = (a, b, operator) => {
       break;
     case '!':
     case '!=':
+    case '<>':
       result = aNum !== bNum;
       break;
     default:

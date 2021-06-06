@@ -231,6 +231,9 @@ describe('TargetModifier', () => {
       mod = new TargetModifier(new ComparePoint('!=', 45));
       expect(mod.notation).toEqual('!=45');
 
+      mod = new TargetModifier(new ComparePoint('<>', 24));
+      expect(mod.notation).toEqual('<>24');
+
       mod = new TargetModifier(new ComparePoint('>=', 2));
       expect(mod.notation).toEqual('>=2');
 
@@ -253,9 +256,9 @@ describe('TargetModifier', () => {
 
       mod = new TargetModifier(
         new ComparePoint('>=', 2),
-        new ComparePoint('!=', 67.47),
+        new ComparePoint('<>', 67.47),
       );
-      expect(mod.notation).toEqual('>=2f!=67.47');
+      expect(mod.notation).toEqual('>=2f<>67.47');
 
       mod = new TargetModifier(
         new ComparePoint('=', 1579.565),

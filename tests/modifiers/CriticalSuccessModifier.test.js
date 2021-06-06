@@ -119,6 +119,9 @@ describe('CriticalSuccessModifier', () => {
       mod = new CriticalSuccessModifier(new ComparePoint('!=', 3));
       expect(mod.notation).toEqual('cs!=3');
 
+      mod = new CriticalSuccessModifier(new ComparePoint('<>', 7));
+      expect(mod.notation).toEqual('cs<>7');
+
       mod = new CriticalSuccessModifier(new ComparePoint('=', 157));
       expect(mod.notation).toEqual('cs=157');
     });

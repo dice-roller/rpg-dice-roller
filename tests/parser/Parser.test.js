@@ -282,6 +282,28 @@ describe('Parser', () => {
           }));
         });
 
+        test('success for `3d50cs<>365`', () => {
+          const parsed = Parser.parse('3d50cs<>365');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual(50);
+          expect(parsed[0].qty).toEqual(3);
+
+          expect(parsed[0].modifiers.has('critical-success')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('critical-success');
+          expect(mod).toBeInstanceOf(CriticalSuccessModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            comparePoint: expect.objectContaining({
+              operator: '<>',
+              value: 365,
+            }),
+          }));
+        });
+
         test('throws error if no compare point', () => {
           expect(() => {
             Parser.parse('d6cs');
@@ -522,6 +544,30 @@ describe('Parser', () => {
               value: 1,
             }),
             compound: true,
+            penetrate: false,
+          }));
+        });
+
+        test('can explode with  compare point `4d%!<>45', () => {
+          const parsed = Parser.parse('4d%!<>45');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual('%');
+          expect(parsed[0].qty).toEqual(4);
+
+          expect(parsed[0].modifiers.has('explode')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('explode');
+          expect(mod).toBeInstanceOf(ExplodeModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            comparePoint: expect.objectContaining({
+              operator: '<>',
+              value: 45,
+            }),
+            compound: false,
             penetrate: false,
           }));
         });
@@ -1034,9 +1080,35 @@ describe('Parser', () => {
               }),
             }));
           });
+
+          test('failure for `450dF.1>0f<>1`', () => {
+            const parsed = Parser.parse('450dF.1>0f<>1');
+
+            expect(parsed).toBeInstanceOf(Array);
+            expect(parsed).toHaveLength(1);
+            expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+            expect(parsed[0].sides).toEqual('F.1');
+            expect(parsed[0].qty).toEqual(450);
+
+            expect(parsed[0].modifiers.has('target')).toBe(true);
+
+            const mod = parsed[0].modifiers.get('target');
+            expect(mod).toBeInstanceOf(TargetModifier);
+            expect(mod.toJSON()).toEqual(expect.objectContaining({
+              successComparePoint: expect.objectContaining({
+                operator: '>',
+                value: 0,
+              }),
+              failureComparePoint: expect.objectContaining({
+                operator: '<>',
+                value: 1,
+              }),
+            }));
+          });
         });
 
-        test('must proceed success compare point', () => {
+        test('must proceed a success compare point', () => {
           // can't have failure before success
           expect(() => {
             Parser.parse('2d6f<=3>4');
