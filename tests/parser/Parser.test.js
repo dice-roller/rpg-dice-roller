@@ -14,6 +14,7 @@ import {
 } from '../../src/modifiers/index.js';
 import * as parser from '../../src/parser/grammars/grammar.js';
 import Parser from '../../src/parser/Parser.js';
+import Description from '../../src/Description.js';
 
 describe('Parser', () => {
   describe('Initialisation', () => {
@@ -1741,6 +1742,78 @@ describe('Parser', () => {
 
         expect(parsed[1]).toEqual('+');
         expect(parsed[2]).toBe(0);
+      });
+    });
+
+    describe('Descriptions', () => {
+      describe('Single', () => {
+        test('3d6 // fire', () => {
+          const parsed = Parser.parse('3d6 // fire');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+          expect(parsed[0].sides).toBe(6);
+          expect(parsed[0].qty).toBe(3);
+          expect(parsed[0].modifiers).toEqual(new Map());
+
+          expect(parsed[0].description).toBeInstanceOf(Description);
+          expect(parsed[0].description.text).toEqual('fire');
+          expect(parsed[0].description.type).toEqual(Description.types.INLINE);
+        });
+
+        test('3d6 # this is a comment', () => {
+          const parsed = Parser.parse('3d6 # this is a comment');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+          expect(parsed[0].sides).toBe(6);
+          expect(parsed[0].qty).toBe(3);
+          expect(parsed[0].modifiers).toEqual(new Map());
+
+          expect(parsed[0].description).toBeInstanceOf(Description);
+          expect(parsed[0].description.text).toEqual('this is a comment');
+          expect(parsed[0].description.type).toEqual(Description.types.INLINE);
+        });
+      });
+
+      describe('multi-line', () => {
+        test('4dF /* This is a multi-line comment */', () => {
+          const comment = 'This is a multi-line comment';
+          const parsed = Parser.parse(`4dF /* ${comment} */`);
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+          expect(parsed[0].sides).toEqual('F.2');
+          expect(parsed[0].qty).toBe(4);
+          expect(parsed[0].modifiers).toEqual(new Map());
+
+          expect(parsed[0].description).toBeInstanceOf(Description);
+          expect(parsed[0].description.text).toEqual(comment);
+          expect(parsed[0].description.type).toEqual(Description.types.MULTILINE);
+        });
+
+        test('12d% [ A comment with a \n line break ]', () => {
+          const comment = 'A comment with a \n line break';
+          const parsed = Parser.parse(`12d% /* ${comment} */`);
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+
+          expect(parsed[0]).toBeInstanceOf(PercentileDice);
+          expect(parsed[0].sides).toBe('%');
+          expect(parsed[0].qty).toBe(12);
+          expect(parsed[0].modifiers).toEqual(new Map());
+
+          expect(parsed[0].description).toBeInstanceOf(Description);
+          expect(parsed[0].description.text).toEqual(comment);
+          expect(parsed[0].description.type).toEqual(Description.types.MULTILINE);
+        });
       });
     });
   });

@@ -711,7 +711,7 @@ describe('DiceRoll', () => {
         ]),
       ];
 
-      diceRoll = new DiceRoll(notation, rolls);
+      diceRoll = new DiceRoll({ notation, rolls });
     });
 
     test('can export to valid JSON', () => {

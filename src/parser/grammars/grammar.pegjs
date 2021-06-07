@@ -7,7 +7,7 @@ Main = Expression
 
 // Expression / roll groups
 RollGroup
-  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* {
+  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* descriptions:__ {
     return new RollGroup(
       [
         expr,
@@ -15,17 +15,20 @@ RollGroup
       ],
       Object.assign({}, ...modifiers.map(item => {
         return {[item.name]: item};
-      }))
+      })),
+      descriptions.find((o) => o instanceof Description)
     );
   }
 
 
 // Dice
 
-Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* {
+Dice = die:(StandardDie / PercentileDie / FudgeDie) modifiers:Modifier* descriptions:__ {
   die.modifiers = Object.assign({}, ...modifiers.map(item => {
     return {[item.name]: item};
   }));
+
+  die.description = descriptions.find((o) => o instanceof Description);
 
   return die;
 }
@@ -72,13 +75,13 @@ TargetModifier
     return new Modifiers.TargetModifier(successCP, failureCP);
   }
 
-// Drop lowest/highest dice) - needs alternative syntax of `"-" ("h" | "l")`
+// Drop lowest/highest dice)
 DropModifier
   = "d" end:[lh]? qty:IntegerNumber {
     return new Modifiers.DropModifier(end || 'l', qty);
   }
 
-// Keep lowest/highest dice) - needs alternative syntax of `"+" ("h" | "l")`
+// Keep lowest/highest dice)
 KeepModifier
   = "k" end:[lh]? qty:IntegerNumber {
     return new Modifiers.KeepModifier(end || 'h', qty);
@@ -199,5 +202,31 @@ Operator
  = "**" { return "^" } / "*" / "^" / "%" / "/" / "+" / "-"
 
 
-_ "whitespace"
-  = [ \t\n\r]*
+/**
+ * Comments
+ */
+
+Comment "comment"
+  = MultiLineComment
+  / SingleLineComment
+
+// allows comments in the format of /* .. */ and [ ... ]
+MultiLineComment
+  = "/*" text:(!"*/" .)* "*/" { return new Description(text.flat().join(''), Description.types.MULTILINE) }
+  / "[" text:[^\]]* "]" { return new Description(text.flat().join(''), Description.types.MULTILINE) }
+
+// allows comments in the format of // ... and # ...
+SingleLineComment
+  = ("//" / "#") text:(!LineTerminator .)* { return new Description(text.flat().join(''), Description.types.INLINE) }
+
+
+LineTerminator
+  = [\n\r\u2028\u2029]
+
+WhiteSpace "whitespace"
+  = [ \t\n\r]
+
+_ = WhiteSpace*
+
+__ "whitespace or comment"
+  = (WhiteSpace / Comment)*

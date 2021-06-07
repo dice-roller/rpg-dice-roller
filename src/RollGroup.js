@@ -1,10 +1,11 @@
 import { RequiredArgumentError } from './exceptions/index.js';
+import HasDescription from './traits/HasDescription.js';
 import Modifier from './modifiers/Modifier.js';
 import ResultGroup from './results/ResultGroup.js';
 import StandardDice from './dice/StandardDice.js';
 
-const modifiersSymbol = Symbol('modifiers');
 const expressionsSymbol = Symbol('expressions');
+const modifiersSymbol = Symbol('modifiers');
 
 /**
  * A `RollGroup` is a group of one or more "sub-rolls".
@@ -33,15 +34,18 @@ const expressionsSymbol = Symbol('expressions');
  *
  * @since 4.5.0
  */
-class RollGroup {
+class RollGroup extends HasDescription {
   /**
    * Create a `RollGroup` instance.
    *
    * @param {Array.<Array.<StandardDice|string|number>>} [expressions=[]] List of sub-rolls
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers=[]] The modifiers that affect the
    * group
+   * @param {Description|string|null} [description=null] The roll description.
    */
-  constructor(expressions = [], modifiers = []) {
+  constructor(expressions = [], modifiers = [], description = null) {
+    super(description);
+
     this.expressions = expressions;
     this.modifiers = modifiers;
   }
@@ -257,12 +261,15 @@ class RollGroup {
   toJSON() {
     const { modifiers, notation, expressions } = this;
 
-    return {
-      expressions,
-      modifiers,
-      notation,
-      type: 'group',
-    };
+    return Object.assign(
+      super.toJSON(),
+      {
+        expressions,
+        modifiers,
+        notation,
+        type: 'group',
+      },
+    );
   }
 
   /**
@@ -275,7 +282,7 @@ class RollGroup {
    * @returns {string}
    */
   toString() {
-    return this.notation;
+    return `${this.notation}${this.description ? ` ${this.description}` : ''}`;
   }
 }
 

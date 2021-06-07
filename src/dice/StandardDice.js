@@ -3,6 +3,7 @@ import { isNumeric, isSafeNumber } from '../utilities/math.js';
 import { generator } from '../utilities/NumberGenerator.js';
 import ComparePoint from '../ComparePoint.js';
 import ExplodeModifier from '../modifiers/ExplodeModifier.js';
+import HasDescription from '../traits/HasDescription.js';
 import Modifier from '../modifiers/Modifier.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
@@ -17,7 +18,7 @@ const maxSymbol = Symbol('max-value');
 /**
  * Represents a standard numerical die.
  */
-class StandardDice {
+class StandardDice extends HasDescription {
   /**
    * Create a `StandardDice` instance.
    *
@@ -26,11 +27,14 @@ class StandardDice {
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
    * @param {number|null} [min=1] The minimum possible roll value
    * @param {number|null} [max=null] The maximum possible roll value. Defaults to number of `sides`
+   * @param {Description|string|null} [description=null] The roll description.
    *
    * @throws {RequiredArgumentError} sides is required
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
-  constructor(sides, qty = 1, modifiers = null, min = 1, max = null) {
+  constructor(sides, qty = 1, modifiers = null, min = 1, max = null, description = null) {
+    super(description);
+
     if (!sides && (sides !== 0)) {
       throw new RequiredArgumentError('sides');
     } else if (sides === Infinity) {
@@ -49,9 +53,12 @@ class StandardDice {
       throw new RangeError('qty must be between 1 and 999');
     }
 
-    if (!isNumeric(min)) {
+    let minVal = min;
+    if ((minVal === null) || (minVal === undefined)) {
+      minVal = 1;
+    } else if (!isNumeric(minVal)) {
       throw new TypeError('min must a finite number');
-    } else if (!isSafeNumber(min)) {
+    } else if (!isSafeNumber(minVal)) {
       throw new RangeError('min must a finite number');
     }
 
@@ -68,7 +75,7 @@ class StandardDice {
       this.modifiers = modifiers;
     }
 
-    this[minSymbol] = parseInt(min, 10);
+    this[minSymbol] = parseInt(minVal, 10);
 
     this[maxSymbol] = max ? parseInt(`${max}`, 10) : sides;
   }
@@ -254,17 +261,20 @@ class StandardDice {
       average, max, min, modifiers, name, notation, qty, sides,
     } = this;
 
-    return {
-      average,
-      max,
-      min,
-      modifiers,
-      name,
-      notation,
-      qty,
-      sides,
-      type: 'die',
-    };
+    return Object.assign(
+      super.toJSON(),
+      {
+        average,
+        max,
+        min,
+        modifiers,
+        name,
+        notation,
+        qty,
+        sides,
+        type: 'die',
+      },
+    );
   }
 
   /**
@@ -277,7 +287,7 @@ class StandardDice {
    * @returns {string}
    */
   toString() {
-    return this.notation;
+    return `${this.notation}${this.description ? ` ${this.description}` : ''}`;
   }
 }
 

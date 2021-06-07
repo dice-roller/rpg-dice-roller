@@ -7,6 +7,7 @@ import Modifier from '../src/modifiers/Modifier.js';
 import ResultGroup from '../src/results/ResultGroup.js';
 import RollResults from '../src/results/RollResults.js';
 import RollGroup from '../src/RollGroup.js';
+import Description from '../src/Description.js';
 
 describe('RollGroup', () => {
   let group;
@@ -22,13 +23,14 @@ describe('RollGroup', () => {
 
     modifier = new KeepModifier();
 
-    group = new RollGroup(expressions);
+    group = new RollGroup(expressions, [], 'a description');
   });
 
   describe('Initialisation', () => {
     test('model structure', () => {
       expect(group).toBeInstanceOf(RollGroup);
 
+      expect(group.description).toBeInstanceOf(Description);
       expect(group.expressions).toBeInstanceOf(Array);
       expect(group.modifiers).toEqual(new Map());
       expect(group.notation).toEqual('{3+4, 4d6/2, 1d10*1d20}');
@@ -336,6 +338,73 @@ describe('RollGroup', () => {
     });
   });
 
+  describe('Description', () => {
+    test('setting in constructor calls setter', () => {
+      const spy = jest.spyOn(RollGroup.prototype, 'description', 'set');
+      const description = 'A test description';
+
+      new RollGroup([], [], description);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(description);
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
+    test('can be changed', () => {
+      expect(group.description).toBeInstanceOf(Description);
+      expect(group.description.text).toEqual('a description');
+      expect(group.description.type).toEqual(Description.types.INLINE);
+
+      group.description = 'foo';
+      expect(group.description).toBeInstanceOf(Description);
+      expect(group.description.text).toEqual('foo');
+
+      group.description = 'baz bar';
+      expect(group.description).toBeInstanceOf(Description);
+      expect(group.description.text).toEqual('baz bar');
+
+      group.description = new Description('foo bar', Description.types.MULTILINE);
+      expect(group.description).toBeInstanceOf(Description);
+      expect(group.description.text).toEqual('foo bar');
+      expect(group.description.type).toEqual(Description.types.MULTILINE);
+    });
+
+    test('setting to falsey get set to `null`', () => {
+      group.description = null;
+      expect(group.description).toEqual(null);
+
+      group.description = undefined;
+      expect(group.description).toEqual(null);
+
+      group.description = false;
+      expect(group.description).toEqual(null);
+    });
+
+    test('throws error if type is invalid', () => {
+      expect(() => {
+        new RollGroup([], [], 0);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new RollGroup([], [], 156);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new RollGroup([], [], 4.3);
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new RollGroup([], [], { foo: 'bar' });
+      }).toThrow(TypeError);
+
+      expect(() => {
+        new RollGroup([], [], ['bar']);
+      }).toThrow(TypeError);
+    });
+  });
+
   describe('Roll', () => {
     test('Returns a `ResultGroup` object', () => {
       expect(group.roll()).toBeInstanceOf(ResultGroup);
@@ -399,38 +468,129 @@ describe('RollGroup', () => {
   });
 
   describe('Output', () => {
-    test('JSON output is correct', () => {
-      expect(JSON.parse(JSON.stringify(group))).toEqual({
-        expressions: [
-          [3, '+', 4],
-          [
-            expect.objectContaining({
-              sides: 6,
-              qty: 4,
-            }),
-            '/',
-            2,
+    describe('With single-line description', () => {
+      test('JSON output is correct', () => {
+        expect(JSON.parse(JSON.stringify(group))).toEqual({
+          description: {
+            text: 'a description',
+            type: Description.types.INLINE,
+          },
+          expressions: [
+            [3, '+', 4],
+            [
+              expect.objectContaining({
+                sides: 6,
+                qty: 4,
+              }),
+              '/',
+              2,
+            ],
+            [
+              expect.objectContaining({
+                sides: 10,
+                qty: 1,
+              }),
+              '*',
+              expect.objectContaining({
+                sides: 20,
+                qty: 1,
+              }),
+            ],
           ],
-          [
-            expect.objectContaining({
-              sides: 10,
-              qty: 1,
-            }),
-            '*',
-            expect.objectContaining({
-              sides: 20,
-              qty: 1,
-            }),
-          ],
-        ],
-        modifiers: {},
-        notation: '{3+4, 4d6/2, 1d10*1d20}',
-        type: 'group',
+          modifiers: {},
+          notation: '{3+4, 4d6/2, 1d10*1d20}',
+          type: 'group',
+        });
+      });
+
+      test('String output is correct', () => {
+        expect(group.toString()).toEqual('{3+4, 4d6/2, 1d10*1d20} # a description');
       });
     });
 
-    test('String output is correct', () => {
-      expect(group.toString()).toEqual('{3+4, 4d6/2, 1d10*1d20}');
+    describe('With multi-line description', () => {
+      test('JSON output is correct', () => {
+        group.description.type = Description.types.MULTILINE;
+
+        expect(JSON.parse(JSON.stringify(group))).toEqual({
+          description: {
+            text: 'a description',
+            type: Description.types.MULTILINE,
+          },
+          expressions: [
+            [3, '+', 4],
+            [
+              expect.objectContaining({
+                sides: 6,
+                qty: 4,
+              }),
+              '/',
+              2,
+            ],
+            [
+              expect.objectContaining({
+                sides: 10,
+                qty: 1,
+              }),
+              '*',
+              expect.objectContaining({
+                sides: 20,
+                qty: 1,
+              }),
+            ],
+          ],
+          modifiers: {},
+          notation: '{3+4, 4d6/2, 1d10*1d20}',
+          type: 'group',
+        });
+      });
+
+      test('String output is correct', () => {
+        group.description.type = Description.types.MULTILINE;
+
+        expect(group.toString()).toEqual('{3+4, 4d6/2, 1d10*1d20} [a description]');
+      });
+    });
+
+    describe('Without description', () => {
+      test('JSON output is correct', () => {
+        group.description = null;
+
+        expect(JSON.parse(JSON.stringify(group))).toEqual({
+          description: null,
+          expressions: [
+            [3, '+', 4],
+            [
+              expect.objectContaining({
+                sides: 6,
+                qty: 4,
+              }),
+              '/',
+              2,
+            ],
+            [
+              expect.objectContaining({
+                sides: 10,
+                qty: 1,
+              }),
+              '*',
+              expect.objectContaining({
+                sides: 20,
+                qty: 1,
+              }),
+            ],
+          ],
+          modifiers: {},
+          notation: '{3+4, 4d6/2, 1d10*1d20}',
+          type: 'group',
+        });
+      });
+
+      test('String output is correct', () => {
+        group.description = null;
+
+        expect(group.toString()).toEqual('{3+4, 4d6/2, 1d10*1d20}');
+      });
     });
   });
 });
