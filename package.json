@@ -1,5 +1,5 @@
 {
-  "name": "rpg-dice-roller",
+  "name": "@dice-roller/rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
   "author": "GreenImp Media <info@greenimp.co.uk> (http://greenimp.co.uk)",
   "version": "5.0.0",
@@ -23,12 +23,12 @@
   "types": "./types/index.d.ts",
   "repository": {
     "type": "git",
-    "url": "https://github.com/GreenImp/rpg-dice-roller.git"
+    "url": "https://github.com/dice-roller/rpg-dice-roller.git"
   },
   "bugs": {
-    "url": "https://github.com/GreenImp/rpg-dice-roller/issues"
+    "url": "https://github.com/dice-roller/rpg-dice-roller/issues"
   },
-  "homepage": "https://greenimp.github.io/rpg-dice-roller/",
+  "homepage": "https://dice-roller.github.io/documentation",
   "funding": [
     "https://github.com/sponsors/dice-roller",
     "https://github.com/sponsors/GreenImp"
