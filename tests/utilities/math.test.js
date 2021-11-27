@@ -159,7 +159,7 @@ describe('Math utils', () => {
       });
     });
 
-    describe('`>', () => {
+    describe('`>`', () => {
       test('returns true if `a > b`', () => {
         expect(mathUtils.compareNumbers(5, 1, '>')).toBe(true);
         expect(mathUtils.compareNumbers(-1, -5, '>')).toBe(true);
@@ -177,7 +177,7 @@ describe('Math utils', () => {
       });
     });
 
-    describe('`<=', () => {
+    describe('`<=`', () => {
       test('returns true if `a < b`', () => {
         expect(mathUtils.compareNumbers(0, 1, '<=')).toBe(true);
         expect(mathUtils.compareNumbers(-16, -5, '<=')).toBe(true);
@@ -197,7 +197,7 @@ describe('Math utils', () => {
       });
     });
 
-    describe('`>=', () => {
+    describe('`>=`', () => {
       test('returns true if `a > b`', () => {
         expect(mathUtils.compareNumbers(5, 1, '>=')).toBe(true);
         expect(mathUtils.compareNumbers(-1, -5, '>=')).toBe(true);
@@ -236,6 +236,20 @@ describe('Math utils', () => {
         expect(mathUtils.compareNumbers(1, 1, '!=')).toBe(false);
         expect(mathUtils.compareNumbers(45, 45, '!=')).toBe(false);
         expect(mathUtils.compareNumbers(-1.03, -1.03, '!=')).toBe(false);
+      });
+    });
+
+    describe('`<>`', () => {
+      test('returns true if `a <> b`', () => {
+        expect(mathUtils.compareNumbers(1, 4, '<>')).toBe(true);
+        expect(mathUtils.compareNumbers(643, 0.45, '<>')).toBe(true);
+        expect(mathUtils.compareNumbers(0, -1, '<>')).toBe(true);
+      });
+
+      test('returns false if `a = b`', () => {
+        expect(mathUtils.compareNumbers(1, 1, '<>')).toBe(false);
+        expect(mathUtils.compareNumbers(45, 45, '<>')).toBe(false);
+        expect(mathUtils.compareNumbers(-1.03, -1.03, '<>')).toBe(false);
       });
     });
 

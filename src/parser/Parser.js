@@ -7,7 +7,7 @@ import * as parser from './grammars/grammar.js';
  * It is used internally by the DiceRoll object when rolling notation, but can be used by itself if
  * necessary.
  *
- * @see {@link https://greenimp.github.io/rpg-dice-roller/guide/notation/}
+ * @see {@link https://dice-roller.github.io/documentation/guide/notation/}
  * @see {@link https://en.m.wikipedia.org/wiki/Dice_notation}
  */
 class Parser {
