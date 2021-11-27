@@ -4,7 +4,7 @@
 
 # RPG Dice Roller
 
-[![Build Status](https://travis-ci.com/GreenImp/rpg-dice-roller.svg?branch=main)](https://travis-ci.com/GreenImp/rpg-dice-roller)
+[![Build Status](https://github.com/GreenImp/rpg-dice-roller/actions/workflows/build.yml/badge.svg)](https://github.com/GreenImp/rpg-dice-roller/actions/workflows/build.yml)
 [![Coverage Status](https://coveralls.io/repos/github/GreenImp/rpg-dice-roller/badge.svg)](https://coveralls.io/github/GreenImp/rpg-dice-roller)
 ![Tyepscript friendly](https://img.shields.io/badge/typescript-supported-blue)
 [![MIT license](https://img.shields.io/badge/License-MIT-blue.svg)](licence.txt)
