@@ -317,7 +317,9 @@ describe('PercentileDice', () => {
     });
 
     test('roll return a RollResults object', () => {
-      expect((new PercentileDice()).roll()).toBeInstanceOf(RollResults);
+      const rollResults = new PercentileDice().roll();
+      expect(rollResults).toBeInstanceOf(RollResults);
+      expect(rollResults.sides).toBe('%');
     });
 
     test('rollOnce gets called when rolling', () => {

@@ -352,7 +352,9 @@ describe('FudgeDice', () => {
     });
 
     test('roll returns a RollResults object', () => {
-      expect((new FudgeDice(null, 1)).roll()).toBeInstanceOf(RollResults);
+      const rollResults = new FudgeDice(null, 1).roll();
+      expect(rollResults).toBeInstanceOf(RollResults);
+      expect(rollResults.sides).toBe('F.2');
     });
 
     test('rollOnce gets called when rolling', () => {

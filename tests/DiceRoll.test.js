@@ -175,11 +175,13 @@ describe('DiceRoll', () => {
       expect(results).toHaveLength(7);
 
       expect(results[0]).toBeInstanceOf(RollResults);
+      expect(results[0].sides).toBe(8);
       expect(results[1]).toBe('*');
       expect(results[2]).toBe('(');
       expect(results[3]).toBe(5);
       expect(results[4]).toBe('+');
       expect(results[5]).toBeInstanceOf(RollResults);
+      expect(results[5].sides).toBe(10);
       expect(results[6]).toBe(')');
     });
 

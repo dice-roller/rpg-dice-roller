@@ -220,6 +220,8 @@ class StandardDice {
       modifier.run(rollResult, this);
     });
 
+    rollResult.sides = this.sides;
+
     return rollResult;
   }
 

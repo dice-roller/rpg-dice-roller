@@ -1,6 +1,7 @@
 import RollResult from './RollResult.js';
 
 const rollsSymbol = Symbol('rolls');
+const sidesSymbol = Symbol('die');
 
 /**
  * A collection of die roll results
@@ -75,6 +76,28 @@ class RollResults {
     rolls.forEach((result) => {
       this.addRoll(result);
     });
+  }
+
+  /**
+   * The sides of the die that was rolled.
+   *
+   * @returns {number|string}
+   */
+  get sides() {
+    return this[sidesSymbol];
+  }
+
+  /**
+   * Set the sides.
+   *
+   * @param {number|string} sides
+   */
+  set sides(sides) {
+    if (!sides || !(typeof sides === 'string' || typeof sides === 'number')) {
+      throw new TypeError(`die must be a string or number: ${sides}`);
+    }
+
+    this[sidesSymbol] = sides;
   }
 
   /**
