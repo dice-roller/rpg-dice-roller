@@ -1,7 +1,7 @@
 import RollResult from './RollResult.js';
 
 const rollsSymbol = Symbol('rolls');
-const sidesSymbol = Symbol('die');
+const sidesSymbol = Symbol('sides');
 
 /**
  * A collection of die roll results

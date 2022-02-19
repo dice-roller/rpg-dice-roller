@@ -6,7 +6,7 @@ const modifiersSymbol = Symbol('modifiers');
 const initialValueSymbol = Symbol('initial-value');
 const useInTotalSymbol = Symbol('use-in-total');
 const valueSymbol = Symbol('value');
-const sidesSymbol = Symbol('die');
+const sidesSymbol = Symbol('sides');
 
 /**
  * A `RollResult` represents the value and applicable modifiers for a single die roll
