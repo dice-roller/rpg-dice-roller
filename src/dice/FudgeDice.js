@@ -81,7 +81,9 @@ class FudgeDice extends StandardDice {
       }
     }
 
-    return new RollResult(total);
+    const rollResult = new RollResult(total);
+    rollResult.sides = this.sides;
+    return rollResult;
   }
 }
 

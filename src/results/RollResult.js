@@ -6,6 +6,7 @@ const modifiersSymbol = Symbol('modifiers');
 const initialValueSymbol = Symbol('initial-value');
 const useInTotalSymbol = Symbol('use-in-total');
 const valueSymbol = Symbol('value');
+const sidesSymbol = Symbol('die');
 
 /**
  * A `RollResult` represents the value and applicable modifiers for a single die roll
@@ -222,6 +223,28 @@ class RollResult {
     }
 
     this[valueSymbol] = Number(value);
+  }
+
+  /**
+   * The sides of the type of die that was rolled.
+   *
+   * @returns {number|string}
+   */
+  get sides() {
+    return this[sidesSymbol];
+  }
+
+  /**
+   * Set the sides.
+   *
+   * @param {number|string} sides
+   */
+  set sides(sides) {
+    if (!sides || !(typeof sides === 'string' || typeof sides === 'number')) {
+      throw new TypeError(`die must be a string or number: ${sides}`);
+    }
+
+    this[sidesSymbol] = sides;
   }
 
   /**

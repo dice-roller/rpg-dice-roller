@@ -540,7 +540,9 @@ describe('StandardDice', () => {
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new StandardDice(6)).rollOnce()).toBeInstanceOf(RollResult);
+      const rollResult = new StandardDice(6).rollOnce();
+      expect(rollResult).toBeInstanceOf(RollResult);
+      expect(rollResult.sides).toBe(6);
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {

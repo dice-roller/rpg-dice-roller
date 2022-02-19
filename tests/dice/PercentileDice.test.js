@@ -300,7 +300,9 @@ describe('PercentileDice', () => {
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new PercentileDice()).rollOnce()).toBeInstanceOf(RollResult);
+      const rollResult = new PercentileDice().rollOnce();
+      expect(rollResult).toBeInstanceOf(RollResult);
+      expect(rollResult.sides).toBe('%');
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {

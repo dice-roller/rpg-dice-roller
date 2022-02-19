@@ -322,7 +322,9 @@ describe('FudgeDice', () => {
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new FudgeDice(2, 1)).rollOnce()).toBeInstanceOf(RollResult);
+      const rollResult = new FudgeDice(2, 1).rollOnce();
+      expect(rollResult).toBeInstanceOf(RollResult);
+      expect(rollResult.sides).toBe('F.2');
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {
