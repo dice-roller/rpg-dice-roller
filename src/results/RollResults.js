@@ -79,7 +79,7 @@ class RollResults {
   }
 
   /**
-   * The sides of the die that was rolled.
+   * The sides of the type of die that was rolled.
    *
    * @returns {number|string}
    */
