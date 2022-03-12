@@ -399,6 +399,34 @@ describe('Rolling', () => {
       // remove the spy
       spy.mockRestore();
     });
+
+    test('roll `(d6>3)?1:0', () => {
+      const rolls = new RollResults([4]);
+      const spy = jest.spyOn(StandardDice.prototype, 'roll')
+        .mockImplementationOnce(() => rolls);
+      const roll = roller.roll('(d6>3)?1:0');
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('(d6>3)?1:0');
+
+      expect(roll.rolls).toHaveLength(7);
+      expect(roll.rolls[0]).toEqual('(');
+      expect(roll.rolls[1]).toEqual(rolls);
+      expect(roll.rolls[2]).toEqual(')');
+      expect(roll.rolls[3]).toEqual('?');
+      expect(roll.rolls[4]).toBe(1);
+      expect(roll.rolls[5]).toEqual(':');
+      expect(roll.rolls[6]).toBe(0);
+
+      expect(roll.total).toBe(1);
+      expect(roll.output).toEqual('(d6>3)?1:0: ([4])?1:0 = 1');
+      expect(roll.minTotal).toEqual(0);
+      expect(roll.maxTotal).toEqual(1);
+      expect(roll.averageTotal).toEqual(0.5);
+
+      // remove the spy
+      spy.mockRestore();
+    });
   });
 
   describe('Group rolls', () => {
