@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import Modifier from '../modifiers/Modifier.js';
 import StandardDice from './StandardDice.js';
 
 /**

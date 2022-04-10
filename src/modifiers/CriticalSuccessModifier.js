@@ -1,3 +1,5 @@
+// eslint-disable-next-line no-unused-vars
+import ComparePoint from '../ComparePoint.js';
 import ComparisonModifier from './ComparisonModifier.js';
 
 /**

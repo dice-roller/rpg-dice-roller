@@ -1,6 +1,10 @@
 import Modifier from './Modifier.js';
 import ResultGroup from '../results/ResultGroup.js';
+// eslint-disable-next-line no-unused-vars
+import RollGroup from '../RollGroup.js';
 import RollResults from '../results/RollResults.js';
+// eslint-disable-next-line no-unused-vars
+import StandardDice from '../dice/StandardDice.js';
 
 const directionSymbol = Symbol('direction');
 

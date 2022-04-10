@@ -1,4 +1,6 @@
 import { generator } from '../utilities/NumberGenerator.js';
+// eslint-disable-next-line no-unused-vars
+import Modifier from '../modifiers/Modifier.js';
 import RollResult from '../results/RollResult.js';
 import StandardDice from './StandardDice.js';
 
