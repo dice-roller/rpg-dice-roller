@@ -1,10 +1,10 @@
-import commonjs from 'rollup-plugin-commonjs';
-import resolve from 'rollup-plugin-node-resolve';
-import babel from 'rollup-plugin-babel';
+import commonjs from '@rollup/plugin-commonjs';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
+import { babel } from '@rollup/plugin-babel';
 import banner from 'rollup-plugin-banner';
+// import eslint from '@rollup/plugin-eslint';
 
 const { terser } = require('rollup-plugin-terser');
-const { eslint } = require('rollup-plugin-eslint');
 const path = require('path');
 
 const production = !process.env.BUILD || (process.env.BUILD === 'prod');
@@ -25,10 +25,10 @@ const globals = {
  * @returns {{}}
  */
 const plugins = (isUmd = false, isProduction = false) => [
-  // lint the files
-  eslint(),
+  // lint the files (Currently broken because plugin uses an old version of eslint)
+  // eslint(),
   // resolve third party library imports
-  resolve(),
+  nodeResolve(),
   // handle commonJS modules
   commonjs(),
   // only use babel if we're compiling to UMD
