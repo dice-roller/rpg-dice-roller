@@ -1,6 +1,6 @@
-import { RequiredArgumentError } from './exceptions/index.js';
 import HasDescription from './traits/HasDescription.js';
 import Modifier from './modifiers/Modifier.js';
+import RequiredArgumentError from './exceptions/RequiredArgumentError.js';
 import ResultGroup from './results/ResultGroup.js';
 import StandardDice from './dice/StandardDice.js';
 

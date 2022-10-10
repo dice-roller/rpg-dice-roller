@@ -1,5 +1,5 @@
-import { RequiredArgumentError } from '../exceptions/index.js';
 import * as parser from './grammars/grammar.js';
+import RequiredArgumentError from '../exceptions/RequiredArgumentError.js';
 
 /**
  * The `Parser` takes a notation string and parses it into objects.

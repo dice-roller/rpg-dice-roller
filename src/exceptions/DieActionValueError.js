@@ -1,5 +1,5 @@
 /**
- * An error thrown when an invalid die action (e.g Exploding on a d1) occurs
+ * An error thrown when an invalid die action (e.g. Exploding on a d1) occurs
  */
 class DieActionValueError extends Error {
   /**

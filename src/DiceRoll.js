@@ -1,9 +1,11 @@
 import { StandardDice } from './dice/index.js';
-import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
 import { toFixed } from './utilities/math.js';
 import { engines, generator } from './utilities/NumberGenerator.js';
 import { isBase64, isJson } from './utilities/utils.js';
+import DataFormatError from './exceptions/DataFormatError.js';
+import NotationError from './exceptions/NotationError.js';
 import Parser from './parser/Parser.js';
+import RequiredArgumentError from './exceptions/RequiredArgumentError.js';
 import RollGroup from './RollGroup.js';
 import RollResults from './results/RollResults.js';
 import ResultGroup from './results/ResultGroup.js';

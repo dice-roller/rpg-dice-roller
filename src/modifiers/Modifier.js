@@ -1,3 +1,6 @@
+// eslint-disable-next-line no-unused-vars
+import RollResults from '../results/RollResults.js';
+
 /**
  * A `Modifier` is the base modifier class that all others extend from.
  *

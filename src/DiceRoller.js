@@ -1,7 +1,8 @@
-import { DataFormatError, RequiredArgumentError } from './exceptions/index.js';
 import { isBase64, isJson } from './utilities/utils.js';
+import DataFormatError from './exceptions/DataFormatError.js';
 import DiceRoll from './DiceRoll.js';
 import exportFormats from './utilities/ExportFormats.js';
+import RequiredArgumentError from './exceptions/RequiredArgumentError.js';
 
 /**
  * history of log rolls

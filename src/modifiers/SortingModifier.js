@@ -7,7 +7,7 @@ const directionSymbol = Symbol('direction');
 /**
  * A `SortingModifier` sorts roll results by their value, either ascending or descending.
  *
- * @extends ComparisonModifier
+ * @extends Modifier
  */
 class SortingModifier extends Modifier {
   /**

@@ -1,10 +1,10 @@
-import { RequiredArgumentError } from '../exceptions/index.js';
 import { isNumeric, isSafeNumber } from '../utilities/math.js';
 import { generator } from '../utilities/NumberGenerator.js';
 import ComparePoint from '../ComparePoint.js';
 import ExplodeModifier from '../modifiers/ExplodeModifier.js';
 import HasDescription from '../traits/HasDescription.js';
 import Modifier from '../modifiers/Modifier.js';
+import RequiredArgumentError from '../exceptions/RequiredArgumentError.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import ReRollModifier from '../modifiers/ReRollModifier.js';

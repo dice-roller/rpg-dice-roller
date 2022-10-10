@@ -1,5 +1,6 @@
-import { CompareOperatorError, RequiredArgumentError } from './exceptions/index.js';
 import { compareNumbers, isNumeric } from './utilities/math.js';
+import CompareOperatorError from './exceptions/CompareOperatorError.js';
+import RequiredArgumentError from './exceptions/RequiredArgumentError.js';
 
 /**
  * The operator
