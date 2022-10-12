@@ -1743,5 +1743,19 @@ describe('Parser', () => {
         expect(parsed[2]).toBe(0);
       });
     });
+    describe('Conditional Operator', () => {
+      test('roll `1?5:0', () => {
+        const parsed = Parser.parse('1?5:0');
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(5);
+
+        expect(parsed[0]).toBe(1);
+        expect(parsed[1]).toEqual('?');
+        expect(parsed[2]).toBe(5);
+        expect(parsed[3]).toEqual(':');
+        expect(parsed[4]).toBe(0);
+      });
+    });
   });
 });

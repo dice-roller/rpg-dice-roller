@@ -197,6 +197,13 @@ Number
 
 Operator
  = "**" { return "^" } / "*" / "^" / "%" / "/" / "+" / "-"
+ / "?" _ expr:Expression _ ":" {
+   return [
+     '?',
+     ...expr,
+     ":",
+   ];
+ }
 
 
 _ "whitespace"
