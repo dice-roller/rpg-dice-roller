@@ -1,8 +1,10 @@
 import {
   browserCrypto, nodeCrypto, MersenneTwister19937, nativeMath, Random,
-  // eslint-disable-next-line no-unused-vars
-  Engine,
 } from 'random-js';
+
+/**
+ * @typedef {import("random-js").Engine} Engine
+ */
 
 /**
  * The engine
