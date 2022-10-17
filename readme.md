@@ -24,6 +24,14 @@ npm install @dice-roller/rpg-dice-roller
 Check out the documentation at https://dice-roller.github.io/documentation
 
 
+## Usage in the wild
+
+### Official
+
+* [Vue components](https://github.com/dice-roller/vue) - For Tailwind, Bootstrap, basic HTML, and renderless
+* [Vuepress plugin](https://github.com/dice-roller/vuepress-plugin) - Dice roller plugin used in this documentation
+
+
 ## Contributing
 
 We're always happy for community contributions. You can find our contributing guide in the docs: https://dice-roller.github.io/documentation/contributing
