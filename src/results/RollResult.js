@@ -1,4 +1,5 @@
 import { isNumeric } from '../utilities/math.js';
+// eslint-disable-next-line import/no-cycle
 import getModifierFlags from '../modifiers/modifier-flags.js';
 
 const calculationValueSymbol = Symbol('calculation-value');

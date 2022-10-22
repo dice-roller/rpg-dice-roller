@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+// eslint-disable-next-line no-unused-vars, import/no-cycle
 import RollResults from '../results/RollResults.js';
 
 /**

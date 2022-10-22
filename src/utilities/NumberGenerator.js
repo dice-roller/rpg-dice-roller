@@ -1,5 +1,11 @@
 import {
-  browserCrypto, nodeCrypto, MersenneTwister19937, nativeMath, Random,
+  browserCrypto,
+  // eslint-disable-next-line no-unused-vars
+  Engine,
+  nodeCrypto,
+  MersenneTwister19937,
+  nativeMath,
+  Random,
 } from 'random-js';
 
 /**

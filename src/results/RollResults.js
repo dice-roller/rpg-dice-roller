@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import RollResult from './RollResult.js';
 
 const rollsSymbol = Symbol('rolls');

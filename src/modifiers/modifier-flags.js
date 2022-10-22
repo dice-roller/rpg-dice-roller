@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import Modifier from './Modifier.js';
 
 const flags = {
