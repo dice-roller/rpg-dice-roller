@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 
-import { DiceRoller } from '../src/index.js';
+import { DiceRoller } from '../lib/esm/bundle.js';
 
 const roller = new DiceRoller();
 
