@@ -5,6 +5,7 @@ import { FudgeDice, StandardDice } from '../../src/dice/index.js';
 import RollResult from '../../src/results/RollResult.js';
 import RollResults from '../../src/results/RollResults.js';
 import ComparePoint from '../../src/ComparePoint.js';
+import Description from '../../src/Description.js';
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {
@@ -15,6 +16,7 @@ describe('FudgeDice', () => {
       expect(die).toBeInstanceOf(FudgeDice);
       expect(die).toBeInstanceOf(StandardDice);
       expect(die).toEqual(expect.objectContaining({
+        description: null,
         notation: '1dF.2',
         sides: 'F.2',
         qty: 1,
@@ -289,34 +291,178 @@ describe('FudgeDice', () => {
     });
   });
 
-  describe('Output', () => {
-    test('JSON output is correct', () => {
-      const die = new FudgeDice(null, 4);
+  describe('Description', () => {
+    test('setting in constructor calls setter', () => {
+      const spy = jest.spyOn(FudgeDice.prototype, 'description', 'set');
+      const description = 'Some description';
 
-      // json encode, to get the encoded string, then decode so we can compare the object
-      // this allows us to check that the output is correct, but ignoring the order of the
-      // returned properties
-      expect(JSON.parse(JSON.stringify(die))).toEqual({
-        average: 0,
-        max: 1,
-        min: -1,
-        modifiers: null,
-        name: 'fudge',
-        notation: '4dF.2',
-        qty: 4,
-        sides: 'F.2',
-        type: 'die',
+      new FudgeDice(2, 1, null, description);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(description);
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
+    test('can be changed', () => {
+      const die = new FudgeDice();
+
+      expect(die.description).toBe(null);
+
+      die.description = 'a description';
+
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('a description');
+      expect(die.description.type).toEqual(Description.types.INLINE);
+
+      die.description = 'foo';
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('foo');
+
+      die.description = new Description('foo bar', Description.types.MULTILINE);
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('foo bar');
+      expect(die.description.type).toEqual(Description.types.MULTILINE);
+    });
+
+    test('setting to falsey get set to `null`', () => {
+      const die = new FudgeDice();
+
+      die.description = undefined;
+      expect(die.description).toEqual(null);
+
+      die.description = false;
+      expect(die.description).toEqual(null);
+
+      die.description = null;
+      expect(die.description).toEqual(null);
+    });
+
+    test('throws error if type is invalid', () => {
+      const die = new FudgeDice();
+
+      expect(() => {
+        die.description = 0;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = 356;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = 61.34;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = { foo: 'bar' };
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = ['bar'];
+      }).toThrow(TypeError);
+    });
+  });
+
+  describe('Output', () => {
+    describe('With single-line description', () => {
+      test('JSON output is correct', () => {
+        const description = 'Some description';
+        const die = new FudgeDice();
+
+        die.description = description;
+
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 0,
+          description: {
+            text: description,
+            type: Description.types.INLINE,
+          },
+          max: 1,
+          min: -1,
+          modifiers: null,
+          name: 'fudge',
+          notation: '1dF.2',
+          qty: 1,
+          sides: 'F.2',
+          type: 'die',
+        });
+      });
+
+      test('String output is correct', () => {
+        const description = 'Another description';
+        const die = new FudgeDice();
+
+        die.description = description;
+
+        expect(die.toString()).toEqual(`1dF.2 # ${description}`);
       });
     });
 
-    test('String output is correct', () => {
-      let die = new FudgeDice(null, 4);
+    describe('With multi-line description', () => {
+      test('JSON output is correct', () => {
+        const description = 'Some description';
+        const die = new FudgeDice();
 
-      expect(die.toString()).toEqual('4dF.2');
+        die.description = new Description(description, Description.types.MULTILINE);
 
-      die = new FudgeDice(1, 4);
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 0,
+          description: {
+            text: description,
+            type: Description.types.MULTILINE,
+          },
+          max: 1,
+          min: -1,
+          modifiers: null,
+          name: 'fudge',
+          notation: '1dF.2',
+          qty: 1,
+          sides: 'F.2',
+          type: 'die',
+        });
+      });
 
-      expect(die.toString()).toEqual('4dF.1');
+      test('String output is correct', () => {
+        const description = 'Another description';
+        const die = new FudgeDice();
+
+        die.description = new Description(description, Description.types.MULTILINE);
+
+        expect(die.toString()).toEqual(`1dF.2 [${description}]`);
+      });
+    });
+
+    describe('Without description', () => {
+      test('JSON output is correct', () => {
+        const die = new FudgeDice(null, 4);
+
+        // json encode, to get the encoded string, then decode so we can compare the object
+        // this allows us to check that the output is correct, but ignoring the order of the
+        // returned properties
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 0,
+          description: null,
+          max: 1,
+          min: -1,
+          modifiers: null,
+          name: 'fudge',
+          notation: '4dF.2',
+          qty: 4,
+          sides: 'F.2',
+          type: 'die',
+        });
+      });
+
+      test('String output is correct', () => {
+        let die = new FudgeDice(null, 4);
+
+        expect(die.toString()).toEqual('4dF.2');
+
+        die = new FudgeDice(1, 4);
+
+        expect(die.toString()).toEqual('4dF.1');
+      });
     });
   });
 

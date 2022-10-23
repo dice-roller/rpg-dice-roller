@@ -14,11 +14,12 @@ class FudgeDice extends StandardDice {
    * @param {number} [nonBlanks=2] The number of sides each symbol should cover (`1` or `2`)
    * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
+   * @param {Description|string|null} [description=null] The roll description.
    *
    * @throws {RangeError} nonBlanks must be 1 or 2
    * @throws {TypeError} modifiers must be valid
    */
-  constructor(nonBlanks = 2, qty = 1, modifiers = null) {
+  constructor(nonBlanks = 2, qty = 1, modifiers = null, description = null) {
     let numNonBlanks = nonBlanks;
 
     if (!numNonBlanks && (numNonBlanks !== 0)) {
@@ -27,7 +28,7 @@ class FudgeDice extends StandardDice {
       throw new RangeError('nonBlanks must be 1 or 2');
     }
 
-    super(numNonBlanks, qty, modifiers, -1, 1);
+    super(numNonBlanks, qty, modifiers, -1, 1, description);
   }
 
   /* eslint-disable class-methods-use-this */
