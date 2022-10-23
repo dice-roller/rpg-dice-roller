@@ -2,6 +2,7 @@
 *
 
 # Except for these
+!/bin/*.js
 !/lib/*.js
 !/lib/**/*.js
 !/lib/*.map
