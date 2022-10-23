@@ -2,7 +2,7 @@
   "name": "@dice-roller/rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
   "author": "GreenImp Media <info@greenimp.co.uk> (http://greenimp.co.uk)",
-  "version": "5.1.1",
+  "version": "5.2.0",
   "license": "MIT",
   "type": "module",
   "main": "./lib/esm/bundle.js",
@@ -19,6 +19,9 @@
     "./src/": "./src/",
     "./types/": "./types/",
     "./package.json": "./package.json"
+  },
+  "bin": {
+    "roll": "./bin/roll.js"
   },
   "types": "./types/index.d.ts",
   "repository": {
@@ -78,7 +81,7 @@
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
     "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude=\"./index.js,./parser/grammars\"",
-    "build:grammars": "peggy --format es --dependency '{ evaluate }:../../utilities/math.js' --dependency '* as Dice:../../dice/index.js' --dependency '* as Modifiers:../../modifiers/index.js' --dependency 'ComparePoint:../../ComparePoint.js' --dependency 'RollGroup:../../RollGroup.js' ./src/parser/grammars/grammar.pegjs",
+    "build:grammars": "peggy --format es --dependency '{ evaluate }:../../utilities/math.js' --dependency '* as Dice:../../dice/index.js' --dependency '* as Modifiers:../../modifiers/index.js' --dependency 'ComparePoint:../../ComparePoint.js' --dependency 'RollGroup:../../RollGroup.js' --dependency 'Description:../../Description.js' ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",

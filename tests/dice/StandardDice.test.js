@@ -4,6 +4,7 @@ import { ExplodeModifier, Modifier, SortingModifier } from '../../src/modifiers/
 import ComparePoint from '../../src/ComparePoint.js';
 import RollResult from '../../src/results/RollResult.js';
 import RollResults from '../../src/results/RollResults.js';
+import Description from '../../src/Description.js';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -12,6 +13,7 @@ describe('StandardDice', () => {
 
       expect(die).toBeInstanceOf(StandardDice);
       expect(die).toEqual(expect.objectContaining({
+        description: null,
         notation: '4d6',
         sides: 6,
         qty: 4,
@@ -511,30 +513,180 @@ describe('StandardDice', () => {
     });
   });
 
-  describe('Output', () => {
-    test('JSON output is correct', () => {
-      const die = new StandardDice(6, 4);
+  describe('Description', () => {
+    test('setting in constructor calls setter', () => {
+      const spy = jest.spyOn(StandardDice.prototype, 'description', 'set');
+      const description = 'A really cool description';
 
-      // json encode, to get the encoded string, then decode so we can compare the object
-      // this allows us to check that the output is correct, but ignoring the order of the
-      // returned properties
-      expect(JSON.parse(JSON.stringify(die))).toEqual({
-        average: 3.5,
-        max: 6,
-        min: 1,
-        modifiers: null,
-        name: 'standard',
-        notation: '4d6',
-        qty: 4,
-        sides: 6,
-        type: 'die',
+      new StandardDice(6, 4, null, 1, 6, description);
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(description);
+
+      // remove the spy
+      spy.mockRestore();
+    });
+
+    test('can be changed', () => {
+      const die = new StandardDice(45, 167);
+
+      expect(die.description).toBe(null);
+
+      die.description = 'a description';
+
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('a description');
+      expect(die.description.type).toEqual(Description.types.INLINE);
+
+      die.description = 'foo';
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('foo');
+
+      die.description = new Description('foo bar', Description.types.MULTILINE);
+      expect(die.description).toBeInstanceOf(Description);
+      expect(die.description.text).toEqual('foo bar');
+      expect(die.description.type).toEqual(Description.types.MULTILINE);
+    });
+
+    test('setting to falsey get set to `null`', () => {
+      const die = new StandardDice(45, 167);
+
+      die.description = undefined;
+      expect(die.description).toEqual(null);
+
+      die.description = false;
+      expect(die.description).toEqual(null);
+
+      die.description = null;
+      expect(die.description).toEqual(null);
+    });
+
+    test('throws error if type is invalid', () => {
+      const die = new StandardDice(4, 8);
+
+      expect(() => {
+        die.description = 0;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = 356;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = 61.34;
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = { foo: 'bar' };
+      }).toThrow(TypeError);
+
+      expect(() => {
+        die.description = ['bar'];
+      }).toThrow(TypeError);
+    });
+  });
+
+  describe('Output', () => {
+    describe('With single-line description', () => {
+      test('JSON output is correct', () => {
+        const description = 'My awesome description';
+        const die = new StandardDice(6, 4);
+
+        die.description = description;
+
+        // json encode, to get the encoded string, then decode so we can compare the object
+        // this allows us to check that the output is correct, but ignoring the order of the
+        // returned properties
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 3.5,
+          description: {
+            text: description,
+            type: Description.types.INLINE,
+          },
+          max: 6,
+          min: 1,
+          modifiers: null,
+          name: 'standard',
+          notation: '4d6',
+          qty: 4,
+          sides: 6,
+          type: 'die',
+        });
+      });
+
+      test('String output is correct', () => {
+        const description = 'My awesome description';
+        const die = new StandardDice(6, 4);
+
+        die.description = description;
+
+        expect(die.toString()).toEqual(`4d6 # ${description}`);
       });
     });
 
-    test('String output is correct', () => {
-      const die = new StandardDice(6, 4);
+    describe('With multi-line description', () => {
+      test('JSON output is correct', () => {
+        const description = 'My awesome description';
+        const die = new StandardDice(6, 4);
 
-      expect(die.toString()).toEqual('4d6');
+        die.description = new Description(description, Description.types.MULTILINE);
+
+        // json encode, to get the encoded string, then decode so we can compare the object
+        // this allows us to check that the output is correct, but ignoring the order of the
+        // returned properties
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 3.5,
+          description: {
+            text: description,
+            type: Description.types.MULTILINE,
+          },
+          max: 6,
+          min: 1,
+          modifiers: null,
+          name: 'standard',
+          notation: '4d6',
+          qty: 4,
+          sides: 6,
+          type: 'die',
+        });
+      });
+
+      test('String output is correct', () => {
+        const description = 'My awesome description';
+        const die = new StandardDice(6, 4);
+
+        die.description = new Description(description, Description.types.MULTILINE);
+
+        expect(die.toString()).toEqual(`4d6 [${description}]`);
+      });
+    });
+
+    describe('Without description', () => {
+      test('JSON output is correct', () => {
+        const die = new StandardDice(6, 4);
+
+        // json encode, to get the encoded string, then decode so we can compare the object
+        // this allows us to check that the output is correct, but ignoring the order of the
+        // returned properties
+        expect(JSON.parse(JSON.stringify(die))).toEqual({
+          average: 3.5,
+          description: null,
+          max: 6,
+          min: 1,
+          modifiers: null,
+          name: 'standard',
+          notation: '4d6',
+          qty: 4,
+          sides: 6,
+          type: 'die',
+        });
+      });
+
+      test('String output is correct', () => {
+        const die = new StandardDice(6, 4);
+
+        expect(die.toString()).toEqual('4d6');
+      });
     });
   });
 

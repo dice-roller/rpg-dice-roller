@@ -12,11 +12,12 @@ class PercentileDice extends StandardDice {
    * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
    * @param {Map<string, Modifier>|Modifier[]|{}|null} [modifiers] The modifiers that affect the die
    * @param {boolean} [sidesAsNumber=false] Whether to show the sides as `%` (default) or `100`
+   * @param {Description|string|null} [description=null] The roll description.
    *
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
-  constructor(qty = 1, modifiers = null, sidesAsNumber = false) {
-    super(100, qty, modifiers);
+  constructor(qty = 1, modifiers = null, sidesAsNumber = false, description = null) {
+    super(100, qty, modifiers, null, null, description);
 
     this.sidesAsNumber = !!sidesAsNumber;
   }
