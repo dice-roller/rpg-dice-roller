@@ -2,6 +2,11 @@ import Description from '../Description.js';
 
 const descriptionSymbol = Symbol('description');
 
+/**
+ * A base class for description functionality.
+ *
+ * @abstract
+ */
 class HasDescription {
   constructor(text = null) {
     this.description = text;
