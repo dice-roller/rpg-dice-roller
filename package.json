@@ -20,9 +20,6 @@
     "./types/": "./types/",
     "./package.json": "./package.json"
   },
-  "bin": {
-    "roll": "./bin/roll.js"
-  },
   "types": "./types/index.d.ts",
   "repository": {
     "type": "git",
