@@ -168,7 +168,7 @@ SimpleExpressionRangeGroup
 // An expression range (e.g. `2...6`, `4:8`, `10:5:40`)
 SimpleExpressionRange
   = start:SimpleExpression _ step:RangeStep _ end:SimpleExpression {
-    return { start, step, end };
+    return { start: evaluate(start), step, end: evaluate(end) };
   }
 
 // Range step (Defaults to `1` if no value provided)
@@ -192,7 +192,7 @@ Expression
         .map(([, value, , factor]) => {
           return [
             value,
-            factor,
+            factor
           ];
         }).flat(2)
     ]

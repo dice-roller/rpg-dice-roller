@@ -187,7 +187,12 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('2:8');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: 2,
+              end: 8,
+              step: 1,
+            }));
 
             expect(parsed[0].qty).toBe(4);
             expect(parsed[0].modifiers).toEqual(new Map());

@@ -1,4 +1,4 @@
-import {isNumeric} from '../utilities/math.js';
+import { isNumeric } from '../utilities/math.js';
 
 const sidesSymbol = Symbol('sides');
 const qtySymbol = Symbol('qty');
@@ -10,7 +10,7 @@ class ArbitraryDice {
    * @param {string|number|string[]|number[]} sides The sides of the die
    * @param {number} [qty=1] The number of dice to roll (e.g. `4`)
    */
-  constructor (sides, qty = 1) {
+  constructor(sides, qty = 1) {
     this.sides = sides;
 
     if (!isNumeric(qty)) {
