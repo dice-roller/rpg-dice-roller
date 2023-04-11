@@ -198,6 +198,7 @@ Expression
     ]
   }
 
+// Generic expression of simple mathematical values (Excludes dice notation)
 SimpleExpression
   = head:SimpleFactor tail:(_ Operator _ SimpleFactor)* {
     head = Array.isArray(head) ? head : [head];
