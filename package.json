@@ -78,7 +78,7 @@
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
     "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude=\"./index.js,./**/index.js,./parser/grammars\"",
-    "build:grammars": "peggy --format es --dependency '{ evaluate }:../../utilities/math.js' --dependency '* as Dice:../../dice/index.js' --dependency '* as Modifiers:../../modifiers/index.js' --dependency 'ComparePoint:../../ComparePoint.js' --dependency 'RollGroup:../../RollGroup.js' --dependency 'Description:../../Description.js' ./src/parser/grammars/grammar.pegjs",
+    "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
