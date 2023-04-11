@@ -30,6 +30,7 @@ Check out the documentation at https://dice-roller.github.io/documentation
 
 * [Vue components](https://github.com/dice-roller/vue) - For Tailwind, Bootstrap, basic HTML, and renderless
 * [Vuepress plugin](https://github.com/dice-roller/vuepress-plugin) - Dice roller plugin used in this documentation
+* [CLI](https://github.com/dice-roller/cli) - Command Line Interface for rolling dice
 
 
 ## Contributing
