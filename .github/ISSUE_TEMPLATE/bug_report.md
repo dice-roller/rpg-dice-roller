@@ -23,8 +23,8 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
- - Environment type & version: [e.g. NodeJs v12.0, Firefox v30]
- - Dice roller version [e.g. 4.5.1]
+ - Environment type & version: [e.g. NodeJs v18.0, Firefox v110]
+ - Dice roller version [e.g. 6.0.0]
 
 **Additional context**
 Add any other context about the problem here.
