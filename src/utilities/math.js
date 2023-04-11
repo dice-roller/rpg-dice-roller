@@ -1,4 +1,33 @@
-import { evaluate as mathEval } from 'mathjs';
+import {
+  create,
+  addDependencies,
+  ceilDependencies,
+  divideDependencies,
+  evaluateDependencies,
+  floorDependencies,
+  maxDependencies,
+  minDependencies,
+  modDependencies,
+  multiplyDependencies,
+  powDependencies,
+  subtractDependencies,
+  unaryMinusDependencies,
+} from 'mathjs/lib/esm/number';
+
+const math = create({
+  addDependencies,
+  ceilDependencies,
+  divideDependencies,
+  evaluateDependencies,
+  floorDependencies,
+  maxDependencies,
+  minDependencies,
+  modDependencies,
+  multiplyDependencies,
+  powDependencies,
+  subtractDependencies,
+  unaryMinusDependencies,
+});
 
 /**
  * Check if `a` is comparative to `b` with the given operator.
@@ -70,7 +99,7 @@ const compareNumbers = (a, b, operator) => {
  *
  * @returns {number} The result of the equation
  */
-const evaluate = (equation) => mathEval(equation);
+const evaluate = (equation) => math.evaluate(equation);
 
 /**
  * Check if the given value is a valid finite number.

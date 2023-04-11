@@ -13,7 +13,6 @@ const inputPath = 'src/index.js';
 const outputPath = (format, minify = false) => `lib/${format}/bundle${minify ? '.min' : ''}.js`;
 const packageName = 'rpgDiceRoller';
 const globals = {
-  mathjs: 'math',
   'random-js': 'Random',
 };
 
@@ -53,8 +52,6 @@ export default [
       globals,
     },
     plugins: plugins(false, production),
-    // indicate which modules should be treated as external
-    external: ['mathjs'],
   },
   // UMD
   {
@@ -68,6 +65,6 @@ export default [
     },
     plugins: plugins(true, production),
     // indicate which modules should be treated as external
-    external: ['mathjs', 'random-js'],
+    external: ['random-js'],
   },
 ];
