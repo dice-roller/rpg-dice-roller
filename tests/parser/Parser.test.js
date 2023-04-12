@@ -31,6 +31,7 @@ describe('Parser', () => {
     });
   });
 
+
   describe('notation', () => {
     test('requires notation', () => {
       expect(() => {
@@ -207,7 +208,12 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('0:4');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: 0,
+              end: 4,
+              step: 1,
+            }));
 
             expect(parsed[0].qty).toBe(1);
             expect(parsed[0].modifiers).toEqual(new Map());
@@ -222,7 +228,12 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('-2:6');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: -2,
+              end: 6,
+              step: 1,
+            }));
 
             expect(parsed[0].qty).toBe(3);
             expect(parsed[0].modifiers).toEqual(new Map());
@@ -237,7 +248,12 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('4.6...9.6');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: 4.6,
+              end: 9.6,
+              step: 1,
+            }));
 
             expect(parsed[0].qty).toBe(6);
             expect(parsed[0].modifiers).toEqual(new Map());
@@ -252,7 +268,12 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('3.6:0.2:7.9');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: 3.6,
+              end: 7.9,
+              step: 0.2,
+            }));
 
             expect(parsed[0].qty).toBe(45);
             expect(parsed[0].modifiers).toEqual(new Map());
@@ -267,7 +288,7 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(1);
-            expect(parsed[0].sides[0]).toBe('4-5');
+            expect(parsed[0].sides[0]).toBe(-1);
 
             expect(parsed[0].qty).toBe(16);
             expect(parsed[0].modifiers).toEqual(new Map());
@@ -284,11 +305,20 @@ describe('Parser', () => {
 
             expect(parsed[0].sides).toBeInstanceOf(Array);
             expect(parsed[0].sides).toHaveLength(5);
-            expect(parsed[0].sides[0]).toBe('34:60');
-            expect(parsed[0].sides[1]).toBe('4:8');
-            expect(parsed[0].sides[2]).toBe('95');
-            expect(parsed[0].sides[3]).toBe('-47');
-            expect(parsed[0].sides[4]).toBe('27*4-(3/2)');
+
+            expect(parsed[0].sides[0]).toEqual(expect.objectContaining({
+              start: 34,
+              end: 60,
+              step: 1,
+            }));
+            expect(parsed[0].sides[1]).toEqual(expect.objectContaining({
+              start: 4,
+              end: 8,
+              step: 1,
+            }));
+            expect(parsed[0].sides[2]).toBe(95);
+            expect(parsed[0].sides[3]).toBe(-47);
+            expect(parsed[0].sides[4]).toBe(106.5);
 
             expect(parsed[0].qty).toBe(12);
             expect(parsed[0].modifiers).toEqual(new Map());

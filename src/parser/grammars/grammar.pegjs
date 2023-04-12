@@ -161,14 +161,14 @@ SimpleExpressionRangeGroup
   = expr:(SimpleExpressionRange / SimpleExpression) exprs:(_ "," _ (SimpleExpressionRange / SimpleExpression))* {
     return [
       expr,
-      ...exprs.map(v => v[3]),
-    ];
+      ...exprs.map((v) => v[3]),
+    ].map((v) => Array.isArray(v) ? evaluate(v.join('')) : v);
   }
 
 // An expression range (e.g. `2...6`, `4:8`, `10:5:40`)
 SimpleExpressionRange
   = start:SimpleExpression _ step:RangeStep _ end:SimpleExpression {
-    return { start: evaluate(start), step, end: evaluate(end) };
+    return { start: evaluate(start.join('')), step, end: evaluate(end.join('')) };
   }
 
 // Range step (Defaults to `1` if no value provided)
