@@ -21,7 +21,7 @@ class DropModifier extends KeepModifier {
     super(end, qty);
 
     // set the modifier's sort order
-    this.order = 6;
+    this.order = 7;
   }
 
   /**

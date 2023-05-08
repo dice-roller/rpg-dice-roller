@@ -4,16 +4,28 @@ import ComparisonModifier from './ComparisonModifier.js';
 const onceSymbol = Symbol('once');
 
 /**
+ *
+ * @param {{}} value
+ * @param {number} index
+ * @param {[]} collection
+ * @param {boolean=} [notFirst=false]
+ * @returns {boolean}
+ */
+const isDuplicate = (value, index, collection, notFirst = false) => {
+  const i = collection.map((e) => e.value).indexOf(value.value);
+
+  return notFirst ? i < index : i !== index;
+};
+
+/**
  * A `ReRollModifier` re-rolls dice that match a given test, and replaces the new value with the old
  * one.
  *
- * @see {@link ExplodeModifier} if you want to keep the old value as well
- *
  * @extends ComparisonModifier
  */
-class ReRollModifier extends ComparisonModifier {
+class UniqueModifier extends ComparisonModifier {
   /**
-   * Create a `ReRollModifier` instance.
+   * Create a `UniqueModifier` instance.
    *
    * @param {boolean} [once=false] Whether to only re-roll once or not
    * @param {ComparePoint} [comparePoint=null] The comparison object
@@ -24,17 +36,17 @@ class ReRollModifier extends ComparisonModifier {
     this.once = !!once;
 
     // set the modifier's sort order
-    this.order = 4;
+    this.order = 5;
   }
 
   /* eslint-disable class-methods-use-this */
   /**
    * The name of the modifier.
    *
-   * @returns {string} 're-roll'
+   * @returns {string} 'unique'
    */
   get name() {
-    return 're-roll';
+    return 'unique';
   }
   /* eslint-enable class-methods-use-this */
 
@@ -44,7 +56,7 @@ class ReRollModifier extends ComparisonModifier {
    * @returns {string}
    */
   get notation() {
-    return `r${this.once ? 'o' : ''}${super.notation}`;
+    return `u${this.once ? 'o' : ''}${super.notation}`;
   }
 
   /**
@@ -74,33 +86,40 @@ class ReRollModifier extends ComparisonModifier {
    * @returns {RollResults} The modified results
    */
   run(results, _context) {
-    // ensure that the dice can explode without going into an infinite loop
+    // ensure that the dice can re-roll without going into an infinite loop
     if (_context.min === _context.max) {
       throw new DieActionValueError(_context, 're-roll');
     }
 
     results.rolls
-      .map((roll) => {
-        // re-roll if the value matches the compare point, and we haven't hit the max iterations,
-        // unless we're only rolling once and have already re-rolled
-        for (let i = 0; (i < this.maxIterations) && this.isComparePoint(roll.value); i++) {
+      .forEach((roll, index, collection) => {
+        // no need to re-roll on the first roll
+        if (index === 0) {
+          return;
+        }
+
+        for (
+          let i = 0;
+          (
+            (i < this.maxIterations)
+            && (!this.comparePoint || this.isComparePoint(roll.value))
+            && isDuplicate(roll, index, collection, true)
+          );
+          i++
+        ) {
           // re-roll the dice
           const rollResult = _context.rollOnce();
 
-          // update the roll value (Unlike exploding, the original value is not kept)
           // eslint-disable-next-line no-param-reassign
           roll.value = rollResult.value;
 
           // add the re-roll modifier flag
-          roll.modifiers.add(`re-roll${this.once ? '-once' : ''}`);
+          roll.modifiers.add(`unique${this.once ? '-once' : ''}`);
 
-          // stop the loop if we're only re-rolling once
           if (this.once) {
             break;
           }
         }
-
-        return roll;
       });
 
     return results;
@@ -131,4 +150,4 @@ class ReRollModifier extends ComparisonModifier {
   }
 }
 
-export default ReRollModifier;
+export default UniqueModifier;

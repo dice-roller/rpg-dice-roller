@@ -13,6 +13,8 @@ const flags = {
   're-roll-once': 'ro',
   'target-failure': '_',
   'target-success': '*',
+  unique: 'u',
+  'unique-once': 'uo',
 };
 
 /**

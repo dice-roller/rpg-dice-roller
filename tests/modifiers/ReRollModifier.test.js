@@ -181,7 +181,7 @@ describe('ReRollModifier', () => {
       expect(mod.run(results, die)).toBe(results);
     });
 
-    test('does not explode without compare point', () => {
+    test('does not re-roll without compare point', () => {
       const modifiedResults = mod.run(results, die).rolls;
 
       expect(modifiedResults).toBeInstanceOf(Array);

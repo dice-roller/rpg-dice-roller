@@ -11,6 +11,7 @@ import {
   ReRollModifier,
   SortingModifier,
   TargetModifier,
+  UniqueModifier,
 } from '../../src/modifiers/index.js';
 import * as parser from '../../src/parser/grammars/grammar.js';
 import Parser from '../../src/parser/Parser.js';
@@ -1119,6 +1120,114 @@ describe('Parser', () => {
           expect(() => {
             Parser.parse('4d7f!=2');
           }).toThrow(parser.SyntaxError);
+        });
+      });
+
+      describe('Unique', () => {
+        test('Unique re-roll for `5d10u`', () => {
+          const parsed = Parser.parse('5d10u');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual(10);
+          expect(parsed[0].qty).toEqual(5);
+
+          expect(parsed[0].modifiers.has('unique')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('unique');
+          expect(mod).toBeInstanceOf(UniqueModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            once: false,
+            comparePoint: undefined,
+          }));
+        });
+
+        test('Unique re-roll for `12dFu`', () => {
+          const parsed = Parser.parse('12dFu');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+
+          expect(parsed[0].sides).toEqual('F.2');
+          expect(parsed[0].qty).toEqual(12);
+
+          expect(parsed[0].modifiers.has('unique')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('unique');
+          expect(mod).toBeInstanceOf(UniqueModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            once: false,
+            comparePoint: undefined,
+          }));
+        });
+
+        test('accepts compare point', () => {
+          const parsed = Parser.parse('2d%u>80');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual('%');
+          expect(parsed[0].qty).toEqual(2);
+
+          expect(parsed[0].modifiers.has('unique')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('unique');
+          expect(mod).toBeInstanceOf(UniqueModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            once: false,
+            comparePoint: expect.objectContaining({
+              operator: '>',
+              value: 80,
+            }),
+          }));
+        });
+
+        test('Unique re-roll once for `35dF.1uo`', () => {
+          const parsed = Parser.parse('35dF.1uo');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(FudgeDice);
+
+          expect(parsed[0].sides).toEqual('F.1');
+          expect(parsed[0].qty).toEqual(35);
+
+          expect(parsed[0].modifiers.has('unique')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('unique');
+          expect(mod).toBeInstanceOf(UniqueModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            once: true,
+            comparePoint: undefined,
+          }));
+        });
+
+        test('Unique re-roll once for `d64uo<=35`', () => {
+          const parsed = Parser.parse('d64uo<=35');
+
+          expect(parsed).toBeInstanceOf(Array);
+          expect(parsed).toHaveLength(1);
+          expect(parsed[0]).toBeInstanceOf(StandardDice);
+
+          expect(parsed[0].sides).toEqual(64);
+          expect(parsed[0].qty).toEqual(1);
+
+          expect(parsed[0].modifiers.has('unique')).toBe(true);
+
+          const mod = parsed[0].modifiers.get('unique');
+          expect(mod).toBeInstanceOf(UniqueModifier);
+          expect(mod.toJSON()).toEqual(expect.objectContaining({
+            once: true,
+            comparePoint: expect.objectContaining({
+              operator: '<=',
+              value: 35,
+            }),
+          }));
         });
       });
 

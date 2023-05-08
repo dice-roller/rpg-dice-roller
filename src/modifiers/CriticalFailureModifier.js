@@ -21,7 +21,7 @@ class CriticalFailureModifier extends ComparisonModifier {
     super(comparePoint);
 
     // set the modifier's sort order
-    this.order = 9;
+    this.order = 10;
   }
 
   /* eslint-disable class-methods-use-this */
