@@ -65,6 +65,6 @@ export default [
     },
     plugins: plugins(true, production),
     // indicate which modules should be treated as external
-    external: ['random-js'],
+    //external: ['random-js'],
   },
 ];
