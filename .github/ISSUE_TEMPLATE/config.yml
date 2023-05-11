@@ -1,3 +1,4 @@
+blank_issues_enabled: false
 contact_links:
   - name: Question & Discussion
     url: https://github.com/dice-roller/rpg-dice-roller/discussions
