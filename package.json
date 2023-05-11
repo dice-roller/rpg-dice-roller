@@ -77,7 +77,7 @@
     "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
-    "build:docs": "./node_modules/vuepress-jsdoc/bin/vuepress-jsdoc.js --dist ./docs --folder api --exclude=\"./index.js,./**/index.js,./parser/grammars\"",
+    "build:docs": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\"",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
     "watch": "npm run build:dev -- -w",
