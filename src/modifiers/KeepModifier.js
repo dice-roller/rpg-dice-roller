@@ -31,7 +31,7 @@ class KeepModifier extends Modifier {
     this.qty = qty;
 
     // set the modifier's sort order
-    this.order = 5;
+    this.order = 6;
   }
 
   /**
