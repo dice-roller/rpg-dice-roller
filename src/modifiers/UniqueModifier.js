@@ -3,14 +3,6 @@ import ComparisonModifier from './ComparisonModifier.js';
 
 const onceSymbol = Symbol('once');
 
-/**
- *
- * @param {{}} value
- * @param {number} index
- * @param {[]} collection
- * @param {boolean=} [notFirst=false]
- * @returns {boolean}
- */
 const isDuplicate = (value, index, collection, notFirst = false) => {
   const i = collection.map((e) => e.value).indexOf(value.value);
 
@@ -18,8 +10,7 @@ const isDuplicate = (value, index, collection, notFirst = false) => {
 };
 
 /**
- * A `ReRollModifier` re-rolls dice that match a given test, and replaces the new value with the old
- * one.
+ * A `UniqueModifier` re-rolls any non-unique dice values and, optionally that match a given test.
  *
  * @extends ComparisonModifier
  */
