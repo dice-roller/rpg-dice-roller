@@ -57,6 +57,7 @@ Modifier
   / DropModifier
   / KeepModifier
   / ReRollModifier
+  / UniqueModifier
   / CriticalSuccessModifier
   / CriticalFailureModifier
   / SortingModifier
@@ -103,6 +104,11 @@ MinModifier
 ReRollModifier
   = "r" once:"o"? comparePoint:ComparePoint? {
     return new Modifiers.ReRollModifier(!!once, comparePoint);
+  }
+
+UniqueModifier
+  = "u" once:"o"? comparePoint:ComparePoint? {
+    return new Modifiers.UniqueModifier(!!once, comparePoint);
   }
 
 // Critical success setting

@@ -10,6 +10,7 @@ import Modifier from './Modifier.js';
 import ReRollModifier from './ReRollModifier.js';
 import SortingModifier from './SortingModifier.js';
 import TargetModifier from './TargetModifier.js';
+import UniqueModifier from './UniqueModifier.js';
 
 export {
   ComparisonModifier,
@@ -24,4 +25,5 @@ export {
   ReRollModifier,
   SortingModifier,
   TargetModifier,
+  UniqueModifier,
 };
