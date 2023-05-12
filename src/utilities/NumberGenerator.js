@@ -3,6 +3,10 @@ import {
 } from 'random-js';
 
 /**
+ * @typedef {import("random-js").Engine} Engine
+ */
+
+/**
  * The engine
  *
  * @type {symbol}

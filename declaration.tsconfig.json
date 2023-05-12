@@ -10,4 +10,4 @@
 	  "emitDeclarationOnly": true,
 	  "outDir": "types"
 	}
-  }
+}
