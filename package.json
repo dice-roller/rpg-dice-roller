@@ -68,7 +68,7 @@
   },
   "dependencies": {
     "mathjs": "^11.2.1",
-    "random-js": "^2.1.0"
+    "random-js": "file:../../random-js"
   },
   "engines": {
     "node": ">=18.0"

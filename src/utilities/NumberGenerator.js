@@ -128,19 +128,29 @@ class NumberGenerator {
     this.engine = engine || nativeMath;
   }
 
+  /* eslint-disable class-methods-use-this */
   async defaultEngine() {
     try {
-      const global = typeof window !== "undefined" && typeof window.document !== "undefined" ? window
-        : (typeof self === "object" ? self : null);
+      let global;
+
+      /* eslint-disable no-restricted-globals */
+      if (typeof window !== 'undefined' && typeof window.document !== 'undefined') {
+        global = window;
+      } else if (typeof self === 'object') {
+        global = self;
+      }
+      /* eslint-enable no-restricted-globals */
 
       if (global?.crypto) {
-        console.log('has browser crypto');
+        console.debug('has browser crypto');
 
         return browserCrypto;
-      } else if (await import('crypto') || await import('node:crypto')) {
+      }
+
+      if (await import('crypto') || await import('node:crypto')) {
         // @todo check if the import breaks the build
         // @todo check if the import breaks the browser check (When browser crypto is unavailable)
-        console.log('has node crypto');
+        console.debug('has node crypto');
 
         return nodeCrypto;
       }
@@ -150,6 +160,7 @@ class NumberGenerator {
 
     return nativeMath;
   }
+  /* eslint-enable class-methods-use-this */
 
   /**
    * The current engine.

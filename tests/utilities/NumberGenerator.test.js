@@ -76,47 +76,47 @@ describe('NumberGenerator', () => {
     });
 
     describe('integer', () => {
-      test('calls `Random.integer()`', () => {
+      test('calls `Random.integer()`', async () => {
         const spy = jest.spyOn(Random.prototype, 'integer')
           .mockImplementationOnce(() => 3);
 
-        const result = generator.integer(1, 4);
+        const result = await generator.integer(1, 4);
 
         expect(spy).toHaveBeenCalledWith(1, 4);
         expect(result).toBe(3);
       });
 
-      test('generates integer', () => {
-        const val = generator.integer(1, 4);
+      test('generates integer', async () => {
+        const val = await generator.integer(1, 4);
 
         expect(Number.isInteger(val)).toBe(true);
       });
 
-      test('generates integer even if `next` provides float', () => {
+      test('generates integer even if `next` provides float', async () => {
         generator.engine = {
           next() {
             return 4.5;
           },
         };
 
-        const val = generator.integer(1, 4);
+        const val = await generator.integer(1, 4);
 
         expect(Number.isInteger(val)).toBe(true);
       });
     });
 
     describe('float', () => {
-      test('calls `Random.real()`', () => {
+      test('calls `Random.real()`', async () => {
         const spy = jest.spyOn(Random.prototype, 'real')
           .mockImplementationOnce(() => 2.45);
 
-        const result = generator.real(1, 4);
+        const result = await generator.real(1, 4);
 
         expect(spy).toHaveBeenCalledWith(1, 4, false);
         expect(result).toBe(2.45);
       });
 
-      test('passes `inclusive` boolean to `Random.real()', () => {
+      test('passes `inclusive` boolean to `Random.real()', async () => {
         const spy = jest.spyOn(Random.prototype, 'real')
           .mockImplementation(() => 2.45);
 
