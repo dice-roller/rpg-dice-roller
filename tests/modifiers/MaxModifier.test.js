@@ -18,6 +18,7 @@ describe('MaxModifier', () => {
         max: 3,
         name: 'max',
         notation: 'max3',
+        order: 2,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

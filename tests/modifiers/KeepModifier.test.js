@@ -16,6 +16,7 @@ describe('KeepModifier', () => {
         end: 'h',
         name: 'keep-h',
         notation: 'kh1',
+        order: 6,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

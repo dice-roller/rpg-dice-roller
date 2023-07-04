@@ -16,6 +16,7 @@ describe('SortingModifier', () => {
         direction: 'a',
         name: 'sorting',
         notation: 'sa',
+        order: 11,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
