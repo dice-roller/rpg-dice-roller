@@ -14,6 +14,13 @@ const maxSymbol = Symbol('max');
  */
 class MaxModifier extends Modifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 2;
+
+  /**
    * Create a `MaxModifier` instance.
    *
    * @param {number} max The maximum value
@@ -24,9 +31,6 @@ class MaxModifier extends Modifier {
     super();
 
     this.max = max;
-
-    // set the modifier's sort order
-    this.order = 2;
   }
 
   /**

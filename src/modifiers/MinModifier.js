@@ -14,6 +14,13 @@ const minSymbol = Symbol('min');
  */
 class MinModifier extends Modifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 1;
+
+  /**
    * Create a `MinModifier` instance.
    *
    * @param {number} min The minimum value
@@ -24,9 +31,6 @@ class MinModifier extends Modifier {
     super();
 
     this.min = min;
-
-    // set the modifier's sort order
-    this.order = 1;
   }
 
   /**

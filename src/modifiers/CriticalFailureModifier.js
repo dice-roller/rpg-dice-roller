@@ -12,6 +12,13 @@ import ComparisonModifier from './ComparisonModifier.js';
  */
 class CriticalFailureModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 10;
+
+  /**
    * Create a `CriticalFailureModifier` instance.
    *
    * @param {ComparePoint} [comparePoint] The comparison object
@@ -20,9 +27,6 @@ class CriticalFailureModifier extends ComparisonModifier {
    */
   constructor(comparePoint) {
     super(comparePoint);
-
-    // set the modifier's sort order
-    this.order = 10;
   }
 
   /* eslint-disable class-methods-use-this */

@@ -15,6 +15,13 @@ const failureCPSymbol = Symbol('failure-cp');
  */
 class TargetModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 8;
+
+  /**
    * Create a `TargetModifier` instance.
    *
    * @param {ComparePoint} successCP The success comparison object
@@ -27,9 +34,6 @@ class TargetModifier extends ComparisonModifier {
 
     // set the failure compare point
     this.failureComparePoint = failureCP;
-
-    // set the modifier's sort order
-    this.order = 8;
   }
 
   /**
