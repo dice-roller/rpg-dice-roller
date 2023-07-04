@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 import ComparisonModifier from './ComparisonModifier.js';
 
 /**
