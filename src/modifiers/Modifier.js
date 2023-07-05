@@ -1,10 +1,6 @@
 /**
  * A `Modifier` is the base modifier class that all others extend from.
  *
- * ::: warning Abstract class
- * This is meant as an abstract class and should not be used directly.
- * :::
- *
  * @abstract
  */
 class Modifier {
