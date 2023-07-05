@@ -64,7 +64,7 @@ jobs:
         run: npm install
 
       - name: Build API docs
-        run: npm run build:docs
+        run: npm run docs:build
 
   finish:
     needs: test
