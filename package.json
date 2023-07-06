@@ -2,7 +2,7 @@
   "name": "@dice-roller/rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
   "author": "GreenImp Media <info@greenimp.co.uk> (https://greenimp.co.uk)",
-  "version": "5.3.2",
+  "version": "5.4.0",
   "license": "MIT",
   "type": "module",
   "main": "./lib/esm/bundle.js",
