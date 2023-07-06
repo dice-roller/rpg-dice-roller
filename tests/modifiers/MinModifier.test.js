@@ -18,6 +18,7 @@ describe('MinModifier', () => {
         min: 3,
         name: 'min',
         notation: 'min3',
+        order: 1,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

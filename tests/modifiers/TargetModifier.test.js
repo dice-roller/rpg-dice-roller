@@ -28,6 +28,7 @@ describe('TargetModifier', () => {
         isSuccess: expect.any(Function),
         name: 'target',
         notation: '>8f<4',
+        order: 8,
         run: expect.any(Function),
         successComparePoint: sCP,
         toJSON: expect.any(Function),

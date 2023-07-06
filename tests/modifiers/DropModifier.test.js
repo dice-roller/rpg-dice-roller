@@ -16,6 +16,7 @@ describe('DropModifier', () => {
         end: 'l',
         name: 'drop-l',
         notation: 'dl1',
+        order: 7,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

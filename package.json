@@ -1,7 +1,7 @@
 {
   "name": "@dice-roller/rpg-dice-roller",
   "description": "An advanced JS based dice roller that can roll various types of dice and modifiers, along with mathematical equations.",
-  "author": "GreenImp Media <info@greenimp.co.uk> (http://greenimp.co.uk)",
+  "author": "GreenImp Media <info@greenimp.co.uk> (https://greenimp.co.uk)",
   "version": "5.3.2",
   "license": "MIT",
   "type": "module",
@@ -71,15 +71,16 @@
     "random-js": "^2.1.0"
   },
   "engines": {
-    "node": ">=12.0"
+    "node": ">=18.0"
   },
   "scripts": {
     "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
     "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
-    "build:docs": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\"",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
+    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\"",
+    "docs:watch": "npm run docs:build -- --watch",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",

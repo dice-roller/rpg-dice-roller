@@ -18,6 +18,7 @@ describe('ReRollModifier', () => {
         name: 're-roll',
         notation: 'r',
         once: false,
+        order: 4,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

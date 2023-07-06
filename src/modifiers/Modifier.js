@@ -1,19 +1,22 @@
 /**
  * A `Modifier` is the base modifier class that all others extend from.
  *
- * ::: warning Abstract class
- * This is meant as an abstract class and should not be used directly.
- * :::
- *
  * @abstract
  */
 class Modifier {
+  /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 999;
+
   /**
    * Create a `Modifier` instance.
    */
   constructor() {
     // set the modifier's sort order
-    this.order = 999;
+    this.order = this.constructor.order;
   }
 
   /* eslint-disable class-methods-use-this */

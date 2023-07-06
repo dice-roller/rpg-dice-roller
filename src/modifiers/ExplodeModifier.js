@@ -14,6 +14,13 @@ const penetrateSymbol = Symbol('penetrate');
  */
 class ExplodeModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 3;
+
+  /**
    * Create an `ExplodeModifier` instance
    *
    * @param {ComparePoint} [comparePoint=null] The comparison object
@@ -27,9 +34,6 @@ class ExplodeModifier extends ComparisonModifier {
 
     this[compoundSymbol] = !!compound;
     this[penetrateSymbol] = !!penetrate;
-
-    // set the modifier's sort order
-    this.order = 3;
   }
 
   /**

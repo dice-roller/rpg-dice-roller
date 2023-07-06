@@ -6,11 +6,6 @@ const comparePointSymbol = Symbol('compare-point');
 /**
  * A `ComparisonModifier` is the base modifier class for comparing values.
  *
- * ::: warning Abstract class
- * This is meant as an abstract class and should not be used directly.
- * You can use one of the extended modifiers, or extend the class yourself.
- * :::
- *
  * @abstract
  *
  * @extends Modifier

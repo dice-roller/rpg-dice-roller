@@ -18,6 +18,7 @@ describe('UniqueModifier', () => {
         name: 'unique',
         notation: 'u',
         once: false,
+        order: 5,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),

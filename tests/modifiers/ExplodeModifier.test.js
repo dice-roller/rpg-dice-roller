@@ -20,6 +20,7 @@ describe('ExplodeModifier', () => {
         maxIterations: 1000,
         name: 'explode',
         notation: '!',
+        order: 3,
         run: expect.any(Function),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
