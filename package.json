@@ -86,7 +86,7 @@
     "build:dev": "npm run build:prepare && rollup --c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:prepare && rollup --c --environment BUILD:prod",
-    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\"",
+    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\" --readme=\"./docs/readme.md\"",
     "docs:watch": "npm run docs:build -- --watch",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",

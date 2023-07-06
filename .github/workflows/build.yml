@@ -21,7 +21,7 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Run tests
         run: npm run test:coverage
@@ -44,7 +44,7 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build Typescript
         run: npm run build:declaration
@@ -61,7 +61,7 @@ jobs:
           node-version: 'lts/*'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build API docs
         run: npm run docs:build
