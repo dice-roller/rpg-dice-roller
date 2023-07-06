@@ -16,6 +16,13 @@ const qtySymbol = Symbol('qty');
  */
 class KeepModifier extends Modifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 6;
+
+  /**
    * Create a `KeepModifier` instance
    *
    * @param {string} [end=h] Either `h|l` to keep highest or lowest
@@ -29,9 +36,6 @@ class KeepModifier extends Modifier {
 
     this.end = end;
     this.qty = qty;
-
-    // set the modifier's sort order
-    this.order = 6;
   }
 
   /**

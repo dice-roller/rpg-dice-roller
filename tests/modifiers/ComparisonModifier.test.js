@@ -14,6 +14,7 @@ describe('ComparisonModifier', () => {
         isComparePoint: expect.any(Function),
         name: 'comparison',
         notation: '',
+        order: expect.any(Number),
         toJSON: expect.any(Function),
         toString: expect.any(Function),
       }));

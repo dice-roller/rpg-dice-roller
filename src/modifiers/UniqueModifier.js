@@ -16,6 +16,13 @@ const isDuplicate = (value, index, collection, notFirst = false) => {
  */
 class UniqueModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 5;
+
+  /**
    * Create a `UniqueModifier` instance.
    *
    * @param {boolean} [once=false] Whether to only re-roll once or not
@@ -25,9 +32,6 @@ class UniqueModifier extends ComparisonModifier {
     super(comparePoint);
 
     this.once = !!once;
-
-    // set the modifier's sort order
-    this.order = 5;
   }
 
   /* eslint-disable class-methods-use-this */

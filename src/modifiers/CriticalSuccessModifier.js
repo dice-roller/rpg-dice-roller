@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-constructor */
 import ComparisonModifier from './ComparisonModifier.js';
 
 /**
@@ -11,6 +12,13 @@ import ComparisonModifier from './ComparisonModifier.js';
  */
 class CriticalSuccessModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 9;
+
+  /**
    * Create a `CriticalSuccessModifier` instance.
    *
    * @param {ComparePoint} comparePoint The comparison object
@@ -19,9 +27,6 @@ class CriticalSuccessModifier extends ComparisonModifier {
    */
   constructor(comparePoint) {
     super(comparePoint);
-
-    // set the modifier's sort order
-    this.order = 9;
   }
 
   /* eslint-disable class-methods-use-this */

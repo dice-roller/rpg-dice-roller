@@ -11,6 +11,13 @@ const directionSymbol = Symbol('direction');
  */
 class SortingModifier extends Modifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 11;
+
+  /**
    * Create a `SortingModifier` instance.
    *
    * @param {string} [direction=a] The direction to sort in; 'a' (Ascending) or 'd' (Descending)
@@ -21,9 +28,6 @@ class SortingModifier extends Modifier {
     super();
 
     this.direction = direction;
-
-    // set the modifier's sort order
-    this.order = 11;
   }
 
   /**

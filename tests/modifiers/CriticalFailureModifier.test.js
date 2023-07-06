@@ -15,6 +15,7 @@ describe('CriticalFailureModifier', () => {
         isComparePoint: expect.any(Function),
         name: 'critical-failure',
         notation: 'cf',
+        order: 10,
         toJSON: expect.any(Function),
         toString: expect.any(Function),
       }));

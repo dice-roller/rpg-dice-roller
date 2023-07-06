@@ -13,6 +13,13 @@ const onceSymbol = Symbol('once');
  */
 class ReRollModifier extends ComparisonModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 4;
+
+  /**
    * Create a `ReRollModifier` instance.
    *
    * @param {boolean} [once=false] Whether to only re-roll once or not
@@ -22,9 +29,6 @@ class ReRollModifier extends ComparisonModifier {
     super(comparePoint);
 
     this.once = !!once;
-
-    // set the modifier's sort order
-    this.order = 4;
   }
 
   /* eslint-disable class-methods-use-this */

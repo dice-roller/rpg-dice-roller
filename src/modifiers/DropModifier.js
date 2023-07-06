@@ -9,6 +9,13 @@ import KeepModifier from './KeepModifier.js';
  */
 class DropModifier extends KeepModifier {
   /**
+   * The default modifier execution order.
+   *
+   * @type {number}
+   */
+  static order = 7;
+
+  /**
    * Create a `DropModifier` instance.
    *
    * @param {string} [end=l] Either `h|l` to drop highest or lowest
@@ -19,9 +26,6 @@ class DropModifier extends KeepModifier {
    */
   constructor(end = 'l', qty = 1) {
     super(end, qty);
-
-    // set the modifier's sort order
-    this.order = 7;
   }
 
   /**
