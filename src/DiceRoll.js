@@ -93,7 +93,7 @@ const totalSymbol = Symbol('total');
 const calculateTotal = (results) => toFixed(results.calculationValue, 2);
 
 /**
- * A `DiceRoll` handles rolling of a single dice notation and storing it's result.
+ * A `DiceRoll` handles rolling of a single dice notation and storing the result.
  *
  * @see {@link DiceRoller} if you need to keep a history of rolls
  */
