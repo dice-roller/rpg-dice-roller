@@ -10,10 +10,17 @@
   "browser": "./lib/umd/bundle.js",
   "exports": {
     ".": {
-      "import": "./lib/esm/bundle.js",
-      "require": "./lib/umd/bundle.js"
+      "import": {
+        "types": "./types/index.d.ts",
+        "default": "./lib/esm/bundle.js"
+      },
+      "require": {
+        "types": "./types/index.d.cts",
+        "default": "./lib/umd/bundle.js"
+      }
     },
     "./lib/umd/bundle.js": {
+      "types": "./types/index.d.cts",
       "require": "./lib/umd/bundle.js"
     },
     "./src/": "./src/",
@@ -75,7 +82,7 @@
   },
   "scripts": {
     "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
-    "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json",
+    "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json && cp ./types/index.d.ts ./types/index.d.cts",
     "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
