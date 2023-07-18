@@ -1,4 +1,4 @@
-import { RequiredArgumentError } from '../exceptions/index.js';
+import { RequiredArgumentError, SyntaxError } from '../exceptions/index.js';
 import * as parser from './grammars/grammar.js';
 
 /**
@@ -31,8 +31,16 @@ class Parser {
       throw new TypeError('Notation must be a string');
     }
 
-    // parse the notation
-    return parser.parse(notation);
+    try {
+      // parse the notation
+      return parser.parse(notation);
+    } catch (e) {
+      if (e instanceof parser.SyntaxError) {
+        throw new SyntaxError(e.message, e.expected, e.found, e.location);
+      }
+
+      throw e;
+    }
   }
 }
 
