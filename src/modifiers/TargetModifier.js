@@ -122,7 +122,7 @@ class TargetModifier extends ComparisonModifier {
    *
    * A response of `false` does _NOT_ indicate a success.
    * A value is a success _ONLY_ if it passes the success compare point.
-   * A value could be neither a failure or a success.
+   * A value could be neither a failure nor a success.
    *
    * @param {number} value The number to compare against
    *
@@ -133,7 +133,7 @@ class TargetModifier extends ComparisonModifier {
   }
 
   /**
-   * Check if the `value` is neither a success or a failure.
+   * Check if the `value` is neither a success nor a failure.
    *
    * @param {number} value The number to compare against
    *
@@ -148,7 +148,7 @@ class TargetModifier extends ComparisonModifier {
    *
    * A response of `false` does _NOT_ indicate a failure.
    * A value is a failure _ONLY_ if it passes the failure compare point.
-   * A value could be neither a failure or a success.
+   * A value could be neither a failure nor a success.
    *
    * @param {number} value The number to compare against
    *

@@ -8,6 +8,6 @@
 	  "declaration": true,
 	  "noEmit": false,
 	  "emitDeclarationOnly": true,
-	  "outDir": "types"
+	  "declarationDir": "types"
 	}
-  }
+}
