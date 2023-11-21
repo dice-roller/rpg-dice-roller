@@ -50,7 +50,33 @@ class Modifier {
   get maxIterations() {
     return 1000;
   }
+
+  /**
+   * No default values present
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {object}
+   */
+  defaults(_context) {
+    return {};
+  }
   /* eslint-enable class-methods-use-this */
+
+  /**
+   * Processing default values definitions
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {void}
+   */
+  ensureParameters(_context) {
+    Object.entries(this.defaults(_context)).forEach(([field, value]) => {
+      if (!this[field]) {
+        this[field] = value;
+      }
+    });
+  }
 
   /* eslint-disable class-methods-use-this */
   /**
@@ -62,6 +88,7 @@ class Modifier {
    * @returns {RollResults} The modified results
    */
   run(results, _context) {
+    this.ensureParameters(_context);
     return results;
   }
   /* eslint-enable class-methods-use-this */
