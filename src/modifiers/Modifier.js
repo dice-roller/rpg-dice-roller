@@ -70,9 +70,9 @@ class Modifier {
    *
    * @returns {void}
    */
-  ensureParameters(_context) {
+  useDefaultsIfNeeded(_context) {
     Object.entries(this.defaults(_context)).forEach(([field, value]) => {
-      if (!this[field]) {
+      if (typeof this[field] === 'undefined') {
         this[field] = value;
       }
     });
@@ -88,7 +88,7 @@ class Modifier {
    * @returns {RollResults} The modified results
    */
   run(results, _context) {
-    this.ensureParameters(_context);
+    this.useDefaultsIfNeeded(_context);
     return results;
   }
   /* eslint-enable class-methods-use-this */

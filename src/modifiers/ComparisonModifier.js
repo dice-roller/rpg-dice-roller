@@ -85,7 +85,7 @@ class ComparisonModifier extends Modifier {
    * @returns {null}
    */
   defaultComparePoint(_context) {
-    return null;
+    return {};
   }
   /* eslint-enable class-methods-use-this */
 
@@ -99,8 +99,8 @@ class ComparisonModifier extends Modifier {
   defaults(_context) {
     const comparePointConfig = this.defaultComparePoint(_context);
 
-    if (comparePointConfig) {
-      return { comparePoint: new ComparePoint(...this.defaultComparePoint(_context)) };
+    if (typeof comparePointConfig === 'object' && comparePointConfig.length === 2) {
+      return { comparePoint: new ComparePoint(...comparePointConfig) };
     }
 
     return {};
