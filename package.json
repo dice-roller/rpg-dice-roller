@@ -61,7 +61,6 @@
     "@rollup/plugin-eslint": "^8.0.2",
     "@rollup/plugin-node-resolve": "^14.1.0",
     "abab": "^2.0.6",
-    "coveralls": "^3.1.1",
     "eslint": "^8.24.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
@@ -82,19 +81,20 @@
   },
   "scripts": {
     "build": "npm run build:dev && npm run build:prod && npm run build:declaration",
+    "build:prepare": "npm run build:grammars && npm run lint",
     "build:declaration": "rm -rf types/ && tsc -p declaration.tsconfig.json && cp ./types/index.d.ts ./types/index.d.cts",
-    "build:dev": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:dev",
+    "build:dev": "npm run build:prepare && rollup --c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
-    "build:prod": "npm run build:grammars && npm run lint && rollup --c --environment BUILD:prod",
+    "build:prod": "npm run build:prepare && rollup --c --environment BUILD:prod",
     "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\"",
     "docs:watch": "npm run docs:build -- --watch",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
     "lint:fix": "eslint --fix src/** tests/**",
-    "pretest": "npm run build:grammars && npm run lint",
+    "pretest": "npm run build:prepare",
     "test": "jest",
-    "test:coverage": "npm run pretest && jest --coverage",
-    "test:watch": "npm run pretest && jest --watchAll",
+    "test:coverage": "npm test -- --coverage",
+    "test:watch": "npm test -- --watchAll",
     "prepublishOnly": "npm test && npm run build"
   }
 }
