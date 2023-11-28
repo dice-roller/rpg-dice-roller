@@ -182,7 +182,7 @@ describe('ReRollModifier', () => {
       expect(mod.run(results, die)).toBe(results);
     });
 
-    test('does not re-roll without compare point', () => {
+    test('does re-roll with default compare point', () => {
       const modifiedResults = mod.run(results, die).rolls;
 
       expect(modifiedResults).toBeInstanceOf(Array);
@@ -201,8 +201,8 @@ describe('ReRollModifier', () => {
       expect(modifiedResults[2].modifiers).toEqual(new Set());
 
       expect(modifiedResults[3].initialValue).toBe(1);
-      expect(modifiedResults[3].value).toBe(1);
-      expect(modifiedResults[3].modifiers).toEqual(new Set());
+      expect(modifiedResults[3].value).toBe(10);
+      expect(modifiedResults[3].modifiers).toEqual(new Set(new Set(['re-roll'])));
 
       expect(modifiedResults[4].initialValue).toBe(6);
       expect(modifiedResults[4].value).toBe(6);

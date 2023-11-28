@@ -1,0 +1,41 @@
+name: build docs
+on:
+  push:
+    branches:
+      - main
+jobs:
+  build-api-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v3
+        with:
+          node-version: 'lts/*'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build API docs
+        run: npm run docs:build
+
+      - name: Checkout documentation repository
+        uses: actions/checkout@v3
+        with:
+          token: ${{ secrets.DOCS_DEPLOY_GHP }}
+          repository: 'dice-roller/documentation'
+          path: './documentation'
+
+      - name: Copy API docs to documentation repository
+        run: |
+          rm -rf ./documentation/docs/api
+          mv ./docs/api ./documentation/docs/api
+
+      - name: Commit and push API doc changes
+        uses: EndBug/add-and-commit@v9
+        with:
+          cwd: './documentation'
+          add: './docs/api'
+          message: 'Auto API update from github workflow'
