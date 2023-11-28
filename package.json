@@ -70,7 +70,7 @@
     "rollup-plugin-banner": "^0.2.1",
     "rollup-plugin-terser": "^7.0.2",
     "typescript": "^4.8.4",
-    "vuepress-jsdoc": "^4.3.0"
+    "vuepress-jsdoc": "^5.0.0"
   },
   "dependencies": {
     "mathjs": "^11.2.1",
@@ -86,7 +86,7 @@
     "build:dev": "npm run build:prepare && rollup --c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs",
     "build:prod": "npm run build:prepare && rollup --c --environment BUILD:prod",
-    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\"",
+    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\" --readme=\"./docs/readme.md\"",
     "docs:watch": "npm run docs:build -- --watch",
     "watch": "npm run build:dev -- -w",
     "lint": "eslint src/** tests/**",
