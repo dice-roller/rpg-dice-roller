@@ -1,0 +1,91 @@
+name: Publish to npm
+
+on:
+
+  push:
+    branches:
+      - main
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.compare.outputs.should_publish }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Ensure we fetch all tags
+
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Get Current Version
+        id: get_version
+        run: |
+          current_version=$(node -p "require('./package.json').version")
+          echo "current_version=v$current_version" >> "$GITHUB_ENV"
+          echo "Current version: v$current_version"
+
+      - name: Get Published Version
+        id: get_published_version
+        run: |
+          package_name=$(node -p "require('./package.json').name")
+          tag=latest
+          published_version=$(npm view "$package_name"@"$tag" version || echo "0.0.0")
+          echo "published_version=$published_version" >> "$GITHUB_ENV"
+          echo "Published version on npm: $published_version"
+
+      - name: Compare Versions New
+        run: |
+          node -e "
+          const semver = require('semver');
+          const currentVersion = ${{ env.current_version }};
+          const publishedVersion = ${{ env.published_version }};
+
+          if (semver.gt(currentVersion, publishedVersion)) {
+            console.log('New version detected! Proceeding with publish.');
+            console.log('should_publish=true');
+            process.exit(0);
+          } else {
+            console.log('Version is not greater than the published version. Skipping publish.');
+            console.log('should_publish=false');
+            process.exit(1);
+          }
+          " || echo "should_publish=false" >> "$GITHUB_OUTPUT"
+
+  publish:
+    needs: check-version
+    if: needs.check-version.outputs.should_publish == 'true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-tags: true
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Tag Release
+        run: |
+          tag_name="v$(node -p "require('./package.json').version")"
+          if git rev-parse "$tag_name" >/dev/null 2>&1; then
+            echo "Tag $tag_name already exists. Skipping tagging."
+          else
+            echo "Tag $tag_name does not exist. Creating and pushing tag."
+            git tag "$tag_name"
+            git push origin --tags
+          fi
