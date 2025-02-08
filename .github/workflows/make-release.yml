@@ -1,0 +1,95 @@
+name: Start a Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_bump:
+        description: 'Version bump type (major, minor, patch)'
+        required: true
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    outputs:
+      release_branch: ${{ steps.push_release_branch.output.release_branch }}
+      version: ${{ steps.bump_version.output.sversion }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: develop
+          fetch-tags: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+
+      - name: Bump Version
+        id: bump_version
+        run: |
+          npm version ${{ github.event.inputs.version_bump }} -m "chore(release): bump version to %s"
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Push Release Branch
+        id: push_release_branch
+        run: |
+          RELEASE_BRANCH="release/${VERSION}"
+          echo "release_branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+
+          git checkout -b "$RELEASE_BRANCH"
+          git push origin "$RELEASE_BRANCH" --follow-tags
+
+  merge-to-main:
+    needs: create-release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Merge Release Branch into Main
+        run: |
+          git merge --no-ff origin/${{ needs.create-release.outputs.release_branch }}
+          git push origin main --follow-tags
+
+  merge-back-to-develop:
+    needs: merge-to-main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Merge Release Branch back into Develop
+        run: |
+          git checkout develop
+          git merge --no-ff origin/${{ env.RELEASE_BRANCH }}
+          git push origin develop
+
+  publish-to-npm:
+    needs: merge-to-main
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          registry-url: https://registry.npmjs.org/
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Publish to npm
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
