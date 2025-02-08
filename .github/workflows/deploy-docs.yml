@@ -1,4 +1,4 @@
-name: build docs
+name: Deploy docs
 on:
   push:
     branches:
@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
 
@@ -22,7 +22,7 @@ jobs:
         run: npm run docs:build
 
       - name: Checkout documentation repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.DOCS_DEPLOY_GHP }}
           repository: 'dice-roller/documentation'
