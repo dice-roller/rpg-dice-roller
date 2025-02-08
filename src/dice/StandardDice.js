@@ -221,7 +221,9 @@ class StandardDice extends HasDescription {
    * @returns {RollResult} The value rolled
    */
   rollOnce() {
-    return new RollResult(generator.integer(this.min, this.max));
+    const rollResult = new RollResult(generator.integer(this.min, this.max));
+    rollResult.dice = this;
+    return rollResult;
   }
 
   /**
