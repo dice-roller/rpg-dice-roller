@@ -452,7 +452,13 @@ describe('PercentileDice', () => {
 
   describe('Rolling', () => {
     test('rollOnce returns a RollResult object', () => {
-      expect((new PercentileDice()).rollOnce()).toBeInstanceOf(RollResult);
+      const dice = new PercentileDice();
+      const result = dice.rollOnce();
+
+      expect(result).toBeInstanceOf(RollResult);
+      expect(result.dice).toBeInstanceOf(PercentileDice);
+      expect(result.dice).toBe(dice);
+      expect(result.dice.sides).toEqual('%');
     });
 
     test('rollOnce rolls between min and max (Inclusive)', () => {
@@ -487,9 +493,11 @@ describe('PercentileDice', () => {
     });
 
     test('roll returns correct number of rolls', () => {
-      const die = new PercentileDice(4);
+      const dice = new PercentileDice(4);
+      const rollResults = dice.roll();
 
-      expect(die.roll()).toHaveLength(4);
+      expect(rollResults).toHaveLength(4);
+      expect(rollResults.rolls[0].dice).toBe(dice);
     });
   });
 
