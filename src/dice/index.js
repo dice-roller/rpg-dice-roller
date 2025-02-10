@@ -1,4 +1,4 @@
-import StandardDice from './StandardDice.js';
+import StandardDice from './StandardDice.ts';
 import FudgeDice from './FudgeDice.js';
 import PercentileDice from './PercentileDice.js';
 

@@ -8,7 +8,7 @@ const descriptionSymbol = Symbol('description');
  * @abstract
  */
 class HasDescription {
-  constructor(text = null) {
+  constructor(text: Description|string|null = null) {
     this.description = text;
   }
 
@@ -17,7 +17,7 @@ class HasDescription {
    *
    * @return {Description|null}
    */
-  get description() {
+  get description(): ?string {
     return this[descriptionSymbol] || null;
   }
 
@@ -26,7 +26,7 @@ class HasDescription {
    *
    * @param {Description|string|null} description
    */
-  set description(description) {
+  set description(description?: Description|string): void {
     if (!description && (description !== 0)) {
       this[descriptionSymbol] = null;
     } else if (description instanceof Description) {
@@ -45,7 +45,7 @@ class HasDescription {
    *
    * @returns {{description: (Description|null)}}
    */
-  toJSON() {
+  toJSON(): object {
     const { description } = this;
 
     return {
@@ -62,7 +62,7 @@ class HasDescription {
    *
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     if (this.description) {
       return `${this.description}`;
     }

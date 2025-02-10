@@ -1,8 +1,8 @@
 import { RequiredArgumentError } from './exceptions/index.js';
-import HasDescription from './traits/HasDescription.js';
+import HasDescription from './traits/HasDescription.ts';
 import Modifier from './modifiers/Modifier.js';
 import ResultGroup from './results/ResultGroup.js';
-import StandardDice from './dice/StandardDice.js';
+import StandardDice from './dice/StandardDice.ts';
 
 const expressionsSymbol = Symbol('expressions');
 const modifiersSymbol = Symbol('modifiers');

@@ -5,6 +5,7 @@ import HasDescription from '../traits/HasDescription.js';
 import Modifier from '../modifiers/Modifier.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
+import Description from "../Description";
 
 const modifiersSymbol = Symbol('modifiers');
 const qtySymbol = Symbol('qty');
@@ -29,7 +30,14 @@ class StandardDice extends HasDescription {
    * @throws {RequiredArgumentError} sides is required
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
-  constructor(sides, qty = 1, modifiers = null, min = 1, max = null, description = null) {
+  constructor(
+    sides: number,
+    qty: number = 1,
+    modifiers = null,
+    min: number|null|undefined = 1,
+    max?: number = null,
+    description: Description|string|null = null
+  ) {
     super(description);
 
     if (!sides && (sides !== 0)) {
@@ -72,7 +80,7 @@ class StandardDice extends HasDescription {
       this.modifiers = modifiers;
     }
 
-    this[minSymbol] = parseInt(minVal, 10);
+    this[minSymbol] = parseInt(minVal.toString(), 10);
 
     this[maxSymbol] = max ? parseInt(`${max}`, 10) : sides;
   }

@@ -1,6 +1,6 @@
 import { generator } from '../utilities/NumberGenerator.js';
 import RollResult from '../results/RollResult.js';
-import StandardDice from './StandardDice.js';
+import StandardDice from './StandardDice.ts';
 
 /**
  * Represents a Fudge / Fate type die.

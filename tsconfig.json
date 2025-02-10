@@ -1,26 +1,23 @@
 {
-	"files": [
-	  "src/index.js"
-	],
 	"include": [
-	  "tests/**/*.js",
-	  "tests/**/*.ts"
+    "./src/**/*",
 	],
 	"compilerOptions": {
 	  /* Basic Options */
-	  "target": "ES2016",
+    "outDir": "./built",
+    "target": "ES2016",
 	  "module": "commonjs",
 	  "allowJs": true,
-	  "resolveJsonModule": true,
+	  /*"resolveJsonModule": true,
 	  "noEmit": true,
-	  "maxNodeModuleJsDepth": 3,
-  
+	  "maxNodeModuleJsDepth": 3,*/
+
 	  /* Strict Type-Checking Options */
-	  "strict": true,
+	  /*"strict": true,
 	  "noImplicitAny": true,
-	  "strictNullChecks": true,
-  
+	  "strictNullChecks": true,*/
+
 	  /* Additional Checks */
-	  "noUnusedLocals": true
+//	  "noUnusedLocals": true
 	}
 }
