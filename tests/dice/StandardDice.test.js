@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import { RequiredArgumentError } from '../../src/exceptions/index.js';
 import { ExplodeModifier, Modifier, SortingModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';

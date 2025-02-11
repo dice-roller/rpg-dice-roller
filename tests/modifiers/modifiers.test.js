@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import DiceRoll from '../../src/DiceRoll.js';
 import {
   DropModifier,

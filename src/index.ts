@@ -1,4 +1,4 @@
-import * as Dice from './dice/index.js';
+import * as Dice from './dice/index';
 import * as Exceptions from './exceptions/index.js';
 import * as Modifiers from './modifiers/index.js';
 import * as Results from './results/index.js';

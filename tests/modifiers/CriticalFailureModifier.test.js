@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import { ComparisonModifier, CriticalFailureModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';
 import RollResults from '../../src/results/RollResults.js';

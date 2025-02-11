@@ -1,4 +1,4 @@
-import { StandardDice } from '../src/dice/index.js';
+import { StandardDice } from '../src/dice/index.ts';
 import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
 import DiceRoll from '../src/DiceRoll.js';
 import Parser from '../src/parser/Parser.js';

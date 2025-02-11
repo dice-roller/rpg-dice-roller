@@ -1,4 +1,7 @@
 import Description from '../Description.js';
+import {Stringable} from "../types/Interfaces/Stringable";
+import {JsonSerializable} from "../types/Interfaces/JsonSerializable";
+import {Describable} from "../types/Interfaces/Describable";
 
 const descriptionSymbol = Symbol('description');
 
@@ -7,7 +10,7 @@ const descriptionSymbol = Symbol('description');
  *
  * @abstract
  */
-class HasDescription {
+class HasDescription implements Describable, JsonSerializable, Stringable {
   constructor(text: Description|string|null = null) {
     this.description = text;
   }
@@ -17,7 +20,7 @@ class HasDescription {
    *
    * @return {Description|null}
    */
-  get description(): ?string {
+  get description(): Description|null {
     return this[descriptionSymbol] || null;
   }
 
@@ -26,8 +29,8 @@ class HasDescription {
    *
    * @param {Description|string|null} description
    */
-  set description(description?: Description|string): void {
-    if (!description && (description !== 0)) {
+  set description(description: Description|string|null) {
+    if (!description) {
       this[descriptionSymbol] = null;
     } else if (description instanceof Description) {
       this[descriptionSymbol] = description;
@@ -45,7 +48,7 @@ class HasDescription {
    *
    * @returns {{description: (Description|null)}}
    */
-  toJSON(): object {
+  toJSON(): {description: Description|null} {
     const { description } = this;
 
     return {

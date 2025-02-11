@@ -1,4 +1,4 @@
-import { StandardDice } from '../src/dice/index.js';
+import { StandardDice } from '../src/dice/index.ts';
 import DiceRoll from '../src/DiceRoll.js';
 import DiceRoller from '../src/DiceRoller.js';
 import RollResult from '../src/results/RollResult.js';

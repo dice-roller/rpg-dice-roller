@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import { ComparisonModifier, TargetModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';
 import ResultGroup from '../../src/results/ResultGroup.js';

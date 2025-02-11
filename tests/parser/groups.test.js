@@ -1,4 +1,4 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.js';
+import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.ts';
 import { DropModifier, KeepModifier, SortingModifier } from '../../src/modifiers/index.js';
 import { SyntaxError } from '../../src/parser/grammars/grammar.js';
 import Parser from '../../src/parser/Parser.js';

@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import { DieActionValueError } from '../../src/exceptions/index.js';
 import { ComparisonModifier, ExplodeModifier } from '../../src/modifiers/index.js';
 import ComparePoint from '../../src/ComparePoint.js';

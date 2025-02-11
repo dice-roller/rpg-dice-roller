@@ -1,4 +1,4 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.js';
+import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.ts';
 import { RequiredArgumentError } from '../../src/exceptions/index.js';
 import {
   CriticalFailureModifier,

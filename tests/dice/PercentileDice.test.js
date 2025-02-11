@@ -1,4 +1,4 @@
-import { PercentileDice, StandardDice } from '../../src/dice/index.js';
+import { PercentileDice, StandardDice } from '../../src/dice/index.ts';
 import {
   ExplodeModifier, KeepModifier, Modifier, SortingModifier,
 } from '../../src/modifiers/index.js';

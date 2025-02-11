@@ -1,7 +1,7 @@
 import {
   ExplodeModifier, KeepModifier, Modifier, SortingModifier,
 } from '../../src/modifiers/index.js';
-import { FudgeDice, StandardDice } from '../../src/dice/index.js';
+import { FudgeDice, StandardDice } from '../../src/dice/index.ts';
 import RollResult from '../../src/results/RollResult.js';
 import RollResults from '../../src/results/RollResults.js';
 import ComparePoint from '../../src/ComparePoint.js';

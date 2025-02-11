@@ -1,4 +1,4 @@
-import { StandardDice } from '../../src/dice/index.js';
+import { StandardDice } from '../../src/dice/index.ts';
 import { KeepModifier, Modifier } from '../../src/modifiers/index.js';
 import ResultGroup from '../../src/results/ResultGroup.js';
 import RollResult from '../../src/results/RollResult.js';

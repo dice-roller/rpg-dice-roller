@@ -1,4 +1,4 @@
-import { StandardDice } from './dice/index.js';
+import { StandardDice } from './dice/index.ts';
 import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
 import { toFixed } from './utilities/math.js';
 import { engines, generator } from './utilities/NumberGenerator.js';

@@ -2,21 +2,25 @@ import { RequiredArgumentError } from '../exceptions/index.js';
 import { isNumeric, isSafeNumber } from '../utilities/math.js';
 import { generator } from '../utilities/NumberGenerator.js';
 import HasDescription from '../traits/HasDescription.js';
-import Modifier from '../modifiers/Modifier.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import Description from "../Description";
-
-const modifiersSymbol = Symbol('modifiers');
-const qtySymbol = Symbol('qty');
-const sidesSymbol = Symbol('sides');
-const minSymbol = Symbol('min-value');
-const maxSymbol = Symbol('max-value');
+import {Dice} from "../types/Interfaces/Dice";
+import {ModifierCollection} from "../types/Types/ModifierCollection";
+import {ModelType} from "../types/Enums/ModelType";
+import {Modifier} from "../types/Interfaces/Modifier";
+import ModifierClass from '../modifiers/Modifier.js';
 
 /**
  * Represents a standard numerical die.
  */
-class StandardDice extends HasDescription {
+class StandardDice extends HasDescription implements Dice {
+  #max: number;
+  #min: number = 1;
+  #modifiers: ModifierCollection | null = null;
+  #sides: number;
+  #qty: number;
+
   /**
    * Create a `StandardDice` instance.
    *
@@ -31,12 +35,12 @@ class StandardDice extends HasDescription {
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
   constructor(
-    sides: number,
-    qty: number = 1,
-    modifiers = null,
-    min: number|null|undefined = 1,
-    max?: number = null,
-    description: Description|string|null = null
+      sides: number,
+      qty: number = 1,
+      modifiers: ModifierCollection | null = null,
+      min: number|null|undefined = 1,
+      max: number|null|undefined = null,
+      description: Description|string|null = null,
   ) {
     super(description);
 
@@ -73,16 +77,16 @@ class StandardDice extends HasDescription {
       throw new RangeError('max must a finite number');
     }
 
-    this[qtySymbol] = parseInt(`${qty}`, 10);
-    this[sidesSymbol] = sides;
+    this.#qty = parseInt(`${qty}`, 10);
+    this.#sides = sides;
 
     if (modifiers) {
       this.modifiers = modifiers;
     }
 
-    this[minSymbol] = parseInt(minVal.toString(), 10);
+    this.#min = parseInt(minVal.toString(), 10);
 
-    this[maxSymbol] = max ? parseInt(`${max}`, 10) : sides;
+    this.#max = max ? parseInt(`${max}`, 10) : sides;
   }
 
   /**
@@ -90,19 +94,19 @@ class StandardDice extends HasDescription {
    *
    * @returns {number}
    */
-  get average() {
+  get average(): number {
     return (this.min + this.max) / 2;
   }
 
   /**
    * The modifiers that affect this die roll.
    *
-   * @returns {Map<string, Modifier>|null}
+   * @returns {ModifierCollection|null}
    */
-  get modifiers() {
-    if (this[modifiersSymbol]) {
+  get modifiers(): ModifierCollection | null {
+    if (this.#modifiers) {
       // ensure modifiers are ordered correctly
-      return new Map([...this[modifiersSymbol]].sort((a, b) => a[1].order - b[1].order));
+      return new Map([...this.#modifiers].sort((a, b) => a[1].order - b[1].order));
     }
 
     return null;
@@ -115,27 +119,27 @@ class StandardDice extends HasDescription {
    *
    * @throws {TypeError} Modifiers should be a Map, array of Modifiers, or an Object
    */
-  set modifiers(value) {
+  set modifiers(value: ModifierCollection|Modifier[]|object|null) {
     let modifiers;
     if (value instanceof Map) {
       modifiers = value;
     } else if (Array.isArray(value)) {
       // loop through and get the modifier name of each item and use it as the map key
-      modifiers = new Map(value.map((modifier) => [modifier.name, modifier]));
+      modifiers = new Map(value.map((modifier: Modifier) => [modifier.name, modifier]));
     } else if (typeof value === 'object') {
-      modifiers = new Map(Object.entries(value));
+      modifiers = new Map(Object.entries(value as {[index: string]: Modifier}));
     } else {
       throw new TypeError('modifiers should be a Map, array, or an Object containing Modifiers');
     }
 
     if (
-      modifiers.size
-      && [...modifiers.entries()].some((entry) => !(entry[1] instanceof Modifier))
+        modifiers.size
+        && [...modifiers.entries()].some((entry) => !(entry[1] instanceof ModifierClass))
     ) {
       throw new TypeError('modifiers must only contain Modifier instances');
     }
 
-    this[modifiersSymbol] = modifiers;
+    this.#modifiers = modifiers;
   }
 
   /**
@@ -143,8 +147,8 @@ class StandardDice extends HasDescription {
    *
    * @returns {number}
    */
-  get max() {
-    return this[maxSymbol];
+  get max(): number {
+    return this.#max;
   }
 
   /**
@@ -152,8 +156,8 @@ class StandardDice extends HasDescription {
    *
    * @returns {number}
    */
-  get min() {
-    return this[minSymbol];
+  get min(): number {
+    return this.#min;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -162,7 +166,7 @@ class StandardDice extends HasDescription {
    *
    * @returns {string} 'standard'
    */
-  get name() {
+  get name(): string {
     return 'standard';
   }
   /* eslint-enable class-methods-use-this */
@@ -172,7 +176,7 @@ class StandardDice extends HasDescription {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     let notation = `${this.qty}d${this.sides}`;
 
     if (this.modifiers && this.modifiers.size) {
@@ -187,8 +191,8 @@ class StandardDice extends HasDescription {
    *
    * @returns {number}
    */
-  get qty() {
-    return this[qtySymbol];
+  get qty(): number {
+    return this.#qty;
   }
 
   /**
@@ -196,8 +200,8 @@ class StandardDice extends HasDescription {
    *
    * @returns {number}
    */
-  get sides() {
-    return this[sidesSymbol];
+  get sides(): number | string {
+    return this.#sides;
   }
 
   /**
@@ -205,7 +209,7 @@ class StandardDice extends HasDescription {
    *
    * @returns {RollResults} The result of the roll
    */
-  roll() {
+  roll(): RollResults {
     // create a result object to hold the rolls
     const rollResult = new RollResults();
 
@@ -216,7 +220,7 @@ class StandardDice extends HasDescription {
     }
 
     // loop through each modifier and carry out its actions
-    (this.modifiers || []).forEach((modifier) => {
+    (this.modifiers || []).forEach((modifier: Modifier) => {
       modifier.run(rollResult, this);
     });
 
@@ -228,7 +232,7 @@ class StandardDice extends HasDescription {
    *
    * @returns {RollResult} The value rolled
    */
-  rollOnce() {
+  rollOnce(): RollResult {
     return new RollResult(generator.integer(this.min, this.max));
   }
 
@@ -245,7 +249,7 @@ class StandardDice extends HasDescription {
    *  qty: number,
    *  name: string,
    *  sides: number,
-   *  modifiers: (Map<string, Modifier>|null),
+   *  modifiers: (ModifierCollection|null),
    *  type: string
    * }}
    */
@@ -255,18 +259,18 @@ class StandardDice extends HasDescription {
     } = this;
 
     return Object.assign(
-      super.toJSON(),
-      {
-        average,
-        max,
-        min,
-        modifiers,
-        name,
-        notation,
-        qty,
-        sides,
-        type: 'die',
-      },
+        super.toJSON(),
+        {
+          average,
+          max,
+          min,
+          modifiers,
+          name,
+          notation,
+          qty,
+          sides,
+          type: ModelType.Dice,
+        },
     );
   }
 
@@ -279,7 +283,7 @@ class StandardDice extends HasDescription {
    *
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     return `${this.notation}${this.description ? ` ${this.description}` : ''}`;
   }
 }
