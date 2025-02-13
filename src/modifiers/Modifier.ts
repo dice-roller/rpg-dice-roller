@@ -1,22 +1,29 @@
+import { Modifier as IModifier } from '../types/Interfaces/Modifier';
+import RollResults from "../results/RollResults";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ModelType } from "../types/Enums/ModelType";
+
 /**
  * A `Modifier` is the base modifier class that all others extend from.
  *
  * @abstract
  */
-class Modifier {
+class Modifier implements IModifier {
   /**
    * The default modifier execution order.
    *
    * @type {number}
    */
-  static order = 999;
+  static order: number = 999;
+
+  order: number;
 
   /**
    * Create a `Modifier` instance.
    */
   constructor() {
     // set the modifier's sort order
-    this.order = this.constructor.order;
+    this.order = (this.constructor as typeof Modifier).order;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -25,7 +32,7 @@ class Modifier {
    *
    * @returns {string} 'modifier'
    */
-  get name() {
+  get name(): string {
     return 'modifier';
   }
   /* eslint-enable class-methods-use-this */
@@ -36,7 +43,7 @@ class Modifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return '';
   }
   /* eslint-enable class-methods-use-this */
@@ -47,7 +54,7 @@ class Modifier {
    *
    * @returns {number} `1000`
    */
-  get maxIterations() {
+  get maxIterations(): number {
     return 1000;
   }
 
@@ -58,7 +65,7 @@ class Modifier {
    *
    * @returns {object}
    */
-  defaults(_context) {
+  #defaults(_context: Modifiable): { [index: string]: unknown } {
     return {};
   }
   /* eslint-enable class-methods-use-this */
@@ -70,12 +77,13 @@ class Modifier {
    *
    * @returns {void}
    */
-  useDefaultsIfNeeded(_context) {
-    Object.entries(this.defaults(_context)).forEach(([field, value]) => {
-      if (typeof this[field] === 'undefined') {
-        this[field] = value;
-      }
-    });
+  #useDefaultsIfNeeded(_context: Modifiable): void {
+    (Object.entries(this.#defaults(_context)) as [keyof this, any][])
+      .forEach(([field, value]) => {
+        if (typeof this[field] === 'undefined') {
+          this[field] = value;
+        }
+      });
   }
 
   /* eslint-disable class-methods-use-this */
@@ -87,8 +95,8 @@ class Modifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
-    this.useDefaultsIfNeeded(_context);
+  run(results: RollResults, _context: Modifiable): RollResults {
+    this.#useDefaultsIfNeeded(_context);
     return results;
   }
   /* eslint-enable class-methods-use-this */
@@ -106,7 +114,7 @@ class Modifier {
     return {
       name,
       notation,
-      type: 'modifier',
+      type: ModelType.Modifier,
     };
   }
 
@@ -119,7 +127,7 @@ class Modifier {
    *
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     return this.notation;
   }
 }

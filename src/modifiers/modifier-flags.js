@@ -1,4 +1,4 @@
-import Modifier from './Modifier.js';
+import Modifier from './Modifier.ts';
 
 const flags = {
   compound: '!',

@@ -1,5 +1,5 @@
 import { FudgeDice, PercentileDice, StandardDice } from '../../src/dice/index.ts';
-import { RequiredArgumentError } from '../../src/exceptions/index.js';
+import { RequiredArgumentError } from '../../src/exceptions/index.ts';
 import {
   CriticalFailureModifier,
   CriticalSuccessModifier,
@@ -12,10 +12,10 @@ import {
   SortingModifier,
   TargetModifier,
   UniqueModifier,
-} from '../../src/modifiers/index.js';
+} from '../../src/modifiers/index.ts';
 import * as parser from '../../src/parser/grammars/grammar.js';
-import Parser from '../../src/parser/Parser.js';
-import Description from '../../src/Description.js';
+import Parser from '../../src/parser/Parser.ts';
+import Description from '../../src/Description.ts';
 
 describe('Parser', () => {
   describe('Initialisation', () => {

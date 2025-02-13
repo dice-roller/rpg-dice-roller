@@ -8,6 +8,9 @@
  * @property {number} BASE_64
  * @property {number} JSON
  * @property {number} OBJECT
+ *
+ * @deprected use @link{ExportFormat} instead
+ * @todo remove this file
  */
 const exportFormats = Object.freeze({
   BASE_64: 1,

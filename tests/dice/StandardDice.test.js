@@ -1,10 +1,10 @@
 import { StandardDice } from '../../src/dice/index.ts';
-import { RequiredArgumentError } from '../../src/exceptions/index.js';
-import { ExplodeModifier, Modifier, SortingModifier } from '../../src/modifiers/index.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
-import Description from '../../src/Description.js';
+import { RequiredArgumentError } from '../../src/exceptions/index.ts';
+import { ExplodeModifier, Modifier, SortingModifier } from '../../src/modifiers/index.ts';
+import ComparePoint from '../../src/ComparePoint.ts';
+import RollResult from '../../src/results/RollResult.ts';
+import RollResults from '../../src/results/RollResults.ts';
+import Description from '../../src/Description.ts';
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {

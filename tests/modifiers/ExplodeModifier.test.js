@@ -1,9 +1,9 @@
 import { StandardDice } from '../../src/dice/index.ts';
-import { DieActionValueError } from '../../src/exceptions/index.js';
-import { ComparisonModifier, ExplodeModifier } from '../../src/modifiers/index.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import RollResult from '../../src/results/RollResult.js';
-import RollResults from '../../src/results/RollResults.js';
+import { DieActionValueError } from '../../src/exceptions/index.ts';
+import { ComparisonModifier, ExplodeModifier } from '../../src/modifiers/index.ts';
+import ComparePoint from '../../src/ComparePoint.ts';
+import RollResult from '../../src/results/RollResult.ts';
+import RollResults from '../../src/results/RollResults.ts';
 
 describe('ExplodeModifier', () => {
   describe('Initialisation', () => {

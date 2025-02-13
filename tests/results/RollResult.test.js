@@ -1,4 +1,4 @@
-import RollResult from '../../src/results/RollResult.js';
+import RollResult from '../../src/results/RollResult.ts';
 
 describe('RollResult', () => {
   describe('Initialisation', () => {

@@ -1,10 +1,10 @@
 import { StandardDice } from '../src/dice/index.ts';
-import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.js';
+import { DataFormatError, NotationError, RequiredArgumentError } from '../src/exceptions/index.ts';
 import DiceRoll from '../src/DiceRoll.js';
-import Parser from '../src/parser/Parser.js';
+import Parser from '../src/parser/Parser.ts';
 import ResultGroup from '../src/results/ResultGroup.js';
-import RollResult from '../src/results/RollResult.js';
-import RollResults from '../src/results/RollResults.js';
+import RollResult from '../src/results/RollResult.ts';
+import RollResults from '../src/results/RollResults.ts';
 import exportFormats from '../src/utilities/ExportFormats.js';
 
 describe('DiceRoll', () => {

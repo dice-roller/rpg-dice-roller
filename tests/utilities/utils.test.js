@@ -1,4 +1,4 @@
-import * as diceUtils from '../../src/utilities/utils.js';
+import * as diceUtils from '../../src/utilities/utils.ts';
 import exportFormats from '../../src/utilities/ExportFormats.js';
 
 describe('Export formats', () => {

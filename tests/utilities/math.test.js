@@ -1,4 +1,4 @@
-import * as mathUtils from '../../src/utilities/math.js';
+import * as mathUtils from '../../src/utilities/math.ts';
 
 describe('Math utils', () => {
   test('model structure', () => {

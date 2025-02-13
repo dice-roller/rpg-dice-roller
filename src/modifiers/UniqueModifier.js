@@ -1,4 +1,4 @@
-import { DieActionValueError } from '../exceptions/index.js';
+import { DieActionValueError } from '../exceptions/index.ts';
 import ComparisonModifier from './ComparisonModifier.js';
 
 const onceSymbol = Symbol('once');

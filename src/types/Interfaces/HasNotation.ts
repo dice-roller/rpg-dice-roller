@@ -1,3 +1,3 @@
 export interface HasNotation {
-  readonly notation: string,
+  notation: string,
 }

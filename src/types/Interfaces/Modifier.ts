@@ -1,18 +1,19 @@
-import RollResults from "../../results/RollResults";
 import { ModelType } from "../Enums/ModelType";
 import { Stringable } from "./Stringable";
 import {Modifiable} from "./Modifiable";
+import { Nameable } from "./Nameable";
+import { HasNotation } from "./HasNotation";
+import { ResultCollection } from "./Results/ResultCollection";
 
-export interface Modifier extends Stringable {
+export interface Modifier extends Readonly<HasNotation>, Readonly<Nameable>, Stringable {
   readonly maxIterations: number;
   readonly name: string;
-  readonly notation: string;
-  readonly order: number;
+  order: number;
 
-  run(results: RollResults, context: Modifiable): RollResults;
+  run(results: ResultCollection, context: Modifiable): ResultCollection;
   toJSON(): {
     name: string;
     notation: string;
-    type: typeof ModelType.Modifier;
+    type: ModelType;
   };
 }

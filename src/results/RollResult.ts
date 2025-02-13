@@ -1,11 +1,7 @@
-import { isNumeric } from '../utilities/math.js';
+import { isNumeric } from '../utilities/math';
 import getModifierFlags from '../modifiers/modifier-flags.js';
-
-const calculationValueSymbol = Symbol('calculation-value');
-const modifiersSymbol = Symbol('modifiers');
-const initialValueSymbol = Symbol('initial-value');
-const useInTotalSymbol = Symbol('use-in-total');
-const valueSymbol = Symbol('value');
+import { Result } from "../types/Interfaces/Results/Result";
+import { ResultValue } from "../types/Interfaces/Results/ResultValue";
 
 /**
  * A `RollResult` represents the value and applicable modifiers for a single die roll
@@ -15,7 +11,14 @@ const valueSymbol = Symbol('value');
  * rolls, but `RollResult` objects will be returned when rolling dice.
  * :::
  */
-class RollResult {
+class RollResult implements Result {
+  readonly #initialValue: number;
+
+  #calculationValue: number|null = null;
+  #modifiers: Set<string> = new Set();
+  #useInTotal: boolean = true;
+  #value!: number|null;
+
   /**
    * Create a `RollResult` instance.
    *
@@ -48,9 +51,9 @@ class RollResult {
    *
    * @throws {TypeError} Result value, calculation value, or modifiers are invalid
    */
-  constructor(value, modifiers = [], useInTotal = true) {
+  constructor(value: number|ResultValue, modifiers: string[]|Set<string> = [], useInTotal: boolean = true) {
     if (isNumeric(value)) {
-      this[initialValueSymbol] = Number(value);
+      this.#initialValue = Number(value);
 
       this.modifiers = modifiers || [];
       this.useInTotal = useInTotal;
@@ -61,11 +64,11 @@ class RollResult {
         throw new TypeError(`Result value is invalid: ${initialVal}`);
       }
 
-      this[initialValueSymbol] = Number(initialVal);
+      this.#initialValue = Number(initialVal);
 
       if (
         isNumeric(value.value)
-        && (Number(value.value) !== this[initialValueSymbol])
+        && (Number(value.value) !== this.#initialValue)
       ) {
         this.value = value.value;
       }
@@ -92,9 +95,9 @@ class RollResult {
    *
    * @returns {number}
    */
-  get calculationValue() {
-    return isNumeric(this[calculationValueSymbol])
-      ? parseFloat(this[calculationValueSymbol])
+  get calculationValue(): number {
+    return isNumeric(this.#calculationValue)
+      ? parseFloat(`${this.#calculationValue}`)
       : this.value;
   }
 
@@ -105,7 +108,7 @@ class RollResult {
    *
    * @throws {TypeError} value is invalid
    */
-  set calculationValue(value) {
+  set calculationValue(value: number) {
     const isValNumeric = isNumeric(value);
     if (value === Infinity) {
       throw new RangeError('Result calculation value must be a finite number');
@@ -114,7 +117,7 @@ class RollResult {
       throw new TypeError(`Result calculation value is invalid: ${value}`);
     }
 
-    this[calculationValueSymbol] = isValNumeric ? parseFloat(`${value}`) : null;
+    this.#calculationValue = isValNumeric ? parseFloat(`${value}`) : null;
   }
 
   /**
@@ -127,8 +130,8 @@ class RollResult {
    *
    * @returns {number}
    */
-  get initialValue() {
-    return this[initialValueSymbol];
+  get initialValue(): number {
+    return this.#initialValue;
   }
 
   /**
@@ -138,7 +141,7 @@ class RollResult {
    *
    * @returns {string}
    */
-  get modifierFlags() {
+  get modifierFlags(): string {
     return getModifierFlags(...this.modifiers);
   }
 
@@ -147,8 +150,8 @@ class RollResult {
    *
    * @returns {Set<string>}
    */
-  get modifiers() {
-    return this[modifiersSymbol];
+  get modifiers(): Set<string> {
+    return this.#modifiers;
   }
 
   /**
@@ -161,16 +164,16 @@ class RollResult {
    *
    * @throws {TypeError} modifiers must be a Set or array of modifier names
    */
-  set modifiers(value) {
+  set modifiers(value: Set<string>|string[]) {
     if ((Array.isArray(value) || (value instanceof Set)) && [...value].every((item) => typeof item === 'string')) {
-      this[modifiersSymbol] = new Set([...value]);
+      this.#modifiers = new Set([...value]);
 
       return;
     }
 
     if (!value && (value !== 0)) {
       // clear the modifiers
-      this[modifiersSymbol] = new Set();
+      this.#modifiers = new Set();
 
       return;
     }
@@ -183,8 +186,8 @@ class RollResult {
    *
    * @returns {boolean}
    */
-  get useInTotal() {
-    return !!this[useInTotalSymbol];
+  get useInTotal(): boolean {
+    return this.#useInTotal;
   }
 
   /**
@@ -192,8 +195,8 @@ class RollResult {
    *
    * @param {boolean} value
    */
-  set useInTotal(value) {
-    this[useInTotalSymbol] = !!value;
+  set useInTotal(value: boolean) {
+    this.#useInTotal = !!value;
   }
 
   /**
@@ -201,8 +204,10 @@ class RollResult {
    *
    * @returns {number}
    */
-  get value() {
-    return isNumeric(this[valueSymbol]) ? this[valueSymbol] : this[initialValueSymbol];
+  get value(): number {
+    return isNumeric(this.#value)
+      ? this.#value as number
+      : this.#initialValue;
   }
 
   /**
@@ -213,7 +218,7 @@ class RollResult {
    * @throws {RangeError} value must be finite
    * @throws {TypeError} value is invalid
    */
-  set value(value) {
+  set value(value: number) {
     if (value === Infinity) {
       throw new RangeError('Result value must be a finite number');
     }
@@ -221,7 +226,7 @@ class RollResult {
       throw new TypeError(`Result value is invalid: ${value}`);
     }
 
-    this[valueSymbol] = Number(value);
+    this.#value = Number(value);
   }
 
   /**
@@ -239,7 +244,7 @@ class RollResult {
    *  value: number
    * }}
    */
-  toJSON() {
+  toJSON(): object {
     const {
       calculationValue, initialValue, modifierFlags, modifiers, useInTotal, value,
     } = this;
@@ -262,8 +267,8 @@ class RollResult {
    *
    * @returns {string}
    */
-  toString() {
-    return this.value + this.modifierFlags;
+  toString(): string {
+    return `${this.value}${this.modifierFlags}`;
   }
 }
 

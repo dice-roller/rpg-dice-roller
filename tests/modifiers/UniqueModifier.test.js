@@ -1,9 +1,9 @@
-import { ComparisonModifier, UniqueModifier } from '../../src/modifiers/index.js';
+import { ComparisonModifier, UniqueModifier } from '../../src/modifiers/index.ts';
 import { StandardDice } from '../../src/dice/index.ts';
-import { DieActionValueError } from '../../src/exceptions/index.js';
-import ComparePoint from '../../src/ComparePoint.js';
-import RollResults from '../../src/results/RollResults.js';
-import RollResult from '../../src/results/RollResult.js';
+import { DieActionValueError } from '../../src/exceptions/index.ts';
+import ComparePoint from '../../src/ComparePoint.ts';
+import RollResults from '../../src/results/RollResults.ts';
+import RollResult from '../../src/results/RollResult.ts';
 
 describe('UniqueModifier', () => {
   describe('Initialisation', () => {

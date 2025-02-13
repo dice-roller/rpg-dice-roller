@@ -1,4 +1,5 @@
 import { evaluate as mathEval } from 'mathjs';
+import { ComparisonOperator } from "../types/Enums/ComparisonOperator";
 
 /**
  * Check if `a` is comparative to `b` with the given operator.
@@ -21,43 +22,33 @@ import { evaluate as mathEval } from 'mathjs';
  *
  * @returns {boolean} `true` if the comparison matches, `false` otherwise
  */
-const compareNumbers = (a, b, operator) => {
+const compareNumbers = (a: number, b: number, operator: ComparisonOperator): boolean => {
   const aNum = Number(a);
   const bNum = Number(b);
-  let result;
 
   if (Number.isNaN(aNum) || Number.isNaN(bNum)) {
     return false;
   }
 
   switch (operator) {
-    case '=':
-    case '==':
-      result = aNum === bNum;
-      break;
-    case '<':
-      result = aNum < bNum;
-      break;
-    case '>':
-      result = aNum > bNum;
-      break;
-    case '<=':
-      result = aNum <= bNum;
-      break;
-    case '>=':
-      result = aNum >= bNum;
-      break;
-    case '!':
-    case '!=':
-    case '<>':
-      result = aNum !== bNum;
-      break;
+    case ComparisonOperator.Equal:
+    case ComparisonOperator.EqualDouble:
+      return aNum === bNum;
+    case ComparisonOperator.LessThan:
+      return aNum < bNum;
+    case ComparisonOperator.GreaterThan:
+      return aNum > bNum;
+    case ComparisonOperator.LessThanOrEqual:
+      return aNum <= bNum;
+    case ComparisonOperator.GreaterThanOrEqual:
+      return aNum >= bNum;
+    case ComparisonOperator.NotEqual:
+    case ComparisonOperator.NotEqualSimple:
+    case ComparisonOperator.NotEqualArrows:
+      return aNum !== bNum;
     default:
-      result = false;
-      break;
+      return false;
   }
-
-  return result;
 };
 
 /**
@@ -70,7 +61,7 @@ const compareNumbers = (a, b, operator) => {
  *
  * @returns {number} The result of the equation
  */
-const evaluate = (equation) => mathEval(equation);
+const evaluate = (equation: string): number => mathEval(equation);
 
 /**
  * Check if the given value is a valid finite number.
@@ -79,7 +70,7 @@ const evaluate = (equation) => mathEval(equation);
  *
  * @returns {boolean} `true` if it is a finite number, `false` otherwise
  */
-const isNumeric = (val) => {
+const isNumeric = (val: unknown): boolean => {
   if ((typeof val !== 'number') && (typeof val !== 'string')) {
     return false;
   }
@@ -97,7 +88,7 @@ const isNumeric = (val) => {
  *
  * @returns {boolean} `true` if the value is a "safe" number, `false` otherwise
  */
-const isSafeNumber = (val) => {
+const isSafeNumber = (val: unknown): boolean => {
   if (!isNumeric(val)) {
     return false;
   }
@@ -114,10 +105,12 @@ const isSafeNumber = (val) => {
  *
  * @returns {number} The summed value
  */
-const sumArray = (numbers) => (
-  !Array.isArray(numbers) ? 0 : numbers.reduce((prev, current) => (
-    prev + (isNumeric(current) ? parseFloat(`${current}`) : 0)
-  ), 0)
+const sumArray = (numbers: number[]): number => (
+  !Array.isArray(numbers)
+    ? 0
+    : numbers.reduce((prev, current): number => (
+      prev + (isNumeric(current) ? parseFloat(`${current}`) : 0)
+    ), 0)
 );
 
 /**
@@ -134,7 +127,7 @@ const sumArray = (numbers) => (
  *
  * @returns {number}
  */
-const toFixed = (num, precision = 0) => (
+const toFixed = (num: number, precision: number = 0): number => (
   // round to precision, then cast to a number to remove trailing zeroes after the decimal point
   parseFloat(parseFloat(`${num}`).toFixed(precision || 0))
 );

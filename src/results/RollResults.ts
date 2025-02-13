@@ -1,6 +1,5 @@
 import RollResult from './RollResult.js';
-
-const rollsSymbol = Symbol('rolls');
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
 
 /**
  * A collection of die roll results
@@ -10,7 +9,9 @@ const rollsSymbol = Symbol('rolls');
  * rolls, but RollResults objects will be returned when rolling dice.
  * :::
  */
-class RollResults {
+class RollResults implements ResultCollection {
+  #rolls: RollResult[] = [];
+
   /**
    * Create a `RollResults` instance.
    *
@@ -35,7 +36,7 @@ class RollResults {
    *
    * @throws {TypeError} Rolls must be an array
    */
-  constructor(rolls = []) {
+  constructor(rolls: RollResult[]|number[] = []) {
     this.rolls = rolls;
   }
 
@@ -53,8 +54,8 @@ class RollResults {
    *
    * @returns {RollResult[]}
    */
-  get rolls() {
-    return [...this[rollsSymbol]];
+  get rolls(): RollResult[] {
+    return [...this.#rolls];
   }
 
   /**
@@ -64,14 +65,14 @@ class RollResults {
    *
    * @throws {TypeError} Rolls must be an array
    */
-  set rolls(rolls) {
+  set rolls(rolls: RollResult[]|number[]) {
     if (!rolls || !Array.isArray(rolls)) {
       // roll is not an array
       throw new TypeError(`rolls must be an array: ${rolls}`);
     }
 
     // loop through each result and add it to the rolls list
-    this[rollsSymbol] = [];
+    this.#rolls = [];
     rolls.forEach((result) => {
       this.addRoll(result);
     });
@@ -82,8 +83,14 @@ class RollResults {
    *
    * @returns {number}
    */
-  get value() {
-    return this.rolls.reduce((v, roll) => v + (roll.useInTotal ? roll.calculationValue : 0), 0);
+  get value(): number {
+    return this
+      .rolls
+      .filter((roll) => roll.useInTotal)
+      .reduce(
+        (carry, roll) => carry + roll.calculationValue,
+        0
+      );
   }
 
   /**
@@ -91,10 +98,10 @@ class RollResults {
    *
    * @param {RollResult|number} value
    */
-  addRoll(value) {
+  addRoll(value: RollResult|number): void {
     const result = (value instanceof RollResult) ? value : new RollResult(value);
 
-    this[rollsSymbol].push(result);
+    this.#rolls.push(result);
   }
 
   /**
@@ -104,7 +111,7 @@ class RollResults {
    *
    * @returns {{rolls: RollResult[], value: number}}
    */
-  toJSON() {
+  toJSON(): object {
     const { rolls, value } = this;
 
     return {
@@ -121,7 +128,7 @@ class RollResults {
    *
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     return `[${this.rolls.join(', ')}]`;
   }
 }

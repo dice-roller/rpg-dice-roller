@@ -1,4 +1,4 @@
-import { CompareOperatorError } from '../../src/exceptions/index.js';
+import { CompareOperatorError } from '../../src/exceptions/index.ts';
 
 describe('CompareOperatorError', () => {
   test('throws correct message', () => {

@@ -1,4 +1,4 @@
-import { RequiredArgumentError } from '../exceptions/index.js';
+import { RequiredArgumentError } from '../exceptions/index';
 import * as parser from './grammars/grammar.js';
 
 /**
@@ -22,7 +22,7 @@ class Parser {
    * @throws {SyntaxError} The notation syntax is invalid
    * @throws {TypeError} Notation must be a string
    */
-  static parse(notation) {
+  static parse(notation: string): unknown[] {
     if (!notation) {
       throw new RequiredArgumentError('notation');
     }

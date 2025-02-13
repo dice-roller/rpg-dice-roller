@@ -1,5 +1,5 @@
-import { CompareOperatorError, RequiredArgumentError } from '../src/exceptions/index.js';
-import ComparePoint from '../src/ComparePoint.js';
+import { CompareOperatorError, RequiredArgumentError } from '../src/exceptions/index.ts';
+import ComparePoint from '../src/ComparePoint.ts';
 
 describe('ComparePoint', () => {
   describe('Initialisation', () => {

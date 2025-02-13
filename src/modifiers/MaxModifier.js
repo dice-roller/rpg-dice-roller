@@ -1,5 +1,5 @@
-import { isNumeric } from '../utilities/math.js';
-import Modifier from './Modifier.js';
+import { isNumeric } from '../utilities/math.ts';
+import Modifier from './Modifier.ts';
 
 const maxSymbol = Symbol('max');
 

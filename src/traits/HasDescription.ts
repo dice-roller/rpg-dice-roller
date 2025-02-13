@@ -3,14 +3,14 @@ import {Stringable} from "../types/Interfaces/Stringable";
 import {JsonSerializable} from "../types/Interfaces/JsonSerializable";
 import {Describable} from "../types/Interfaces/Describable";
 
-const descriptionSymbol = Symbol('description');
-
 /**
  * A base class for description functionality.
  *
  * @abstract
  */
 class HasDescription implements Describable, JsonSerializable, Stringable {
+  #description: Description|null = null;
+
   constructor(text: Description|string|null = null) {
     this.description = text;
   }
@@ -21,7 +21,7 @@ class HasDescription implements Describable, JsonSerializable, Stringable {
    * @return {Description|null}
    */
   get description(): Description|null {
-    return this[descriptionSymbol] || null;
+    return this.#description || null;
   }
 
   /**
@@ -31,11 +31,11 @@ class HasDescription implements Describable, JsonSerializable, Stringable {
    */
   set description(description: Description|string|null) {
     if (!description) {
-      this[descriptionSymbol] = null;
+      this.#description = null;
     } else if (description instanceof Description) {
-      this[descriptionSymbol] = description;
+      this.#description = description;
     } else if (typeof description === 'string') {
-      this[descriptionSymbol] = new Description(description);
+      this.#description = new Description(description);
     } else {
       throw new TypeError(`description must be of type Description, string or null. Received ${typeof description}`);
     }

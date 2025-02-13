@@ -1,14 +1,11 @@
-const textSymbol = Symbol('text');
-const typeSymbol = Symbol('type');
+import { DescriptionType } from "./types/Enums/DescriptionType";
 
 /**
  * Represents a Roll / Roll group description.
  */
 class Description {
-  static types = {
-    MULTILINE: 'multiline',
-    INLINE: 'inline',
-  };
+  #text: string = '';
+  #type: DescriptionType = DescriptionType.Inline;
 
   /**
    * Create a `Description` instance.
@@ -16,7 +13,7 @@ class Description {
    * @param {string} text
    * @param {string} [type=inline]
    */
-  constructor(text, type = this.constructor.types.INLINE) {
+  constructor(text: string, type: DescriptionType = DescriptionType.Inline) {
     this.text = text;
     this.type = type;
   }
@@ -26,8 +23,8 @@ class Description {
    *
    * @return {string}
    */
-  get text() {
-    return this[textSymbol];
+  get text(): string {
+    return this.#text;
   }
 
   /**
@@ -35,14 +32,14 @@ class Description {
    *
    * @param {string|number} text
    */
-  set text(text) {
+  set text(text: string) {
     if (typeof text === 'object') {
       throw new TypeError('Description text is invalid');
     } else if ((!text && (text !== 0)) || (`${text}`.trim() === '')) {
       throw new TypeError('Description text cannot be empty');
     }
 
-    this[textSymbol] = `${text}`.trim();
+    this.#text = `${text}`.trim();
   }
 
   /**
@@ -50,8 +47,8 @@ class Description {
    *
    * @return {string} "inline" or "multiline"
    */
-  get type() {
-    return this[typeSymbol];
+  get type(): DescriptionType {
+    return this.#type;
   }
 
   /**
@@ -59,8 +56,8 @@ class Description {
    *
    * @param {string} type
    */
-  set type(type) {
-    const types = Object.values(this.constructor.types);
+  set type(type: DescriptionType) {
+    const types = Object.values(DescriptionType);
 
     if (typeof type !== 'string') {
       throw new TypeError('Description type must be a string');
@@ -68,7 +65,7 @@ class Description {
       throw new RangeError(`Description type must be one of; ${types.join(', ')}`);
     }
 
-    this[typeSymbol] = type;
+    this.#type = type;
   }
 
   /**
@@ -96,8 +93,8 @@ class Description {
    *
    * @returns {string}
    */
-  toString() {
-    if (this.type === this.constructor.types.INLINE) {
+  toString(): string {
+    if (this.type === DescriptionType.Inline) {
       return `# ${this.text}`;
     }
 

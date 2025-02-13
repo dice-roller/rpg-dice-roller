@@ -1,29 +1,16 @@
-import { CompareOperatorError, RequiredArgumentError } from './exceptions/index.js';
+import { CompareOperatorError, RequiredArgumentError } from './exceptions/index';
 import { compareNumbers, isNumeric } from './utilities/math.js';
-
-/**
- * The operator
- *
- * @type {symbol}
- *
- * @private
- */
-const operatorSymbol = Symbol('operator');
-
-/**
- * The value
- *
- * @type {symbol}
- *
- * @private
- */
-const valueSymbol = Symbol('value');
+import { ComparisonOperator } from "./types/Enums/ComparisonOperator";
+import { Comparator } from "./types/Interfaces/Comparator";
 
 /**
  * A `ComparePoint` object compares numbers against each other.
  * For example, _is 6 greater than 3_, or _is 8 equal to 10_.
  */
-class ComparePoint {
+class ComparePoint implements Comparator {
+  #operator!: ComparisonOperator;
+  #value!: number;
+
   /**
    * Create a `ComparePoint` instance.
    *
@@ -34,7 +21,7 @@ class ComparePoint {
    * @throws {RequiredArgumentError} operator and value are required
    * @throws {TypeError} value must be numeric
    */
-  constructor(operator, value) {
+  constructor(operator: ComparisonOperator|string, value: number) {
     if (!operator) {
       throw new RequiredArgumentError('operator');
     } else if (!value && (value !== 0)) {
@@ -51,9 +38,12 @@ class ComparePoint {
    * @param {string} operator
    *
    * @returns {boolean} `true` if the operator is valid, `false` otherwise
+   *
+   * @todo move this to a helper
    */
-  static isValidOperator(operator) {
-    return (typeof operator === 'string') && /^(?:[<>!]?=|[<>]|<>)$/.test(operator);
+  static isValidOperator(operator: ComparisonOperator|string): boolean {
+    return (typeof operator === 'string')
+      && Object.values(ComparisonOperator).includes(operator as any);
   }
 
   /**
@@ -63,12 +53,12 @@ class ComparePoint {
    *
    * @throws CompareOperatorError operator is invalid
    */
-  set operator(operator) {
-    if (!this.constructor.isValidOperator(operator)) {
+  set operator(operator: ComparisonOperator|string) {
+    if (!(this.constructor as typeof ComparePoint).isValidOperator(operator)) {
       throw new CompareOperatorError(operator);
     }
 
-    this[operatorSymbol] = operator;
+    this.#operator = operator as ComparisonOperator;
   }
 
   /**
@@ -76,8 +66,8 @@ class ComparePoint {
    *
    * @returns {string}
    */
-  get operator() {
-    return this[operatorSymbol];
+  get operator(): ComparisonOperator {
+    return this.#operator;
   }
 
   /**
@@ -87,12 +77,12 @@ class ComparePoint {
    *
    * @throws {TypeError} value must be numeric
    */
-  set value(value) {
+  set value(value: number) {
     if (!isNumeric(value)) {
       throw new TypeError('value must be a finite number');
     }
 
-    this[valueSymbol] = Number(value);
+    this.#value = Number(value);
   }
 
   /**
@@ -100,8 +90,8 @@ class ComparePoint {
    *
    * @returns {number}
    */
-  get value() {
-    return this[valueSymbol];
+  get value(): number {
+    return this.#value;
   }
 
   /**
@@ -111,7 +101,7 @@ class ComparePoint {
    *
    * @returns {boolean} `true` if it is a match, `false` otherwise
    */
-  isMatch(value) {
+  isMatch(value: number): boolean {
     return compareNumbers(value, this.value, this.operator);
   }
 
@@ -139,7 +129,7 @@ class ComparePoint {
    *
    * @returns {string}
    */
-  toString() {
+  toString(): string {
     return `${this.operator}${this.value}`;
   }
 }

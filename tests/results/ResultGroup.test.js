@@ -1,5 +1,5 @@
 import ResultGroup from '../../src/results/ResultGroup.js';
-import RollResults from '../../src/results/RollResults.js';
+import RollResults from '../../src/results/RollResults.ts';
 
 describe('ResultGroup', () => {
   let group;

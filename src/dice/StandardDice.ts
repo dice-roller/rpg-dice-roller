@@ -1,25 +1,25 @@
-import { RequiredArgumentError } from '../exceptions/index.js';
+import { RequiredArgumentError } from '../exceptions';
 import { isNumeric, isSafeNumber } from '../utilities/math.js';
-import { generator } from '../utilities/NumberGenerator.js';
+import { generator } from '../NumberGenerator/Generator.js';
 import HasDescription from '../traits/HasDescription.js';
 import RollResult from '../results/RollResult.js';
 import RollResults from '../results/RollResults.js';
 import Description from "../Description";
-import {Dice} from "../types/Interfaces/Dice";
-import {ModifierCollection} from "../types/Types/ModifierCollection";
-import {ModelType} from "../types/Enums/ModelType";
-import {Modifier} from "../types/Interfaces/Modifier";
+import { Dice } from "../types/Interfaces/Dice";
+import { ModifierCollection } from "../types/Types/ModifierCollection";
+import { ModelType } from "../types/Enums/ModelType";
+import { Modifier } from "../types/Interfaces/Modifier";
 import ModifierClass from '../modifiers/Modifier.js';
 
 /**
  * Represents a standard numerical die.
  */
 class StandardDice extends HasDescription implements Dice {
-  #max: number;
-  #min: number = 1;
+  readonly #max: number;
+  readonly #min: number = 1;
   #modifiers: ModifierCollection | null = null;
-  #sides: number;
-  #qty: number;
+  readonly #sides: number;
+  readonly #qty: number;
 
   /**
    * Create a `StandardDice` instance.
@@ -35,12 +35,12 @@ class StandardDice extends HasDescription implements Dice {
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
   constructor(
-      sides: number,
-      qty: number = 1,
-      modifiers: ModifierCollection | null = null,
-      min: number|null|undefined = 1,
-      max: number|null|undefined = null,
-      description: Description|string|null = null,
+    sides: number,
+    qty: number = 1,
+    modifiers: ModifierCollection | null = null,
+    min: number | null | undefined = 1,
+    max: number | null | undefined = null,
+    description: Description | string | null = null,
   ) {
     super(description);
 
@@ -119,7 +119,7 @@ class StandardDice extends HasDescription implements Dice {
    *
    * @throws {TypeError} Modifiers should be a Map, array of Modifiers, or an Object
    */
-  set modifiers(value: ModifierCollection|Modifier[]|object|null) {
+  set modifiers(value: ModifierCollection | Modifier[] | object | null) {
     let modifiers;
     if (value instanceof Map) {
       modifiers = value;
@@ -127,14 +127,14 @@ class StandardDice extends HasDescription implements Dice {
       // loop through and get the modifier name of each item and use it as the map key
       modifiers = new Map(value.map((modifier: Modifier) => [modifier.name, modifier]));
     } else if (typeof value === 'object') {
-      modifiers = new Map(Object.entries(value as {[index: string]: Modifier}));
+      modifiers = new Map(Object.entries(value as { [index: string]: Modifier }));
     } else {
       throw new TypeError('modifiers should be a Map, array, or an Object containing Modifiers');
     }
 
     if (
-        modifiers.size
-        && [...modifiers.entries()].some((entry) => !(entry[1] instanceof ModifierClass))
+      modifiers.size
+      && [...modifiers.entries()].some((entry) => !(entry[1] instanceof ModifierClass))
     ) {
       throw new TypeError('modifiers must only contain Modifier instances');
     }
@@ -258,20 +258,18 @@ class StandardDice extends HasDescription implements Dice {
       average, max, min, modifiers, name, notation, qty, sides,
     } = this;
 
-    return Object.assign(
-        super.toJSON(),
-        {
-          average,
-          max,
-          min,
-          modifiers,
-          name,
-          notation,
-          qty,
-          sides,
-          type: ModelType.Dice,
-        },
-    );
+    return {
+      ...super.toJSON(),
+      average,
+      max,
+      min,
+      modifiers,
+      name,
+      notation,
+      qty,
+      sides,
+      type: ModelType.Dice,
+    };
   }
 
   /**

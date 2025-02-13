@@ -1,6 +1,6 @@
-import { evaluate, isNumeric } from '../utilities/math.js';
+import { evaluate, isNumeric } from '../utilities/math.ts';
 import getModifierFlags from '../modifiers/modifier-flags.js';
-import RollResults from './RollResults.js';
+import RollResults from './RollResults.ts';
 
 const calculationValueSymbol = Symbol('calculation-value');
 const isRollGroupSymbol = Symbol('is-roll-group');

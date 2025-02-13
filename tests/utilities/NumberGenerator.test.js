@@ -1,5 +1,5 @@
 import { Random } from 'random-js';
-import { engines, generator } from '../../src/utilities/NumberGenerator.js';
+import { engines, generator } from '../../src/NumberGenerator/Generator.ts';
 
 describe('NumberGenerator', () => {
   describe('initialisation', () => {

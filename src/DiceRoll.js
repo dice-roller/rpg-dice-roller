@@ -1,11 +1,11 @@
 import { StandardDice } from './dice/index.ts';
-import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.js';
-import { toFixed } from './utilities/math.js';
-import { engines, generator } from './utilities/NumberGenerator.js';
-import { isBase64, isJson } from './utilities/utils.js';
-import Parser from './parser/Parser.js';
+import { DataFormatError, NotationError, RequiredArgumentError } from './exceptions/index.ts';
+import { toFixed } from './utilities/math.ts';
+import { engines, generator } from './NumberGenerator/Generator.ts';
+import { isBase64, isJson } from './utilities/utils.ts';
+import Parser from './parser/Parser.ts';
 import RollGroup from './RollGroup.js';
-import RollResults from './results/RollResults.js';
+import RollResults from './results/RollResults.ts';
 import ResultGroup from './results/ResultGroup.js';
 import exportFormats from './utilities/ExportFormats.js';
 

@@ -1,27 +1,29 @@
-import RollResults from "../../results/RollResults";
-import RollResult from "../../results/RollResult";
-import {Stringable} from "./Stringable";
-import {JsonSerializable} from "./JsonSerializable";
-import {ModelType} from "../Enums/ModelType";
+import { Stringable } from "./Stringable";
+import { JsonSerializable } from "./JsonSerializable";
+import { ModelType } from "../Enums/ModelType";
 import Description from "../../Description";
-import {Describable} from "./Describable";
-import {Modifiable} from "./Modifiable";
-import {HasNotation} from "./HasNotation";
-import {ModifierCollection} from "../Types/ModifierCollection";
+import { Describable } from "./Describable";
+import { Modifiable } from "./Modifiable";
+import { HasNotation } from "./HasNotation";
+import { ModifierCollection } from "../Types/ModifierCollection";
+import { Nameable } from "./Nameable";
+import { ResultCollection } from "./Results/ResultCollection";
+import { Result } from "./Results/Result";
 
-export interface Dice extends Describable, HasNotation, JsonSerializable, Modifiable, Stringable {
+export interface Dice extends Describable, Readonly<HasNotation>, JsonSerializable, Modifiable, Readonly<Nameable>, Stringable {
   readonly average: number;
   readonly max: number,
   readonly min: number,
-  readonly name: string,
   readonly qty: number;
   readonly sides: number | string;
 
-  roll(): RollResults;
-  rollOnce(): RollResult;
+  roll(): ResultCollection;
+
+  rollOnce(): Result;
+
   toJSON(): {
     average: number;
-    description: Description|null,
+    description: Description | null,
     max: number;
     min: number;
     modifiers: ModifierCollection | null;
@@ -29,6 +31,6 @@ export interface Dice extends Describable, HasNotation, JsonSerializable, Modifi
     notation: string;
     qty: number;
     sides: number | string;
-    type: typeof ModelType.Dice;
+    type: ModelType;
   };
 }

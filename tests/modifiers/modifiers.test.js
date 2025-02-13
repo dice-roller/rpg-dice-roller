@@ -6,8 +6,8 @@ import {
   KeepModifier,
   ReRollModifier,
   UniqueModifier,
-} from '../../src/modifiers/index.js';
-import RollResult from '../../src/results/RollResult.js';
+} from '../../src/modifiers/index.ts';
+import RollResult from '../../src/results/RollResult.ts';
 
 describe('Modifiers', () => {
   test('does not duplicate drop modifier', () => {

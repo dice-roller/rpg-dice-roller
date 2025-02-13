@@ -1,7 +1,7 @@
-import { ComparisonModifier, CriticalSuccessModifier } from '../../src/modifiers/index.js';
+import { ComparisonModifier, CriticalSuccessModifier } from '../../src/modifiers/index.ts';
 import { StandardDice } from '../../src/dice/index.ts';
-import ComparePoint from '../../src/ComparePoint.js';
-import RollResults from '../../src/results/RollResults.js';
+import ComparePoint from '../../src/ComparePoint.ts';
+import RollResults from '../../src/results/RollResults.ts';
 
 describe('CriticalSuccessModifier', () => {
   describe('Initialisation', () => {

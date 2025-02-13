@@ -1,6 +1,6 @@
 import { StandardDice } from '../../src/dice/index.ts';
-import { MaxModifier, Modifier } from '../../src/modifiers/index.js';
-import RollResults from '../../src/results/RollResults.js';
+import { MaxModifier, Modifier } from '../../src/modifiers/index.ts';
+import RollResults from '../../src/results/RollResults.ts';
 
 describe('MaxModifier', () => {
   let mod;

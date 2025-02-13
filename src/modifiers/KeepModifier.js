@@ -1,7 +1,7 @@
-import { isNumeric } from '../utilities/math.js';
-import Modifier from './Modifier.js';
+import { isNumeric } from '../utilities/math.ts';
+import Modifier from './Modifier.ts';
 import ResultGroup from '../results/ResultGroup.js';
-import RollResults from '../results/RollResults.js';
+import RollResults from '../results/RollResults.ts';
 
 const endSymbol = Symbol('end');
 const qtySymbol = Symbol('qty');

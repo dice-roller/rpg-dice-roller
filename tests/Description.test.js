@@ -1,4 +1,4 @@
-import Description from '../src/Description.js';
+import Description from '../src/Description.ts';
 
 describe('Description', () => {
   let description;

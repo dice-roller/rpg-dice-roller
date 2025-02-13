@@ -1,4 +1,4 @@
-import { generator } from '../utilities/NumberGenerator.js';
+import { generator } from '../NumberGenerator/Generator.js';
 import RollResult from '../results/RollResult.js';
 import StandardDice from './StandardDice';
 import {ModifierCollection} from "../types/Types/ModifierCollection";

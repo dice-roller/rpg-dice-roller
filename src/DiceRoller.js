@@ -1,5 +1,5 @@
-import { DataFormatError, RequiredArgumentError } from './exceptions/index.js';
-import { isBase64, isJson } from './utilities/utils.js';
+import { DataFormatError, RequiredArgumentError } from './exceptions/index.ts';
+import { isBase64, isJson } from './utilities/utils.ts';
 import DiceRoll from './DiceRoll.js';
 import exportFormats from './utilities/ExportFormats.js';
 
