@@ -1,7 +1,11 @@
-import { DieActionValueError } from '../exceptions/index.ts';
-import ComparisonModifier from './ComparisonModifier.ts';
-
-const onceSymbol = Symbol('once');
+import DieActionValueError from "../exceptions/DieActionValueError";
+import ComparisonModifier from './ComparisonModifier';
+import { Comparator } from "../types/Interfaces/Comparator";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import RollResults from "../results/RollResults";
+import StandardDice from "../dice/StandardDice";
 
 /**
  * A `ReRollModifier` re-rolls dice that match a given test, and replaces the new value with the old
@@ -12,21 +16,23 @@ const onceSymbol = Symbol('once');
  * @extends ComparisonModifier
  */
 class ReRollModifier extends ComparisonModifier {
+  #once: boolean = false;
+
   /**
    * The default modifier execution order.
    *
    * @type {number}
    */
-  static order = 4;
+  static order: number = 4;
 
   /**
    * Create a `ReRollModifier` instance.
    *
    * @param {boolean} [once=false] Whether to only re-roll once or not
-   * @param {ComparePoint} [comparePoint=null] The comparison object
+   * @param {ComparePoint} [comparator=null] The comparison object
    */
-  constructor(once = false, comparePoint = null) {
-    super(comparePoint);
+  constructor(once: boolean = false, comparator?: Comparator) {
+    super(comparator);
 
     this.once = !!once;
   }
@@ -37,7 +43,7 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @returns {string} 're-roll'
    */
-  get name() {
+  get name(): string {
     return 're-roll';
   }
   /* eslint-enable class-methods-use-this */
@@ -47,7 +53,7 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `r${this.once ? 'o' : ''}${super.notation}`;
   }
 
@@ -56,8 +62,8 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @returns {boolean} `true` if it should re-roll once, `false` otherwise
    */
-  get once() {
-    return !!this[onceSymbol];
+  get once(): boolean {
+    return !!this.#once;
   }
 
   /**
@@ -65,8 +71,8 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @param {boolean} value
    */
-  set once(value) {
-    this[onceSymbol] = !!value;
+  set once(value: boolean) {
+    this.#once = !!value;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -77,8 +83,12 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @returns {array}
    */
-  defaultComparePoint(_context) {
-    return ['=', _context.min];
+  protected defaultComparePoint(_context: Modifiable): [string, number]|null {
+    if ('min' in _context) {
+      return ['=', _context.min as number];
+    }
+
+    return null;
   }
   /* eslint-enable class-methods-use-this */
 
@@ -90,15 +100,22 @@ class ReRollModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     super.run(results, _context);
+
+    const isDice = _context instanceof StandardDice;
+
+    if (!isDice || !(results instanceof RollResults)){
+      return results;
+    }
 
     // ensure that the dice can explode without going into an infinite loop
     if (_context.min === _context.max) {
       throw new DieActionValueError(_context, 're-roll');
     }
 
-    results.rolls
+    results.rolls = results
+      .rolls
       .map((roll) => {
         // re-roll if the value matches the compare point, and we haven't hit the max iterations,
         // unless we're only rolling once and have already re-rolled
