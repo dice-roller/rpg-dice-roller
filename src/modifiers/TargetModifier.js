@@ -1,4 +1,4 @@
-import ComparisonModifier from './ComparisonModifier.js';
+import ComparisonModifier from './ComparisonModifier.ts';
 import ComparePoint from '../ComparePoint.ts';
 import ResultGroup from '../results/ResultGroup.ts';
 

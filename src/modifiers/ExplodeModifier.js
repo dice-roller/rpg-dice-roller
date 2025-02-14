@@ -1,6 +1,6 @@
 import { DieActionValueError } from '../exceptions/index.ts';
 import { sumArray } from '../utilities/math.ts';
-import ComparisonModifier from './ComparisonModifier.js';
+import ComparisonModifier from './ComparisonModifier.ts';
 
 const compoundSymbol = Symbol('compound');
 const penetrateSymbol = Symbol('penetrate');

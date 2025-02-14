@@ -1,4 +1,4 @@
-import { Modifier as IModifier } from '../types/Interfaces/Modifier';
+import { Modifier as IModifier } from '../types/Interfaces/Modifiers/Modifier';
 import { Modifiable } from "../types/Interfaces/Modifiable";
 import { ModelType } from "../types/Enums/ModelType";
 import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
@@ -66,7 +66,7 @@ class Modifier implements IModifier {
    *
    * @returns {object}
    */
-  #defaults(_context: Modifiable): { [index: string]: unknown } {
+  protected defaults(_context: Modifiable): { [index: string]: unknown } {
     return {};
   }
   /* eslint-enable class-methods-use-this */
@@ -78,8 +78,8 @@ class Modifier implements IModifier {
    *
    * @returns {void}
    */
-  #useDefaultsIfNeeded(_context: Modifiable): void {
-    (Object.entries(this.#defaults(_context)) as [keyof this, any][])
+  protected useDefaultsIfNeeded(_context: Modifiable): void {
+    (Object.entries(this.defaults(_context)) as [keyof this, any][])
       .forEach(([field, value]) => {
         if (typeof this[field] === 'undefined') {
           this[field] = value;
@@ -97,7 +97,7 @@ class Modifier implements IModifier {
    * @returns {RollResults} The modified results
    */
   run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
-    this.#useDefaultsIfNeeded(_context);
+    this.useDefaultsIfNeeded(_context);
     return results;
   }
   /* eslint-enable class-methods-use-this */

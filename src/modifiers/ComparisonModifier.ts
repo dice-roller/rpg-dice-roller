@@ -1,7 +1,8 @@
-import Modifier from './Modifier.ts';
-import ComparePoint from '../ComparePoint.ts';
-
-const comparePointSymbol = Symbol('compare-point');
+import Modifier from './Modifier';
+import ComparePoint from '../ComparePoint';
+import { Comparator } from "../types/Interfaces/Comparator";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ComparatorModifier } from "../types/Interfaces/Modifiers/ComparatorModifier";
 
 /**
  * A `ComparisonModifier` is the base modifier class for comparing values.
@@ -16,19 +17,21 @@ const comparePointSymbol = Symbol('compare-point');
  * @see {@link ReRollModifier}
  * @see {@link TargetModifier}
  */
-class ComparisonModifier extends Modifier {
+class ComparisonModifier extends Modifier implements ComparatorModifier {
+  #comparator: Comparator|undefined;
+
   /**
    * Create a `ComparisonModifier` instance.
    *
-   * @param {ComparePoint} [comparePoint] The comparison object
+   * @param {ComparePoint} [comparator] The comparison object
    *
    * @throws {TypeError} `comparePoint` must be an instance of `ComparePoint` or `undefined`
    */
-  constructor(comparePoint) {
+  constructor(comparator: Comparator) {
     super();
 
-    if (comparePoint) {
-      this.comparePoint = comparePoint;
+    if (comparator) {
+      this.comparePoint = comparator;
     }
   }
 
@@ -37,8 +40,8 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {ComparePoint|undefined}
    */
-  get comparePoint() {
-    return this[comparePointSymbol];
+  get comparePoint(): Comparator|undefined {
+    return this.#comparator;
   }
 
   /**
@@ -48,12 +51,12 @@ class ComparisonModifier extends Modifier {
    *
    * @throws {TypeError} value must be an instance of `ComparePoint`
    */
-  set comparePoint(comparePoint) {
+  set comparePoint(comparePoint: Comparator|undefined) {
     if (!(comparePoint instanceof ComparePoint)) {
       throw new TypeError('comparePoint must be instance of ComparePoint');
     }
 
-    this[comparePointSymbol] = comparePoint;
+    this.#comparator = comparePoint;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -62,7 +65,7 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {string} 'comparison'
    */
-  get name() {
+  get name(): string {
     return 'comparison';
   }
   /* eslint-enable class-methods-use-this */
@@ -72,7 +75,7 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `${this.comparePoint || ''}`;
   }
 
@@ -84,8 +87,8 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {null}
    */
-  defaultComparePoint(_context) {
-    return {};
+  protected defaultComparePoint(_context: Modifiable): [string, number]|null {
+    return null;
   }
   /* eslint-enable class-methods-use-this */
 
@@ -96,11 +99,13 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {object}
    */
-  defaults(_context) {
+  protected defaults(_context: Modifiable): { [index: string]: unknown } {
     const comparePointConfig = this.defaultComparePoint(_context);
 
-    if (typeof comparePointConfig === 'object' && comparePointConfig.length === 2) {
-      return { comparePoint: new ComparePoint(...comparePointConfig) };
+    if (Array.isArray(comparePointConfig) && comparePointConfig.length === 2) {
+      return {
+        comparePoint: new ComparePoint(...comparePointConfig),
+      };
     }
 
     return {};
@@ -113,12 +118,8 @@ class ComparisonModifier extends Modifier {
    *
    * @returns {boolean} `true` if the value matches, `false` otherwise
    */
-  isComparePoint(value) {
-    if (!this.comparePoint) {
-      return false;
-    }
-
-    return this.comparePoint.isMatch(value);
+  isComparePoint(value: number): boolean {
+    return this.comparePoint?.isMatch(value) ?? false;
   }
 
   /**

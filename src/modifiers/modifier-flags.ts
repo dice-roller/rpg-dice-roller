@@ -1,4 +1,4 @@
-import { Modifier } from "../types/Interfaces/Modifier";
+import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
 
 // @todo if we're keeping this functionality, possibly move to an enum
 const flags = {

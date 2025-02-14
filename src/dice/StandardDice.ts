@@ -8,7 +8,7 @@ import Description from "../Description";
 import { Dice } from "../types/Interfaces/Dice";
 import { ModifierCollection } from "../types/Types/ModifierCollection";
 import { ModelType } from "../types/Enums/ModelType";
-import { Modifier } from "../types/Interfaces/Modifier";
+import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
 import ModifierClass from '../modifiers/Modifier.js';
 
 /**

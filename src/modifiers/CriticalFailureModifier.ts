@@ -1,5 +1,10 @@
 /* eslint-disable no-useless-constructor */
-import ComparisonModifier from './ComparisonModifier.js';
+import ComparisonModifier from './ComparisonModifier';
+import { Comparator } from "../types/Interfaces/Comparator";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import RollResults from "../results/RollResults";
 
 /**
  * A `CriticalFailureModifier` modifier flags values that match a comparison.
@@ -16,17 +21,17 @@ class CriticalFailureModifier extends ComparisonModifier {
    *
    * @type {number}
    */
-  static order = 10;
+  static order: number = 10;
 
   /**
    * Create a `CriticalFailureModifier` instance.
    *
-   * @param {ComparePoint} [comparePoint] The comparison object
+   * @param {ComparePoint} [comparator] The comparison object
    *
    * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(comparePoint) {
-    super(comparePoint);
+  constructor(comparator: Comparator) {
+    super(comparator);
   }
 
   /* eslint-disable class-methods-use-this */
@@ -35,7 +40,7 @@ class CriticalFailureModifier extends ComparisonModifier {
    *
    * @returns {string} 'critical-failure'
    */
-  get name() {
+  get name(): string {
     return 'critical-failure';
   }
   /* eslint-enable class-methods-use-this */
@@ -45,7 +50,7 @@ class CriticalFailureModifier extends ComparisonModifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `cf${super.notation}`;
   }
 
@@ -57,8 +62,12 @@ class CriticalFailureModifier extends ComparisonModifier {
    *
    * @returns {array}
    */
-  defaultComparePoint(_context) {
-    return ['=', _context.min];
+  protected defaultComparePoint(_context: Modifiable): [string, number]|null {
+    if ('min' in _context) {
+      return ['=', _context.min as number];
+    }
+
+    return null;
   }
   /* eslint-enable class-methods-use-this */
 
@@ -70,18 +79,21 @@ class CriticalFailureModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     super.run(results, _context);
 
-    results.rolls
-      .forEach((roll) => {
-        // add the modifier flag
-        if (this.isComparePoint(roll.value)) {
-          roll.modifiers.add('critical-failure');
-        }
+    if (results instanceof RollResults) {
+      results.rolls = results
+        .rolls
+        .map((roll) => {
+          // add the modifier flag
+          if (this.isComparePoint(roll.value)) {
+            roll.modifiers.add(this.name);
+          }
 
-        return roll;
-      });
+          return roll;
+        });
+    }
 
     return results;
   }
