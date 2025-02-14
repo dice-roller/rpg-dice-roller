@@ -1,5 +1,5 @@
 import { evaluate, isNumeric } from '../utilities/math';
-import getModifierFlags from '../modifiers/modifier-flags.js';
+import getModifierFlags from '../modifiers/modifier-flags';
 import RollResults from './RollResults';
 import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
 import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";

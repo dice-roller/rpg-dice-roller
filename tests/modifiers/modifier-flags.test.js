@@ -1,4 +1,4 @@
-import getModifierFlags from '../../src/modifiers/modifier-flags.js';
+import getModifierFlags from '../../src/modifiers/modifier-flags';
 import ExplodeModifier from '../../src/modifiers/ExplodeModifier.js';
 
 describe('Modifier flags', () => {

@@ -1,5 +1,5 @@
 import { isNumeric } from '../utilities/math';
-import getModifierFlags from '../modifiers/modifier-flags.js';
+import getModifierFlags from '../modifiers/modifier-flags';
 import { SingleResult } from "../types/Interfaces/Results/SingleResult";
 import { ResultValue } from "../types/Interfaces/Results/ResultValue";
 import { ModelType } from "../types/Enums/ModelType";
