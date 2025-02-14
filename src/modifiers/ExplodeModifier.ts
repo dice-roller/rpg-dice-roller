@@ -1,9 +1,12 @@
-import { DieActionValueError } from '../exceptions/index.ts';
-import { sumArray } from '../utilities/math.ts';
-import ComparisonModifier from './ComparisonModifier.ts';
-
-const compoundSymbol = Symbol('compound');
-const penetrateSymbol = Symbol('penetrate');
+import DieActionValueError from "../exceptions/DieActionValueError";
+import { sumArray } from '../utilities/math';
+import ComparisonModifier from './ComparisonModifier';
+import { Comparator } from "../types/Interfaces/Comparator";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import StandardDice from "../dice/StandardDice";
+import RollResults from "../results/RollResults";
 
 /**
  * An `ExplodeModifier` re-rolls dice that match a given test, and adds them to the results.
@@ -18,22 +21,25 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @type {number}
    */
-  static order = 3;
+  static order: number = 3;
+
+  #compound: boolean;
+  #penetrate: boolean;
 
   /**
    * Create an `ExplodeModifier` instance
    *
-   * @param {ComparePoint} [comparePoint=null] The comparison object
+   * @param {ComparePoint} [comparator=null] The comparison object
    * @param {boolean} [compound=false] Whether to compound or not
    * @param {boolean} [penetrate=false] Whether to penetrate or not
    *
    * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(comparePoint = null, compound = false, penetrate = false) {
-    super(comparePoint);
+  constructor(comparator?: Comparator, compound: boolean = false, penetrate: boolean = false) {
+    super(comparator);
 
-    this[compoundSymbol] = !!compound;
-    this[penetrateSymbol] = !!penetrate;
+    this.#compound = !!compound;
+    this.#penetrate = !!penetrate;
   }
 
   /**
@@ -41,8 +47,8 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {boolean} `true` if it should compound, `false` otherwise
    */
-  get compound() {
-    return this[compoundSymbol];
+  get compound(): boolean {
+    return this.#compound;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -51,7 +57,7 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {string} 'explode'
    */
-  get name() {
+  get name(): string {
     return 'explode';
   }
   /* eslint-enable class-methods-use-this */
@@ -61,7 +67,7 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `!${this.compound ? '!' : ''}${this.penetrate ? 'p' : ''}${super.notation}`;
   }
 
@@ -70,8 +76,8 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {boolean} `true` if it should penetrate, `false` otherwise
    */
-  get penetrate() {
-    return this[penetrateSymbol];
+  get penetrate(): boolean {
+    return this.#penetrate;
   }
 
   /* eslint-disable class-methods-use-this */
@@ -82,8 +88,12 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {array}
    */
-  defaultComparePoint(_context) {
-    return ['=', _context.max];
+  protected defaultComparePoint(_context: Modifiable): [string, number]|null {
+    if ('max' in _context) {
+      return ['=', _context.max as number];
+    }
+
+    return null;
   }
   /* eslint-enable class-methods-use-this */
 
@@ -95,8 +105,14 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     super.run(results, _context);
+
+    const isDice = _context instanceof StandardDice;
+
+    if (!isDice || !(results instanceof RollResults)){
+      return results;
+    }
 
     // ensure that the dice can explode without going into an infinite loop
     if (_context.min === _context.max) {
@@ -105,7 +121,8 @@ class ExplodeModifier extends ComparisonModifier {
 
     const parsedResults = results;
 
-    parsedResults.rolls = results.rolls
+    parsedResults.rolls = results
+      .rolls
       .map((roll) => {
         const subRolls = [roll];
         let compareValue = roll.value;
@@ -133,14 +150,14 @@ class ExplodeModifier extends ComparisonModifier {
         }
 
         // return the rolls (Compounded if necessary)
-        /* eslint-disable  no-param-reassign */
+        /* eslint-disable no-param-reassign */
         if (this.compound && (subRolls.length > 1)) {
           // update the roll value and modifiers
           roll.value = sumArray(subRolls.map((result) => result.value));
-          roll.modifiers = [
+          roll.modifiers = new Set([
             'explode',
             'compound',
-          ];
+          ]);
 
           if (this.penetrate) {
             roll.modifiers.add('penetrate');

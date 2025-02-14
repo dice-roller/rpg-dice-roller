@@ -1,5 +1,5 @@
 import getModifierFlags from '../../src/modifiers/modifier-flags';
-import ExplodeModifier from '../../src/modifiers/ExplodeModifier.js';
+import ExplodeModifier from '../../src/modifiers/ExplodeModifier.ts';
 
 describe('Modifier flags', () => {
   test('returns a string', () => {

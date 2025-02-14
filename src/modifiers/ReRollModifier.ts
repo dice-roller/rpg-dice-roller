@@ -114,7 +114,9 @@ class ReRollModifier extends ComparisonModifier {
       throw new DieActionValueError(_context, 're-roll');
     }
 
-    results.rolls = results
+    const parsedResults = results;
+
+    parsedResults.rolls = results
       .rolls
       .map((roll) => {
         // re-roll if the value matches the compare point, and we haven't hit the max iterations,
@@ -139,7 +141,7 @@ class ReRollModifier extends ComparisonModifier {
         return roll;
       });
 
-    return results;
+    return parsedResults;
   }
 
   /**
