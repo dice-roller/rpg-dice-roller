@@ -1,7 +1,9 @@
-import { isNumeric } from '../utilities/math.ts';
-import Modifier from './Modifier.ts';
-
-const maxSymbol = Symbol('max');
+import { isNumeric } from '../utilities/math';
+import Modifier from './Modifier';
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import ResultGroup from "../results/ResultGroup";
 
 /**
  * A `MaxModifier` causes die rolls over a maximum value to be treated as the maximum value.
@@ -18,7 +20,9 @@ class MaxModifier extends Modifier {
    *
    * @type {number}
    */
-  static order = 2;
+  static order: number = 2;
+
+  #max!: number;
 
   /**
    * Create a `MaxModifier` instance.
@@ -27,7 +31,7 @@ class MaxModifier extends Modifier {
    *
    * @throws {TypeError} max must be a number
    */
-  constructor(max) {
+  constructor(max: number) {
     super();
 
     this.max = max;
@@ -38,8 +42,8 @@ class MaxModifier extends Modifier {
    *
    * @returns {Number}
    */
-  get max() {
-    return this[maxSymbol];
+  get max(): number {
+    return this.#max;
   }
 
   /**
@@ -49,12 +53,12 @@ class MaxModifier extends Modifier {
    *
    * @throws {TypeError} max must be a number
    */
-  set max(value) {
+  set max(value: number) {
     if (!isNumeric(value)) {
       throw new TypeError('max must be a number');
     }
 
-    this[maxSymbol] = parseFloat(`${value}`);
+    this.#max = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */
@@ -63,7 +67,7 @@ class MaxModifier extends Modifier {
    *
    * @returns {string} 'max'
    */
-  get name() {
+  get name(): string {
     return 'max';
   }
   /* eslint-enable class-methods-use-this */
@@ -73,7 +77,7 @@ class MaxModifier extends Modifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `max${this.max}`;
   }
 
@@ -85,21 +89,27 @@ class MaxModifier extends Modifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
-    const parsedResults = results;
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+    if (results instanceof ResultGroup) {
+      return results;
+    }
 
-    parsedResults.rolls = results.rolls.map((roll) => {
-      const parsedRoll = roll;
+    const parsedResults = results as ResultCollection;
 
-      if (roll.value > this.max) {
-        parsedRoll.value = this.max;
-        parsedRoll.modifiers.add('max');
-      }
+    parsedResults.rolls = parsedResults
+      .rolls
+      .map((roll) => {
+        const parsedRoll = roll;
 
-      return parsedRoll;
-    });
+        if (roll.value > this.max) {
+          parsedRoll.value = this.max;
+          parsedRoll.modifiers.add('max');
+        }
 
-    return parsedResults;
+        return parsedRoll;
+      });
+
+    return parsedResults as T;
   }
 
   /**

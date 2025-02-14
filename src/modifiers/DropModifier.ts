@@ -1,4 +1,8 @@
-import KeepModifier from './KeepModifier.js';
+import KeepModifier from './KeepModifier';
+import { RangeEnd } from "../types/Enums/RangeEnd";
+import { ResultIndex } from "../types/Types/ResultIndex";
+
+// @todo rename "end" to "target" / "rangeTarget" or similar
 
 /**
  * A `DropModifier` will "drop" (Remove from total calculations) dice from a roll.
@@ -13,7 +17,7 @@ class DropModifier extends KeepModifier {
    *
    * @type {number}
    */
-  static order = 7;
+  static order: number = 7;
 
   /**
    * Create a `DropModifier` instance.
@@ -24,7 +28,7 @@ class DropModifier extends KeepModifier {
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(end = 'l', qty = 1) {
+  constructor(end: RangeEnd = RangeEnd.Low, qty: number = 1) {
     super(end, qty);
   }
 
@@ -33,7 +37,7 @@ class DropModifier extends KeepModifier {
    *
    * @returns {string} 'drop-l' or 'drop-h'
    */
-  get name() {
+  get name(): string {
     return `drop-${this.end}`;
   }
 
@@ -42,7 +46,7 @@ class DropModifier extends KeepModifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `d${this.end}${this.qty}`;
   }
 
@@ -53,9 +57,9 @@ class DropModifier extends KeepModifier {
    *
    * @returns {number[]} The min / max range to drop
    */
-  rangeToDrop(_results) {
-    // we're dropping, so we want to drop all dice that are inside of the qty range
-    if (this.end === 'h') {
+  rangeToDrop(_results: ResultIndex[]): number[] {
+    // we're dropping, so we want to drop all dice that are inside the qty range
+    if (this.end === RangeEnd.High) {
       return [_results.length - this.qty, _results.length];
     }
 

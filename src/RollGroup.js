@@ -1,7 +1,7 @@
 import { RequiredArgumentError } from './exceptions/index.ts';
 import HasDescription from './traits/HasDescription.ts';
 import Modifier from './modifiers/Modifier.ts';
-import ResultGroup from './results/ResultGroup.js';
+import ResultGroup from './results/ResultGroup.ts';
 import StandardDice from './dice/StandardDice.ts';
 
 const expressionsSymbol = Symbol('expressions');

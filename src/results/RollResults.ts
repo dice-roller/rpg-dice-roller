@@ -1,5 +1,7 @@
 import RollResult from './RollResult.js';
 import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { ModelType } from "../types/Enums/ModelType";
+import { SingleResult } from "../types/Interfaces/Results/SingleResult";
 
 /**
  * A collection of die roll results
@@ -10,7 +12,7 @@ import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
  * :::
  */
 class RollResults implements ResultCollection {
-  #rolls: RollResult[] = [];
+  #rolls: SingleResult[] = [];
 
   /**
    * Create a `RollResults` instance.
@@ -36,7 +38,7 @@ class RollResults implements ResultCollection {
    *
    * @throws {TypeError} Rolls must be an array
    */
-  constructor(rolls: RollResult[]|number[] = []) {
+  constructor(rolls: SingleResult[]|number[] = []) {
     this.rolls = rolls;
   }
 
@@ -45,7 +47,7 @@ class RollResults implements ResultCollection {
    *
    * @returns {number}
    */
-  get length() {
+  get length(): number {
     return this.rolls.length || 0;
   }
 
@@ -54,7 +56,7 @@ class RollResults implements ResultCollection {
    *
    * @returns {RollResult[]}
    */
-  get rolls(): RollResult[] {
+  get rolls(): SingleResult[] {
     return [...this.#rolls];
   }
 
@@ -65,7 +67,7 @@ class RollResults implements ResultCollection {
    *
    * @throws {TypeError} Rolls must be an array
    */
-  set rolls(rolls: RollResult[]|number[]) {
+  set rolls(rolls: SingleResult[]|number[]) {
     if (!rolls || !Array.isArray(rolls)) {
       // roll is not an array
       throw new TypeError(`rolls must be an array: ${rolls}`);
@@ -98,7 +100,7 @@ class RollResults implements ResultCollection {
    *
    * @param {RollResult|number} value
    */
-  addRoll(value: RollResult|number): void {
+  addRoll(value: SingleResult|number): void {
     const result = (value instanceof RollResult) ? value : new RollResult(value);
 
     this.#rolls.push(result);
@@ -116,7 +118,7 @@ class RollResults implements ResultCollection {
 
     return {
       rolls,
-      type: 'roll-results',
+      type: ModelType.ResultCollection,
       value,
     };
   }

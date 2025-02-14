@@ -1,6 +1,6 @@
 import ComparisonModifier from './ComparisonModifier.js';
 import ComparePoint from '../ComparePoint.ts';
-import ResultGroup from '../results/ResultGroup.js';
+import ResultGroup from '../results/ResultGroup.ts';
 
 const failureCPSymbol = Symbol('failure-cp');
 

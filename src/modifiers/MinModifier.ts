@@ -1,7 +1,9 @@
-import { isNumeric } from '../utilities/math.ts';
-import Modifier from './Modifier.ts';
-
-const minSymbol = Symbol('min');
+import { isNumeric } from '../utilities/math';
+import Modifier from './Modifier';
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import ResultGroup from "../results/ResultGroup";
 
 /**
  * A `MinModifier` causes die rolls under a minimum value to be treated as the minimum value.
@@ -18,7 +20,9 @@ class MinModifier extends Modifier {
    *
    * @type {number}
    */
-  static order = 1;
+  static order: number = 1;
+
+  #min!: number;
 
   /**
    * Create a `MinModifier` instance.
@@ -27,7 +31,7 @@ class MinModifier extends Modifier {
    *
    * @throws {TypeError} min must be a number
    */
-  constructor(min) {
+  constructor(min: number) {
     super();
 
     this.min = min;
@@ -38,8 +42,8 @@ class MinModifier extends Modifier {
    *
    * @returns {Number}
    */
-  get min() {
-    return this[minSymbol];
+  get min(): number {
+    return this.#min;
   }
 
   /**
@@ -49,12 +53,12 @@ class MinModifier extends Modifier {
    *
    * @throws {TypeError} min must be a number
    */
-  set min(value) {
+  set min(value: number) {
     if (!isNumeric(value)) {
       throw new TypeError('min must be a number');
     }
 
-    this[minSymbol] = parseFloat(`${value}`);
+    this.#min = parseFloat(`${value}`);
   }
 
   /* eslint-disable class-methods-use-this */
@@ -63,7 +67,7 @@ class MinModifier extends Modifier {
    *
    * @returns {string} 'min'
    */
-  get name() {
+  get name(): string {
     return 'min';
   }
   /* eslint-enable class-methods-use-this */
@@ -73,7 +77,7 @@ class MinModifier extends Modifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `min${this.min}`;
   }
 
@@ -85,21 +89,27 @@ class MinModifier extends Modifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results, _context) {
-    const parsedResults = results;
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+    if (results instanceof ResultGroup) {
+      return results;
+    }
 
-    parsedResults.rolls = results.rolls.map((roll) => {
-      const parsedRoll = roll;
+    const parsedResults = results as ResultCollection;
 
-      if (roll.value < this.min) {
-        parsedRoll.value = this.min;
-        parsedRoll.modifiers.add('min');
-      }
+    parsedResults.rolls = parsedResults
+      .rolls
+      .map((roll) => {
+        const parsedRoll = roll;
 
-      return parsedRoll;
-    });
+        if (roll.value < this.min) {
+          parsedRoll.value = this.min;
+          parsedRoll.modifiers.add('min');
+        }
 
-    return parsedResults;
+        return parsedRoll;
+      });
+
+    return parsedResults as T;
   }
 
   /**

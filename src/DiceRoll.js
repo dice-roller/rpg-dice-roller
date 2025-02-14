@@ -6,7 +6,7 @@ import { isBase64, isJson } from './utilities/utils.ts';
 import Parser from './parser/Parser.ts';
 import RollGroup from './RollGroup.js';
 import RollResults from './results/RollResults.ts';
-import ResultGroup from './results/ResultGroup.js';
+import ResultGroup from './results/ResultGroup.ts';
 import exportFormats from './utilities/ExportFormats.js';
 
 /**

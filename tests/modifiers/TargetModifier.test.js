@@ -1,7 +1,7 @@
 import { StandardDice } from '../../src/dice/index.ts';
 import { ComparisonModifier, TargetModifier } from '../../src/modifiers/index.ts';
 import ComparePoint from '../../src/ComparePoint.ts';
-import ResultGroup from '../../src/results/ResultGroup.js';
+import ResultGroup from '../../src/results/ResultGroup.ts';
 import RollResult from '../../src/results/RollResult.ts';
 import RollResults from '../../src/results/RollResults.ts';
 import RollGroup from '../../src/RollGroup.js';

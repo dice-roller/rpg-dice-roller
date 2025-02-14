@@ -1,12 +1,9 @@
-import { evaluate, isNumeric } from '../utilities/math.ts';
+import { evaluate, isNumeric } from '../utilities/math';
 import getModifierFlags from '../modifiers/modifier-flags.js';
-import RollResults from './RollResults.ts';
-
-const calculationValueSymbol = Symbol('calculation-value');
-const isRollGroupSymbol = Symbol('is-roll-group');
-const modifiersSymbol = Symbol('modifiers');
-const resultsSymbol = Symbol('results');
-const useInTotalSymbol = Symbol('use-in-total');
+import RollResults from './RollResults';
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { ModelType } from "../types/Enums/ModelType";
 
 /**
  * A collection of results and expressions.
@@ -21,7 +18,13 @@ const useInTotalSymbol = Symbol('use-in-total');
  *
  * @since 4.5.0
  */
-class ResultGroup {
+class ResultGroup implements ExpressionResult {
+  #calculationValue: number|null = null;
+  #isRollGroup!: boolean;
+  #modifiers!: Set<string>;
+  #results!: Array<ExpressionResult|ResultCollection|number|string>;
+  #useInTotal!: boolean;
+
   /**
    * Create a `ResultGroup` instance.
    *
@@ -55,7 +58,12 @@ class ResultGroup {
    *
    * @throws {TypeError} Rolls must be an array
    */
-  constructor(results = [], modifiers = [], isRollGroup = false, useInTotal = true) {
+  constructor(
+    results: Array<ExpressionResult|ResultCollection|number|string> = [],
+    modifiers: Set<string>|string[] = [],
+    isRollGroup: boolean = false,
+    useInTotal: boolean = true
+  ) {
     this.isRollGroup = isRollGroup;
     this.modifiers = modifiers;
     this.results = results;
@@ -68,9 +76,9 @@ class ResultGroup {
    *
    * @returns {number}
    */
-  get calculationValue() {
-    return isNumeric(this[calculationValueSymbol])
-      ? parseFloat(this[calculationValueSymbol])
+  get calculationValue(): number {
+    return isNumeric(this.#calculationValue)
+      ? parseFloat(`${this.#calculationValue}`)
       : this.value;
   }
 
@@ -81,7 +89,7 @@ class ResultGroup {
    *
    * @throws {TypeError} value is invalid
    */
-  set calculationValue(value) {
+  set calculationValue(value: number) {
     const isValNumeric = isNumeric(value);
     if (value === Infinity) {
       throw new RangeError('Results calculation value must be a finite number');
@@ -90,7 +98,7 @@ class ResultGroup {
       throw new TypeError(`Results calculation value is invalid: ${value}`);
     }
 
-    this[calculationValueSymbol] = isValNumeric ? parseFloat(`${value}`) : null;
+    this.#calculationValue = isValNumeric ? parseFloat(`${value}`) : null;
   }
 
   /**
@@ -98,8 +106,8 @@ class ResultGroup {
    *
    * @returns {boolean} `true` if it is a roll group, `false` otherwise
    */
-  get isRollGroup() {
-    return this[isRollGroupSymbol];
+  get isRollGroup(): boolean {
+    return this.#isRollGroup;
   }
 
   /**
@@ -107,8 +115,8 @@ class ResultGroup {
    *
    * @param {boolean} value
    */
-  set isRollGroup(value) {
-    this[isRollGroupSymbol] = !!value;
+  set isRollGroup(value: boolean) {
+    this.#isRollGroup = !!value;
   }
 
   /**
@@ -116,7 +124,7 @@ class ResultGroup {
    *
    * @returns {number}
    */
-  get length() {
+  get length(): number {
     return this.results.length || 0;
   }
 
@@ -127,7 +135,7 @@ class ResultGroup {
    *
    * @returns {string}
    */
-  get modifierFlags() {
+  get modifierFlags(): string {
     return getModifierFlags(...this.modifiers);
   }
 
@@ -136,8 +144,8 @@ class ResultGroup {
    *
    * @returns {Set<string>}
    */
-  get modifiers() {
-    return this[modifiersSymbol];
+  get modifiers(): Set<string> {
+    return this.#modifiers;
   }
 
   /**
@@ -150,12 +158,12 @@ class ResultGroup {
    *
    * @throws {TypeError} modifiers must be a Set or array of modifier names
    */
-  set modifiers(value) {
+  set modifiers(value: Set<string>|string[]) {
     if ((Array.isArray(value) || (value instanceof Set)) && [...value].every((item) => typeof item === 'string')) {
-      this[modifiersSymbol] = new Set([...value]);
+      this.#modifiers = new Set([...value]);
     } else if (!value && (value !== 0)) {
       // clear the modifiers
-      this[modifiersSymbol] = new Set();
+      this.#modifiers = new Set();
     } else {
       throw new TypeError(`modifiers must be a Set or array of modifier names: ${value}`);
     }
@@ -166,8 +174,8 @@ class ResultGroup {
    *
    * @returns {Array.<ResultGroup|RollResults|number|string>}
    */
-  get results() {
-    return [...this[resultsSymbol]];
+  get results(): Array<ExpressionResult|ResultCollection|number|string> {
+    return [...this.#results];
   }
 
   /**
@@ -177,14 +185,14 @@ class ResultGroup {
    *
    * @throws {TypeError} Results must be an array
    */
-  set results(results) {
+  set results(results: Array<ExpressionResult|ResultCollection|number|string>) {
     if (!results || !Array.isArray(results)) {
       // results is not an array
       throw new TypeError(`results must be an array: ${results}`);
     }
 
     // loop through each result and add it to the results list
-    this[resultsSymbol] = [];
+    this.#results = [];
     results.forEach((result) => {
       this.addResult(result);
     });
@@ -195,8 +203,8 @@ class ResultGroup {
    *
    * @returns {boolean}
    */
-  get useInTotal() {
-    return !!this[useInTotalSymbol];
+  get useInTotal(): boolean {
+    return !!this.#useInTotal;
   }
 
   /**
@@ -204,8 +212,8 @@ class ResultGroup {
    *
    * @param {boolean} value
    */
-  set useInTotal(value) {
-    this[useInTotalSymbol] = !!value;
+  set useInTotal(value: boolean) {
+    this.#useInTotal = !!value;
   }
 
   /**
@@ -213,7 +221,7 @@ class ResultGroup {
    *
    * @returns {number}
    */
-  get value() {
+  get value(): number {
     if (!this.results.length) {
       return 0;
     }
@@ -222,17 +230,27 @@ class ResultGroup {
     // - get the values of result objects and add any operators and plain numbers
     // we'll either end up with a numerical total (If all results are result objects or numbers)
     // or a string equation (If there are operators)
-    const value = this.results.reduce((v, result) => {
-      let val = result;
+    const value: number|string = this
+      .results
+      .reduce(
+        (carry: string|number, currentValue) => {
+          let val;
+          if (currentValue instanceof ResultGroup) {
+            val = currentValue.useInTotal ? currentValue.calculationValue : 0;
+          } else if (currentValue instanceof RollResults) {
+            val = currentValue.value;
+          } else {
+            val = currentValue as string|number;
+          }
 
-      if (result instanceof ResultGroup) {
-        val = result.useInTotal ? result.calculationValue : 0;
-      } else if (result instanceof RollResults) {
-        val = result.value;
-      }
+          if (typeof carry === 'string' || typeof val === 'string') {
+            return `${carry}${val}`;
+          }
 
-      return v + val;
-    }, (typeof this.results[0] === 'string') ? '' : 0);
+          return carry + val;
+        },
+        (typeof this.results[0] === 'string') ? '' : 0
+      );
 
     // if value is a string that means operators were included, so we need to evaluate the equation
     if (typeof value === 'string') {
@@ -249,7 +267,7 @@ class ResultGroup {
    *
    * @throws {TypeError} Value type is invalid
    */
-  addResult(value) {
+  addResult(value: ExpressionResult|ResultCollection|number|string): void {
     let val;
 
     if ((value instanceof ResultGroup) || (value instanceof RollResults)) {
@@ -263,7 +281,7 @@ class ResultGroup {
     }
 
     // add the result to the list
-    this[resultsSymbol].push(val);
+    this.#results.push(val);
   }
 
   /**
@@ -280,7 +298,7 @@ class ResultGroup {
    *  value: number
    * }}
    */
-  toJSON() {
+  toJSON(): object {
     const {
       calculationValue, isRollGroup, modifierFlags, modifiers, results, useInTotal, value,
     } = this;
@@ -291,7 +309,7 @@ class ResultGroup {
       modifierFlags,
       modifiers: [...modifiers],
       results,
-      type: 'result-group',
+      type: ModelType.ResultGroup,
       useInTotal,
       value,
     };

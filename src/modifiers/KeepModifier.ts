@@ -1,10 +1,16 @@
-import { isNumeric } from '../utilities/math.ts';
-import Modifier from './Modifier.ts';
-import ResultGroup from '../results/ResultGroup.js';
-import RollResults from '../results/RollResults.ts';
+import { isNumeric } from '../utilities/math';
+import Modifier from './Modifier';
+import ResultGroup from '../results/ResultGroup';
+import RollResults from '../results/RollResults';
+import { RangeEnd } from "../types/Enums/RangeEnd";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { Modifiable } from "../types/Interfaces/Modifiable";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
+import { SingleResult } from "../types/Interfaces/Results/SingleResult";
+import { ResultValue } from "../types/Interfaces/Results/ResultValue";
+import { ResultIndex } from "../types/Types/ResultIndex";
 
-const endSymbol = Symbol('end');
-const qtySymbol = Symbol('qty');
+// @todo rename "end" to "target" / "rangeTarget" or similar
 
 /**
  * A `KeepModifier` will "keep" dice from a roll, dropping (Remove from total calculations) all
@@ -20,7 +26,10 @@ class KeepModifier extends Modifier {
    *
    * @type {number}
    */
-  static order = 6;
+  static order: number = 6;
+
+  #end!: RangeEnd;
+  #qty!: number;
 
   /**
    * Create a `KeepModifier` instance
@@ -31,7 +40,7 @@ class KeepModifier extends Modifier {
    * @throws {RangeError} End must be one of 'h' or 'l'
    * @throws {TypeError} qty must be a positive integer
    */
-  constructor(end = 'h', qty = 1) {
+  constructor(end: RangeEnd = RangeEnd.High, qty: number = 1) {
     super();
 
     this.end = end;
@@ -43,8 +52,8 @@ class KeepModifier extends Modifier {
    *
    * @returns {string} 'h' or 'l'
    */
-  get end() {
-    return this[endSymbol];
+  get end(): RangeEnd {
+    return this.#end;
   }
 
   /**
@@ -54,12 +63,13 @@ class KeepModifier extends Modifier {
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
    */
-  set end(value) {
-    if ((value !== 'h') && (value !== 'l')) {
+  set end(value: RangeEnd) {
+    if (!Object.values(RangeEnd).includes(value)) {
+      // @todo update error to use enum values
       throw new RangeError('End must be "h" or "l"');
     }
 
-    this[endSymbol] = value;
+    this.#end = value;
   }
 
   /**
@@ -67,7 +77,7 @@ class KeepModifier extends Modifier {
    *
    * @returns {string} 'keep-l' or 'keep-h'
    */
-  get name() {
+  get name(): string {
     return `keep-${this.end}`;
   }
 
@@ -76,7 +86,7 @@ class KeepModifier extends Modifier {
    *
    * @returns {string}
    */
-  get notation() {
+  get notation(): string {
     return `k${this.end}${this.qty}`;
   }
 
@@ -85,8 +95,8 @@ class KeepModifier extends Modifier {
    *
    * @returns {number}
    */
-  get qty() {
-    return this[qtySymbol];
+  get qty(): number {
+    return this.#qty;
   }
 
   /**
@@ -96,7 +106,7 @@ class KeepModifier extends Modifier {
    *
    * @throws {TypeError} qty must be a positive finite integer
    */
-  set qty(value) {
+  set qty(value: number) {
     if (value === Infinity) {
       throw new RangeError('qty must be a finite number');
     }
@@ -104,7 +114,7 @@ class KeepModifier extends Modifier {
       throw new TypeError('qty must be a positive finite integer');
     }
 
-    this[qtySymbol] = Math.floor(value);
+    this.#qty = Math.floor(value);
   }
 
   /**
@@ -114,9 +124,9 @@ class KeepModifier extends Modifier {
    *
    * @returns {number[]} The min / max range to drop
    */
-  rangeToDrop(_results) {
-    // we're keeping, so we want to drop all dice that are outside of the qty range
-    if (this.end === 'h') {
+  rangeToDrop(_results: ResultIndex[]): number[] {
+    // we're keeping, so we want to drop all dice that are outside the qty range
+    if (this.end === RangeEnd.High) {
       return [0, _results.length - this.qty];
     }
 
@@ -131,46 +141,53 @@ class KeepModifier extends Modifier {
    *
    * @returns {ResultGroup|RollResults} The modified results
    */
-  run(results, _context) {
-    let modifiedRolls;
-    let rollIndexes;
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+    let modifiedRolls: Array<ExpressionResult|ResultCollection|ResultValue|number|string>;
+    let rollIndexes: ResultIndex[] = [];
 
     if (results instanceof ResultGroup) {
       modifiedRolls = results.results;
 
       if ((modifiedRolls.length === 1) && (modifiedRolls[0] instanceof ResultGroup)) {
         // single sub-roll - get all the dice rolled and their 2d indexes
-        rollIndexes = modifiedRolls[0].results.map((result, index) => {
-          if (result instanceof RollResults) {
-            return result.rolls.map((subResult, subIndex) => ({
-              value: subResult.value,
-              index: [index, subIndex],
-            }));
-          }
+        rollIndexes = (modifiedRolls[0] as ExpressionResult)
+          .results
+          .map((result, index) => {
+            if (!(result instanceof RollResults)) {
+              return null;
+            }
 
-          return null;
-        }).flat().filter(Boolean);
+            return (result as ResultCollection)
+              .rolls
+              .map((subResult, subIndex) => ({
+                value: subResult.value,
+                index: [index, subIndex],
+              }));
+          })
+          .flat()
+          .filter(Boolean) as ResultIndex[];
       } else {
         rollIndexes = [...modifiedRolls]
+          .filter((result) => result.hasOwnProperty('value'))
           // get a list of objects with roll values and original index
           .map((roll, index) => ({
-            value: roll.value,
+            value: (roll as ExpressionResult|ResultCollection|ResultValue).value,
             index,
           }));
       }
-    } else {
+    } else if (results instanceof RollResults) {
       modifiedRolls = results.rolls;
 
       rollIndexes = [...modifiedRolls]
         // get a list of objects with roll values and original index
-        .map((roll, index) => ({
-          value: roll.value,
+        .map((roll , index) => ({
+          value: (roll as SingleResult).value,
           index,
         }));
     }
 
     // determine the indexes that need to be dropped
-    rollIndexes = rollIndexes
+    const dropIndexes: (number|number[])[] = rollIndexes
       // sort the list ascending by value
       .sort((a, b) => a.value - b.value)
       .map((rollIndex) => rollIndex.index)
@@ -178,17 +195,21 @@ class KeepModifier extends Modifier {
       .slice(...this.rangeToDrop(rollIndexes));
 
     // loop through all of our dice to drop and flag them as such
-    rollIndexes.forEach((rollIndex) => {
-      let roll;
+    dropIndexes.forEach((rollIndex) => {
+      let roll: ResultValue;
 
       if (Array.isArray(rollIndex)) {
         // array of indexes (e.g. single sub-roll in a group roll)
-        roll = modifiedRolls[0].results[rollIndex[0]].rolls[rollIndex[1]];
+        roll = (
+          (modifiedRolls[0] as ExpressionResult)
+            .results[rollIndex[0]] as ResultCollection
+        )
+          .rolls[rollIndex[1]];
       } else {
-        roll = modifiedRolls[rollIndex];
+        roll = modifiedRolls[rollIndex] as ResultValue;
       }
 
-      roll.modifiers.add('drop');
+      roll.modifiers?.add('drop');
       roll.useInTotal = false;
     });
 

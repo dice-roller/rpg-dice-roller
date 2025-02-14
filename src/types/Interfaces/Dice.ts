@@ -8,7 +8,7 @@ import { HasNotation } from "./HasNotation";
 import { ModifierCollection } from "../Types/ModifierCollection";
 import { Nameable } from "./Nameable";
 import { ResultCollection } from "./Results/ResultCollection";
-import { Result } from "./Results/Result";
+import { SingleResult } from "./Results/SingleResult";
 
 export interface Dice extends Describable, Readonly<HasNotation>, JsonSerializable, Modifiable, Readonly<Nameable>, Stringable {
   readonly average: number;
@@ -19,7 +19,7 @@ export interface Dice extends Describable, Readonly<HasNotation>, JsonSerializab
 
   roll(): ResultCollection;
 
-  rollOnce(): Result;
+  rollOnce(): SingleResult;
 
   toJSON(): {
     average: number;

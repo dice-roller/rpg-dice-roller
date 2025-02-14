@@ -1,7 +1,8 @@
 import { Modifier as IModifier } from '../types/Interfaces/Modifier';
-import RollResults from "../results/RollResults";
 import { Modifiable } from "../types/Interfaces/Modifiable";
 import { ModelType } from "../types/Enums/ModelType";
+import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
+import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
 
 /**
  * A `Modifier` is the base modifier class that all others extend from.
@@ -95,7 +96,7 @@ class Modifier implements IModifier {
    *
    * @returns {RollResults} The modified results
    */
-  run(results: RollResults, _context: Modifiable): RollResults {
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     this.#useDefaultsIfNeeded(_context);
     return results;
   }

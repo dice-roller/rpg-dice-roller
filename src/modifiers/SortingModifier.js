@@ -1,5 +1,5 @@
 import Modifier from './Modifier.ts';
-import ResultGroup from '../results/ResultGroup.js';
+import ResultGroup from '../results/ResultGroup.ts';
 import RollResults from '../results/RollResults.ts';
 
 const directionSymbol = Symbol('direction');

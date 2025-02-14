@@ -1,7 +1,8 @@
 import { isNumeric } from '../utilities/math';
 import getModifierFlags from '../modifiers/modifier-flags.js';
-import { Result } from "../types/Interfaces/Results/Result";
+import { SingleResult } from "../types/Interfaces/Results/SingleResult";
 import { ResultValue } from "../types/Interfaces/Results/ResultValue";
+import { ModelType } from "../types/Enums/ModelType";
 
 /**
  * A `RollResult` represents the value and applicable modifiers for a single die roll
@@ -11,7 +12,7 @@ import { ResultValue } from "../types/Interfaces/Results/ResultValue";
  * rolls, but `RollResult` objects will be returned when rolling dice.
  * :::
  */
-class RollResult implements Result {
+class RollResult implements SingleResult {
   readonly #initialValue: number;
 
   #calculationValue: number|null = null;
@@ -254,7 +255,7 @@ class RollResult implements Result {
       initialValue,
       modifierFlags,
       modifiers: [...modifiers],
-      type: 'result',
+      type: ModelType.Result,
       useInTotal,
       value,
     };

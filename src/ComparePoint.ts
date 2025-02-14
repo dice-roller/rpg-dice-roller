@@ -2,6 +2,7 @@ import { CompareOperatorError, RequiredArgumentError } from './exceptions/index'
 import { compareNumbers, isNumeric } from './utilities/math.js';
 import { ComparisonOperator } from "./types/Enums/ComparisonOperator";
 import { Comparator } from "./types/Interfaces/Comparator";
+import { ModelType } from "./types/Enums/ModelType";
 
 /**
  * A `ComparePoint` object compares numbers against each other.
@@ -117,7 +118,7 @@ class ComparePoint implements Comparator {
 
     return {
       operator,
-      type: 'compare-point',
+      type: ModelType.ComparePoint,
       value,
     };
   }
