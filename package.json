@@ -23,7 +23,6 @@
       "types": "./types/index.d.cts",
       "require": "./lib/umd/bundle.js"
     },
-    "./src/": "./src/",
     "./types/": "./types/",
     "./package.json": "./package.json"
   },
