@@ -218,12 +218,12 @@ Comment "comment"
 
 // allows comments in the format of /* .. */ and [ ... ]
 MultiLineComment
-  = "/*" text:(!"*/" .)* "*/" { return new Description(text.flat().join(''), Description.types.MULTILINE) }
-  / "[" text:[^\]]* "]" { return new Description(text.flat().join(''), Description.types.MULTILINE) }
+  = "/*" text:(!"*/" .)* "*/" { return new Description(text.flat().join(''), DescriptionType.MultiLine) }
+  / "[" text:[^\]]* "]" { return new Description(text.flat().join(''), DescriptionType.MultiLine) }
 
 // allows comments in the format of // ... and # ...
 SingleLineComment
-  = ("//" / "#") text:(!LineTerminator .)* { return new Description(text.flat().join(''), Description.types.INLINE) }
+  = ("//" / "#") text:(!LineTerminator .)* { return new Description(text.flat().join(''), DescriptionType.Inline) }
 
 
 LineTerminator
