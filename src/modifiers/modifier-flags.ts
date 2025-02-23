@@ -38,3 +38,8 @@ const getModifierFlags = (...modifiers: (Modifier|string)[]): string => (
 );
 
 export default getModifierFlags;
+
+export {
+  flags,
+  getModifierFlags,
+};

@@ -8,7 +8,7 @@ import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
 import { Modifiable } from "../types/Interfaces/Modifiable";
 import { SingleResult } from "../types/Interfaces/Results/SingleResult";
 import { ModifierJsonOutput } from "../types/Interfaces/Json/ModifierJsonOutput";
-import { RollResult } from "../types/Types/RollResult";
+import { RollResultType } from "../types/Types/RollResultType";
 
 /**
  * A `TargetModifier` determines whether rolls are classed as a success, failure, or neutral.
@@ -67,7 +67,11 @@ class TargetModifier extends ComparisonModifier {
       throw new TypeError('failure comparePoint must be instance of ComparePoint or null');
     }
 
-    this.#failComparator = comparePoint ?? null;
+    if (!comparePoint) {
+      this.#failComparator = null;
+    } else {
+      this.#failComparator = comparePoint;
+    }
   }
 
   /**
@@ -168,7 +172,7 @@ class TargetModifier extends ComparisonModifier {
    * @returns {RollResults} The modified results
    */
   override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
-    let rolls: RollResult[]|SingleResult[];
+    let rolls: RollResultType[]|SingleResult[];
 
     if (results instanceof ResultGroup) {
       rolls = results.results;

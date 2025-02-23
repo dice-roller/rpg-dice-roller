@@ -2,18 +2,18 @@
  * An error thrown when a required argument is missing
  */
 class RequiredArgumentError extends Error {
-  readonly argumentName: string|null;
+  readonly argumentName?: string|null;
 
   /**
    * Create a `RequiredArgumentError`
    *
    * @param {string|null} [argumentName=null] The argument name
    */
-  constructor(argumentName: string|null = null) {
+  constructor(argumentName?: string|null) {
     super(`Missing argument${argumentName ? ` "${argumentName}"` : ''}`);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if ("captureStackTrace" in Error) {
+    if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, RequiredArgumentError);
     }
 

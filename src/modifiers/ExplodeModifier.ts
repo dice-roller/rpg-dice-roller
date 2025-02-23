@@ -8,6 +8,7 @@ import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
 import StandardDice from "../dice/StandardDice";
 import RollResults from "../results/RollResults";
 import { ModifierJsonOutput } from "../types/Interfaces/Json/ModifierJsonOutput";
+import { ComparisonOperator } from "../types/Enums/ComparisonOperator";
 
 /**
  * An `ExplodeModifier` re-rolls dice that match a given test, and adds them to the results.
@@ -38,7 +39,11 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @throws {TypeError} comparePoint must be a `ComparePoint` object
    */
-  constructor(comparator?: Comparator, compound: boolean = false, penetrate: boolean = false) {
+  constructor(
+    comparator?: Comparator|null,
+    compound: boolean = false,
+    penetrate: boolean = false,
+  ) {
     super(comparator);
 
     this.#compound = !!compound;
@@ -82,7 +87,7 @@ class ExplodeModifier extends ComparisonModifier {
    */
   protected override defaultComparePoint(_context: Modifiable): [string, number]|null {
     if ('max' in _context) {
-      return ['=', _context.max as number];
+      return [ComparisonOperator.Equal, _context.max as number];
     }
 
     return null;
@@ -97,7 +102,7 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable, debug: boolean = false): T {
     super.run(results, _context);
 
     const isDice = _context instanceof StandardDice;
@@ -165,6 +170,15 @@ class ExplodeModifier extends ComparisonModifier {
         return subRolls;
       })
       .flat();
+
+    if (debug) {
+      console.log(
+        isDice,
+        (results as ResultCollection).rolls.map((roll) => roll.value),
+        this.compound,
+        (parsedResults as ResultCollection).rolls.map((roll) => roll.value),
+      );
+    }
 
     return parsedResults;
   }

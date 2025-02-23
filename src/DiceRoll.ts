@@ -10,7 +10,7 @@ import ResultGroup from './results/ResultGroup';
 import { HasNotation } from "./types/Interfaces/HasNotation";
 import { ExpressionResult } from "./types/Interfaces/Results/ExpressionResult";
 import { Engine } from "./types/Interfaces/NumberGenerator/Engines/Engine";
-import { RollResult } from "./types/Types/RollResult";
+import { RollResultType } from "./types/Types/RollResultType";
 import { ResultCollection } from "./types/Interfaces/Results/ResultCollection";
 import { ExportFormat } from "./types/Enums/ExportFormat";
 import { ModelType } from "./types/Enums/ModelType";
@@ -70,7 +70,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    * @throws {RequiredArgumentError} notation is required
    * @throws {TypeError} Rolls must be a valid result object, or an array
    */
-  constructor(notation: string|DiceRollJsonOutput) {
+  constructor(notation: string|DiceRoll|DiceRollJsonOutput) {
     if (!notation) {
       throw new RequiredArgumentError('notation');
     }
@@ -86,7 +86,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
         throw new RequiredArgumentError('notation');
       } else if (typeof notation.notation !== 'string') {
         throw new NotationError(notation.notation);
-      } else if (notation.rolls as unknown) {
+      } else if (notation.rolls) {
         // we have rolls - store them
         this.#setRolls(notation.rolls);
       }
@@ -203,7 +203,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @returns {Array.<ResultGroup|RollResults|string|number>}
    */
-  get rolls(): RollResult[] {
+  get rolls(): RollResultType[] {
     return this.#rolls ? this.#rolls.results : [];
   }
 
@@ -234,7 +234,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @throws {TypeError} Invalid export format
    */
-  export(format: ExportFormat = ExportFormat.Json): string|object {
+  export(format: ExportFormat = ExportFormat.Json): string|DiceRollJsonOutput {
     switch (format) {
       case ExportFormat.Base64:
         // JSON encode then base64, else it exports the string representation of the roll output
@@ -242,7 +242,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
       case ExportFormat.Json:
         return JSON.stringify(this);
       case ExportFormat.Object:
-        return JSON.parse(this.export(ExportFormat.Json) as string) as object;
+        return JSON.parse(this.export(ExportFormat.Json) as string) as DiceRollJsonOutput;
       default:
         throw new TypeError(`Invalid export format "${format}"`);
     }
@@ -274,7 +274,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @returns {RollResults[]} The results of the rolls
    */
-  roll(): RollResult[] {
+  roll(): RollResultType[] {
     // reset the cached total
     this.#total = 0;
 
@@ -368,7 +368,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @throws {DataFormatError} data format is invalid
    */
-  static import(data: string|DiceRollJsonOutput): DiceRoll {
+  static import(data: string|DiceRoll|DiceRollJsonOutput): DiceRoll {
     if (!data) {
       throw new RequiredArgumentError('data');
     }
@@ -443,11 +443,11 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @private
    *
-   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array.<RollResult|number>>} rolls
+   * @param {ResultGroup|Array.<ResultGroup|RollResults|string|number|{}|Array.<RollResultType|number>>} rolls
    *
    * @throws {TypeError} Rolls must be a valid result object, or an array
    */
-  #setRolls(rolls: RollResultJsonOutput[]|ExpressionResult|ResultCollection|RollResult[]): void {
+  #setRolls(rolls: RollResultJsonOutput[]|ExpressionResult|ResultCollection|RollResultType[]): void {
     if (rolls instanceof ResultGroup) {
       this.#rolls = rolls;
     } else if (rolls instanceof RollResults) {

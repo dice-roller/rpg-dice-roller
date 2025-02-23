@@ -13,7 +13,7 @@ class NotationError extends Error {
     super(`Notation "${notation}" is invalid`);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if ("captureStackTrace" in Error) {
+    if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, NotationError);
     }
 

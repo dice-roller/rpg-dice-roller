@@ -19,7 +19,7 @@ class StandardDice extends HasDescription implements Dice {
   readonly #max: number;
   readonly #min: number = 1;
   #modifiers: ModifierCollection = new Map();
-  readonly #sides: number;
+  readonly #sides: number|string;
   readonly #qty: number;
 
   readonly name: string = 'standard';
@@ -38,12 +38,12 @@ class StandardDice extends HasDescription implements Dice {
    * @throws {TypeError} qty must be a positive integer, and modifiers must be valid
    */
   constructor(
-    sides: number,
+    sides: number|string,
     qty: number = 1,
-    modifiers: ModifierCollection | null = null,
+    modifiers: ModifierCollection | Modifier[] | null = null,
     min: number | null | undefined = 1,
     max: number | null | undefined = null,
-    description: Description | string | null = null,
+    description: Description|string|null = null,
   ) {
     super(description);
 
@@ -89,7 +89,9 @@ class StandardDice extends HasDescription implements Dice {
 
     this.#min = parseInt(minVal.toString(), 10);
 
-    this.#max = max ? parseInt(`${max}`, 10) : sides;
+    this.#max = max
+      ? parseInt(`${max}`, 10)
+      : (isNumeric(sides) ? sides as number : this.#min);
   }
 
   /**

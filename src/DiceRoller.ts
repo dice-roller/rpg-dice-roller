@@ -28,7 +28,7 @@ class DiceRoller implements Exportable, Importable<DiceRollJsonOutput[]|DiceRoll
    *
    * @throws {TypeError} if data is an object, it must have a `log[]` property
    */
-  constructor(data?: DiceRollJsonOutput[]|DiceRollerJsonOutput) {
+  constructor(data?: DiceRoll[]|DiceRollJsonOutput[]|DiceRollerJsonOutput) {
     this.#log = [];
 
     if (data) {
@@ -125,7 +125,7 @@ class DiceRoller implements Exportable, Importable<DiceRollJsonOutput[]|DiceRoll
    * @throws {RequiredArgumentError} data is required
    * @throws {TypeError} log must be an array
    */
-  import(data: DiceRollJsonOutput[]|DiceRollerJsonOutput|string): DiceRoll[] {
+  import(data: {log: DiceRoll[]}|DiceRoll[]|DiceRollJsonOutput[]|DiceRollerJsonOutput|string): DiceRoll[] {
     if (!data) {
       throw new RequiredArgumentError('data');
     }
@@ -141,7 +141,7 @@ class DiceRoller implements Exportable, Importable<DiceRollJsonOutput[]|DiceRoll
     }
 
     if (Array.isArray(data)) {
-      return this.import({log: data});
+      return this.import({log: data as DiceRoll[]});
     }
 
     if (typeof data === 'object') {

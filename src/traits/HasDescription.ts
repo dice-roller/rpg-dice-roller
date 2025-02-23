@@ -10,9 +10,9 @@ import { DescriptionJsonOutput } from "../types/Interfaces/Json/DescriptionJsonO
  * @abstract
  */
 class HasDescription implements Describable, JsonSerializable, Stringable {
-  #description: Description|null = null;
+  #description?: Description|null;
 
-  constructor(text: Description|string|null = null) {
+  constructor(text?: Description|string|null) {
     this.description = text;
   }
 
@@ -30,7 +30,7 @@ class HasDescription implements Describable, JsonSerializable, Stringable {
    *
    * @param {Description|string|null} description
    */
-  set description(description: Description|string|null) {
+  set description(description: Description|string|undefined|null) {
     if (!description && ((description as unknown) !== 0)) {
       this.#description = null;
     } else if (description instanceof Description) {

@@ -19,8 +19,6 @@ class DropModifier extends KeepModifier {
    */
   static override order: number = 7;
 
-  override readonly name: string = `drop-${this.end}`;
-
   /**
    * Create a `DropModifier` instance.
    *
@@ -32,6 +30,10 @@ class DropModifier extends KeepModifier {
    */
   constructor(end: RangeEnd = RangeEnd.Low, qty: number = 1) {
     super(end, qty);
+  }
+
+  override get name(): string {
+    return`drop-${this.end}`;
   }
 
   /**

@@ -13,7 +13,7 @@ class CompareOperatorError extends TypeError {
     super(`Operator "${operator}" is invalid`);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if (TypeError.captureStackTrace as unknown) {
+    if (typeof TypeError.captureStackTrace === 'function') {
       TypeError.captureStackTrace(this, CompareOperatorError);
     }
 

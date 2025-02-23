@@ -284,8 +284,15 @@ class RollGroup extends HasDescription implements Nameable {
     return Object.assign(
       super.toJSON(),
       {
-        expressions,
-        modifiers,
+        expressions: expressions.map(
+          (expression) => expression.map(
+            (item) => typeof item === 'object' ? item.toJSON() : item
+          )
+        ),
+        modifiers: Object.fromEntries(
+          [...modifiers]
+            .map(([name, modifier]) => [name, modifier.toJSON()])
+        ),
         name: this.name,
         notation,
         type: ModelType.Group,

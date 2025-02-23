@@ -1,11 +1,10 @@
 import { JsonOutput } from "./JsonOutput";
-import { ExpressionCollection } from "../../Types/ExpressionCollection";
-import Description from "../../../Description";
-import { ModifierCollection } from "../../Types/ModifierCollection";
+import { DescriptionJsonOutput } from "./DescriptionJsonOutput";
+import { ModifierCollectionJsonOutput } from "../../Types/Json/ModifierCollectionJsonOutput";
+import { DiceJsonOutput } from "./DiceJsonOutput";
 
-export interface RollGroupJsonOutput extends JsonOutput {
-  description: Description|null;
-  expressions: ExpressionCollection[];
-  modifiers: ModifierCollection;
+export interface RollGroupJsonOutput extends DescriptionJsonOutput, JsonOutput {
+  expressions: (DiceJsonOutput|string|number)[][];
+  modifiers: ModifierCollectionJsonOutput;
   notation: string;
 }

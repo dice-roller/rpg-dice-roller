@@ -3,6 +3,7 @@ import RollResult from '../results/RollResult';
 import StandardDice from './StandardDice';
 import {ModifierCollection} from "../types/Types/ModifierCollection";
 import Description from "../Description";
+import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
 
 /**
  * Represents a Fudge / Fate type die.
@@ -24,14 +25,14 @@ class FudgeDice extends StandardDice {
    * @throws {TypeError} modifiers must be valid
    */
   constructor(
-    nonBlanks: number = 2,
+    nonBlanks?: 1|2,
     qty: number = 1,
-    modifiers: ModifierCollection | null = null,
+    modifiers: ModifierCollection | Modifier[] | null = null,
     description: Description|string|null = null
   ) {
     let numNonBlanks = nonBlanks;
 
-    if (!numNonBlanks && (numNonBlanks !== 0)) {
+    if (!numNonBlanks && (numNonBlanks as unknown !== 0)) {
       numNonBlanks = 2;
     } else if ((numNonBlanks !== 1) && (numNonBlanks !== 2)) {
       throw new RangeError('nonBlanks must be 1 or 2');
@@ -73,6 +74,7 @@ class FudgeDice extends StandardDice {
       // only 1 of each non-blank
       // on 1d6 a roll of 1 = -1, 6 = +1, others = 0
       const num = generator.integer(1, 6);
+
       if (num === 1) {
         total = -1;
       } else if (num === 6) {

@@ -3,7 +3,7 @@ import getModifierFlags from '../modifiers/modifier-flags';
 import RollResults from './RollResults';
 import { ExpressionResult } from "../types/Interfaces/Results/ExpressionResult";
 import { ModelType } from "../types/Enums/ModelType";
-import { RollResult } from "../types/Types/RollResult";
+import { RollResultType } from "../types/Types/RollResultType";
 import { ExpressionResultJsonOutput } from "../types/Interfaces/Json/ExpressionResultJsonOutput";
 import { RollResultJsonOutput } from "../types/Types/Json/RollResultJsonOutput";
 
@@ -26,7 +26,7 @@ class ResultGroup implements ExpressionResult {
   #calculationValue: number|null = null;
   #isRollGroup!: boolean;
   #modifiers: Set<string> = new Set();
-  #results!: RollResult[];
+  #results!: RollResultType[];
   #useInTotal!: boolean;
 
   /**
@@ -63,13 +63,13 @@ class ResultGroup implements ExpressionResult {
    * @throws {TypeError} Rolls must be an array
    */
   constructor(
-    results: RollResultJsonOutput[]|RollResult[] = [],
-    modifiers: Set<string>|string[] = [],
+    results: RollResultJsonOutput[]|RollResultType[] = [],
+    modifiers?: Set<string>|string[]|null,
     isRollGroup: boolean = false,
     useInTotal: boolean = true
   ) {
     this.isRollGroup = isRollGroup;
-    this.modifiers = modifiers;
+    this.modifiers = modifiers ?? [];
     this.results = results;
     this.useInTotal = useInTotal;
   }
@@ -178,7 +178,7 @@ class ResultGroup implements ExpressionResult {
    *
    * @returns {Array.<ResultGroup|RollResults|number|string>}
    */
-  get results(): RollResult[] {
+  get results(): RollResultType[] {
     return [...this.#results];
   }
 
@@ -189,7 +189,7 @@ class ResultGroup implements ExpressionResult {
    *
    * @throws {TypeError} Results must be an array
    */
-  set results(results: RollResultJsonOutput[]|RollResult[]) {
+  set results(results: RollResultJsonOutput[]|RollResultType[]) {
     if (!Array.isArray(results)) {
       // results is not an array
       throw new TypeError(`results must be an array: ${results}`);
@@ -271,7 +271,7 @@ class ResultGroup implements ExpressionResult {
    *
    * @throws {TypeError} Value type is invalid
    */
-  addResult(value: RollResultJsonOutput|RollResult): void {
+  addResult(value: RollResultJsonOutput|RollResultType): void {
     let val;
 
     if ((value instanceof ResultGroup) || (value instanceof RollResults)) {
@@ -285,7 +285,7 @@ class ResultGroup implements ExpressionResult {
     }
 
     // add the result to the list
-    this.#results.push(val as RollResult);
+    this.#results.push(val as RollResultType);
   }
 
   /**

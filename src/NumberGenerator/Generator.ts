@@ -69,12 +69,15 @@ class Generator implements RandomNumberGenerator {
    * @throws {TypeError} engine must have function `next()`
    */
   set engine(engine: Engine) {
-    if ((typeof (engine as Engine|undefined)?.next !== 'function')) {
+    if (
+      (engine as unknown)
+      && (typeof (engine as Engine|undefined)?.next !== 'function')
+    ) {
       throw new TypeError('engine must have function `next()`');
     }
 
     // set the engine and re-initialise the random engine
-    this.#engine = engine;
+    this.#engine = ((engine as unknown) || NativeMath) as Engine;
     this.#generator = new Random(this.#engine);
   }
 

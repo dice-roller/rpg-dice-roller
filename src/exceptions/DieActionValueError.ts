@@ -5,7 +5,7 @@ import { Dice } from "../types/Interfaces/Dice";
  */
 class DieActionValueError extends Error {
   readonly action: string|null;
-  readonly die: Dice;
+  readonly die: Dice|string;
 
   /**
    * Create a `DieActionValueError`
@@ -13,11 +13,11 @@ class DieActionValueError extends Error {
    * @param {StandardDice} die The die the action was on
    * @param {string|null} [action=null] The invalid action
    */
-  constructor(die: Dice, action: string|null = null) {
+  constructor(die: Dice|string, action: string|null = null) {
     super(`Die "${die}" must have more than 1 possible value to ${action ?? 'do this action'}`);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if ("captureStackTrace" in Error) {
+    if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, DieActionValueError);
     }
 

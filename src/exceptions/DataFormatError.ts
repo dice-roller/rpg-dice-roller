@@ -13,7 +13,7 @@ class DataFormatError extends Error {
     super(`Invalid data format: ${data}`);
 
     // Maintains proper stack trace for where our error was thrown (only available on V8)
-    if ("captureStackTrace" in Error) {
+    if (typeof Error.captureStackTrace === 'function') {
       Error.captureStackTrace(this, DataFormatError);
     }
 

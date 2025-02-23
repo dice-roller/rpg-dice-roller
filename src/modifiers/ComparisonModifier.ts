@@ -30,7 +30,7 @@ class ComparisonModifier extends Modifier implements ComparatorModifier {
    *
    * @throws {TypeError} `comparePoint` must be an instance of `ComparePoint` or `undefined`
    */
-  constructor(comparator?: Comparator) {
+  constructor(comparator?: Comparator|null) {
     super();
 
     if (comparator) {

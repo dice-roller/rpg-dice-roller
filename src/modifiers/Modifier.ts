@@ -10,7 +10,7 @@ import { ModifierJsonOutput } from "../types/Interfaces/Json/ModifierJsonOutput"
  *
  * @abstract
  */
-class Modifier implements IModifier {
+abstract class Modifier implements IModifier {
   /**
    * The default modifier execution order.
    *
@@ -18,7 +18,7 @@ class Modifier implements IModifier {
    */
   static order: number = 999;
 
-  readonly name: string = 'modifier';
+  readonly abstract name: string;
   order: number;
 
   /**
@@ -72,7 +72,10 @@ class Modifier implements IModifier {
   protected useDefaultsIfNeeded(_context: Modifiable): void {
     (Object.entries(this.defaults(_context)) as [keyof this, typeof this[keyof this]][])
       .forEach(([field, value]) => {
-        if (typeof this[field] === 'undefined') {
+        if (
+          (field in this)
+          && (typeof this[field] === 'undefined' || this[field] === null)
+        ) {
           this[field] = value;
         }
       });

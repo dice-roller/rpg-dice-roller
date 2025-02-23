@@ -1,8 +1,8 @@
 import { ExpressionResult } from "./Results/ExpressionResult";
-import { RollResult } from "../Types/RollResult";
+import { RollResultType } from "../Types/RollResultType";
 
 // @todo think of better name for this
 export interface RollOutputData {
   notation: string;
-  rolls: ExpressionResult|RollResult[];
+  rolls: ExpressionResult|RollResultType[];
 }

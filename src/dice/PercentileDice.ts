@@ -1,6 +1,7 @@
 import StandardDice from './StandardDice';
 import {ModifierCollection} from "../types/Types/ModifierCollection";
 import Description from "../Description";
+import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
 
 /**
  * Represents a percentile die.
@@ -24,7 +25,7 @@ class PercentileDice extends StandardDice {
    */
   constructor(
     qty: number = 1,
-    modifiers: ModifierCollection | null = null,
+    modifiers: ModifierCollection | Modifier[] | null = null,
     sidesAsNumber: boolean = false,
     description: Description|string|null = null
   ) {

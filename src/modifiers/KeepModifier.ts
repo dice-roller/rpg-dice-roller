@@ -1,7 +1,6 @@
 import { isNumeric } from '../utilities/math';
 import Modifier from './Modifier';
-import ResultGroup from '../results/ResultGroup';
-import RollResults from '../results/RollResults';
+import { ResultGroup, RollResults } from '../results';
 import { RangeEnd } from "../types/Enums/RangeEnd";
 import { ResultCollection } from "../types/Interfaces/Results/ResultCollection";
 import { Modifiable } from "../types/Interfaces/Modifiable";
@@ -31,8 +30,6 @@ class KeepModifier extends Modifier {
 
   #end!: RangeEnd;
   #qty!: number;
-
-  override readonly name: string = `keep-${this.end}`;
 
   /**
    * Create a `KeepModifier` instance
@@ -73,6 +70,10 @@ class KeepModifier extends Modifier {
     }
 
     this.#end = value;
+  }
+
+  override get name(): string {
+    return`keep-${this.end}`;
   }
 
   /**

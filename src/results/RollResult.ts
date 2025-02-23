@@ -1,9 +1,9 @@
 import { isNumeric } from '../utilities/math';
 import getModifierFlags from '../modifiers/modifier-flags';
-import { SingleResult } from "../types/Interfaces/Results/SingleResult";
-import { ResultValue } from "../types/Interfaces/Results/ResultValue";
-import { ModelType } from "../types/Enums/ModelType";
-import { SingleResultJsonOutput } from "../types/Interfaces/Json/SingleResultJsonOutput";
+import { SingleResult } from '../types/Interfaces/Results/SingleResult';
+import { ResultValue } from '../types/Interfaces/Results/ResultValue';
+import { ModelType } from '../types/Enums/ModelType';
+import { SingleResultJsonOutput } from '../types/Interfaces/Json/SingleResultJsonOutput';
 
 /**
  * A `RollResult` represents the value and applicable modifiers for a single die roll
@@ -53,7 +53,11 @@ class RollResult implements SingleResult {
    *
    * @throws {TypeError} Result value, calculation value, or modifiers are invalid
    */
-  constructor(value: number|ResultValue|SingleResultJsonOutput, modifiers?: string[]|Set<string>, useInTotal: boolean = true) {
+  constructor(
+    value: number|ResultValue|Partial<SingleResultJsonOutput>,
+    modifiers?: string[]|Set<string>|null,
+    useInTotal: boolean = true
+  ) {
     if (isNumeric(value)) {
       this.#initialValue = Number(value);
 
@@ -72,24 +76,26 @@ class RollResult implements SingleResult {
         isNumeric(value.value)
         && (Number(value.value) !== this.#initialValue)
       ) {
-        this.value = value.value;
+        this.value = value.value as number;
       }
 
       if (
         isNumeric(value.calculationValue)
         && (parseFloat(`${value.calculationValue}`) !== this.value)
       ) {
-        this.calculationValue = value.calculationValue;
+        this.calculationValue = value.calculationValue as number;
       }
 
       let hasModifiers: boolean;
       if (Array.isArray(value.modifiers)) {
         hasModifiers = value.modifiers.length > 0;
       } else {
-        hasModifiers = value.modifiers.size > 0;
+        hasModifiers = (value.modifiers?.size ?? 0) > 0;
       }
 
-      this.modifiers = hasModifiers ? value.modifiers : (modifiers ?? []);
+      this.modifiers = hasModifiers
+        ? (value.modifiers as Set<string>|string[])
+        : (modifiers ?? []);
       this.useInTotal = (typeof value.useInTotal === 'boolean')
         ? value.useInTotal
         : (useInTotal || false);
