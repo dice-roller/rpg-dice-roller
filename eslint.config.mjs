@@ -9,9 +9,8 @@ export default tseslint.config(
       'coverage/**/*',
       'docs/**/*',
       'lib/**/*',
-      // 'types/**/*',
+      'types/**/*',
       'src/parser/grammars/grammar.js',
-      // 'tests/**/*',
     ],
   },
   eslint.configs.recommended,
@@ -47,6 +46,14 @@ export default tseslint.config(
         'error',
         'type-annotation',
       ],
+    },
+  },
+  {
+    files: [
+      'tests/**/*',
+    ],
+    rules: {
+      '@typescript-eslint/no-unsafe-assignment': 'off',
     },
   },
 );
