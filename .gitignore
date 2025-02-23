@@ -47,6 +47,7 @@ bower_components
 /lib/*.map
 /lib/**/*.map
 /src/parser/grammars/grammar.js
+/src/parser/grammars/grammar.ts
 
 ## Compiled TypeScript
 /types

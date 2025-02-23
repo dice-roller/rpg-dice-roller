@@ -1,11 +1,18 @@
+const tspegjs = require('ts-pegjs');
+
 module.exports = {
   format: 'es',
+  plugins: [tspegjs],
   dependencies: {
-    '{ evaluate }': '../../utilities/math.js',
-    '* as Dice': '../../dice/index.js',
-    '* as Modifiers': '../../modifiers/index.js',
-    'ComparePoint': '../../ComparePoint.js',
-    'RollGroup': '../../RollGroup.js',
-    'Description': '../../Description.js',
+    '{ evaluate }': '../../utilities/math',
+    '* as Dice': '../../dice/index',
+    '* as Modifiers': '../../modifiers/index',
+    'ComparePoint': '../../ComparePoint',
+    'RollGroup': '../../RollGroup',
+    'Description': '../../Description',
+    '{ DescriptionType }': '../../types/Enums/DescriptionType',
+  },
+  tspegjs: {
+    skipTypeComputation: true,
   },
 };
