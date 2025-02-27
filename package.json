@@ -15,12 +15,12 @@
         "default": "./dist/esm/bundle.js"
       },
       "require": {
-        "types": "./dist/types/index.d.cts",
+        "types": "./dist/types/index.d.ts",
         "default": "./dist/umd/bundle.js"
       }
     },
     "./dist/umd/bundle.js": {
-      "types": "./dist/types/index.d.cts",
+      "types": "./dist/types/index.d.ts",
       "require": "./dist/umd/bundle.js"
     },
     "./types/": "./dist/types/",
@@ -86,7 +86,7 @@
   "scripts": {
     "build": "npm run build:dev && npm run build:prod && npm run build:definitions",
     "build:prepare": "npm run build:grammars && npm run lint",
-    "build:definitions": "rm -rf ./dist/types/ && tsc -p definitions.tsconfig.json && cp ./dist/types/index.d.ts ./dist/types/index.d.cts",
+    "build:definitions": "rm -rf ./dist/types/ && tsc -p definitions.tsconfig.json",
     "build:dev": "npm run build:prepare && rollup --c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs -o ./src/parser/grammars/grammar.ts",
     "build:prod": "npm run build:prepare && rollup --c --environment BUILD:prod",

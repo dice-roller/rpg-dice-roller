@@ -3,12 +3,12 @@
 
 # Except for these
 !/dist/*.js
+!/dist/*.d.ts
 !/dist/**/*.js
+!/dist/**/*.d.ts
 !/dist/*.map
 !/dist/**/*.map
-!/types/*.d.ts
-!/types/index.d.cts
-!/types/**/*.d.ts
+!CODE_OF_CONDUCT.md
 !CONTRIBUTING.md
 !licence.txt
 !package.json
