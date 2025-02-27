@@ -1,10 +1,8 @@
-import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { babel } from '@rollup/plugin-babel';
 import license from 'rollup-plugin-license';
 import terser from '@rollup/plugin-terser';
 import typescript from '@rollup/plugin-typescript';
-// import eslint from '@rollup/plugin-eslint';
 
 const path = require('path');
 
@@ -28,14 +26,9 @@ const buildOutputPath = (format, minify = false) => `${outputDir}/${format}/bund
  * @returns {{}}
  */
 const getPlugins = (isUmd = false, isProduction = false) => [
-  // lint the files (Currently broken because plugin uses an old version of eslint)
-  // eslint(),
   typescript(),
   // resolve third party library imports
   nodeResolve(),
-  // handle commonJS modules
-  // @todo I don't think this is needed anymore, as we don't have any commonJS dependencies
-  commonjs({ extensions: ['.js', '.ts'] }),
   // only use babel if we're compiling to UMD
   isUmd ? babel({
     exclude: 'node_modules/**',
