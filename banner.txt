@@ -1,4 +1,6 @@
-<%= pkg.name %> - <%= pkg.description %>
+<%= pkg.name %>
+
+<%= pkg.description %>
 
 @version <%= pkg.version %>
 @license <%= pkg.license %>
