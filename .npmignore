@@ -2,13 +2,13 @@
 *
 
 # Except for these
-!/lib/*.js
-!/lib/**/*.js
-!/lib/*.map
-!/lib/**/*.map
-!/types/*.d.ts
-!/types/index.d.cts
-!/types/**/*.d.ts
+!/dist/*.js
+!/dist/*.d.ts
+!/dist/**/*.js
+!/dist/**/*.d.ts
+!/dist/*.map
+!/dist/**/*.map
+!CODE_OF_CONDUCT.md
 !CONTRIBUTING.md
 !licence.txt
 !package.json

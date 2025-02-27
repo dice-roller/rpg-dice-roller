@@ -1,13 +1,12 @@
 {
 	"extends": "./tsconfig",
 	"exclude": [
-	  "tests/**/*.js",
-	  "tests/**/*.ts"
+	  "tests/**/*"
 	],
 	"compilerOptions": {
 	  "declaration": true,
+    "declarationDir": "./dist/types",
 	  "noEmit": false,
 	  "emitDeclarationOnly": true,
-	  "declarationDir": "types"
 	}
 }

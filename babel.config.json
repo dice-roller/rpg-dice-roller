@@ -3,10 +3,9 @@
     [
       "@babel/preset-env",
       {
-        "targets": {
-          "browsers": "defaults"
-        }
+        "targets": "default"
       }
-    ]
+    ],
+    "@babel/preset-typescript"
   ]
 }
