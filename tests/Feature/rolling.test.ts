@@ -113,6 +113,86 @@ describe('Rolling', () => {
       ]);
     });
 
+    test('roll `fix(4d10/3)', () => {
+      const rolls = new RollResults([2,3,6,2])
+      jest.spyOn(StandardDice.prototype, 'roll')
+        .mockImplementationOnce(() => rolls);
+      const roll = roller.roll('fix(4d10/3)') as DiceRoll;
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('fix(4d10/3)');
+      expect(roll.total).toBe(4);
+      expect(roll.output).toEqual('fix(4d10/3): fix([2, 3, 6, 2]/3) = 4');
+      expect(roll.rolls).toEqual([
+        'fix(',
+        rolls,
+        '/',
+        3,
+        ')',
+      ]);
+    });
+
+    test('roll `fix(4d10/3, 2)', () => {
+      const rolls = new RollResults([2,3,6,2])
+      jest.spyOn(StandardDice.prototype, 'roll')
+        .mockImplementationOnce(() => rolls);
+      const roll = roller.roll('fix(4d10/3, 2)') as DiceRoll;
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('fix(4d10/3, 2)');
+      expect(roll.total).toBe(4.33);
+      expect(roll.output).toEqual('fix(4d10/3, 2): fix([2, 3, 6, 2]/3,2) = 4.33');
+      expect(roll.rolls).toEqual([
+        'fix(',
+        rolls,
+        '/',
+        3,
+        ',',
+        2,
+        ')',
+      ]);
+    });
+
+    test('roll `trunc(4d10/3)', () => {
+      const rolls = new RollResults([2,3,6,2])
+      jest.spyOn(StandardDice.prototype, 'roll')
+        .mockImplementationOnce(() => rolls);
+      const roll = roller.roll('trunc(4d10/3)') as DiceRoll;
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('trunc(4d10/3)');
+      expect(roll.total).toBe(4);
+      expect(roll.output).toEqual('trunc(4d10/3): fix([2, 3, 6, 2]/3) = 4');
+      expect(roll.rolls).toEqual([
+        'fix(',
+        rolls,
+        '/',
+        3,
+        ')',
+      ]);
+    });
+
+    test('roll `trunc(4d10/3, 2)', () => {
+      const rolls = new RollResults([2,3,6,2])
+      jest.spyOn(StandardDice.prototype, 'roll')
+        .mockImplementationOnce(() => rolls);
+      const roll = roller.roll('trunc(4d10/3, 2)') as DiceRoll;
+
+      expect(roll).toBeInstanceOf(DiceRoll);
+      expect(roll.notation).toEqual('trunc(4d10/3, 2)');
+      expect(roll.total).toBe(4.33);
+      expect(roll.output).toEqual('trunc(4d10/3, 2): fix([2, 3, 6, 2]/3,2) = 4.33');
+      expect(roll.rolls).toEqual([
+        'fix(',
+        rolls,
+        '/',
+        3,
+        ',',
+        2,
+        ')',
+      ]);
+    });
+
     test('roll `3d6cs>3cf<3`', () => {
       jest.spyOn(StandardDice.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(5))
