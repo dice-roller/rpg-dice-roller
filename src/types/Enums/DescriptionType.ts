@@ -1,4 +1,4 @@
 export enum DescriptionType {
-  MultiLine = 'multiline',
+  Block = 'block',
   Inline = 'inline',
 }

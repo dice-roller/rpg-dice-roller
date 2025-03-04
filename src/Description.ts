@@ -45,7 +45,7 @@ class Description {
   /**
    * The description type.
    *
-   * @return {string} "inline" or "multiline"
+   * @return {string} "inline" or "block"
    */
   get type(): DescriptionType {
     return this.#type;

@@ -585,7 +585,7 @@ describe('Parsing', () => {
 
         expect(result.description).toBeInstanceOf(Description);
         expect(result.description?.text).toEqual(comment);
-        expect(result.description?.type).toEqual(DescriptionType.MultiLine);
+        expect(result.description?.type).toEqual(DescriptionType.Block);
       });
 
       test('12d% [ A comment with a \n line break ]', () => {
@@ -603,7 +603,7 @@ describe('Parsing', () => {
 
         expect(result.description).toBeInstanceOf(Description);
         expect(result.description?.text).toEqual(comment);
-        expect(result.description?.type).toEqual(DescriptionType.MultiLine);
+        expect(result.description?.type).toEqual(DescriptionType.Block);
       });
     });
   });

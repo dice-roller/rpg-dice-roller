@@ -78,7 +78,7 @@ describe('Parsing Roll Groups Descriptions', () => {
 
       expect(group.description).toBeInstanceOf(Description);
       expect(group.description?.text).toEqual(comment);
-      expect(group.description?.type).toEqual(DescriptionType.MultiLine);
+      expect(group.description?.type).toEqual(DescriptionType.Block);
     });
 
     test('{12d%} [ A comment with a \n line break ]', () => {
@@ -102,7 +102,7 @@ describe('Parsing Roll Groups Descriptions', () => {
 
       expect(group.description).toBeInstanceOf(Description);
       expect(group.description?.text).toEqual(comment);
-      expect(group.description?.type).toEqual(DescriptionType.MultiLine);
+      expect(group.description?.type).toEqual(DescriptionType.Block);
     });
   });
 });

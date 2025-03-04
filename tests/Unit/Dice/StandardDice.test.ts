@@ -574,10 +574,10 @@ describe('StandardDice', () => {
       expect(die.description).toBeInstanceOf(Description);
       expect(die.description?.text).toEqual('foo');
 
-      die.description = new Description('foo bar', DescriptionType.MultiLine);
+      die.description = new Description('foo bar', DescriptionType.Block);
       expect(die.description).toBeInstanceOf(Description);
       expect(die.description.text).toEqual('foo bar');
-      expect(die.description.type).toEqual(DescriptionType.MultiLine);
+      expect(die.description.type).toEqual(DescriptionType.Block);
     });
 
     test('setting to falsey get set to `null`', () => {
@@ -667,7 +667,7 @@ describe('StandardDice', () => {
         const description = 'My awesome description';
         const die = new StandardDice(6, 4);
 
-        die.description = new Description(description, DescriptionType.MultiLine);
+        die.description = new Description(description, DescriptionType.Block);
 
         // json encode, to get the encoded string, then decode so we can compare the object
         // this allows us to check that the output is correct, but ignoring the order of the
@@ -676,7 +676,7 @@ describe('StandardDice', () => {
           average: 3.5,
           description: {
             text: description,
-            type: DescriptionType.MultiLine,
+            type: DescriptionType.Block,
           },
           max: 6,
           min: 1,
@@ -693,7 +693,7 @@ describe('StandardDice', () => {
         const description = 'My awesome description';
         const die = new StandardDice(6, 4);
 
-        die.description = new Description(description, DescriptionType.MultiLine);
+        die.description = new Description(description, DescriptionType.Block);
 
         expect(die.toString()).toEqual(`4d6 [${description}]`);
       });
