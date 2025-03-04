@@ -5,13 +5,16 @@ on:
       - main
       - develop
       - 'releases/**'
+      - 'next/**'
   pull_request:
     branches:
       - main
       - develop
       - 'releases/**'
+      - 'next/**'
 jobs:
   test:
+    name: 'Run tests'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -34,7 +37,8 @@ jobs:
           github-token: ${{ secrets.github_token }}
           parallel: true
 
-  build-typescript:
+  build-definitions:
+    name: 'Check TS definitions are compiled'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,10 +52,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Build Grammars
+        run: npm run build:grammars
+
       - name: Build Typescript
-        run: npm run build:declaration
+        run: npm run build:definitions
 
   build-api-docs:
+    name: "Check API docs are built"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -69,6 +77,7 @@ jobs:
         run: npm run docs:build
 
   finish:
+    name: "Send Coverage"
     needs: test
     runs-on: ubuntu-latest
     steps:

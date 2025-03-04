@@ -7,12 +7,9 @@ Main = Expression
 
 // Expression / roll groups
 RollGroup
-  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* descriptions:__ {
+  = "{" _ expressions:ExpressionCollection _ "}" modifiers:Modifier* descriptions:__ {
     return new RollGroup(
-      [
-        expr,
-        ...exprs.map(v => v[3])
-      ],
+      expressions,
       Object.assign({}, ...modifiers.map(item => {
         return {[item.name]: item};
       })),
@@ -170,6 +167,13 @@ Expression
     ]
   }
 
+ExpressionCollection = expr:Expression exprs:(_ "," _ Expression)* {
+  return [
+    expr,
+    ...exprs.map(v => v[3])
+  ];
+}
+
 Factor
   = MathFunction
   / Dice
@@ -191,6 +195,17 @@ MathFunction
       ...expr1,
       ',',
       ...expr2,
+      ')',
+    ];
+  }
+  / func:("fix" / "trunc" { return "fix" }) "(" _ expr1:Expression _ expr2:("," _ Expression _)? ")" {
+    return [
+      `${func}(`,
+      ...expr1,
+      ...(expr2 ? [
+        ',',
+        ...expr2[2],
+      ] : []),
       ')',
     ];
   }

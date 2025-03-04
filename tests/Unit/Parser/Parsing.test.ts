@@ -110,6 +110,47 @@ describe('Parsing', () => {
         }).toThrow(parser.PeggySyntaxError);
       });
     });
+
+    // Test the fix / trunc function
+    ['fix', 'trunc'].forEach((name) => {
+      test(`can parse \`${name}(2d10*3)\``, () => {
+        const parsed = Parser.parse(`${name}(2d10*3)`);
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(5);
+
+        expect(parsed[0]).toEqual('fix(');
+
+        const result = parsed[1] as Dice;
+        expect(result).toBeInstanceOf(StandardDice);
+        expect(result.sides).toBe(10);
+        expect(result.qty).toBe(2);
+        expect(result.modifiers).toEqual(new Map());
+
+        expect(parsed[2]).toEqual('*');
+        expect(parsed[3]).toBe(3);
+        expect(parsed[4]).toEqual(')');
+      });
+
+      test(`can parse \`${name}(5d20, 2)\``, () => {
+        const parsed = Parser.parse(`${name}(5d20, 2)`);
+
+        expect(parsed).toBeInstanceOf(Array);
+        expect(parsed).toHaveLength(5);
+
+        expect(parsed[0]).toEqual('fix(');
+
+        const result = parsed[1] as Dice;
+        expect(result).toBeInstanceOf(StandardDice);
+        expect(result.sides).toBe(20);
+        expect(result.qty).toBe(5);
+        expect(result.modifiers).toEqual(new Map());
+
+        expect(parsed[2]).toEqual(',');
+        expect(parsed[3]).toBe(2);
+        expect(parsed[4]).toEqual(')');
+      });
+    });
   });
 
   describe('Multiple dice', () => {
