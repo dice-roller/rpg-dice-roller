@@ -348,10 +348,10 @@ describe('FudgeDice', () => {
       expect(die.description).toBeInstanceOf(Description);
       expect(die.description?.text).toEqual('foo');
 
-      die.description = new Description('foo bar', DescriptionType.MultiLine);
+      die.description = new Description('foo bar', DescriptionType.Block);
       expect(die.description).toBeInstanceOf(Description);
       expect(die.description.text).toEqual('foo bar');
-      expect(die.description.type).toEqual(DescriptionType.MultiLine);
+      expect(die.description.type).toEqual(DescriptionType.Block);
     });
 
     test('setting to falsey get set to `null`', () => {
@@ -438,13 +438,13 @@ describe('FudgeDice', () => {
         const description = 'Some description';
         const die = new FudgeDice();
 
-        die.description = new Description(description, DescriptionType.MultiLine);
+        die.description = new Description(description, DescriptionType.Block);
 
         expect(JSON.parse(JSON.stringify(die))).toEqual({
           average: 0,
           description: {
             text: description,
-            type: DescriptionType.MultiLine,
+            type: DescriptionType.Block,
           },
           max: 1,
           min: -1,
@@ -461,7 +461,7 @@ describe('FudgeDice', () => {
         const description = 'Another description';
         const die = new FudgeDice();
 
-        die.description = new Description(description, DescriptionType.MultiLine);
+        die.description = new Description(description, DescriptionType.Block);
 
         expect(die.toString()).toEqual(`1dF.2 [${description}]`);
       });

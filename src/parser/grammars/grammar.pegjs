@@ -228,13 +228,13 @@ Operator
  */
 
 Comment "comment"
-  = MultiLineComment
+  = BlockComment
   / SingleLineComment
 
 // allows comments in the format of /* .. */ and [ ... ]
-MultiLineComment
-  = "/*" text:(!"*/" .)* "*/" { return new Description(text.flat().join(''), DescriptionType.MultiLine) }
-  / "[" text:[^\]]* "]" { return new Description(text.flat().join(''), DescriptionType.MultiLine) }
+BlockComment
+  = "/*" text:(!"*/" .)* "*/" { return new Description(text.flat().join(''), DescriptionType.Block) }
+  / "[" text:[^\]]* "]" { return new Description(text.flat().join(''), DescriptionType.Block) }
 
 // allows comments in the format of // ... and # ...
 SingleLineComment

@@ -407,10 +407,10 @@ describe('RollGroup', () => {
       expect(group.description).toBeInstanceOf(Description);
       expect(group.description?.text).toEqual('baz bar');
 
-      group.description = new Description('foo bar', DescriptionType.MultiLine);
+      group.description = new Description('foo bar', DescriptionType.Block);
       expect(group.description).toBeInstanceOf(Description);
       expect(group.description.text).toEqual('foo bar');
-      expect(group.description.type).toEqual(DescriptionType.MultiLine);
+      expect(group.description.type).toEqual(DescriptionType.Block);
     });
 
     test('setting to falsey get set to `null`', () => {
@@ -563,12 +563,12 @@ describe('RollGroup', () => {
 
     describe('With multi-line description', () => {
       test('JSON output is correct', () => {
-        (group.description as Description).type = DescriptionType.MultiLine;
+        (group.description as Description).type = DescriptionType.Block;
 
         expect(JSON.parse(JSON.stringify(group))).toEqual({
           description: {
             text: 'a description',
-            type: DescriptionType.MultiLine,
+            type: DescriptionType.Block,
           },
           expressions: [
             [3, '+', 4],
@@ -600,7 +600,7 @@ describe('RollGroup', () => {
       });
 
       test('String output is correct', () => {
-        (group.description as Description).type = DescriptionType.MultiLine;
+        (group.description as Description).type = DescriptionType.Block;
 
         expect(group.toString()).toEqual('{3+4, 4d6/2, 1d10*1d20} [a description]');
       });

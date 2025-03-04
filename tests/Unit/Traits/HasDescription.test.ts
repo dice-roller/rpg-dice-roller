@@ -30,7 +30,7 @@ describe('HasDescription', () => {
 
       expect(model.description).toBe(description);
 
-      description = new Description('multiline description', DescriptionType.MultiLine);
+      description = new Description('multiline description', DescriptionType.Block);
       model = new HasDescription(description);
 
       expect(model.description).toBe(description);
@@ -93,7 +93,7 @@ describe('HasDescription', () => {
 
       expect(model.description).toBe(description);
 
-      description = new Description('Another description', DescriptionType.MultiLine);
+      description = new Description('Another description', DescriptionType.Block);
       model.description = description;
 
       expect(model.description).toBe(description);
@@ -135,7 +135,7 @@ describe('HasDescription', () => {
 
     describe('With multi-line description', () => {
       beforeEach(() => {
-        model = new HasDescription(new Description('a multi-line description', DescriptionType.MultiLine));
+        model = new HasDescription(new Description('a multi-line description', DescriptionType.Block));
       });
 
       test('JSON output is correct', () => {

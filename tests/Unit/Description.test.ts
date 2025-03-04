@@ -92,10 +92,10 @@ describe('Description', () => {
     test('setting in constructor calls setter', () => {
       const spy = jest.spyOn(Description.prototype, 'type', 'set');
 
-      new Description(text, DescriptionType.MultiLine);
+      new Description(text, DescriptionType.Block);
 
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toHaveBeenCalledWith(DescriptionType.MultiLine);
+      expect(spy).toHaveBeenCalledWith(DescriptionType.Block);
 
       // remove the spy
       spy.mockRestore();
@@ -104,8 +104,8 @@ describe('Description', () => {
     test('can be changed', () => {
       expect(description.type).toEqual(DescriptionType.Inline);
 
-      description.type = DescriptionType.MultiLine;
-      expect(description.type).toEqual(DescriptionType.MultiLine);
+      description.type = DescriptionType.Block;
+      expect(description.type).toEqual(DescriptionType.Block);
 
       description.type = DescriptionType.Inline;
       expect(description.type).toEqual(DescriptionType.Inline);
@@ -175,16 +175,16 @@ describe('Description', () => {
       });
     });
 
-    describe(DescriptionType.MultiLine, () => {
+    describe(DescriptionType.Block, () => {
       test('JSON output is correct', () => {
-        const type = DescriptionType.MultiLine;
+        const type = DescriptionType.Block;
         description.type = type;
 
         expect(JSON.parse(JSON.stringify(description))).toEqual({ text, type });
       });
 
       test('String output is correct', () => {
-        description.type = DescriptionType.MultiLine;
+        description.type = DescriptionType.Block;
 
         expect(description.toString()).toEqual(`[${text}]`);
       });
