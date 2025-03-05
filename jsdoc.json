@@ -1,0 +1,26 @@
+{
+  "plugins": ["node_modules/jsdoc-babel"],
+  "babel": {
+    "extensions": ["ts", "tsx"],
+    "ignore": ["**/*.(test|spec).ts"],
+    "babelrc": false,
+    "presets": [
+      [
+        "@babel/preset-env",
+        {
+          "targets": { "node": true }
+        }
+      ],
+      "@babel/preset-typescript"
+    ]
+  },
+  "templates": {
+    "cleverLinks": false,
+    "monospaceLinks": false
+  },
+  "recurseDepth": 10,
+  "source": {
+    "includePattern": ".+\\.[jt]s(doc|x)?$",
+    "excludePattern": ".+\\.(test|spec).js"
+  }
+}
