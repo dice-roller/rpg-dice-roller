@@ -11,6 +11,11 @@ import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
 class PercentileDice extends StandardDice {
   readonly #sidesAsNumber: boolean = false;
 
+  /**
+   * The name of the die.
+   *
+   * @returns {string} 'percentile'
+   */
   override readonly name: string = 'percentile';
 
   /**

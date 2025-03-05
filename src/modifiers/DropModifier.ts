@@ -22,7 +22,7 @@ class DropModifier extends KeepModifier {
   /**
    * Create a `DropModifier` instance.
    *
-   * @param {string} [end=l] Either `h|l` to drop highest or lowest
+   * @param {RangeEnd} [end=RangeEnd.Low] Either `h|l` to drop highest or lowest
    * @param {number} [qty=1] The amount of dice to drop
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
@@ -32,6 +32,11 @@ class DropModifier extends KeepModifier {
     super(end, qty);
   }
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'drop-l' or 'drop-h'
+   */
   override get name(): string {
     return`drop-${this.end}`;
   }

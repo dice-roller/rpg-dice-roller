@@ -21,6 +21,11 @@ import { ModifierJsonOutput } from "../types/Interfaces/Json/ModifierJsonOutput"
 class ComparisonModifier extends Modifier implements ComparatorModifier {
   #comparator: Comparator|null = null;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'comparison'
+   */
   override readonly name: string = 'comparison';
 
   /**
@@ -41,7 +46,7 @@ class ComparisonModifier extends Modifier implements ComparatorModifier {
   /**
    * The compare point.
    *
-   * @returns {ComparePoint|undefined}
+   * @returns {ComparePoint|null}
    */
   get comparePoint(): Comparator|null {
     return this.#comparator;

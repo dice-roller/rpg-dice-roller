@@ -23,6 +23,11 @@ class CriticalSuccessModifier extends ComparisonModifier {
    */
   static override order: number = 9;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'critical-success'
+   */
   override readonly name:string = 'critical-success';
 
   /**

@@ -1,7 +1,14 @@
 import { nativeMath } from "random-js";
 
-export default nativeMath;
+/**
+ * An int32-producing Engine that uses `Math.random()`
+ *
+ * @type {Engine}
+ */
+const engine = nativeMath;
+
+export default engine;
 
 export {
-  nativeMath as engine,
+  engine,
 };

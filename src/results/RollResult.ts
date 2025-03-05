@@ -24,7 +24,7 @@ class RollResult implements SingleResult {
   /**
    * Create a `RollResult` instance.
    *
-   * `value` can be a numbeinTotal: number   notation: string   output: string   rolls: RollResult[]   totr, or an object containing a list of different values.
+   * `value` can be a number, or an object containing a list of different values.
    * This allows you to specify the `initialValue`, `value` and `calculationValue` with different
    * values.
    *

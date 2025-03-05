@@ -28,6 +28,11 @@ class ExplodeModifier extends ComparisonModifier {
   readonly #compound: boolean;
   readonly #penetrate: boolean;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'explode'
+   */
   override readonly name:string = 'explode';
 
   /**

@@ -89,7 +89,7 @@ class DiceRoller implements Exportable, Importable<DiceRollJsonOutput[]|DiceRoll
    *
    * @see {@link DiceRoller#toJSON}
    *
-   * @param {ExportFormat} [format=ExportFormat#Json] The format to export the data as
+   * @param {ExportFormat} [format=ExportFormat.Json] The format to export the data as
    *
    * @returns {string|null} The exported data, in the specified format
    *

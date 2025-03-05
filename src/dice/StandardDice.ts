@@ -22,6 +22,11 @@ class StandardDice extends HasDescription implements Dice {
   readonly #sides: number|string;
   readonly #qty: number;
 
+  /**
+   * The name of the die.
+   *
+   * @returns {string} 'standard'
+   */
   readonly name: string = 'standard';
 
   /**

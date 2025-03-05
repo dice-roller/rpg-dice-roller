@@ -6,7 +6,7 @@ import { Engine } from "../../types/Interfaces/NumberGenerator/Engines/Engine";
  *
  * @since 4.2.0
  *
- * @type {{next(): number, range: number[]}}
+ * @type {Engine}
  */
 class Max implements Engine {
   /**

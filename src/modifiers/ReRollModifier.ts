@@ -19,6 +19,11 @@ import { ModifierJsonOutput } from "../types/Interfaces/Json/ModifierJsonOutput"
 class ReRollModifier extends ComparisonModifier {
   #once: boolean = false;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 're-roll'
+   */
   override readonly name:string = 're-roll';
 
   /**

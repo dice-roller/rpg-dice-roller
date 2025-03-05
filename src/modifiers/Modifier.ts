@@ -18,7 +18,13 @@ abstract class Modifier implements IModifier {
    */
   static order: number = 999;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string}
+   */
   readonly abstract name: string;
+
   order: number;
 
   /**

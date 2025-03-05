@@ -30,6 +30,11 @@ class UniqueModifier extends ComparisonModifier {
 
   #once: boolean = false;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'unique'
+   */
   override readonly name:string = 'unique';
 
   /**

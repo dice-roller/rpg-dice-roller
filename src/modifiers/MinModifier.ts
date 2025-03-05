@@ -24,6 +24,12 @@ class MinModifier extends Modifier {
   static override order: number = 1;
 
   #min!: number;
+
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'min'
+   */
   override readonly name: string = 'min';
 
   /**

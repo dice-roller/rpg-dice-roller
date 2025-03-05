@@ -11,6 +11,11 @@ import { Modifier } from "../types/Interfaces/Modifiers/Modifier";
  * @extends StandardDice
  */
 class FudgeDice extends StandardDice {
+  /**
+   * The name of the die.
+   *
+   * @returns {string} 'fudge'
+   */
   override readonly name: string = 'fudge';
 
   /**

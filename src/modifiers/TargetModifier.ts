@@ -29,6 +29,11 @@ class TargetModifier extends ComparisonModifier {
 
   #failComparator: Comparator|null = null;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'sorting'
+   */
   override readonly name:string = 'target';
 
   /**

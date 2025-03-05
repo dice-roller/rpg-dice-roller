@@ -230,7 +230,7 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
    *
    * @see {@link DiceRoll#toJSON}
    *
-   * @param {ExportFormat} [format=exportFormats.JSON] The format to export the data as
+   * @param {ExportFormat} [format=ExportFormat.Json] The format to export the data as
    *
    * @returns {string|null} The exported data, in the specified format
    *

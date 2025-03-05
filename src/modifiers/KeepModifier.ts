@@ -34,7 +34,7 @@ class KeepModifier extends Modifier {
   /**
    * Create a `KeepModifier` instance
    *
-   * @param {string} [end=h] Either `h|l` to keep highest or lowest
+   * @param {RangeEnd} [end=RangeEnd.High] Either `h|l` to keep highest or lowest
    * @param {number} [qty=1] The amount dice to keep
    *
    * @throws {RangeError} End must be one of 'h' or 'l'
@@ -72,8 +72,13 @@ class KeepModifier extends Modifier {
     this.#end = value;
   }
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'keep-l' or 'keep-h'
+   */
   override get name(): string {
-    return`keep-${this.end}`;
+    return `keep-${this.end}`;
   }
 
   /**

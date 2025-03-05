@@ -24,6 +24,11 @@ class SortingModifier extends Modifier {
 
   #direction!: SortDirection;
 
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'sorting'
+   */
   override readonly name: string = 'sorting';
 
   /**

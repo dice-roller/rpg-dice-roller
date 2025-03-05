@@ -24,6 +24,12 @@ class MaxModifier extends Modifier {
   static override order: number = 2;
 
   #max!: number;
+
+  /**
+   * The name of the modifier.
+   *
+   * @returns {string} 'max'
+   */
   override readonly name: string = 'max';
 
   /**
