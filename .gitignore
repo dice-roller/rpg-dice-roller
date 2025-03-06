@@ -46,10 +46,10 @@ bower_components
 /dist/**/*.js
 /dist/*.map
 /dist/**/*.map
+/dist/types
+/dist/**/*.d.ts
 /src/parser/grammars/grammar.js
 /src/parser/grammars/grammar.ts
-
-## Compiled TypeScript
 /types
 
 ## Testing
