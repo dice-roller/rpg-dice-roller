@@ -88,7 +88,7 @@
     "build:prepare": "npm run build:grammars && npm run lint",
     "build:definitions": "rm -rf ./dist/types/ && tsc -p definitions.tsconfig.json",
     "build:dev": "npm run build:prepare && rollup --c --environment BUILD:dev",
-    "build:grammars": "peggy -c ./peggy.config.cjs ./src/parser/grammars/grammar.pegjs -o ./src/parser/grammars/grammar.ts",
+    "build:grammars": "peggy -c ./peggy.config.cjs src/Parser/grammars/grammar.pegjs -o src/Parser/grammars/grammar.ts",
     "build:prod": "npm run build:prepare && rollup --c --environment BUILD:prod",
     "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.[jt]s,**/index.[jt]s,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\" --readme=\"./docs/readme.md\"",
     "docs:watch": "npm run docs:build -- --watch",

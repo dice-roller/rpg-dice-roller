@@ -1,7 +1,7 @@
-import Parser from "../../../src/parser/Parser";
-import { Dice } from "../../../src/types/Interfaces/Dice";
-import { FudgeDice, PercentileDice, StandardDice } from "../../../src/dice";
-import * as parser from "../../../src/parser/grammars/grammar";
+import Parser from "../../../src/Parser/Parser";
+import { Dice } from "../../../src/Types/Interfaces/Dice";
+import { FudgeDice, PercentileDice, StandardDice } from "../../../src/Dice";
+import * as parser from "../../../src/Parser/grammars/grammar";
 
 describe('Parsing Basic Dice', () => {
   test('returns correct response for `d6`', () => {

@@ -1,7 +1,7 @@
-import { StandardDice } from '../../../src/dice';
-import { MaxModifier, Modifier } from '../../../src/modifiers';
-import RollResults from '../../../src/results/RollResults';
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
+import { StandardDice } from '../../../src/Dice';
+import { MaxModifier, Modifier } from '../../../src/Modifiers';
+import RollResults from '../../../src/Results/RollResults';
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
 
 describe('MaxModifier', () => {
   let mod: MaxModifier;

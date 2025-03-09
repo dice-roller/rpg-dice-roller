@@ -1,25 +1,26 @@
-import * as Dice from './dice/index';
-import * as Exceptions from './exceptions';
-import * as Modifiers from './modifiers';
-import * as Results from './results';
+import * as Dice from './Dice/index';
+import * as Exceptions from './Exceptions';
+import * as Modifiers from './Modifiers';
+import * as Results from './Results';
 import * as NumberGenerator from './NumberGenerator';
-import DiceRoll from './DiceRoll';
-import DiceRoller from './DiceRoller';
+import DiceRoll from './Rolling/DiceRoll';
+import { RollEngine, RollLog } from './Rolling';
 import ComparePoint from './ComparePoint';
-import Parser from './parser/Parser';
+import Parser from './Parser/Parser';
 import RollGroup from './RollGroup';
-import { ExportFormat } from "./types/Enums/ExportFormat";
+import { ExportFormat } from "./Types/Enums/ExportFormat";
 
 export {
   ComparePoint,
   Dice,
   DiceRoll,
-  DiceRoller,
   Exceptions,
   ExportFormat,
   Modifiers,
   NumberGenerator,
   Parser,
   Results,
+  RollEngine,
   RollGroup,
+  RollLog,
 };

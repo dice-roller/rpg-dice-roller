@@ -1,13 +1,13 @@
-import { StandardDice } from '../../../src/dice';
-import { KeepModifier, Modifier } from '../../../src/modifiers';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import { StandardDice } from '../../../src/Dice';
+import { KeepModifier, Modifier } from '../../../src/Modifiers';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import RollGroup from '../../../src/RollGroup';
-import { RangeEnd } from '../../../src/types/Enums/RangeEnd';
-import { ModelType } from '../../../src/types/Enums/ModelType';
-import { SingleResult } from '../../../src/types/Interfaces/Results/SingleResult';
-import { RollResultType } from "../../../src/types/Types/RollResultType";
-import { ResultGroup } from "../../../src/results";
+import { RangeEnd } from '../../../src/Types/Enums/RangeEnd';
+import { ModelType } from '../../../src/Types/Enums/ModelType';
+import { SingleResult } from '../../../src/Types/Interfaces/Results/SingleResult';
+import { RollResultType } from "../../../src/Types/Types/RollResultType";
+import { ResultGroup } from "../../../src/Results";
 
 describe('KeepModifier', () => {
   describe('Initialisation', () => {

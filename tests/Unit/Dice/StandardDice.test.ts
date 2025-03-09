@@ -1,12 +1,13 @@
-import { StandardDice } from '../../../src/dice';
-import { RequiredArgumentError } from '../../../src/exceptions';
-import { ExplodeModifier, SortingModifier } from '../../../src/modifiers';
+import { StandardDice } from '../../../src/Dice';
+import { RequiredArgumentError } from '../../../src/Exceptions';
+import { ExplodeModifier, SortingModifier } from '../../../src/Modifiers';
 import ComparePoint from '../../../src/ComparePoint';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import Description from '../../../src/Description';
-import { ModelType } from "../../../src/types/Enums/ModelType";
-import { DescriptionType } from "../../../src/types/Enums/DescriptionType";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
+import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -752,7 +753,7 @@ describe('StandardDice', () => {
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce');
+      const spy = jest.spyOn(RollEngine.prototype, 'rollOnce');
       const die = new StandardDice(6, 4);
 
       // roll the dice

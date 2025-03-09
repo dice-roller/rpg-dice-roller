@@ -1,6 +1,6 @@
-import HasDescription from '../../../src/traits/HasDescription';
+import HasDescription from '../../../src/Traits/HasDescription';
 import Description from '../../../src/Description';
-import { DescriptionType } from "../../../src/types/Enums/DescriptionType";
+import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
 
 describe('HasDescription', () => {
   describe('Initialisation', () => {

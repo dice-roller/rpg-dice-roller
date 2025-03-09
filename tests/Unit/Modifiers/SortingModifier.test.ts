@@ -1,11 +1,11 @@
-import { StandardDice } from '../../../src/dice';
-import { Modifier, SortingModifier } from '../../../src/modifiers';
-import ResultGroup from '../../../src/results/ResultGroup';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import { StandardDice } from '../../../src/Dice';
+import { Modifier, SortingModifier } from '../../../src/Modifiers';
+import ResultGroup from '../../../src/Results/ResultGroup';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import RollGroup from '../../../src/RollGroup';
-import { SortDirection } from "../../../src/types/Enums/SortDirection";
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
+import { SortDirection } from "../../../src/Types/Enums/SortDirection";
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
 
 describe('SortingModifier', () => {
   describe('Initialisation', () => {

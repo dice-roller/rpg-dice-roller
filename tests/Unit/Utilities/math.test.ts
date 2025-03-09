@@ -1,5 +1,5 @@
-import * as mathUtils from '../../../src/utilities/math';
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
+import * as mathUtils from '../../../src/Utilities/math';
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
 
 describe('Math utils', () => {
   test('model structure', () => {

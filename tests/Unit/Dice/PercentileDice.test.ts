@@ -1,15 +1,16 @@
-import { PercentileDice, StandardDice } from '../../../src/dice';
-import { ExplodeModifier, KeepModifier, SortingModifier, } from '../../../src/modifiers';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import { PercentileDice, StandardDice } from '../../../src/Dice';
+import { ExplodeModifier, KeepModifier, SortingModifier, } from '../../../src/Modifiers';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import ComparePoint from '../../../src/ComparePoint';
 import Description from '../../../src/Description';
-import { RangeEnd } from "../../../src/types/Enums/RangeEnd";
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import { SortDirection } from "../../../src/types/Enums/SortDirection";
-import { DescriptionType } from "../../../src/types/Enums/DescriptionType";
-import { ModelType } from "../../../src/types/Enums/ModelType";
-import { DiceJsonOutput } from "../../../src/types/Interfaces/Json/DiceJsonOutput";
+import { RangeEnd } from "../../../src/Types/Enums/RangeEnd";
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import { SortDirection } from "../../../src/Types/Enums/SortDirection";
+import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
+import { DiceJsonOutput } from "../../../src/Types/Interfaces/Json/DiceJsonOutput";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
@@ -499,7 +500,7 @@ describe('PercentileDice', () => {
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
-      const spy = jest.spyOn(PercentileDice.prototype, 'rollOnce');
+      const spy = jest.spyOn(RollEngine.prototype, 'rollOnce');
       const die = new PercentileDice(4);
 
       // roll the dice

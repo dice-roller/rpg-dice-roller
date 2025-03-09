@@ -48,8 +48,8 @@ bower_components
 /dist/**/*.map
 /dist/types
 /dist/**/*.d.ts
-/src/parser/grammars/grammar.js
-/src/parser/grammars/grammar.ts
+/src/Parser/grammars/grammar.js
+/src/Parser/grammars/grammar.ts
 /types
 
 ## Testing

@@ -1,5 +1,5 @@
-import { flags as modifierFlags, getModifierFlags } from '../../../src/modifiers/modifier-flags';
-import { ReRollModifier } from "../../../src/modifiers";
+import { flags as modifierFlags, getModifierFlags } from '../../../src/Modifiers/modifier-flags';
+import { ReRollModifier } from "../../../src/Modifiers";
 
 describe('Modifier flags', () => {
   test('returns a string', () => {

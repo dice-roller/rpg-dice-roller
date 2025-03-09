@@ -1,7 +1,7 @@
-import { StandardDice } from '../../../src/dice';
-import { Modifier } from '../../../src/modifiers';
-import RollResults from '../../../src/results/RollResults';
-import { Dice } from "../../../src/types/Interfaces/Dice";
+import { StandardDice } from '../../../src/Dice';
+import { Modifier } from '../../../src/Modifiers';
+import RollResults from '../../../src/Results/RollResults';
+import { Dice } from "../../../src/Types/Interfaces/Dice";
 
 describe('Modifier', () => {
   describe('Static', () => {

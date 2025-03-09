@@ -1,6 +1,6 @@
-import { CompareOperatorError, RequiredArgumentError } from '../../src/exceptions';
+import { CompareOperatorError, RequiredArgumentError } from '../../src/Exceptions';
 import ComparePoint from '../../src/ComparePoint';
-import { ModelType } from "../../src/types/Enums/ModelType";
+import { ModelType } from "../../src/Types/Enums/ModelType";
 
 describe('ComparePoint', () => {
   describe('Initialisation', () => {

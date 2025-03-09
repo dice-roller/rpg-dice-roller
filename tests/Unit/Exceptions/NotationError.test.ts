@@ -1,4 +1,4 @@
-import NotationError from "../../../src/exceptions/NotationError";
+import NotationError from "../../../src/Exceptions/NotationError";
 
 describe('NotationError', () => {
   test('outputs correct message', () => {

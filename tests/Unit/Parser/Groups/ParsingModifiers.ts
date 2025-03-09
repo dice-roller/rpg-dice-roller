@@ -1,8 +1,8 @@
-import Parser from "../../../../src/parser/Parser";
+import Parser from "../../../../src/Parser/Parser";
 import RollGroup from "../../../../src/RollGroup";
-import { FudgeDice, PercentileDice, StandardDice } from "../../../../src/dice";
-import { DropModifier, KeepModifier, SortingModifier } from "../../../../src/modifiers";
-import { PeggySyntaxError } from "../../../../src/parser/grammars/grammar";
+import { FudgeDice, PercentileDice, StandardDice } from "../../../../src/Dice";
+import { DropModifier, KeepModifier, SortingModifier } from "../../../../src/Modifiers";
+import { PeggySyntaxError } from "../../../../src/Parser/grammars/grammar";
 
 describe('Parsing Roll Group Modifiers', () => {
   describe('Drop', () => {
