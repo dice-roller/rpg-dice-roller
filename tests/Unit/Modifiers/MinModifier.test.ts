@@ -1,7 +1,7 @@
-import { MinModifier, Modifier } from '../../../src/modifiers';
-import { StandardDice } from '../../../src/dice';
-import RollResults from '../../../src/results/RollResults';
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
+import { MinModifier, Modifier } from '../../../src/Modifiers';
+import { StandardDice } from '../../../src/Dice';
+import RollResults from '../../../src/Results/RollResults';
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
 
 describe('MinModifier', () => {
   let mod: MinModifier;

@@ -1,9 +1,9 @@
-import { CompareOperatorError, RequiredArgumentError } from './exceptions/index';
-import { compareNumbers, isNumeric } from './utilities/math';
-import { ComparisonOperator } from "./types/Enums/ComparisonOperator";
-import { Comparator } from "./types/Interfaces/Comparator";
-import { ModelType } from "./types/Enums/ModelType";
-import { JsonOutput } from "./types/Interfaces/Json/JsonOutput";
+import { CompareOperatorError, RequiredArgumentError } from './Exceptions/index';
+import { compareNumbers, isNumeric } from './Utilities/math';
+import { ComparisonOperator } from "./Types/Enums/ComparisonOperator";
+import { Comparator } from "./Types/Interfaces/Comparator";
+import { ModelType } from "./Types/Enums/ModelType";
+import { JsonOutput } from "./Types/Interfaces/Json/JsonOutput";
 
 /**
  * A `ComparePoint` object compares numbers against each other.

@@ -1,6 +1,6 @@
-import Parser from "../../../src/parser/Parser";
-import { RequiredArgumentError } from "../../../src/exceptions";
-import StandardDice from "../../../src/dice/StandardDice";
+import Parser from "../../../src/Parser/Parser";
+import { RequiredArgumentError } from "../../../src/Exceptions";
+import StandardDice from "../../../src/Dice/StandardDice";
 import RollGroup from "../../../src/RollGroup";
 
 describe('Parser Structure', () => {

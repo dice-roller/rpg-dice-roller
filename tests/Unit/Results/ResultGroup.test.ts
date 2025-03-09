@@ -1,6 +1,6 @@
-import ResultGroup from '../../../src/results/ResultGroup';
-import RollResults from '../../../src/results/RollResults';
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import ResultGroup from '../../../src/Results/ResultGroup';
+import RollResults from '../../../src/Results/RollResults';
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('ResultGroup', () => {
   let group: ResultGroup;

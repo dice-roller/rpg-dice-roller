@@ -1,9 +1,9 @@
-import Parser from "../../../../src/parser/Parser";
+import Parser from "../../../../src/Parser/Parser";
 import RollGroup from "../../../../src/RollGroup";
-import { Dice } from "../../../../src/types/Interfaces/Dice";
-import { FudgeDice, PercentileDice, StandardDice } from "../../../../src/dice";
+import { Dice } from "../../../../src/Types/Interfaces/Dice";
+import { FudgeDice, PercentileDice, StandardDice } from "../../../../src/Dice";
 import Description from "../../../../src/Description";
-import { DescriptionType } from "../../../../src/types/Enums/DescriptionType";
+import { DescriptionType } from "../../../../src/Types/Enums/DescriptionType";
 
 describe('Parsing Roll Groups Descriptions', () => {
   describe('Single', () => {

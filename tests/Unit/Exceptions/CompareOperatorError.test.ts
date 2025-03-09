@@ -1,4 +1,4 @@
-import CompareOperatorError from "../../../src/exceptions/CompareOperatorError";
+import CompareOperatorError from "../../../src/Exceptions/CompareOperatorError";
 
 describe('CompareOperatorError', () => {
   test('throws correct message', () => {

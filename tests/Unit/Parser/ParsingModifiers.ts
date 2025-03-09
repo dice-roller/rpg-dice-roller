@@ -1,19 +1,19 @@
-import Parser from "../../../src/parser/Parser";
-import { Dice } from "../../../src/types/Interfaces/Dice";
-import { FudgeDice, PercentileDice, StandardDice } from "../../../src/dice";
-import { Modifier } from "../../../src/types/Interfaces/Modifiers/Modifier";
+import Parser from "../../../src/Parser/Parser";
+import { Dice } from "../../../src/Types/Interfaces/Dice";
+import { FudgeDice, PercentileDice, StandardDice } from "../../../src/Dice";
+import { Modifier } from "../../../src/Types/Interfaces/Modifiers/Modifier";
 import {
   CriticalFailureModifier,
   CriticalSuccessModifier,
   DropModifier,
   ExplodeModifier,
   KeepModifier, MaxModifier, MinModifier, ReRollModifier, SortingModifier, TargetModifier, UniqueModifier
-} from "../../../src/modifiers";
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import * as parser from "../../../src/parser/grammars/grammar";
-import RollResults from "../../../src/results/RollResults";
-import minModifier from "../../../src/modifiers/MinModifier";
-import { ModelType } from "../../../src/types/Enums/ModelType";
+} from "../../../src/Modifiers";
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import * as parser from "../../../src/Parser/grammars/grammar";
+import RollResults from "../../../src/Results/RollResults";
+import minModifier from "../../../src/Modifiers/MinModifier";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('Parsing Modifiers', () => {
   describe('Critical failure', () => {

@@ -1,15 +1,15 @@
-import { RequiredArgumentError } from './exceptions/index';
-import HasDescription from './traits/HasDescription';
-import Modifier from './modifiers/Modifier';
-import ResultGroup from './results/ResultGroup';
-import StandardDice from './dice/StandardDice';
-import { RollGroupJsonOutput } from "./types/Interfaces/Json/RollGroupJsonOutput";
-import { ExpressionCollection } from "./types/Types/ExpressionCollection";
-import { ModifierCollection } from "./types/Types/ModifierCollection";
+import { RequiredArgumentError } from './Exceptions/index';
+import HasDescription from './Traits/HasDescription';
+import Modifier from './Modifiers/Modifier';
+import ResultGroup from './Results/ResultGroup';
+import StandardDice from './Dice/StandardDice';
+import { RollGroupJsonOutput } from "./Types/Interfaces/Json/RollGroupJsonOutput";
+import { ExpressionCollection } from "./Types/Types/ExpressionCollection";
+import { ModifierCollection } from "./Types/Types/ModifierCollection";
 import Description from "./Description";
-import { ExpressionResult } from "./types/Interfaces/Results/ExpressionResult";
-import { ModelType } from "./types/Enums/ModelType";
-import { Nameable } from "./types/Interfaces/Nameable";
+import { ExpressionResult } from "./Types/Interfaces/Results/ExpressionResult";
+import { ModelType } from "./Types/Enums/ModelType";
+import { Nameable } from "./Types/Interfaces/Nameable";
 
 /**
  * A `RollGroup` is a group of one or more "sub-rolls".
@@ -255,7 +255,7 @@ class RollGroup extends HasDescription implements Nameable {
         })
     );
 
-    // flag it as roll group results
+    // flag it as rI also oll group results
     rollResults.isRollGroup = true;
 
     // loop through each modifier and carry out its actions

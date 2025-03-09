@@ -1,6 +1,6 @@
-import RollResults from '../../../src/results/RollResults';
-import RollResult from '../../../src/results/RollResult';
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import RollResults from '../../../src/Results/RollResults';
+import RollResult from '../../../src/Results/RollResult';
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('RollResults', () => {
   let rolls: RollResult[];

@@ -1,4 +1,4 @@
-import { DescriptionType } from "./types/Enums/DescriptionType";
+import { DescriptionType } from "./Types/Enums/DescriptionType";
 
 /**
  * Represents a Roll / Roll group description.

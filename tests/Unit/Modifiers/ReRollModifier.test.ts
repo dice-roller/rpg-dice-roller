@@ -1,10 +1,10 @@
-import { StandardDice } from '../../../src/dice';
-import { DieActionValueError } from '../../../src/exceptions';
-import { ComparisonModifier, ReRollModifier } from '../../../src/modifiers';
+import { StandardDice } from '../../../src/Dice';
+import { DieActionValueError } from '../../../src/Exceptions';
+import { ComparisonModifier, ReRollModifier } from '../../../src/Modifiers';
 import ComparePoint from '../../../src/ComparePoint';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
 
 describe('ReRollModifier', () => {
   describe('Initialisation', () => {

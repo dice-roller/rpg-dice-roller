@@ -1,18 +1,18 @@
-import StandardDice from '../../src/dice/StandardDice';
-import FudgeDice from '../../src/dice/FudgeDice';
-import PercentileDice from '../../src/dice/PercentileDice';
-import RequiredArgumentError from '../../src/exceptions/RequiredArgumentError';
-import KeepModifier from '../../src/modifiers/KeepModifier';
-import Modifier from '../../src/modifiers/Modifier';
-import ResultGroup from '../../src/results/ResultGroup';
-import RollResults from '../../src/results/RollResults';
+import StandardDice from '../../src/Dice/StandardDice';
+import FudgeDice from '../../src/Dice/FudgeDice';
+import PercentileDice from '../../src/Dice/PercentileDice';
+import RequiredArgumentError from '../../src/Exceptions/RequiredArgumentError';
+import KeepModifier from '../../src/Modifiers/KeepModifier';
+import Modifier from '../../src/Modifiers/Modifier';
+import ResultGroup from '../../src/Results/ResultGroup';
+import RollResults from '../../src/Results/RollResults';
 import RollGroup from '../../src/RollGroup';
 import Description from '../../src/Description';
-import { ExpressionCollection } from "../../src/types/Types/ExpressionCollection";
-import { DescriptionType } from "../../src/types/Enums/DescriptionType";
-import { ExpressionResult } from "../../src/types/Interfaces/Results/ExpressionResult";
-import { Dice } from "../../src/types/Interfaces/Dice";
-import ExplodeModifier from "../../src/modifiers/ExplodeModifier";
+import { ExpressionCollection } from "../../src/Types/Types/ExpressionCollection";
+import { DescriptionType } from "../../src/Types/Enums/DescriptionType";
+import { ExpressionResult } from "../../src/Types/Interfaces/Results/ExpressionResult";
+import { Dice } from "../../src/Types/Interfaces/Dice";
+import ExplodeModifier from "../../src/Modifiers/ExplodeModifier";
 
 describe('RollGroup', () => {
   let group: RollGroup;

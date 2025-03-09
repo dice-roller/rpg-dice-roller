@@ -1,6 +1,6 @@
 import { Random } from 'random-js';
-import { Engine } from "../types/Interfaces/NumberGenerator/Engines/Engine";
-import { RandomNumberGenerator } from "../types/Interfaces/NumberGenerator/Engines/RandomNumberGenerator";
+import { Engine } from "../Types/Interfaces/NumberGenerator/Engines/Engine";
+import { RandomNumberGenerator } from "../Types/Interfaces/NumberGenerator/Engines/RandomNumberGenerator";
 import { engine as NativeMath } from "./engines/NativeMath";
 
 /**

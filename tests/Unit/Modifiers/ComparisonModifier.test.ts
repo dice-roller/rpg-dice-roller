@@ -1,9 +1,9 @@
-import { StandardDice } from '../../../src/dice';
-import { ComparisonModifier } from '../../../src/modifiers';
+import { StandardDice } from '../../../src/Dice';
+import { ComparisonModifier } from '../../../src/Modifiers';
 import ComparePoint from '../../../src/ComparePoint';
-import RollResults from '../../../src/results/RollResults';
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import RollResults from '../../../src/Results/RollResults';
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('ComparisonModifier', () => {
   describe('Initialisation', () => {

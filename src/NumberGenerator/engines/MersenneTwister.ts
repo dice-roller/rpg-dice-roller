@@ -1,4 +1,4 @@
-import { SeedableEngine } from "../../types/Interfaces/NumberGenerator/SeedableEngine";
+import { SeedableEngine } from "../../Types/Interfaces/NumberGenerator/SeedableEngine";
 import { MersenneTwister19937 } from "random-js";
 
 class MersenneTwister implements SeedableEngine {

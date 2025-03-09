@@ -1,4 +1,4 @@
-import * as diceUtils from '../../../src/utilities/utils';
+import * as diceUtils from '../../../src/Utilities/utils';
 
 describe('Utilities', () => {
   test('model structure', () => {

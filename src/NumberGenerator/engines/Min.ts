@@ -1,4 +1,4 @@
-import { Engine } from "../../types/Interfaces/NumberGenerator/Engines/Engine";
+import { Engine } from "../../Types/Interfaces/NumberGenerator/Engines/Engine";
 /**
  * Engine that always returns the minimum value.
  * Used internally for calculating min roll values.

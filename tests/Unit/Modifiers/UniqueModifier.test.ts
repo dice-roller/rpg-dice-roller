@@ -1,9 +1,9 @@
-import { ComparisonModifier, UniqueModifier } from '../../../src/modifiers';
-import { StandardDice } from '../../../src/dice';
-import { DieActionValueError } from '../../../src/exceptions';
+import { ComparisonModifier, UniqueModifier } from '../../../src/Modifiers';
+import { StandardDice } from '../../../src/Dice';
+import { DieActionValueError } from '../../../src/Exceptions';
 import ComparePoint from '../../../src/ComparePoint';
-import RollResults from '../../../src/results/RollResults';
-import RollResult from '../../../src/results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
+import RollResult from '../../../src/Results/RollResult';
 
 describe('UniqueModifier', () => {
   describe('Initialisation', () => {

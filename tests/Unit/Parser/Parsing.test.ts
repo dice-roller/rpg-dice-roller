@@ -1,16 +1,16 @@
-import { FudgeDice, PercentileDice, StandardDice } from '../../../src/dice';
+import { FudgeDice, PercentileDice, StandardDice } from '../../../src/Dice';
 import {
   ExplodeModifier,
   ReRollModifier,
-} from '../../../src/modifiers';
-import * as parser from '../../../src/parser/grammars/grammar';
-import Parser from '../../../src/parser/Parser';
+} from '../../../src/Modifiers';
+import * as parser from '../../../src/Parser/grammars/grammar';
+import Parser from '../../../src/Parser/Parser';
 import Description from '../../../src/Description';
-import { Dice } from "../../../src/types/Interfaces/Dice";
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import RollResults from "../../../src/results/RollResults";
-import { Modifier } from "../../../src/types/Interfaces/Modifiers/Modifier";
-import { DescriptionType } from "../../../src/types/Enums/DescriptionType";
+import { Dice } from "../../../src/Types/Interfaces/Dice";
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import RollResults from "../../../src/Results/RollResults";
+import { Modifier } from "../../../src/Types/Interfaces/Modifiers/Modifier";
+import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
 
 describe('Parsing', () => {
   describe('Calculating qty and sides', () => {

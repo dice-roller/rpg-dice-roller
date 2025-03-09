@@ -1,14 +1,14 @@
-import { StandardDice } from '../../../src/dice';
-import DiceRoll from '../../../src/DiceRoll';
+import { StandardDice } from '../../../src/Dice';
+import DiceRoll from '../../../src/Rolling/DiceRoll';
 import {
   DropModifier,
   ExplodeModifier,
   KeepModifier,
   ReRollModifier,
   UniqueModifier,
-} from '../../../src/modifiers';
-import RollResult from '../../../src/results/RollResult';
-import { ResultCollection } from "../../../src/types/Interfaces/Results/ResultCollection";
+} from '../../../src/Modifiers';
+import RollResult from '../../../src/Results/RollResult';
+import { ResultCollection } from "../../../src/Types/Interfaces/Results/ResultCollection";
 
 describe('Modifiers', () => {
   test('does not duplicate drop modifier', () => {

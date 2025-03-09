@@ -1,13 +1,13 @@
-import { StandardDice } from '../../../src/dice';
-import { ComparisonModifier, TargetModifier } from '../../../src/modifiers';
+import { StandardDice } from '../../../src/Dice';
+import { ComparisonModifier, TargetModifier } from '../../../src/Modifiers';
 import ComparePoint from '../../../src/ComparePoint';
-import ResultGroup from '../../../src/results/ResultGroup';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import ResultGroup from '../../../src/Results/ResultGroup';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import RollGroup from '../../../src/RollGroup';
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('TargetModifier', () => {
   let sCP: ComparePoint;

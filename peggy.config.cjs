@@ -4,13 +4,13 @@ module.exports = {
   format: 'es',
   plugins: [tspegjs],
   dependencies: {
-    '{ evaluate }': '../../utilities/math',
-    '* as Dice': '../../dice/index',
-    '* as Modifiers': '../../modifiers/index',
+    '{ evaluate }': '../../Utilities/math',
+    '* as Dice': '../../Dice/index',
+    '* as Modifiers': '../../Modifiers/index',
     'ComparePoint': '../../ComparePoint',
     'RollGroup': '../../RollGroup',
     'Description': '../../Description',
-    '{ DescriptionType }': '../../types/Enums/DescriptionType',
+    '{ DescriptionType }': '../../Types/Enums/DescriptionType',
   },
   tspegjs: {
     skipTypeComputation: true,

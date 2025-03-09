@@ -1,14 +1,14 @@
-import { StandardDice } from '../../src/dice';
-import DiceRoll from '../../src/DiceRoll';
-import DiceRoller from '../../src/DiceRoller';
-import RollResult from '../../src/results/RollResult';
-import RollResults from '../../src/results/RollResults';
+import { StandardDice } from '../../src/Dice';
+import DiceRoll from '../../src/Rolling/DiceRoll';
+import RollLog from '../../src/Rolling/RollLog';
+import RollResult from '../../src/Results/RollResult';
+import RollResults from '../../src/Results/RollResults';
 
 describe('Rolling', () => {
-  let roller: DiceRoller;
+  let roller: RollLog;
 
   beforeEach(() => {
-    roller = new DiceRoller();
+    roller = new RollLog();
   });
 
   afterEach(() => {

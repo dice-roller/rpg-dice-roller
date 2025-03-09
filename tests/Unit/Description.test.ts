@@ -1,5 +1,5 @@
 import Description from '../../src/Description';
-import { DescriptionType } from '../../src/types/Enums/DescriptionType';
+import { DescriptionType } from '../../src/Types/Enums/DescriptionType';
 
 describe('Description', () => {
   let description: Description;

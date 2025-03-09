@@ -1,13 +1,13 @@
-import { ExplodeModifier, KeepModifier, SortingModifier, } from '../../../src/modifiers';
-import { FudgeDice, StandardDice } from '../../../src/dice';
-import RollResult from '../../../src/results/RollResult';
-import RollResults from '../../../src/results/RollResults';
+import { ExplodeModifier, KeepModifier, SortingModifier, } from '../../../src/Modifiers';
+import { FudgeDice, StandardDice } from '../../../src/Dice';
+import RollResult from '../../../src/Results/RollResult';
+import RollResults from '../../../src/Results/RollResults';
 import ComparePoint from '../../../src/ComparePoint';
 import Description from '../../../src/Description';
-import { RangeEnd } from "../../../src/types/Enums/RangeEnd";
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import { DescriptionType } from "../../../src/types/Enums/DescriptionType";
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import { RangeEnd } from "../../../src/Types/Enums/RangeEnd";
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {

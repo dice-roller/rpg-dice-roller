@@ -1,10 +1,10 @@
-import { ComparisonModifier, CriticalSuccessModifier } from '../../../src/modifiers';
-import { StandardDice } from '../../../src/dice';
+import { ComparisonModifier, CriticalSuccessModifier } from '../../../src/Modifiers';
+import { StandardDice } from '../../../src/Dice';
 import ComparePoint from '../../../src/ComparePoint';
-import RollResults from '../../../src/results/RollResults';
-import { ComparisonOperator } from "../../../src/types/Enums/ComparisonOperator";
-import { SingleResult } from "../../../src/types/Interfaces/Results/SingleResult";
-import { ModelType } from "../../../src/types/Enums/ModelType";
+import RollResults from '../../../src/Results/RollResults';
+import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
+import { SingleResult } from "../../../src/Types/Interfaces/Results/SingleResult";
+import { ModelType } from "../../../src/Types/Enums/ModelType";
 
 describe('CriticalSuccessModifier', () => {
   describe('Initialisation', () => {
