@@ -117,7 +117,7 @@ class SortingModifier extends Modifier {
    *
    * @returns {RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     if ('results' in results) {
       results.results = this.#sortItems(results.results);
     } else {
@@ -130,7 +130,7 @@ class SortingModifier extends Modifier {
         .results
         .map((subRoll) => {
           if ((subRoll instanceof ResultGroup) || (subRoll instanceof RollResults)) {
-            return this.apply(subRoll, _context);
+            return this.run(subRoll, _context);
           }
 
           return subRoll;

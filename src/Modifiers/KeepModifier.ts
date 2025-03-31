@@ -136,7 +136,7 @@ class KeepModifier extends Modifier {
    *
    * @returns {ResultGroup|RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     let modifiedRolls: (ExpressionResult|ResultCollection|ResultValue|number|string)[];
     let rollIndexes: ResultIndex[] = [];
 

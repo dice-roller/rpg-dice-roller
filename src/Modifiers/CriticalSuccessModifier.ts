@@ -70,8 +70,8 @@ class CriticalSuccessModifier extends ComparisonModifier {
    *
    * @returns {RollResults}
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
-    super.apply(results, _context);
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+    super.run(results, _context);
 
     if (results instanceof RollResults) {
       // loop through each roll and see if it's a critical success

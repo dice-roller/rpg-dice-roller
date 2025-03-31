@@ -116,7 +116,7 @@ class RollGroup extends HasDescription implements Nameable {
    */
   get modifiers(): ModifierCollection {
       return new Map(
-        [...this.#modifiers].sort((a, b) => a[1].order - b[1].order)
+        [...this.#modifiers].sort((a, b) => (a[1].order ?? 0) - (b[1].order ?? 0))
       );
   }
 

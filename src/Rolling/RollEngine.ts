@@ -5,6 +5,9 @@ import RollResult from "../Results/RollResult";
 import { generator } from "../NumberGenerator";
 import { RollResults } from "../Results";
 import { Rollable } from "../Types/Interfaces/Rollable";
+import { handler as modifierHandler } from "../Modifiers/ModifierHandler";
+import { CanModify } from "../Types/Interfaces/CanModify";
+import { Modifiable } from "../Types/Interfaces/Modifiable";
 
 class RollEngine {
   // eslint-disable-next-line @typescript-eslint/class-methods-use-this
@@ -54,6 +57,14 @@ class RollEngine {
     const results = new RollResults();
     for (let i = 0; i < ((times as unknown) ?? 1); i++) {
       results.addRoll(this.rollOnce(rollable));
+    }
+
+    if ('modifiers' in rollable) {
+      return modifierHandler.run(
+        results,
+        rollable.modifiers as CanModify[],
+        rollable as Modifiable
+      );
     }
 
     return results;

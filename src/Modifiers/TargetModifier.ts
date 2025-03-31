@@ -171,7 +171,7 @@ class TargetModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     let rolls: RollResultType[]|SingleResult[];
 
     if (results instanceof ResultGroup) {

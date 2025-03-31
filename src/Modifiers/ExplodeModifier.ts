@@ -102,8 +102,8 @@ class ExplodeModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
-    super.apply(results, _context);
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+    super.run(results, _context);
 
     const isDice = _context instanceof StandardDice;
 

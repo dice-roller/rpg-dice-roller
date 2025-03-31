@@ -79,7 +79,7 @@ class UniqueModifier extends ComparisonModifier {
    *
    * @returns {RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     const isDice = _context instanceof StandardDice;
 
     if (!isDice || !(results instanceof RollResults)){

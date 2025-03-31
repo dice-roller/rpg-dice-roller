@@ -1,4 +1,3 @@
-import { StandardDice } from '../Dice';
 import { DataFormatError, NotationError, RequiredArgumentError } from '../Exceptions';
 import { toFixed } from '../Utilities/math';
 import { engines, generator } from '../NumberGenerator';
@@ -20,6 +19,10 @@ import { RollResultJsonOutput } from "../Types/Types/Json/RollResultJsonOutput";
 import { DiceRollImport } from "../Types/Types/Import/DiceRollImport";
 import { RollsImport } from "../Types/Types/Import/RollsImport";
 import { SingleResult } from "../Types/Interfaces/Results/SingleResult";
+import { rollEngine } from "./RollEngine";
+import { Rollable } from "../Types/Interfaces/Rollable";
+import { Dice } from "../Types/Interfaces/Dice";
+import { handler as modifierHandler } from "../Modifiers/ModifierHandler";
 
 /**
  * Calculate the total of all the results, fixed to a max of 2 digits after the decimal point.
@@ -428,12 +431,18 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
       this
         .#expressions
         .map((expression) => {
-          if ((expression instanceof StandardDice) || (expression instanceof RollGroup)) {
-            // roll the object and return the value
-            return expression.roll();
+          if (['string', 'number'].includes(typeof expression)) {
+            return expression as string|number;
           }
 
-          return expression as string|number;
+          if ('roll' in (expression as RollGroup)) {
+            return (expression as RollGroup).roll();
+          }
+
+          return rollEngine.roll(
+            expression as Rollable,
+            (expression as Dice|undefined)?.qty ?? 1
+          );
         })
         // filter out empty values (e.g. whitespace)
         .filter((value) => !!value || (value === 0))

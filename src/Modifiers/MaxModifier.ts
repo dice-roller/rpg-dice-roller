@@ -80,7 +80,7 @@ class MaxModifier extends Modifier {
    *
    * @returns {RollResults} The modified results
    */
-  override apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  override run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     if (results instanceof ResultGroup) {
       return results;
     }

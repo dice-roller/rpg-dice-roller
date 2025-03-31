@@ -89,7 +89,7 @@ abstract class Modifier implements IModifier {
    *
    * @returns {RollResults} The modified results
    */
-  apply<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
+  run<T extends ExpressionResult | ResultCollection>(results: T, _context: Modifiable): T {
     this.useDefaultsIfNeeded(_context);
     return results;
   }

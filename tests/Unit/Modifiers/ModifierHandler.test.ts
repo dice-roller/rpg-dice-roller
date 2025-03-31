@@ -2,6 +2,8 @@ import ModifierHandler from "../../../src/Modifiers/ModifierHandler";
 import { ExpressionResult } from "../../../src/Types/Interfaces/Results/ExpressionResult";
 import { ResultCollection } from "../../../src/Types/Interfaces/Results/ResultCollection";
 import { RollResults } from "../../../src/Results";
+import { CanModify } from "../../../src/Types/Interfaces/CanModify";
+import { Modifiable } from "../../../src/Types/Interfaces/Modifiable";
 
 describe('ModifierHandler', () => {
   let initialResult: ExpressionResult | ResultCollection;
@@ -16,7 +18,7 @@ describe('ModifierHandler', () => {
   describe('isValidModifier', () => {
     test('Returns true if modifier is valid', () => {
       const result = handler.isValidModifier({
-        apply: (v: unknown) => v,
+        run: (v: unknown) => v,
       });
 
       expect(result).toBe(true);
@@ -46,30 +48,30 @@ describe('ModifierHandler', () => {
     });
   });
 
-  describe('Apply modifiers', () => {
+  describe('Run modifiers', () => {
     test('Returns un-modified values if no modifiers are passed', () => {
-      let result = handler.apply(initialResult, []) as RollResults;
+      let result = handler.run(initialResult, []) as RollResults;
 
       expect(result).toBeInstanceOf(RollResults);
       expect(result).toEqual(initialResult);
       expect(result.rolls.map((roll) => roll.value)).toEqual(values);
 
       // @ts-expect-error testing empty value
-      result = handler.apply(initialResult, null);
+      result = handler.run(initialResult, null);
 
       expect(result).toBeInstanceOf(RollResults);
       expect(result).toEqual(initialResult);
       expect(result.rolls.map((roll) => roll.value)).toEqual(values);
 
       // @ts-expect-error testing empty value
-      result = handler.apply(initialResult, undefined);
+      result = handler.run(initialResult, undefined);
 
       expect(result).toBeInstanceOf(RollResults);
       expect(result).toEqual(initialResult);
       expect(result.rolls.map((roll) => roll.value)).toEqual(values);
 
       // @ts-expect-error testing empty value
-      result = handler.apply(initialResult, false);
+      result = handler.run(initialResult, false);
 
       expect(result).toBeInstanceOf(RollResults);
       expect(result).toEqual(initialResult);
@@ -79,53 +81,99 @@ describe('ModifierHandler', () => {
     test('Throws exception if modifiers is not array', () => {
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, 'foo');
+        handler.run(initialResult, 'foo');
       }).toThrow(TypeError);
 
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, {});
+        handler.run(initialResult, {});
       }).toThrow(TypeError);
     });
 
     test('Throws exception if not all modifiers are valid', () => {
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, ['foo']);
+        handler.run(initialResult, ['foo']);
       }).toThrow(TypeError);
 
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, [true]);
+        handler.run(initialResult, [true]);
       }).toThrow(TypeError);
 
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, [{}]);
+        handler.run(initialResult, [{}]);
       }).toThrow(TypeError);
 
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, [null]);
+        handler.run(initialResult, [null]);
       }).toThrow(TypeError);
 
       expect(() => {
         // @ts-expect-error testing invalid value
-        handler.apply(initialResult, [undefined]);
+        handler.run(initialResult, [undefined]);
       }).toThrow(TypeError);
     });
 
-    test('Run each modifier and returns the result', () => {
-      const modifier = {
-        apply: (v: unknown) => v,
+    test('Run modifier and returns the result', () => {
+      const context: Modifiable = {
+        modifiers: new Map,
       };
-      const spy = jest.spyOn(modifier, 'apply');
+      const modifier = {
+        run: () => 2,
+      };
+      const spy = jest.spyOn(modifier, 'run');
 
-      const result = handler.apply(initialResult, [modifier]);
+      const result = handler.run(
+        initialResult,
+        [modifier as CanModify],
+        context,
+      );
 
-      expect(spy).toHaveBeenCalledTimes(values.length);
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledWith(initialResult, context);
+
+      expect(result).toBe(2);
 
       spy.mockRestore();
+    });
+
+    test('Runs modifiers in correct order', () => {
+      const context: Modifiable = {
+        modifiers: new Map,
+      };
+      const modifiers = [
+        {
+          run: () => 'last',
+          order: 2,
+        },
+        {
+          run: () => 'first',
+          order: 1,
+        }
+      ];
+      const spies: jest.SpyInstance[] = [
+        jest.spyOn(modifiers[1] as CanModify, 'run'),
+        jest.spyOn(modifiers[0] as CanModify, 'run'),
+      ];
+
+      const result = handler.run(
+        initialResult,
+        modifiers as CanModify[],
+        context,
+      );
+
+      expect(spies[0]).toHaveBeenCalledTimes(1);
+      expect(spies[0]).toHaveBeenCalledWith(initialResult, context);
+      spies[0]?.mockRestore();
+
+      expect(spies[1]).toHaveBeenCalledTimes(1);
+      expect(spies[1]).toHaveBeenCalledWith('first', context);
+      spies[1]?.mockRestore();
+
+      expect(result).toEqual('last');
     });
   });
 });
