@@ -245,7 +245,7 @@ class ResultGroup {
   /**
    * Add a single result to the list.
    *
-   * @param {ResultGroup|RollResults|number|string} value
+   * @param {ResultGroup|RollResults|Object|number|string} value
    *
    * @throws {TypeError} Value type is invalid
    */
@@ -258,6 +258,19 @@ class ResultGroup {
     } else if ((typeof value === 'string') || isNumeric(value)) {
       // string operator (e.g. '+', '/', etc.), or plain number
       val = value;
+    } else if (typeof value === 'object') {
+      // plain object from importing, so do basic validation and instantiate the rich classes
+      if (value.type === 'result-group') {
+        val = new ResultGroup(value.results, value.modifiers, value.isRollGroup, value.useInTotal);
+      } else if (value.type === 'roll-results') {
+        if (value.rolls && Array.isArray(value.rolls)) {
+          val = new RollResults(value.rolls);
+        } else {
+          throw new TypeError('objects with type "roll-results" must have a rolls array');
+        }
+      } else {
+        throw new TypeError(`value.type must be 'result-group' or 'roll-results' but is '${value.type}'`);
+      }
     } else {
       throw new TypeError('value must be one of ResultGroup, RollResults, string, or number');
     }

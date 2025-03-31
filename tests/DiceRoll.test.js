@@ -753,7 +753,7 @@ describe('DiceRoll', () => {
     let diceRoll;
 
     beforeEach(() => {
-      diceRoll = new DiceRoll('4d6/7+2d10dl1');
+      diceRoll = new DiceRoll('{4d6/7+2d10dl1}');
     });
 
     test('requires data', () => {
