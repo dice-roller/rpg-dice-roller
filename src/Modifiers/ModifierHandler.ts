@@ -6,7 +6,7 @@ import { CanModify } from "../Types/Interfaces/CanModify";
 
 class ModifierHandler {
   run<T extends ExpressionResult | ResultCollection>(values: T, modifiers: CanModify[], context?: Modifiable): T {
-    if (!modifiers) {
+    if (!modifiers as unknown) {
       return values;
     }
 
