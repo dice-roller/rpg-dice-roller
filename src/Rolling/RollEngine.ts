@@ -6,7 +6,6 @@ import { generator } from "../NumberGenerator";
 import { RollResults } from "../Results";
 import { Rollable } from "../Types/Interfaces/Rollable";
 import { handler as modifierHandler } from "../Modifiers/ModifierHandler";
-import { CanModify } from "../Types/Interfaces/CanModify";
 import { Modifiable } from "../Types/Interfaces/Modifiable";
 
 class RollEngine {
@@ -62,7 +61,7 @@ class RollEngine {
     if ('modifiers' in rollable) {
       return modifierHandler.run(
         results,
-        rollable.modifiers as CanModify[],
+        [...rollable.modifiers?.values() ?? []],
         rollable as Modifiable
       );
     }

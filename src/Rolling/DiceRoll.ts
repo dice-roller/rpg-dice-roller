@@ -22,7 +22,6 @@ import { SingleResult } from "../Types/Interfaces/Results/SingleResult";
 import { rollEngine } from "./RollEngine";
 import { Rollable } from "../Types/Interfaces/Rollable";
 import { Dice } from "../Types/Interfaces/Dice";
-import { handler as modifierHandler } from "../Modifiers/ModifierHandler";
 
 /**
  * Calculate the total of all the results, fixed to a max of 2 digits after the decimal point.

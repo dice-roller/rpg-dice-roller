@@ -11,7 +11,6 @@ import { DiceJsonOutput } from "../Types/Interfaces/Json/DiceJsonOutput";
 import { rollEngine } from "../Rolling/RollEngine";
 import { SingleResult } from "../Types/Interfaces/Results/SingleResult";
 import { ResultCollection } from "../Types/Interfaces/Results/ResultCollection";
-import { handler as modifierHandler } from "../Modifiers/ModifierHandler";
 
 /**
  * Represents a standard numerical die.
@@ -203,13 +202,7 @@ class StandardDice extends HasDescription implements Dice {
    * @returns {RollResults} The result of the roll
    */
   roll(): ResultCollection {
-    const result = rollEngine.roll(this, this.qty);
-
-    return modifierHandler.run(
-      result,
-      [...this.modifiers.values()],
-      this
-    );
+    return rollEngine.roll(this, this.qty);
   }
 
   /**
