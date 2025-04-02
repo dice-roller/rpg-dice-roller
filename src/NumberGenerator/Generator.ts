@@ -1,7 +1,7 @@
 import { Random } from 'random-js';
 import { Engine } from "../Types/Interfaces/NumberGenerator/Engines/Engine";
 import { RandomNumberGenerator } from "../Types/Interfaces/NumberGenerator/Engines/RandomNumberGenerator";
-import { engine as NativeMath } from "./engines/NativeMath";
+import { engine as NativeMath } from "./Engines/NativeMath";
 
 /**
  * The `NumberGenerator` is capable of generating random numbers.
@@ -106,6 +106,16 @@ class Generator implements RandomNumberGenerator {
    */
   real(min: number, max: number, inclusive: boolean = false): number {
     this.#engine.range = [min, max];
+
+    console.log('real start');
+    console.log(this.#engine);
+    console.log(this.#engine.range);
+    // @ts-expect-error just testing
+    console.log(this.#generator.engine);
+    // @ts-expect-error just testing
+    console.log((this.#generator.engine as unknown).next());
+    console.log(min, max, inclusive);
+    console.log('real end');
 
     return this.#generator.real(min, max, inclusive);
   }

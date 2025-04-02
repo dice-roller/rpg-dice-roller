@@ -8,6 +8,7 @@ import RollResults from '../../../src/Results/RollResults';
 import { ExportFormat } from "../../../src";
 import { ResultCollection } from "../../../src/Types/Interfaces/Results/ResultCollection";
 import { ModelType } from "../../../src/Types/Enums/ModelType";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('DiceRoll', () => {
   describe('Initialisation', () => {
@@ -447,7 +448,7 @@ describe('DiceRoll', () => {
 
       test('equal to rolls with modifiers', () => {
         // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'rollOnce')
+        jest.spyOn(RollEngine.prototype, 'rollOnce')
           .mockImplementationOnce(() => new RollResult(6))
           .mockImplementationOnce(() => new RollResult(2))
           .mockImplementationOnce(() => new RollResult(5))
@@ -456,6 +457,9 @@ describe('DiceRoll', () => {
           .mockImplementationOnce(() => new RollResult(9));
 
         const diceRoll = new DiceRoll('4d8dl2*(5+2d10kh1)');
+
+        console.log(diceRoll.toString());
+        console.log(diceRoll.total);
 
         // assert that the total matches
         expect(diceRoll.total).toBe(196);
@@ -634,7 +638,7 @@ describe('DiceRoll', () => {
 
       test('calls RollResults toString', () => {
         // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'rollOnce')
+        jest.spyOn(RollEngine.prototype, 'rollOnce')
           .mockImplementationOnce(() => new RollResult(6))
           .mockImplementationOnce(() => new RollResult(2))
           .mockImplementationOnce(() => new RollResult(5))
@@ -654,7 +658,7 @@ describe('DiceRoll', () => {
 
       test('returns success / failure count as total', () => {
         // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'rollOnce')
+        jest.spyOn(RollEngine.prototype, 'rollOnce')
           .mockImplementationOnce(() => new RollResult(6))
           .mockImplementationOnce(() => new RollResult(2))
           .mockImplementationOnce(() => new RollResult(5))
@@ -670,7 +674,7 @@ describe('DiceRoll', () => {
 
       test('can handle success / failure combined with normal rolls', () => {
         // mock the roll values
-        jest.spyOn(StandardDice.prototype, 'rollOnce')
+        jest.spyOn(RollEngine.prototype, 'rollOnce')
           .mockImplementationOnce(() => new RollResult(6))
           .mockImplementationOnce(() => new RollResult(2))
           .mockImplementationOnce(() => new RollResult(5))

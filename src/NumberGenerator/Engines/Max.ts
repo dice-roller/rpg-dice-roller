@@ -9,6 +9,9 @@ import { Engine } from "../../Types/Interfaces/NumberGenerator/Engines/Engine";
  * @type {{next(): number, range: number[]}}
  */
 class Max implements Engine {
+  private readonly UINT32_MAX = 0xFFFFFFFF; // Max 32-bit unsigned integer
+  private readonly UINT53_MAX = 0x1FFFFFFFFFFFFF; // Max 53-bit unsigned integer
+
   /**
    * The min / max number range (e.g. `[1, 10]`).
    *
@@ -33,8 +36,9 @@ class Max implements Engine {
    * @returns {number}
    */
   next(): number {
+    return ((this.range[1] ?? 0) - (this.range[0] ?? 0));
     // calculate the index of the max number
-    return (this.range[1] ?? 0) - (this.range[0] ?? 0);
+    //return (this.range[1] ?? 0) - (this.range[0] ?? 0);
   }
 }
 

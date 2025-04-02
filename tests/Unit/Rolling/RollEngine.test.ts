@@ -111,8 +111,6 @@ describe('RollEngine', () => {
       expect(table).toBeInstanceOf(Array);
       expect(table).toHaveLength(156);
 
-      console.log(table);
-
       for (let i = 0; i < table.length; i++) {
         expect(table[i]).toBeInstanceOf(Object);
         expect(table[i]?.value).toBe(i-156);

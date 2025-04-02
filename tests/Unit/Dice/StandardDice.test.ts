@@ -7,6 +7,7 @@ import RollResults from '../../../src/Results/RollResults';
 import Description from '../../../src/Description';
 import { ModelType } from "../../../src/Types/Enums/ModelType";
 import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('StandardDice', () => {
   describe('Initialisation', () => {
@@ -752,7 +753,7 @@ describe('StandardDice', () => {
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
-      const spy = jest.spyOn(StandardDice.prototype, 'rollOnce');
+      const spy = jest.spyOn(RollEngine.prototype, 'rollOnce');
       const die = new StandardDice(6, 4);
 
       // roll the dice

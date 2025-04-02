@@ -49,7 +49,7 @@ class RollEngine {
 
   roll(rollable: Rollable, times: number = 1): ResultCollection {
     if (!(rollable as unknown)) {
-      throw new RequiredArgumentError('dice');
+      throw new RequiredArgumentError('rollable');
     }
 
     // create a result object to hold the rolls
@@ -92,6 +92,8 @@ class RollEngine {
     if (totalWeight === 0) {
       throw new RangeError('Total weight must be greater than 0');
     }
+
+    console.log('test integer', generator.integer(0, 8));
 
     const randomWeight = generator.real(0, totalWeight, true);
 

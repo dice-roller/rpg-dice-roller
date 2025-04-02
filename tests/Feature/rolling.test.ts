@@ -3,6 +3,7 @@ import DiceRoll from '../../src/Rolling/DiceRoll';
 import RollLog from '../../src/Rolling/RollLog';
 import RollResult from '../../src/Results/RollResult';
 import RollResults from '../../src/Results/RollResults';
+import RollEngine from "../../src/Rolling/RollEngine";
 
 describe('Rolling', () => {
   let roller: RollLog;
@@ -194,7 +195,7 @@ describe('Rolling', () => {
     });
 
     test('roll `3d6cs>3cf<3`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(5))
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(1));
@@ -207,7 +208,7 @@ describe('Rolling', () => {
     });
 
     test('roll `4d6sd`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(6))
         .mockImplementationOnce(() => new RollResult(5))
@@ -221,7 +222,7 @@ describe('Rolling', () => {
     });
 
     test('roll `2d6r<=4`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         // die 1
         .mockImplementationOnce(() => new RollResult(4))
         // die 2
@@ -237,7 +238,7 @@ describe('Rolling', () => {
     });
 
     test('roll `6d10>=8!>=9`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(5))
         .mockImplementationOnce(() => new RollResult(6))
@@ -255,7 +256,7 @@ describe('Rolling', () => {
     });
 
     test('roll `6d10!>=9>=8`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(5))
         .mockImplementationOnce(() => new RollResult(6))
@@ -273,7 +274,7 @@ describe('Rolling', () => {
     });
 
     test('roll `2d10!<>8`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(5))
 
@@ -292,7 +293,7 @@ describe('Rolling', () => {
     });
 
     test('roll `(4d10^7)*6d(3*2)`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(5))
         .mockImplementationOnce(() => new RollResult(6))
@@ -313,7 +314,7 @@ describe('Rolling', () => {
     });
 
     test('roll `5d6%2d20`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(4))
         .mockImplementationOnce(() => new RollResult(5))
         .mockImplementationOnce(() => new RollResult(6))
@@ -330,7 +331,7 @@ describe('Rolling', () => {
     });
 
     test('roll `1d20+-5`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(20));
       const roll = roller.roll('1d20+-5') as DiceRoll;
 
@@ -341,7 +342,7 @@ describe('Rolling', () => {
     });
 
     test('roll `1d20--6`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(20));
       const roll = roller.roll('1d20--6') as DiceRoll;
 
@@ -352,7 +353,7 @@ describe('Rolling', () => {
     });
 
     test('roll `6d10min3max6', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         .mockImplementationOnce(() => new RollResult(10))
         .mockImplementationOnce(() => new RollResult(2))
         .mockImplementationOnce(() => new RollResult(3))
@@ -425,7 +426,7 @@ describe('Rolling', () => {
     });
 
     test('roll `2d6u`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         // die 1
         .mockImplementationOnce(() => new RollResult(4))
         // die 2
@@ -442,7 +443,7 @@ describe('Rolling', () => {
     });
 
     test('roll `2d6uo`', () => {
-      jest.spyOn(StandardDice.prototype, 'rollOnce')
+      jest.spyOn(RollEngine.prototype, 'rollOnce')
         // die 1
         .mockImplementationOnce(() => new RollResult(4))
         // die 2

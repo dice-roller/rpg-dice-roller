@@ -1,4 +1,3 @@
-import { StandardDice } from '../../../src/Dice';
 import DiceRoll from '../../../src/Rolling/DiceRoll';
 import {
   DropModifier,
@@ -9,11 +8,12 @@ import {
 } from '../../../src/Modifiers';
 import RollResult from '../../../src/Results/RollResult';
 import { ResultCollection } from "../../../src/Types/Interfaces/Results/ResultCollection";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('Modifiers', () => {
   test('does not duplicate drop modifier', () => {
     const notation = '3d6kh2dl1';
-    const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+    const spy = jest.spyOn(RollEngine.prototype, 'rollOnce')
       .mockImplementationOnce(() => new RollResult(1))
       .mockImplementationOnce(() => new RollResult(4))
       .mockImplementationOnce(() => new RollResult(6));
@@ -42,7 +42,7 @@ describe('Modifiers', () => {
 
   test('drop and keep together does not drop too many', () => {
     const notation = '3d6kh2dl1';
-    const spy = jest.spyOn(StandardDice.prototype, 'rollOnce')
+    const spy = jest.spyOn(RollEngine.prototype, 'rollOnce')
       .mockImplementationOnce(() => new RollResult(5))
       .mockImplementationOnce(() => new RollResult(6))
       .mockImplementationOnce(() => new RollResult(5));
@@ -113,7 +113,7 @@ describe('Modifiers', () => {
       const notation = '8d4kh4!';
 
       beforeEach(() => {
-        jest.spyOn(StandardDice.prototype, 'rollOnce')
+        jest.spyOn(RollEngine.prototype, 'rollOnce')
           .mockImplementationOnce(() => new RollResult(3))
           .mockImplementationOnce(() => new RollResult(4))
           .mockImplementationOnce(() => new RollResult(2))

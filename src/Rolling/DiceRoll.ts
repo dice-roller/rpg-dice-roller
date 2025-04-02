@@ -131,6 +131,10 @@ class DiceRoll implements Exportable, Readonly<HasNotation> {
     return (this.maxTotal + this.minTotal) / 2;
   }
 
+  maxRolls() {
+    return this.#rollExpressions(engines.Max);
+  }
+
   /**
    * The maximum possible total for the notation.
    *

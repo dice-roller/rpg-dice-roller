@@ -10,6 +10,7 @@ import { SortDirection } from "../../../src/Types/Enums/SortDirection";
 import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
 import { ModelType } from "../../../src/Types/Enums/ModelType";
 import { DiceJsonOutput } from "../../../src/Types/Interfaces/Json/DiceJsonOutput";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('PercentileDice', () => {
   describe('Initialisation', () => {
@@ -499,7 +500,7 @@ describe('PercentileDice', () => {
 
     test('rollOnce gets called when rolling', () => {
       // create a spy to listen for the Model.rollOnce method to have been triggered
-      const spy = jest.spyOn(PercentileDice.prototype, 'rollOnce');
+      const spy = jest.spyOn(RollEngine.prototype, 'rollOnce');
       const die = new PercentileDice(4);
 
       // roll the dice

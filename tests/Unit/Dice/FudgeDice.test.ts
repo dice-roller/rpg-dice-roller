@@ -8,6 +8,7 @@ import { RangeEnd } from "../../../src/Types/Enums/RangeEnd";
 import { ComparisonOperator } from "../../../src/Types/Enums/ComparisonOperator";
 import { DescriptionType } from "../../../src/Types/Enums/DescriptionType";
 import { ModelType } from "../../../src/Types/Enums/ModelType";
+import RollEngine from "../../../src/Rolling/RollEngine";
 
 describe('FudgeDice', () => {
   describe('Initialisation', () => {
@@ -538,7 +539,7 @@ describe('FudgeDice', () => {
     test('rollOnce gets called when rolling', () => {
       const die = new FudgeDice(undefined, 4);
       // create a spy to listen for the Model.rollOnce method to have been triggered
-      const spy = jest.spyOn(die, 'rollOnce');
+      const spy = jest.spyOn(RollEngine.prototype, 'rollOnce');
 
       // roll the dice
       die.roll();
