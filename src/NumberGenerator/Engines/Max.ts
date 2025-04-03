@@ -9,8 +9,9 @@ import { Engine } from "../../Types/Interfaces/NumberGenerator/Engines/Engine";
  * @type {{next(): number, range: number[]}}
  */
 class Max implements Engine {
-  private readonly UINT32_MAX = 0xFFFFFFFF; // Max 32-bit unsigned integer
-  private readonly UINT53_MAX = 0x1FFFFFFFFFFFFF; // Max 53-bit unsigned integer
+  private readonly UINT32_MAX = 0xFFFFFFFF;
+
+  readonly name: string = 'max';
 
   /**
    * The min / max number range (e.g. `[1, 10]`).
@@ -30,15 +31,29 @@ class Max implements Engine {
     }
   }
 
+  clone(): Max {
+    return new Max(this.range[0], this.range[1]);
+  }
+
   /**
    * Returns the maximum number index for the range
    *
    * @returns {number}
    */
   next(): number {
-    return ((this.range[1] ?? 0) - (this.range[0] ?? 0));
-    // calculate the index of the max number
-    //return (this.range[1] ?? 0) - (this.range[0] ?? 0);
+    const min = this.range[0] ?? 0;
+    const max = this.range[1] ?? min;
+
+    // Compute range and "maxAllowed" boundary from unsafeUniformIntDistribution
+    const rangeSize = max - min + 1;
+    const maxAllowed = rangeSize > 2
+      ? Math.floor(this.UINT32_MAX / rangeSize) * rangeSize
+      : this.UINT32_MAX;
+
+    const val = 0x80000000;
+
+    // Safe value to prevent infinite loop in pure-rand's internal logic
+    return maxAllowed - 1 - val;
   }
 }
 

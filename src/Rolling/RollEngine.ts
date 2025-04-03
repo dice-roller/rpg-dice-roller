@@ -95,7 +95,7 @@ class RollEngine {
 
     console.log('test integer', generator.integer(0, 8));
 
-    const randomWeight = generator.real(0, totalWeight, true);
+    const randomWeight = generator.float64(0, totalWeight);
 
     return new RollResult(this.#findWeightMatch(rollTable, randomWeight));
   }
