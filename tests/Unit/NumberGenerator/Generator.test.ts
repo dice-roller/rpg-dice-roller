@@ -1,4 +1,3 @@
-import { Random } from 'random-js';
 import { engines, generator } from '../../../src/NumberGenerator';
 
 describe('NumberGenerator', () => {
@@ -120,9 +119,9 @@ describe('NumberGenerator', () => {
         const spy = jest.spyOn(Random.prototype, 'real')
           .mockImplementationOnce(() => 2.45);
 
-        const result = generator.real(1, 4);
+        const result = generator.float(1, 4);
 
-        expect(spy).toHaveBeenCalledWith(1, 4, false);
+        expect(spy).toHaveBeenCalledWith(1, 4);
         expect(result).toBe(2.45);
       });
 
@@ -130,17 +129,17 @@ describe('NumberGenerator', () => {
         const spy = jest.spyOn(Random.prototype, 'real')
           .mockImplementation(() => 2.45);
 
-        let result = generator.real(1, 4, false);
-        expect(spy).toHaveBeenCalledWith(1, 4, false);
+        let result = generator.float(1, 4);
+        expect(spy).toHaveBeenCalledWith(1, 4);
         expect(result).toBe(2.45);
 
-        result = generator.real(1, 4, true);
-        expect(spy).toHaveBeenCalledWith(1, 4, true);
+        result = generator.float(1, 4);
+        expect(spy).toHaveBeenCalledWith(1, 4);
         expect(result).toBe(2.45);
       });
 
       test('generates float', () => {
-        const val = generator.real(1, 4);
+        const val = generator.float(1, 4);
 
         expect(Number.isInteger(val)).toBe(false);
       });
@@ -152,7 +151,7 @@ describe('NumberGenerator', () => {
           },
         };
 
-        const val = generator.real(1, 4);
+        const val = generator.float(1, 4);
 
         expect(Number.isInteger(val)).toBe(false);
       });

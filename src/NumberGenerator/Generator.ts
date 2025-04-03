@@ -1,4 +1,4 @@
-import { Random } from 'random-js';
+import { RandomGenerator, unsafeUniformIntDistribution } from 'pure-rand';
 import { Engine } from "../Types/Interfaces/NumberGenerator/Engines/Engine";
 import { RandomNumberGenerator } from "../Types/Interfaces/NumberGenerator/Engines/RandomNumberGenerator";
 import { engine as NativeMath } from "./Engines/NativeMath";
@@ -13,7 +13,6 @@ import { engine as NativeMath } from "./Engines/NativeMath";
  */
 class Generator implements RandomNumberGenerator {
   #engine!: Engine;
-  #generator!: Random;
 
   /**
    * Create a `NumberGenerator` instance.
@@ -78,7 +77,34 @@ class Generator implements RandomNumberGenerator {
 
     // set the engine and re-initialise the random engine
     this.#engine = ((engine as unknown) || NativeMath) as Engine;
-    this.#generator = new Random(this.#engine);
+  }
+
+  /**
+   * Converts the current engine to the format required by the pure-rand library.
+   *
+   * @param min
+   * @param max
+   * @param engine
+   * @private
+   */
+  #getUsableEngine(min: number, max: number, engine?: Engine): RandomGenerator & Pick<Engine, 'range'> {
+    const initialEngine = (engine ?? this.#engine);
+
+    return {
+      clone: () => {
+        return this.#getUsableEngine(min, max, initialEngine.clone() as unknown as Engine);
+      },
+      getState: () => [1],
+      next: () => [
+        initialEngine.next(),
+        initialEngine as unknown as RandomGenerator,
+      ],
+      unsafeNext: () =>
+        typeof initialEngine.unsafeNext === 'function'
+          ? initialEngine.unsafeNext()
+          : initialEngine.next(),
+      range: [min, max],
+    };
   }
 
   /**
@@ -91,33 +117,46 @@ class Generator implements RandomNumberGenerator {
    */
   integer(min: number, max: number): number {
     this.#engine.range = [min, max];
-
-    return this.#generator.integer(min, max);
+    return unsafeUniformIntDistribution(min, max, this.#getUsableEngine(min, max));
   }
 
   /**
-   * Returns a floating-point value within `[min, max)` or `[min, max]`.
+   * Generate a floating-point number in the range `[min, max)`, using 32 bit precision.
    *
-   * @param {number} min The minimum floating-point value, inclusive.
-   * @param {number} max The maximum floating-point value.
-   * @param {boolean} [inclusive=false] If `true`, `max` will be inclusive.
+   * @param {number} min - The lower bound of the range.
+   * @param {number} max - The upper bound of the range.
    *
-   * @returns {number} The random floating-point value
+   * @returns {number} The random floating-point number in range `[min, max)`.
    */
-  real(min: number, max: number, inclusive: boolean = false): number {
-    this.#engine.range = [min, max];
+  float(min: number, max: number): number {
+    const intNumber = this.integer(0, (1 << 24) - 1)
 
-    console.log('real start');
-    console.log(this.#engine);
-    console.log(this.#engine.range);
-    // @ts-expect-error just testing
-    console.log(this.#generator.engine);
-    // @ts-expect-error just testing
-    console.log((this.#generator.engine as unknown).next());
-    console.log(min, max, inclusive);
-    console.log('real end');
+    // Normalize to range [0, 1)
+    const floatNumber = intNumber / (1 << 24);
 
-    return this.#generator.real(min, max, inclusive);
+    // Scale to [min, max)
+    return min + (max - min) * floatNumber;
+  }
+
+  /**
+   * Generate a floating-point number in the range `[min, max)`, using 53 bit precision.
+   *
+   * @param {number} min - The lower bound of the range.
+   * @param {number} max - The upper bound of the range.
+   *
+   * @returns {number} The random floating-point number in range `[min, max)`.
+   */
+  float64(min: number, max: number): number {
+    // Generate first 26 random bits
+    const intNumber1 = this.integer(0, (1 << 26) - 1);
+    // Generate last 27 random bits
+    const intNumber2 = this.integer(0, (1 << 27) - 1);
+    // Combine into a 53-bit integer and normalize to [0, 1)
+    const floatNumber = (intNumber1 * Math.pow(2, 27) + intNumber2) * Math.pow(2, -53);
+
+    // Scale exclusively to [min, max)
+    return (1 - Number.EPSILON) * (min + (max - min) * floatNumber);
+
   }
 }
 
