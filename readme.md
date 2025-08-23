@@ -45,4 +45,4 @@ This dice roller has been released under the MIT licence, meaning you can do pre
 
 You **can** use it in commercial products.
 
-If the licence terminology in the licence.txt is confusing, check out this: https://www.tldrlegal.com/l/mit
+If the licence terminology in the licence.txt is confusing, check out this: https://www.tldrlegal.com/license/mit-license

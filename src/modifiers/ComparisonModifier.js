@@ -76,6 +76,36 @@ class ComparisonModifier extends Modifier {
     return `${this.comparePoint || ''}`;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * Empty default compare point definition
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {null}
+   */
+  defaultComparePoint(_context) {
+    return {};
+  }
+  /* eslint-enable class-methods-use-this */
+
+  /**
+   * Eases processing of simple "compare point only" defaults
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {object}
+   */
+  defaults(_context) {
+    const comparePointConfig = this.defaultComparePoint(_context);
+
+    if (typeof comparePointConfig === 'object' && comparePointConfig.length === 2) {
+      return { comparePoint: new ComparePoint(...comparePointConfig) };
+    }
+
+    return {};
+  }
+
   /**
    * Check whether value matches the compare point or not.
    *

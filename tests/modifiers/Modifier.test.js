@@ -186,6 +186,28 @@ describe('Modifier', () => {
       test('returns RollResults object', () => {
         expect(mod.run(results, die)).toBe(results);
       });
+
+      describe('Defaults', () => {
+        const testKey = 'testKey';
+        const defaultValue = 'defaultValue';
+
+        beforeEach(() => {
+          mod.defaults = () => ({ testKey: defaultValue });
+        });
+
+        test('uses default if value wasn\'t provided', () => {
+          mod.run(results, die);
+          expect(mod[testKey]).toEqual(defaultValue);
+        });
+
+        test('does not set default if value was provided', () => {
+          const providedValue = 'providedValue';
+          mod[testKey] = providedValue;
+
+          mod.run(results, die);
+          expect(mod[testKey]).toEqual(providedValue);
+        });
+      });
     });
   });
 });

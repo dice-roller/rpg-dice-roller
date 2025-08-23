@@ -224,12 +224,12 @@ describe('ExplodeModifier', () => {
       expect(mod.run(results, die)).toBe(results);
     });
 
-    test('does not explode without compare point', () => {
+    test('can explode with default compare point', () => {
       const modifiedResults = mod.run(results, die).rolls;
 
       // assert that all the rolls exist
       expect(modifiedResults).toBeInstanceOf(Array);
-      expect(modifiedResults).toHaveLength(6);
+      expect(modifiedResults).toHaveLength(8);
 
       expect(modifiedResults[0].initialValue).toBe(8);
       expect(modifiedResults[0].value).toBe(8);
@@ -253,7 +253,15 @@ describe('ExplodeModifier', () => {
 
       expect(modifiedResults[5].initialValue).toBe(10);
       expect(modifiedResults[5].value).toBe(10);
-      expect(modifiedResults[5].modifiers).toEqual(new Set());
+      expect(modifiedResults[5].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[6].initialValue).toBe(10);
+      expect(modifiedResults[6].value).toBe(10);
+      expect(modifiedResults[6].modifiers).toEqual(new Set(['explode']));
+
+      expect(modifiedResults[7].initialValue).toBe(2);
+      expect(modifiedResults[7].value).toBe(2);
+      expect(modifiedResults[7].modifiers).toEqual(new Set());
     });
 
     test('can explode with compare point `>=8`', () => {

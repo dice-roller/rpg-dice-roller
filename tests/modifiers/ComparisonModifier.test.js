@@ -154,12 +154,39 @@ describe('ComparisonModifier', () => {
   });
 
   describe('Run', () => {
+    const results = new RollResults();
+    const die = new StandardDice(6, 2);
+    let mod;
+
+    beforeEach(() => {
+      mod = new ComparisonModifier();
+    });
+
     test('returns RollResults object', () => {
-      const results = new RollResults();
-      const die = new StandardDice(6, 2);
-      const mod = new ComparisonModifier(new ComparePoint('=', 4));
+      mod.comparePoint = new ComparePoint('=', 4);
 
       expect(mod.run(results, die)).toBe(results);
+    });
+
+    describe('Defaults', () => {
+      const testOperator = '=';
+      const testValue = 6;
+
+      beforeEach(() => {
+        mod.defaultComparePoint = () => [testOperator, testValue];
+      });
+
+      test('uses default comparison modifier', () => {
+        mod.run(results, die);
+        expect(mod.comparePoint.operator).toEqual(testOperator);
+        expect(mod.comparePoint.value).toEqual(testValue);
+      });
+
+      test('does not set default comparison modifier if value was provided', () => {
+        mod.comparePoint = new ComparePoint('=', 4);
+
+        expect(mod.run(results, die)).toBe(results);
+      });
     });
   });
 

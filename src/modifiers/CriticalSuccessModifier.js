@@ -49,6 +49,19 @@ class CriticalSuccessModifier extends ComparisonModifier {
     return `cs${super.notation}`;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * The default compare point definition
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {array}
+   */
+  defaultComparePoint(_context) {
+    return ['=', _context.max];
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Runs the modifier on the rolls.
    *
@@ -58,6 +71,8 @@ class CriticalSuccessModifier extends ComparisonModifier {
    * @returns {RollResults}
    */
   run(results, _context) {
+    super.run(results, _context);
+
     // loop through each roll and see if it's a critical success
     results.rolls
       .forEach((roll) => {

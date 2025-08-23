@@ -113,13 +113,13 @@ UniqueModifier
 
 // Critical success setting
 CriticalSuccessModifier
-  = "cs" comparePoint:ComparePoint {
+  = "cs" comparePoint:ComparePoint? {
     return new Modifiers.CriticalSuccessModifier(comparePoint);
   }
 
 // Critical failure setting
 CriticalFailureModifier
-  = "cf" comparePoint:ComparePoint {
+  = "cf" comparePoint:ComparePoint? {
     return new Modifiers.CriticalFailureModifier(comparePoint);
   }
 

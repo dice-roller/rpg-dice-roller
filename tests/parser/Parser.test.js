@@ -231,12 +231,6 @@ describe('Parser', () => {
             }),
           }));
         });
-
-        test('throws error if no compare point', () => {
-          expect(() => {
-            Parser.parse('d6cf');
-          }).toThrow(parser.SyntaxError);
-        });
       });
 
       describe('Critical success', () => {
@@ -304,12 +298,6 @@ describe('Parser', () => {
               value: 365,
             }),
           }));
-        });
-
-        test('throws error if no compare point', () => {
-          expect(() => {
-            Parser.parse('d6cs');
-          }).toThrow(parser.SyntaxError);
         });
       });
 
@@ -420,6 +408,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -444,6 +433,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -468,6 +458,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -492,6 +483,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('explode');
           expect(mod).toBeInstanceOf(ExplodeModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             comparePoint: expect.objectContaining({
               operator: '=',
@@ -826,6 +818,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             once: false,
             comparePoint: expect.objectContaining({
@@ -849,6 +842,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             once: false,
             comparePoint: expect.objectContaining({
@@ -895,6 +889,7 @@ describe('Parser', () => {
 
           const mod = parsed[0].modifiers.get('re-roll');
           expect(mod).toBeInstanceOf(ReRollModifier);
+          mod.useDefaultsIfNeeded(parsed[0]);
           expect(mod.toJSON()).toEqual(expect.objectContaining({
             once: true,
             comparePoint: expect.objectContaining({
@@ -1669,6 +1664,7 @@ describe('Parser', () => {
 
         let mod = parsed[0].modifiers.get('explode');
         expect(mod).toBeInstanceOf(ExplodeModifier);
+        mod.useDefaultsIfNeeded(parsed[0]);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
           comparePoint: expect.objectContaining({
             operator: '=',
@@ -1691,6 +1687,7 @@ describe('Parser', () => {
 
         mod = parsed[5].modifiers.get('re-roll');
         expect(mod).toBeInstanceOf(ReRollModifier);
+        mod.useDefaultsIfNeeded(parsed[0]);
         expect(mod.toJSON()).toEqual(expect.objectContaining({
           once: false,
           comparePoint: expect.objectContaining({

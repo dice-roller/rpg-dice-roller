@@ -74,6 +74,19 @@ class ExplodeModifier extends ComparisonModifier {
     return this[penetrateSymbol];
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * The default compare point definition
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {array}
+   */
+  defaultComparePoint(_context) {
+    return ['=', _context.max];
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Run the modifier on the results.
    *
@@ -83,6 +96,8 @@ class ExplodeModifier extends ComparisonModifier {
    * @returns {RollResults} The modified results
    */
   run(results, _context) {
+    super.run(results, _context);
+
     // ensure that the dice can explode without going into an infinite loop
     if (_context.min === _context.max) {
       throw new DieActionValueError(_context, 'explode');

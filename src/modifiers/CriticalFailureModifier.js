@@ -49,6 +49,19 @@ class CriticalFailureModifier extends ComparisonModifier {
     return `cf${super.notation}`;
   }
 
+  /* eslint-disable class-methods-use-this */
+  /**
+   * The default compare point definition
+   *
+   * @param {StandardDice|RollGroup} _context The object that the modifier is attached to
+   *
+   * @returns {array}
+   */
+  defaultComparePoint(_context) {
+    return ['=', _context.min];
+  }
+  /* eslint-enable class-methods-use-this */
+
   /**
    * Run the modifier on the results.
    *
@@ -58,6 +71,8 @@ class CriticalFailureModifier extends ComparisonModifier {
    * @returns {RollResults} The modified results
    */
   run(results, _context) {
+    super.run(results, _context);
+
     results.rolls
       .forEach((roll) => {
         // add the modifier flag
