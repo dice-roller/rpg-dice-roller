@@ -5,6 +5,7 @@ const calculationValueSymbol = Symbol('calculation-value');
 const modifiersSymbol = Symbol('modifiers');
 const initialValueSymbol = Symbol('initial-value');
 const useInTotalSymbol = Symbol('use-in-total');
+const diceSymbol = Symbol('dice');
 const valueSymbol = Symbol('value');
 
 /**
@@ -194,6 +195,18 @@ class RollResult {
    */
   set useInTotal(value) {
     this[useInTotalSymbol] = !!value;
+  }
+
+  get dice() {
+    return this[diceSymbol];
+  }
+
+  set dice(value) {
+    if (typeof value !== 'object' || !value) {
+      throw new TypeError('Dice value is not of instance StandardDice');
+    }
+
+    this[diceSymbol] = value;
   }
 
   /**
