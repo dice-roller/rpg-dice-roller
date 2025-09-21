@@ -202,6 +202,10 @@ class RollResult {
   }
 
   set dice(value) {
+    if (typeof value !== 'object' || !value) {
+      throw new TypeError('Dice value is not of instance StandardDice');
+    }
+
     this[diceSymbol] = value;
   }
 
