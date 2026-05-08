@@ -1,3 +1,4 @@
 # Ignore the generated grammar file as we have no control over the content
 
 /src/parser/grammars/grammar.js
+/src/parser/grammars/grammar.pegjs
