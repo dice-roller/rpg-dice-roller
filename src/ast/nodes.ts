@@ -117,6 +117,7 @@ export const MATH_FUNCTION_NAMES = [
   "pow",
   "max",
   "min",
+  "trunc",
 ] as const;
 export type MathFunctionName = (typeof MATH_FUNCTION_NAMES)[number];
 

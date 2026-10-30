@@ -121,7 +121,7 @@ MathFunction
   }
 
 UnaryFunctionName
-  = "abs" / "ceil" / "cos" / "exp" / "floor" / "log" / "round" / "sign" / "sin" / "sqrt" / "tan"
+  = "abs" / "ceil" / "cos" / "exp" / "floor" / "log" / "round" / "sign" / "sin" / "sqrt" / "tan" / "trunc"
 
 BinaryFunctionName
   = "pow" / "max" / "min"
