@@ -1,0 +1,19 @@
+# Build output
+/coverage
+/lib
+/types
+
+# Generated parser
+/src/parser/generated
+
+# The v5 tests are kept for reference only, until they are converted
+/tests/v5
+
+# Not covered by the new code style
+/.github
+/.idea
+/.junie
+/docs/*
+!/docs/architecture
+/*.md
+package-lock.json

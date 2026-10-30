@@ -1,73 +1,80 @@
-import commonjs from '@rollup/plugin-commonjs';
-import { nodeResolve } from '@rollup/plugin-node-resolve';
-import { babel } from '@rollup/plugin-babel';
-import banner from 'rollup-plugin-banner';
-// import eslint from '@rollup/plugin-eslint';
+import commonjs from "@rollup/plugin-commonjs";
+import license from "rollup-plugin-license";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import terser from "@rollup/plugin-terser";
+import typescript from "@rollup/plugin-typescript";
 
-const { terser } = require('rollup-plugin-terser');
-const path = require('path');
+const production = !process.env.BUILD || process.env.BUILD === "prod";
 
-const production = !process.env.BUILD || (process.env.BUILD === 'prod');
+const inputPath = "src/index.ts";
+const outputPath = (format, minify = false) =>
+  `lib/${format}/bundle${minify ? ".min" : ""}.js`;
+const packageName = "rpgDiceRoller";
 
-const inputPath = 'src/index.js';
-const outputPath = (format, minify = false) => `lib/${format}/bundle${minify ? '.min' : ''}.js`;
-const packageName = 'rpgDiceRoller';
-const globals = {
-  mathjs: 'math',
-  'random-js': 'Random',
+/**
+ * Hides warnings about circular imports inside dependencies (e.g. mathjs), which we can't fix.
+ */
+const onwarn = (warning, warn) => {
+  if (
+    warning.code === "CIRCULAR_DEPENDENCY" &&
+    warning.ids?.every((id) => id.includes("node_modules"))
+  ) {
+    return;
+  }
+
+  warn(warning);
 };
 
 /**
- * Returns a list of common plugins
+ * Returns the list of common plugins.
  *
- * @param {boolean} [isUmd=false]
  * @param {boolean} [isProduction=false]
- * @returns {{}}
  */
-const plugins = (isUmd = false, isProduction = false) => [
-  // lint the files (Currently broken because plugin uses an old version of eslint)
-  // eslint(),
+const plugins = (isProduction = false) => [
+  // compile TypeScript (type errors fail the build)
+  typescript({
+    tsconfig: "./tsconfig.json",
+    include: ["src/**/*.ts"],
+    exclude: ["tests/**"],
+    noEmitOnError: true,
+  }),
   // resolve third party library imports
   nodeResolve(),
   // handle commonJS modules
   commonjs(),
-  // only use babel if we're compiling to UMD
-  isUmd ? babel({
-    exclude: 'node_modules/**',
-  }) : null,
   // minify for production
   isProduction ? terser({ keep_classnames: true }) : null,
-  banner({
-    file: path.join(__dirname, 'banner.txt'),
+  license({
+    banner: {
+      content: {
+        file: "./banner.txt",
+      },
+    },
   }),
 ];
 
 export default [
-  // ESM
+  // ESM: runtime dependencies stay external, so consumers' bundlers can dedupe and tree-shake them
   {
     input: inputPath,
     output: {
-      file: outputPath('esm', production),
-      format: 'esm',
-      // map external dependencies to variables
-      globals,
+      file: outputPath("esm", production),
+      format: "esm",
     },
-    plugins: plugins(false, production),
-    // indicate which modules should be treated as external
-    external: ['mathjs'],
+    plugins: plugins(production),
+    external: [/^mathjs(\/.*)?$/, /^random-js(\/.*)?$/],
+    onwarn,
   },
-  // UMD
+  // UMD: self-contained, with only the used parts of mathjs bundled
   {
     input: inputPath,
     output: {
-      file: outputPath('umd', production),
-      format: 'umd',
+      file: outputPath("umd", production),
+      format: "umd",
       name: packageName,
-      // map external dependencies to variables
-      globals,
+      exports: "named",
     },
-    plugins: plugins(true, production),
-    // indicate which modules should be treated as external
-    external: ['mathjs', 'random-js'],
+    plugins: plugins(production),
+    onwarn,
   },
 ];
