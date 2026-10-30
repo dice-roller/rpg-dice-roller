@@ -1,26 +1,24 @@
 {
-	"files": [
-	  "src/index.js"
-	],
-	"include": [
-	  "tests/**/*.js",
-	  "tests/**/*.ts"
-	],
-	"compilerOptions": {
-	  /* Basic Options */
-	  "target": "ES2016",
-	  "module": "commonjs",
-	  "allowJs": true,
-	  "resolveJsonModule": true,
-	  "noEmit": true,
-	  "maxNodeModuleJsDepth": 3,
-  
-	  /* Strict Type-Checking Options */
-	  "strict": true,
-	  "noImplicitAny": true,
-	  "strictNullChecks": true,
-  
-	  /* Additional Checks */
-	  "noUnusedLocals": true
-	}
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["jest"],
+    "rootDir": ".",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true
+  },
+  "include": ["src/**/*.ts", "tests/**/*.ts"],
+  "exclude": ["tests/v5"]
 }

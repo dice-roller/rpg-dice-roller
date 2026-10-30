@@ -8,10 +8,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
 
       - name: Setup Node.js environment
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7.1.0
         with:
           node-version: 'lts/*'
 
@@ -22,7 +22,7 @@ jobs:
         run: npm run docs:build
 
       - name: Checkout documentation repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7.0.1
         with:
           token: ${{ secrets.DOCS_DEPLOY_GHP }}
           repository: 'dice-roller/documentation'
@@ -34,7 +34,7 @@ jobs:
           mv ./docs/api ./documentation/docs/api
 
       - name: Commit and push API doc changes
-        uses: EndBug/add-and-commit@v9
+        uses: EndBug/add-and-commit@v11.1.1
         with:
           cwd: './documentation'
           add: './docs/api'

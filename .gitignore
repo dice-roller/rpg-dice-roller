@@ -46,7 +46,7 @@ bower_components
 /lib/**/*.js
 /lib/*.map
 /lib/**/*.map
-/src/parser/grammars/grammar.js
+/src/parser/generated/
 
 ## Compiled TypeScript
 /types
@@ -56,3 +56,10 @@ bower_components
 
 ## Docs
 /docs/api
+
+# Junie and Cursor workspace plans
+/.junie/plans/
+/.cursor/plans/
+
+# Claude Code personal settings
+/.claude/settings.local.json
