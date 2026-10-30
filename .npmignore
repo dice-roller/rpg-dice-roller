@@ -2,10 +2,10 @@
 *
 
 # Except for these
-!/lib/*.js
-!/lib/**/*.js
-!/lib/*.map
-!/lib/**/*.map
+!/dist/*.js
+!/dist/**/*.js
+!/dist/*.map
+!/dist/**/*.map
 !/types/*.d.ts
 !/types/index.d.cts
 !/types/**/*.d.ts

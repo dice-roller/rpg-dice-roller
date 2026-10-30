@@ -8,7 +8,7 @@ const production = !process.env.BUILD || process.env.BUILD === "prod";
 
 const inputPath = "src/index.ts";
 const outputPath = (format, minify = false) =>
-  `lib/${format}/bundle${minify ? ".min" : ""}.js`;
+  `dist/${format}/bundle${minify ? ".min" : ""}.js`;
 const packageName = "rpgDiceRoller";
 
 /**

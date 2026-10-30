@@ -1,6 +1,6 @@
 # Build output
 /coverage
-/lib
+/dist
 /types
 
 # Generated parser

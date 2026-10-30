@@ -5,23 +5,23 @@
   "version": "5.5.0",
   "license": "MIT",
   "type": "module",
-  "main": "./lib/esm/bundle.js",
-  "module": "./lib/esm/bundle.js",
-  "browser": "./lib/umd/bundle.js",
+  "main": "./dist/esm/bundle.js",
+  "module": "./dist/esm/bundle.js",
+  "browser": "./dist/umd/bundle.js",
   "exports": {
     ".": {
       "import": {
         "types": "./types/index.d.ts",
-        "default": "./lib/esm/bundle.js"
+        "default": "./dist/esm/bundle.js"
       },
       "require": {
         "types": "./types/index.d.cts",
-        "default": "./lib/umd/bundle.js"
+        "default": "./dist/umd/bundle.js"
       }
     },
-    "./lib/umd/bundle.js": {
+    "./dist/umd/bundle.js": {
       "types": "./types/index.d.cts",
-      "require": "./lib/umd/bundle.js"
+      "require": "./dist/umd/bundle.js"
     },
     "./src/": "./src/",
     "./types/": "./types/",
