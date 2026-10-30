@@ -11,23 +11,23 @@
   "exports": {
     ".": {
       "import": {
-        "types": "./types/index.d.ts",
+        "types": "./dist/types/index.d.ts",
         "default": "./dist/esm/bundle.js"
       },
       "require": {
-        "types": "./types/index.d.cts",
+        "types": "./dist/types/index.d.cts",
         "default": "./dist/umd/bundle.js"
       }
     },
     "./dist/umd/bundle.js": {
-      "types": "./types/index.d.cts",
+      "types": "./dist/types/index.d.cts",
       "require": "./dist/umd/bundle.js"
     },
     "./src/": "./src/",
-    "./types/": "./types/",
+    "./types/": "./dist/types/",
     "./package.json": "./package.json"
   },
-  "types": "./types/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "repository": {
     "type": "git",
     "url": "https://github.com/dice-roller/rpg-dice-roller.git"
@@ -85,11 +85,11 @@
   "scripts": {
     "build": "npm run build:dev && npm run build:prod && npm run build:definitions",
     "build:prepare": "npm run build:grammars && npm run typecheck && npm run lint",
-    "build:definitions": "rm -rf types/ && npm run build:grammars && tsc -p declaration.tsconfig.json && cp ./types/index.d.ts ./types/index.d.cts",
+    "build:definitions": "rm -rf dist/types/ && npm run build:grammars && tsc -p definitions.tsconfig.json && cp ./dist/types/index.d.ts ./dist/types/index.d.cts",
     "build:dev": "npm run build:prepare && rollup -c --environment BUILD:dev",
     "build:grammars": "peggy -c ./peggy.config.cjs",
     "build:prod": "npm run build:prepare && rollup -c --environment BUILD:prod",
-    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/grammars/*\" --partials=\"./docs/partials/**/*.hbs\" --readme=\"./docs/readme.md\"",
+    "docs:build": "vuepress-jsdoc --dist ./docs --folder api --exclude=\"index.js,**/index.js,**/parser/generated/*,**/types/**/*\" --partials=\"./docs/partials/**/*.hbs\" --readme=\"./docs/readme.md\"",
     "docs:watch": "npm run docs:build -- --watch",
     "watch": "npm run build:dev -- -w",
     "format": "prettier --write .",
