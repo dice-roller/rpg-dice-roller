@@ -8,7 +8,7 @@ export default defineConfig(
   globalIgnores([
     "coverage/",
     "docs/",
-    "lib/",
+    "dist/",
     "types/",
     "src/parser/generated/",
     // the v5 tests are kept for reference only, until they are converted
