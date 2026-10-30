@@ -20,5 +20,5 @@
     "noUnusedLocals": true
   },
   "include": ["src/**/*.ts", "tests/**/*.ts"],
-  "exclude": ["tests/v5"]
+  "exclude": ["dist/**/*", "tests/v5"]
 }

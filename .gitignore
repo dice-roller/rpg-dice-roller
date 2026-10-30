@@ -42,8 +42,10 @@ bower_components
 # Project specific
 
 ## Compiled scripts
-/dist/*.js
-/dist/**/*.js
+/dist/*.[jt]s
+/dist/**/*.[jt]s
+/dist/*.cts
+/dist/**/*.cts
 /dist/*.map
 /dist/**/*.map
 /src/parser/generated/

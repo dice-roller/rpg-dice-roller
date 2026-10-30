@@ -2,13 +2,12 @@
 *
 
 # Except for these
-!/dist/*.js
-!/dist/**/*.js
+!/dist/*.[jt]s
+!/dist/**/*.[jt]s
 !/dist/*.map
 !/dist/**/*.map
-!/types/*.d.ts
-!/types/index.d.cts
-!/types/**/*.d.ts
+!/dist/*.cts
+!/dist/**/*.cts
 !CONTRIBUTING.md
 !licence.txt
 !package.json

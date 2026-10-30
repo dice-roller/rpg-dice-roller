@@ -330,7 +330,7 @@ tests/        new *.test.ts / *.test-d.ts
 tests/v5/     the v5 *.test.js files, moved unchanged (same sub-folders), excluded from all runs
 docs/architecture/v6-api.md     design reference
 ```
-The old `src/**/*.js` are removed (they remain in git history). The v5 tests are moved with `git mv` to `tests/v5/` (history is kept) and excluded from Jest, ESLint, Prettier and `tsc`. Root configs are updated: `tsconfig.json`, `declaration.tsconfig.json`, `rollup.config.js`, `jest.config.cjs`, `peggy.config.cjs`, `package.json`. `.eslintrc.json` and `.eslintignore` are replaced by `eslint.config.js`, and `.prettierignore` is added.
+The old `src/**/*.js` are removed (they remain in git history). The v5 tests are moved with `git mv` to `tests/v5/` (history is kept) and excluded from Jest, ESLint, Prettier and `tsc`. Root configs are updated: `tsconfig.json`, `definitions.tsconfig.json`, `rollup.config.js`, `jest.config.cjs`, `peggy.config.cjs`, `package.json`. `.eslintrc.json` and `.eslintignore` are replaced by `eslint.config.js`, and `.prettierignore` is added.
 
 ### Dependency Upgrade
 - **Upgrade to latest:** `peggy` (5.x, `--dts` and ES output), `rollup` (4.x), `@rollup/plugin-node-resolve`, `@rollup/plugin-commonjs`, `jest` (30.x), `eslint` (10.x, flat config only), `typescript`, `random-js`, `mathjs` (15.x, stays in `dependencies`).
@@ -381,7 +381,7 @@ The old `src/**/*.js` are removed (they remain in git history). The v5 tests are
 ### ✓ Step 1: Set up the TypeScript toolchain, upgrade dependencies and clear out the v5 sources
 The repo builds, lints and tests TypeScript from an empty `src/index.ts` on branch `next/re-structure`. All dependencies are current, the old `src` JS is removed, and the old tests are moved to `tests/v5/` and excluded.
 - Apply the Dependency Upgrade list: upgrade to latest, add and remove packages, bump `engines.node`. Check TS 7 compatibility with `ts-jest`/`@rollup/plugin-typescript` first, and pin TS 6.x for tooling if needed.
-- Update `tsconfig.json` (strict, ESM, `src/**/*.ts` + `tests/**/*.ts`) and `declaration.tsconfig.json` (emit `types/`).
+- Update `tsconfig.json` (strict, ESM, `src/**/*.ts` + `tests/**/*.ts`) and `definitions.tsconfig.json` (emit `types/`).
 - Switch `rollup.config.js` to `@rollup/plugin-typescript` + `@rollup/plugin-terser`, and keep the ESM/UMD outputs and the banner via `output.banner`.
 - Configure `jest.config.cjs` with `ts-jest`, `testMatch` limited to `tests/**/*.test.ts` (excluding `tests/v5/`). Replace `.eslintrc.json`/`.eslintignore` with `eslint.config.js` (`@eslint/js` + typescript-eslint recommended/stylistic type-checked + `eslint-config-prettier`), and add `.prettierignore`. Both ignore `tests/v5/`, the parser's `generated/` output and build output.
 - Point `peggy.config.cjs` at `src/parser/grammar.pegjs` → `src/parser/generated/` (ES output + `--dts`), and update the `package.json` scripts.
