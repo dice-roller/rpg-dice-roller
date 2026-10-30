@@ -32,6 +32,7 @@ import {
   subtractDependencies,
   tanDependencies,
   unaryMinusDependencies,
+  fixDependencies,
 } from "mathjs";
 import type { BinaryOperator, MathFunctionName } from "../ast/nodes.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
@@ -44,6 +45,7 @@ const math = create(
     cosDependencies,
     divideDependencies,
     expDependencies,
+    fixDependencies,
     floorDependencies,
     logDependencies,
     maxDependencies,
@@ -73,6 +75,7 @@ type MathName =
   | "cos"
   | "divide"
   | "exp"
+  | "fix"
   | "floor"
   | "log"
   | "max"
@@ -142,4 +145,5 @@ export const functions: Readonly<Record<MathFunctionName, NumberFn>> =
     pow: real("pow"),
     max: real("max"),
     min: real("min"),
+    trunc: real("fix"),
   });

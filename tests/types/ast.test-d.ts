@@ -72,6 +72,7 @@ assertType<
     | "pow"
     | "max"
     | "min"
+    | "trunc"
   >
 >();
 
