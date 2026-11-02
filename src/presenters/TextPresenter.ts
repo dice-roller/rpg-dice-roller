@@ -1,9 +1,9 @@
-import { NotImplementedError } from "../errors/NotImplementedError.js";
 import type { ResultFlag } from "../results/flags.js";
 import type {
   BinaryResult,
   DieResult,
   FunctionResult,
+  GroupMemberResult,
   GroupResult,
   NumberResult,
   ParenResult,
@@ -43,6 +43,10 @@ export interface TextPresenterOptions {
 /**
  * Plain text output, matching v5: e.g. `4d6: [3, 5, 2, 6] = 16`, with flag symbols after each die
  * value, totals rounded to 2 decimal places, and history rolls joined with `"; "`.
+ *
+ * Maths is written without spaces (`[4, 2]+3`), function arguments are joined with `,`
+ * (`max([5],[2])`), and group members are joined with `, ` (`{[4, 5], [3]-1}`). A member with flags
+ * (e.g. dropped, or a target success) is wrapped in parentheses: `([6, 3])d`.
  */
 export class TextPresenter extends TreePresenter<string> {
   readonly flagSymbols: Readonly<Record<ResultFlag, string>>;
@@ -62,49 +66,67 @@ export class TextPresenter extends TreePresenter<string> {
     return flags.map((flag) => this.flagSymbols[flag]).join("");
   }
 
-  /** The rolls joined with `separator`. */
-  protected history(_history: RollHistory): string {
-    throw new NotImplementedError("TextPresenter.history()");
+  /** Formats a number, e.g. `0.2` or `-5`. */
+  protected formatNumber(value: number): string {
+    return String(value);
+  }
+
+  /** The rolls joined with `separator`; an empty history is an empty string. */
+  protected history(history: RollHistory): string {
+    return history.rolls.map((roll) => this.roll(roll)).join(this.separator);
   }
 
   /** `notation: <result> = total`. */
-  protected roll(_roll: Roll<unknown>): string {
-    throw new NotImplementedError("TextPresenter.roll()");
+  protected roll(roll: Roll<unknown>): string {
+    return `${roll.notation}: ${this.visit(roll.result)} = ${this.formatNumber(roll.total)}`;
   }
 
-  protected number(_result: NumberResult): string {
-    throw new NotImplementedError("TextPresenter.number()");
+  protected number(result: NumberResult): string {
+    return this.formatNumber(result.value);
   }
 
   /** `[3, 5, 2, 6]` */
-  protected pool(_result: PoolResult): string {
-    throw new NotImplementedError("TextPresenter.pool()");
+  protected pool(result: PoolResult): string {
+    return `[${result.rolls.map((roll) => this.die(roll, result)).join(", ")}]`;
   }
 
   /** `6!`, `1d` */
-  protected die(_result: DieResult, _pool: PoolResult): string {
-    throw new NotImplementedError("TextPresenter.die()");
+  protected die(result: DieResult, _pool: PoolResult): string {
+    return `${this.formatNumber(result.value)}${this.flags(result.flags)}`;
   }
 
-  /** `{[3, 5] + 2, [4]}` */
-  protected group(_result: GroupResult): string {
-    throw new NotImplementedError("TextPresenter.group()");
+  /** `{[3, 5]+2, ([4])d}` */
+  protected group(result: GroupResult): string {
+    return `{${result.members.map((member) => this.member(member)).join(", ")}}`;
   }
 
-  protected binary(_result: BinaryResult): string {
-    throw new NotImplementedError("TextPresenter.binary()");
+  /** A group member: `[3, 5]+2`, or `([3, 5]+2)*` with flags. */
+  protected member(member: GroupMemberResult): string {
+    const inner = this.visit(member.result);
+
+    return member.flags.length === 0
+      ? inner
+      : `(${inner})${this.flags(member.flags)}`;
   }
 
-  protected unary(_result: UnaryResult): string {
-    throw new NotImplementedError("TextPresenter.unary()");
+  /** `[4, 2]+3` */
+  protected binary(result: BinaryResult): string {
+    return `${this.visit(result.left)}${result.node.op}${this.visit(result.right)}`;
   }
 
-  protected paren(_result: ParenResult): string {
-    throw new NotImplementedError("TextPresenter.paren()");
+  /** `-5` */
+  protected unary(result: UnaryResult): string {
+    return `${result.node.op}${this.visit(result.operand)}`;
   }
 
-  protected fn(_result: FunctionResult): string {
-    throw new NotImplementedError("TextPresenter.fn()");
+  /** `([4, 2]*2)` */
+  protected paren(result: ParenResult): string {
+    return `(${this.visit(result.inner)})`;
+  }
+
+  /** `floor([4, 5]/2)`, `max([5],[2])` */
+  protected fn(result: FunctionResult): string {
+    return `${result.node.name}(${result.args.map((arg) => this.visit(arg)).join(",")})`;
   }
 }
 

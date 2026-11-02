@@ -7,8 +7,12 @@ import type { ExpressionResult } from "./results/types.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
 import { decode } from "./serialization/decode.js";
-import { encode, toRollData } from "./serialization/encode.js";
-import type { ExportFormat, RollData } from "./serialization/formats.js";
+import { encode, encodeNumbers, toRollData } from "./serialization/encode.js";
+import type {
+  EncodedRollData,
+  ExportFormat,
+  RollData,
+} from "./serialization/formats.js";
 
 /** Rounds a total to 2 decimal places, as in v5. */
 const roundTotal = (value: number): number => parseFloat(value.toFixed(2));
@@ -75,8 +79,9 @@ export class Roll<T = string> {
   readonly #settings: RollSettings<T>;
 
   /**
-   * Parses (if a string) and rolls the input. Exported `RollData` is restored as it is, without
-   * rolling: its result and totals are used, and `reroll()` rolls its notation.
+   * Parses (if a string) and rolls the input. `RollData` is restored as it is, without rolling or
+   * validating: its result and totals are used, and `reroll()` rolls its expression. Use
+   * `Roll.import()` / `Roll.fromJSON()` for exported data, which validate it.
    *
    * @param options how to roll; `RollSettings` are used as they are, so they can be shared
    * @throws {ValidationError | NotationError} the notation is invalid
@@ -88,7 +93,9 @@ export class Roll<T = string> {
     this.#settings = RollSettings.from(options);
 
     if (typeof input === "object" && input.type === "roll") {
-      this.#input = input.notation;
+      // the expression, rather than the notation, so builder rolls (whose notation may be
+      // display-only) can be re-rolled
+      this.#input = input.result.node;
       this.notation = input.notation;
       this.result = input.result;
       this.total = input.total;
@@ -106,16 +113,18 @@ export class Roll<T = string> {
   }
 
   /**
-   * Creates a roll from exported data, without rolling.
+   * Creates a roll from exported data (e.g. from `toJSON()`), without rolling.
    *
    * The options are used by `reroll()`. Pools refer to their die by factory name, so re-rolling
    * uses the die registered under that name in these settings.
+   *
+   * @throws {ImportError} the data is invalid, or is a history
    */
   static fromJSON<T = string>(
-    data: RollData,
+    data: EncodedRollData,
     options?: RollOptions<T> | RollSettings<T>,
   ): Roll<T> {
-    return new Roll<T>(data, options);
+    return Roll.import(data, options);
   }
 
   /**
@@ -124,7 +133,7 @@ export class Roll<T = string> {
    * @throws {ImportError} the data is invalid, or is a history
    */
   static import<T = string>(
-    data: string | RollData,
+    data: string | EncodedRollData,
     options?: RollOptions<T> | RollSettings<T>,
   ): Roll<T> {
     const decoded = decode(data);
@@ -135,7 +144,7 @@ export class Roll<T = string> {
       );
     }
 
-    return Roll.fromJSON(decoded, options);
+    return new Roll<T>(decoded, options);
   }
 
   /** The AST that was evaluated. */
@@ -184,14 +193,15 @@ export class Roll<T = string> {
     return defaultTextPresenter.present(this);
   }
 
-  toJSON(): RollData {
-    return toRollData(this);
+  /** The JSON-safe export data, with non-finite numbers tagged (see `EncodedNumber`). */
+  toJSON(): EncodedRollData {
+    return encodeNumbers(toRollData(this));
   }
 
-  export(format: "object"): RollData;
+  export(format: "object"): EncodedRollData;
   export(format?: "json" | "base64"): string;
-  export(format: ExportFormat = "json"): RollData | string {
-    return encode(this.toJSON(), format);
+  export(format: ExportFormat = "json"): EncodedRollData | string {
+    return encode(toRollData(this), format);
   }
 
   #totalIn(mode: "min" | "max"): number {

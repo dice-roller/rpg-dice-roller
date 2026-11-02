@@ -6,7 +6,11 @@ import {
   engines,
   roll as rollOnce,
 } from "../../src/index.js";
-import type { HistoryData, RollData } from "../../src/index.js";
+import type {
+  EncodedHistoryData,
+  EncodedRollData,
+  RollData,
+} from "../../src/index.js";
 import { accepts, assertType } from "./helpers.js";
 import type { Equals } from "./helpers.js";
 
@@ -30,17 +34,23 @@ accepts<HTMLElement>(roll.present(html));
 accepts<string>(roll.present());
 
 // export formats
-accepts<HistoryData>(htmlRoller.export("object"));
+accepts<EncodedHistoryData>(htmlRoller.export("object"));
 accepts<string>(htmlRoller.export("base64"));
 accepts<string>(htmlRoller.export());
-accepts<RollData>(roll.export("object"));
+accepts<EncodedRollData>(roll.export("object"));
+accepts<EncodedRollData>(roll.toJSON());
 // @ts-expect-error - JSON is a string, not data
-accepts<RollData>(roll.export("json"));
+accepts<EncodedRollData>(roll.export("json"));
+// @ts-expect-error - encoded numbers may be tags, not numbers
+accepts<RollData>(roll.export("object"));
 // @ts-expect-error - unknown export format
 htmlRoller.export("xml");
 
-// a roller with any presenter can restore dice on import
+// a roller with any presenter can restore dice on import, from encoded or plain data
+Roll.fromJSON({} as EncodedRollData, htmlRoller.settings);
 Roll.fromJSON({} as RollData, htmlRoller.settings);
+htmlRoller.import(roll.export("object"));
+htmlRoller.import(htmlRoller.export("object"));
 
 // standalone rolls take roll options or shared settings, but no presenter
 accepts<Roll>(new Roll("4d6"));

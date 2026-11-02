@@ -1,8 +1,8 @@
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { Roll } from "./Roll.js";
-import { toHistoryData } from "./serialization/encode.js";
-import type { HistoryData } from "./serialization/formats.js";
+import { encodeNumbers, toHistoryData } from "./serialization/encode.js";
+import type { EncodedHistoryData } from "./serialization/formats.js";
 
 /** A log of rolls. */
 export class RollHistory implements Iterable<Roll<unknown>> {
@@ -13,7 +13,7 @@ export class RollHistory implements Iterable<Roll<unknown>> {
     return [...this.#rolls];
   }
 
-  /** The sum of the roll totals. */
+  /** The sum of the roll totals (`NaN` if they include both `Infinity` and `-Infinity`). */
   get total(): number {
     return this.#rolls.reduce((total, roll) => total + roll.total, 0);
   }
@@ -46,7 +46,8 @@ export class RollHistory implements Iterable<Roll<unknown>> {
     return defaultTextPresenter.present(this);
   }
 
-  toJSON(): HistoryData {
-    return toHistoryData(this);
+  /** The JSON-safe export data, with non-finite numbers tagged (see `EncodedNumber`). */
+  toJSON(): EncodedHistoryData {
+    return encodeNumbers(toHistoryData(this));
   }
 }

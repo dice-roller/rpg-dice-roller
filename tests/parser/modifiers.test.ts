@@ -93,6 +93,18 @@ describe("modifiers", () => {
     ]);
   });
 
+  test("keep and drop are only replaced by the same end", () => {
+    expect(modifiersOf("4d10dh1dl2")).toEqual([
+      createDrop("h", 1),
+      createDrop("l", 2),
+    ]);
+    expect(modifiersOf("4d10kh1kl2kh3")).toEqual([
+      createKeep("h", 3),
+      createKeep("l", 2),
+    ]);
+    expect(modifiersOf("4d10d1dl2")).toEqual([createDrop("l", 2)]);
+  });
+
   test("roll groups take modifiers", () => {
     expect(modifiersOf("{4d6+2d8, 3d20}k1")).toEqual([createKeep("h", 1)]);
   });

@@ -7,8 +7,39 @@
  * Numbers are accepted anywhere an expression is expected, and `pool()` accepts a number of sides
  * (`standard`), an expression for computed sides, or a `DieNode` for any registered die
  * (`die("fib")`, `die("range", -2, 3)`).
+ *
+ * Builders validate their inputs at runtime (for JS users) and throw a `ValidationError` for
+ * anything the parser couldn't produce, e.g. `keep("h", 0)` or `compare(">=", NaN)`.
  */
-import { NotImplementedError } from "../errors/NotImplementedError.js";
+import { ValidationError } from "../errors/ValidationError.js";
+import {
+  createBinary,
+  createComparePoint,
+  createCriticalFailure,
+  createCriticalSuccess,
+  createDescription,
+  createDie,
+  createDrop,
+  createExplode,
+  createFunction,
+  createGroup,
+  createKeep,
+  createMax,
+  createMin,
+  createNumber,
+  createParen,
+  createPool,
+  createReRoll,
+  createSort,
+  createTarget,
+  createUnary,
+  createUnique,
+} from "./factory.js";
+import {
+  BINARY_OPERATORS,
+  COMPARE_OPERATORS,
+  MATH_FUNCTION_NAMES,
+} from "./nodes.js";
 import type {
   BinaryNode,
   BinaryOperator,
@@ -61,60 +92,88 @@ export interface ModifiableOptions {
  * --------------------------------------------------------------------------------------------- */
 
 /** A literal number. */
-export function num(_value: number): NumberNode {
-  throw new NotImplementedError("num()");
+export function num(value: number): NumberNode {
+  return createNumber(finite(value, "A number"));
 }
 
 /**
  * A reference to a registered die factory, e.g. `die("percentile")` for `d%`, or
  * `die("range", -2, 3)`.
  */
-export function die(_name: string, ..._args: ExpressionInput[]): DieNode {
-  throw new NotImplementedError("die()");
+export function die(name: string, ...args: ExpressionInput[]): DieNode {
+  if (typeof name !== "string" || name === "") {
+    throw new ValidationError("A die needs a name");
+  }
+
+  return createDie(name, args.map(expression));
 }
 
 /** A pool of dice, e.g. `pool(4, 6)` for `4d6`, or `pool(2, die("fib"))`. */
 export function pool(
-  _qty: ExpressionInput,
-  _die: DieInput,
-  _options?: ModifiableOptions,
+  qty: ExpressionInput,
+  die: DieInput,
+  options: ModifiableOptions = {},
 ): PoolNode {
-  throw new NotImplementedError("pool()");
+  const dieNode = isNode(die, "die")
+    ? die
+    : createDie("standard", [expression(die)]);
+
+  return createPool(
+    expression(qty),
+    dieNode,
+    modifierList(options.modifiers),
+    description(options.description),
+  );
 }
 
 /** A roll group, e.g. `group([pool(4, 6), pool(2, 8)])` for `{4d6, 2d8}`. */
 export function group(
-  _expressions: readonly ExpressionInput[],
-  _options?: ModifiableOptions,
+  expressions: readonly ExpressionInput[],
+  options: ModifiableOptions = {},
 ): GroupNode {
-  throw new NotImplementedError("group()");
+  if (!Array.isArray(expressions) || expressions.length === 0) {
+    throw new ValidationError("A group needs at least one expression");
+  }
+
+  return createGroup(
+    expressions.map(expression),
+    modifierList(options.modifiers),
+    description(options.description),
+  );
 }
 
 /** A binary operation, e.g. `binary("+", pool(2, 6), 3)` for `2d6+3`. */
 export function binary(
-  _op: BinaryOperator,
-  _left: ExpressionInput,
-  _right: ExpressionInput,
+  op: BinaryOperator,
+  left: ExpressionInput,
+  right: ExpressionInput,
 ): BinaryNode {
-  throw new NotImplementedError("binary()");
+  return createBinary(
+    oneOf(op, BINARY_OPERATORS, "binary operator"),
+    expression(left),
+    expression(right),
+  );
 }
 
 /** A unary minus. */
-export function negate(_operand: ExpressionInput): UnaryNode {
-  throw new NotImplementedError("negate()");
+export function negate(operand: ExpressionInput): UnaryNode {
+  return createUnary(expression(operand));
 }
 
 /** A parenthesised expression. */
-export function paren(_expression: ExpressionInput): ParenNode {
-  throw new NotImplementedError("paren()");
+export function paren(expressionInput: ExpressionInput): ParenNode {
+  return createParen(expression(expressionInput));
 }
 
 /** A maths function call, e.g. `fn("floor", binary("/", pool(2, 6), 2))`. */
 export function fn(
-  _name: MathFunctionName,
-  ..._args: ExpressionInput[]
+  name: MathFunctionName,
+  ...args: ExpressionInput[]
 ): FunctionNode {
-  throw new NotImplementedError("fn()");
+  return createFunction(
+    oneOf(name, MATH_FUNCTION_NAMES, "maths function"),
+    args.map(expression),
+  );
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -123,73 +182,217 @@ export function fn(
 
 /** A compare point, e.g. `compare(">=", 8)`. */
 export function compare(
-  _operator: CompareOperator,
-  _value: number,
+  operator: CompareOperator,
+  value: number,
 ): ComparePoint {
-  throw new NotImplementedError("compare()");
+  return createComparePoint(
+    oneOf(operator, COMPARE_OPERATORS, "compare operator"),
+    finite(value, "A compare point value"),
+  );
 }
 
 /* ------------------------------------------------------------------------------------------------
  * Modifiers
  * --------------------------------------------------------------------------------------------- */
 
-export function explode(_options?: {
-  compound?: boolean;
-  penetrate?: boolean;
-  comparePoint?: ComparePoint;
-}): ExplodeNode {
-  throw new NotImplementedError("explode()");
+export function explode(
+  options: {
+    compound?: boolean;
+    penetrate?: boolean;
+    comparePoint?: ComparePoint;
+  } = {},
+): ExplodeNode {
+  return createExplode(
+    options.compound ?? false,
+    options.penetrate ?? false,
+    optionalComparePoint(options.comparePoint),
+  );
 }
 
 export function target(
-  _success: ComparePoint,
-  _failure?: ComparePoint,
+  success: ComparePoint,
+  failure?: ComparePoint,
 ): TargetNode {
-  throw new NotImplementedError("target()");
+  return createTarget(comparePoint(success), optionalComparePoint(failure));
 }
 
-export function drop(_end: PoolEnd, _qty = 1): DropNode {
-  throw new NotImplementedError("drop()");
+export function drop(end: PoolEnd, qty = 1): DropNode {
+  return createDrop(poolEnd(end), positiveInteger(qty));
 }
 
-export function keep(_end: PoolEnd, _qty = 1): KeepNode {
-  throw new NotImplementedError("keep()");
+export function keep(end: PoolEnd, qty = 1): KeepNode {
+  return createKeep(poolEnd(end), positiveInteger(qty));
 }
 
-export function reRoll(_options?: {
-  once?: boolean;
-  comparePoint?: ComparePoint;
-}): ReRollNode {
-  throw new NotImplementedError("reRoll()");
+export function reRoll(
+  options: {
+    once?: boolean;
+    comparePoint?: ComparePoint;
+  } = {},
+): ReRollNode {
+  return createReRoll(
+    options.once ?? false,
+    optionalComparePoint(options.comparePoint),
+  );
 }
 
-export function unique(_options?: {
-  once?: boolean;
-  comparePoint?: ComparePoint;
-}): UniqueNode {
-  throw new NotImplementedError("unique()");
+export function unique(
+  options: {
+    once?: boolean;
+    comparePoint?: ComparePoint;
+  } = {},
+): UniqueNode {
+  return createUnique(
+    options.once ?? false,
+    optionalComparePoint(options.comparePoint),
+  );
 }
 
 export function criticalSuccess(
-  _comparePoint?: ComparePoint,
+  comparePoint?: ComparePoint,
 ): CriticalSuccessNode {
-  throw new NotImplementedError("criticalSuccess()");
+  return createCriticalSuccess(optionalComparePoint(comparePoint));
 }
 
 export function criticalFailure(
-  _comparePoint?: ComparePoint,
+  comparePoint?: ComparePoint,
 ): CriticalFailureNode {
-  throw new NotImplementedError("criticalFailure()");
+  return createCriticalFailure(optionalComparePoint(comparePoint));
 }
 
-export function sort(_direction: SortDirection = "a"): SortNode {
-  throw new NotImplementedError("sort()");
+export function sort(direction: SortDirection = "a"): SortNode {
+  return createSort(oneOf(direction, ["a", "d"] as const, "sort direction"));
 }
 
-export function max(_value: number): MaxNode {
-  throw new NotImplementedError("max()");
+export function max(value: number): MaxNode {
+  return createMax(finite(value, "A max value"));
 }
 
-export function min(_value: number): MinNode {
-  throw new NotImplementedError("min()");
+export function min(value: number): MinNode {
+  return createMin(finite(value, "A min value"));
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Validation
+ * --------------------------------------------------------------------------------------------- */
+
+const EXPRESSION_TYPES: ReadonlySet<string> = new Set<ExpressionNode["type"]>([
+  "number",
+  "pool",
+  "group",
+  "binary",
+  "unary",
+  "paren",
+  "function",
+]);
+
+function isNode<T extends string>(
+  value: unknown,
+  type: T,
+): value is { readonly type: T } {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    (value as { type?: unknown }).type === type
+  );
+}
+
+function expression(input: ExpressionInput): ExpressionNode {
+  if (typeof input === "number") {
+    return num(input);
+  }
+
+  const type: unknown =
+    typeof input === "object" && input !== null ? input.type : undefined;
+
+  if (typeof type !== "string" || !EXPRESSION_TYPES.has(type)) {
+    throw new ValidationError(
+      `Expected a number or an expression node, got: ${JSON.stringify(input) ?? typeof input}`,
+    );
+  }
+
+  return input;
+}
+
+function finite(value: number, label: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) {
+    throw new ValidationError(`${label} must be finite: ${String(value)}`);
+  }
+
+  return value;
+}
+
+function positiveInteger(value: number): number {
+  if (!Number.isSafeInteger(value) || value < 1) {
+    throw new ValidationError(
+      `A modifier quantity must be a positive integer: ${String(value)}`,
+    );
+  }
+
+  return value;
+}
+
+function oneOf<T extends string>(
+  value: T,
+  allowed: readonly T[],
+  label: string,
+): T {
+  if (!allowed.includes(value)) {
+    throw new ValidationError(`Unknown ${label}: ${String(value)}`);
+  }
+
+  return value;
+}
+
+function poolEnd(end: PoolEnd): PoolEnd {
+  return oneOf(end, ["h", "l"] as const, "pool end");
+}
+
+function comparePoint(point: ComparePoint): ComparePoint {
+  if (typeof point !== "object" || point === null) {
+    throw new ValidationError(`Expected a compare point: ${String(point)}`);
+  }
+
+  return compare(point.operator, point.value);
+}
+
+function optionalComparePoint(
+  point: ComparePoint | undefined,
+): ComparePoint | undefined {
+  return point === undefined ? undefined : comparePoint(point);
+}
+
+function modifierList(
+  modifiers: readonly ModifierNode[] = [],
+): readonly ModifierNode[] {
+  const input: unknown = modifiers;
+
+  if (
+    !Array.isArray(input) ||
+    !input.every((modifier: unknown) => isNode(modifier, "modifier"))
+  ) {
+    throw new ValidationError("Modifiers must be a list of modifier nodes");
+  }
+
+  return modifiers;
+}
+
+function description(
+  input: string | DescriptionNode | undefined,
+): DescriptionNode | undefined {
+  if (input === undefined) {
+    return undefined;
+  }
+
+  const text = typeof input === "string" ? input : input?.text;
+  const style = typeof input === "string" ? "inline" : input?.style;
+
+  if (typeof text !== "string" || text.trim() === "") {
+    throw new ValidationError("Description text cannot be empty");
+  }
+
+  return createDescription(
+    text.trim(),
+    oneOf(style, ["inline", "block"] as const, "description style"),
+  );
 }

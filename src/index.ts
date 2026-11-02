@@ -50,6 +50,10 @@ export type { Presentable } from "./presenters/Presentable.js";
 export type { Presenter } from "./presenters/Presenter.js";
 export type { ExpressionResult } from "./results/types.js";
 export type {
+  EncodedExportData,
+  EncodedHistoryData,
+  EncodedNumber,
+  EncodedRollData,
   ExportFormat,
   HistoryData,
   RollData,

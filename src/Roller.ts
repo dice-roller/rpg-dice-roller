@@ -10,11 +10,11 @@ import { RollHistory } from "./RollHistory.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
 import { decode } from "./serialization/decode.js";
-import { encode } from "./serialization/encode.js";
+import { encode, toHistoryData } from "./serialization/encode.js";
 import type {
+  EncodedExportData,
+  EncodedHistoryData,
   ExportFormat,
-  HistoryData,
-  RollData,
 } from "./serialization/formats.js";
 
 /** @typeParam T the output type of the presenter */
@@ -85,25 +85,26 @@ export class Roller<T = string> {
   }
 
   /** Exports the history. */
-  export(format: "object"): HistoryData;
+  export(format: "object"): EncodedHistoryData;
   export(format?: "json" | "base64"): string;
-  export(format: ExportFormat = "json"): HistoryData | string {
-    return encode(this.history.toJSON(), format);
+  export(format: ExportFormat = "json"): EncodedHistoryData | string {
+    return encode(toHistoryData(this.history), format);
   }
 
   /**
    * Imports exported rolls (a roll or a whole history, as an object, JSON or base64), and adds them
-   * to the history.
+   * to the history, without rolling.
+   *
+   * The data is validated first, so nothing is added if any of it is invalid.
    *
    * @returns the imported rolls
    * @throws {ImportError} the data is invalid
    */
-  import(data: string | RollData | HistoryData): Roll<T>[] {
+  import(data: string | EncodedExportData): Roll<T>[] {
     const decoded = decode(data);
-    const rolls =
-      decoded.type === "history"
-        ? decoded.rolls.map((roll) => Roll.fromJSON(roll, this.settings))
-        : [Roll.fromJSON(decoded, this.settings)];
+    const rolls = (decoded.type === "history" ? decoded.rolls : [decoded]).map(
+      (roll) => new Roll(roll, this.settings),
+    );
 
     this.history.add(...rolls);
 

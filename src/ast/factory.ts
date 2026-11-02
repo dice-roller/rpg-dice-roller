@@ -138,19 +138,28 @@ export function createDescription(
  * --------------------------------------------------------------------------------------------- */
 
 /**
- * De-duplicates modifiers by name, as in v5: a repeated modifier replaces the earlier one
- * (last wins), but keeps the earlier one's position.
+ * De-duplicates modifiers, as in v5: a repeated modifier replaces the earlier one (last wins), but
+ * keeps the earlier one's position.
+ *
+ * Keep and drop are de-duplicated per end, so `4d10dh1dl2` keeps both (as v5's `drop-h` /
+ * `drop-l`), while `4d10dl1dl2` only keeps `dl2`.
  */
 export function createModifiers(
   modifiers: readonly ModifierNode[],
 ): ModifierNode[] {
-  const byName = new Map<ModifierNode["name"], ModifierNode>();
+  const byKey = new Map<string, ModifierNode>();
 
   for (const modifier of modifiers) {
-    byName.set(modifier.name, modifier);
+    byKey.set(modifierKey(modifier), modifier);
   }
 
-  return [...byName.values()];
+  return [...byKey.values()];
+}
+
+function modifierKey(modifier: ModifierNode): string {
+  return modifier.name === "keep" || modifier.name === "drop"
+    ? `${modifier.name}-${modifier.end}`
+    : modifier.name;
 }
 
 export function createExplode(

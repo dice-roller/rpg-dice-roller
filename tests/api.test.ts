@@ -1,5 +1,4 @@
 import { createDie, createNumber, createPool } from "../src/ast/factory.js";
-import { NotImplementedError } from "../src/errors/NotImplementedError.js";
 import { NotationError } from "../src/errors/NotationError.js";
 import { ImportError } from "../src/errors/ImportError.js";
 import type { RollMode } from "../src/evaluator/RollContext.js";
@@ -71,12 +70,37 @@ describe("Roller", () => {
     expect(roller.present()).toBe(42);
   });
 
-  test("rolling is wired to the (stub) evaluator", () => {
+  test("rolling is wired to the evaluator", () => {
+    const roller = new Roller({ engine: engines.MersenneTwister19937.seed(3) });
+    const result = roller.roll("4d6+2");
+
+    expect(result.result.type).toBe("binary");
+    expect(result.total).toBeGreaterThanOrEqual(6);
+    expect(result.total).toBeLessThanOrEqual(26);
+    expect(result.minTotal).toBe(6);
+    expect(result.maxTotal).toBe(26);
+    expect(result.averageTotal).toBe(16);
+    expect(roller.history.rolls).toEqual([result]);
+    expect(roll("2d6").total).toBeGreaterThanOrEqual(2);
+    expect(new Roll("d%").maxTotal).toBe(100);
+  });
+
+  test("seeded rollers roll the same totals", () => {
+    const totals = () => {
+      const roller = new Roller({
+        engine: engines.MersenneTwister19937.seed(42),
+      });
+
+      return Array.from({ length: 5 }, () => roller.roll("3d20+dF").total);
+    };
+
+    expect(totals()).toEqual(totals());
+  });
+
+  test("invalid rolls throw and aren't added to the history", () => {
     const roller = new Roller();
 
-    expect(() => roller.roll("4d6")).toThrow(NotImplementedError);
-    expect(() => roll("4d6")).toThrow(NotImplementedError);
-    expect(() => new Roll("4d6")).toThrow(NotImplementedError);
+    expect(() => roller.roll("sqrt(-4)")).toThrow(errors.EvaluationError);
     expect(roller.history).toHaveLength(0);
   });
 
@@ -165,8 +189,10 @@ describe("Roll", () => {
   });
 
   test("fromJSON() does not roll", () => {
-    // the default (stub) evaluator would throw if it was called
-    const result = Roll.fromJSON(rollData(5));
+    const { settings, evaluate } = fakeSettings();
+    const result = Roll.fromJSON(rollData(5), settings);
+
+    expect(evaluate).not.toHaveBeenCalled();
 
     expect(result.notation).toBe("1d6");
     expect(result.total).toBe(5);
@@ -205,14 +231,22 @@ describe("Roll", () => {
 
   test("the first description is found", () => {
     const description = { text: "fire", style: "block" } as const;
-    const node = createPool(createNumber(4), d6, [], description);
-    const result = Roll.fromJSON({
-      ...rollData(1),
-      notation: "4d6 [fire]",
-      result: { ...number(1), node } as unknown as NumberResult,
-    });
+    const result = Roll.import(new Roll("2+4d6 [fire]").export());
 
     expect(result.description).toEqual(description);
+    expect(new Roll("4d6").description).toBeUndefined();
+  });
+
+  test("an imported roll re-rolls its expression, with the settings given", () => {
+    const settings = new RollSettings({
+      engine: engines.MersenneTwister19937.seed(5),
+    });
+    const imported = Roll.import(new Roll("4d6kh3").export(), settings);
+    const rerolled = imported.reroll();
+
+    expect(rerolled.expression).toEqual(imported.expression);
+    expect(rerolled.notation).toBe("4d6kh3");
+    expect(rerolled.result).not.toBe(imported.result);
   });
 });
 

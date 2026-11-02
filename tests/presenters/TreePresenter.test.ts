@@ -1,5 +1,4 @@
 import { createDie, createNumber } from "../../src/ast/factory.js";
-import { NotImplementedError } from "../../src/errors/NotImplementedError.js";
 import {
   DEFAULT_FLAG_SYMBOLS,
   TextPresenter,
@@ -196,10 +195,8 @@ describe("TextPresenter", () => {
     expect(new TextPresenter({ separator: "\n" }).separator).toBe("\n");
   });
 
-  test("the hooks are stubs, so toString() is not implemented yet", () => {
-    expect(() => defaultTextPresenter.present(number(1))).toThrow(
-      NotImplementedError,
-    );
-    expect(() => String(roll(number(1)))).toThrow(NotImplementedError);
+  test("toString() uses the default TextPresenter", () => {
+    expect(defaultTextPresenter.present(number(1))).toBe("1");
+    expect(String(roll(sum))).toBe("2d6+2: [3, 4]+2 = 9");
   });
 });

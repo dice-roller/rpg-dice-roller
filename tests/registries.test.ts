@@ -163,14 +163,24 @@ describe("ModifierRegistry", () => {
     expect(registry.has("keep")).toBe(true);
   });
 
+  test.each<[ModifierName, string | undefined]>([
+    ["keep", "flatten"],
+    ["drop", "flatten"],
+    ["sort", "each-pool"],
+    ["target", undefined],
+    ["explode", undefined],
+  ])("%s treats group dice as %p", (name, groupHandling) => {
+    expect(registry.getOrThrow(name).groupHandling).toBe(groupHandling);
+  });
+
   test.each(
     registry.handlers.map((handler) => [handler.name, handler] as const),
-  )("%s is a stub", (_, handler) => {
+  )("%s is implemented", (_, handler) => {
     expect(() =>
       handler.apply([], {
         modifier: createKeep("h", 1),
         ctx: createRollContext(),
       }),
-    ).toThrow(NotImplementedError);
+    ).not.toThrow(NotImplementedError);
   });
 });
