@@ -26,16 +26,23 @@ export {
 };
 
 /** The built-in handlers, in execution order. */
-export const builtInModifierHandlers: readonly ModifierHandler[] = [
-  minHandler,
-  maxHandler,
-  explodeHandler,
-  reRollHandler,
-  uniqueHandler,
-  keepHandler,
-  dropHandler,
-  targetHandler,
-  criticalSuccessHandler,
-  criticalFailureHandler,
-  sortHandler,
-];
+export const builtInModifierHandlers: readonly ModifierHandler[] =
+  Object.freeze(
+    [
+      minHandler,
+      maxHandler,
+      explodeHandler,
+      reRollHandler,
+      uniqueHandler,
+      keepHandler,
+      dropHandler,
+      targetHandler,
+      criticalSuccessHandler,
+      criticalFailureHandler,
+      sortHandler,
+    ].map((handler) => {
+      Object.freeze(handler.appliesTo);
+
+      return Object.freeze(handler);
+    }),
+  );

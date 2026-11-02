@@ -87,6 +87,7 @@ export class Roller<T = string> {
   /** Exports the history. */
   export(format: "object"): EncodedHistoryData;
   export(format?: "json" | "base64"): string;
+  export(format: ExportFormat): EncodedHistoryData | string;
   export(format: ExportFormat = "json"): EncodedHistoryData | string {
     return encode(toHistoryData(this.history), format);
   }

@@ -19,11 +19,11 @@ import { Roll } from "./Roll.js";
 import type { RollOptions, RollSettings } from "./RollSettings.js";
 
 /** Shorthand for `new Roll(input, options)`: rolls notation (or an AST) once, without a history. */
-export function roll(
+export function roll<T = string>(
   input: string | ExpressionNode,
-  options?: RollOptions | RollSettings,
-): Roll {
-  return new Roll(input, options);
+  options?: RollOptions<T> | RollSettings<T>,
+): Roll<T> {
+  return new Roll<T>(input, options);
 }
 
 // the main classes

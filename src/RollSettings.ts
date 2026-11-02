@@ -2,8 +2,8 @@ import type { ExpressionNode } from "./ast/nodes.js";
 import { DieRegistry } from "./dice/DieRegistry.js";
 import { Evaluator } from "./evaluator/Evaluator.js";
 import {
-  DEFAULT_ROLL_LIMITS,
   createRollContext,
+  resolveRollLimits,
 } from "./evaluator/RollContext.js";
 import type { RollLimits, RollMode } from "./evaluator/RollContext.js";
 import { ModifierRegistry } from "./modifiers/ModifierRegistry.js";
@@ -50,10 +50,10 @@ export class RollSettings<T = string> {
   readonly evaluator: Evaluator;
 
   constructor(options: RollOptions<T> = {}) {
+    this.limits = Object.freeze(resolveRollLimits(options.limits));
     this.generator = new NumberGenerator(options.engine);
     this.dice = options.dice ?? new DieRegistry();
     this.modifiers = options.modifiers ?? new ModifierRegistry();
-    this.limits = Object.freeze({ ...DEFAULT_ROLL_LIMITS, ...options.limits });
     // without a presenter, T is the default `string`
     this.presenter =
       options.presenter ?? (defaultTextPresenter as unknown as Presenter<T>);
@@ -64,7 +64,7 @@ export class RollSettings<T = string> {
     });
   }
 
-  /** Returns the settings as they are, or resolves the options (undefined: the shared defaults). */
+  /** Returns settings as they are, or creates settings from options (undefined: fresh defaults). */
   static from<T = string>(
     options?: RollOptions<T> | RollSettings<T>,
   ): RollSettings<T> {
@@ -72,9 +72,7 @@ export class RollSettings<T = string> {
       return options;
     }
 
-    return options
-      ? new RollSettings(options)
-      : (defaultSettings() as unknown as RollSettings<T>);
+    return new RollSettings(options);
   }
 
   /** Parses notation into the AST, without rolling. */
@@ -96,15 +94,4 @@ export class RollSettings<T = string> {
       }),
     );
   }
-}
-
-let defaults: RollSettings | undefined;
-
-/**
- * The settings of rolls created without options.
- *
- * Created on first use. Kept private, so nobody can register dice or modifiers on them globally.
- */
-function defaultSettings(): RollSettings {
-  return (defaults ??= new RollSettings());
 }

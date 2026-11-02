@@ -83,6 +83,7 @@ export class Roll<T = string> {
    * validating: its result and totals are used, and `reroll()` rolls its expression. Use
    * `Roll.import()` / `Roll.fromJSON()` for exported data, which validate it.
    *
+   * @param input the notation or expression to roll
    * @param options how to roll; `RollSettings` are used as they are, so they can be shared
    * @throws {ValidationError | NotationError} the notation is invalid
    */
@@ -200,6 +201,7 @@ export class Roll<T = string> {
 
   export(format: "object"): EncodedRollData;
   export(format?: "json" | "base64"): string;
+  export(format: ExportFormat): EncodedRollData | string;
   export(format: ExportFormat = "json"): EncodedRollData | string {
     return encode(toRollData(this), format);
   }

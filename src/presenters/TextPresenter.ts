@@ -131,4 +131,4 @@ export class TextPresenter extends TreePresenter<string> {
 }
 
 /** The shared instance used by every `toString()`. */
-export const defaultTextPresenter = new TextPresenter();
+export const defaultTextPresenter = Object.freeze(new TextPresenter());

@@ -13,6 +13,16 @@ import { evaluate, evaluatePool, parser, rollsOf } from "./helpers.js";
 /** Notation, the generator's values (initial rolls first), the expected rolls, and the total. */
 type Example = [string, number[], string[], number];
 
+const repeatableTestDie = {
+  notation: "10",
+  min: 1,
+  max: 10,
+  average: 5.5,
+  faceCount: 10,
+  roll: () => 1,
+  source: { min: 1, max: 10 },
+};
+
 describe("explode", () => {
   test.each<Example>([
     // the documented examples
@@ -113,6 +123,24 @@ describe("explode", () => {
     ).toHaveLength(6);
   });
 
+  test.each([1, 3])("rolls no more than %i extra dice", (maxIterations) => {
+    const rollDie = jest.fn(() => createDieResult(10));
+    const result = explodeHandler.apply([createDieResult(10)], {
+      modifier: {
+        type: "modifier",
+        name: "explode",
+        compound: false,
+        penetrate: false,
+      },
+      ctx: createRollContext({ limits: { maxIterations } }),
+      die: repeatableTestDie,
+      rollDie,
+    });
+
+    expect(rollDie).toHaveBeenCalledTimes(maxIterations);
+    expect(result).toHaveLength(maxIterations + 1);
+  });
+
   test.each([
     ["max", 6006],
     ["min", 1],
@@ -167,6 +195,19 @@ describe("re-roll", () => {
     expect(rollsOf(result)).toEqual(["1r", "1r"]);
   });
 
+  test.each([1, 3])("re-rolls no more than %i times", (maxIterations) => {
+    const rollDie = jest.fn(() => createDieResult(1));
+    const result = reRollHandler.apply([createDieResult(1)], {
+      modifier: { type: "modifier", name: "re-roll", once: false },
+      ctx: createRollContext({ limits: { maxIterations } }),
+      die: repeatableTestDie,
+      rollDie,
+    });
+
+    expect(rollDie).toHaveBeenCalledTimes(maxIterations);
+    expect(result).toHaveLength(1);
+  });
+
   test("in min mode the re-rolls stop at the iteration limit", () => {
     expect(evaluate("d6r", { mode: "min" }).value).toBe(1);
   });
@@ -207,6 +248,25 @@ describe("unique", () => {
     ]);
   });
 
+  test.each([1, 3])(
+    "re-rolls duplicates no more than %i times",
+    (maxIterations) => {
+      const rollDie = jest.fn(() => createDieResult(1));
+      const result = uniqueHandler.apply(
+        [createDieResult(1), createDieResult(1)],
+        {
+          modifier: { type: "modifier", name: "unique", once: false },
+          ctx: createRollContext({ limits: { maxIterations } }),
+          die: repeatableTestDie,
+          rollDie,
+        },
+      );
+
+      expect(rollDie).toHaveBeenCalledTimes(maxIterations);
+      expect(result).toHaveLength(2);
+    },
+  );
+
   test("impossible uniqueness stops at 1000 re-rolls per roll, excluding the first", () => {
     const generator = jest.fn(() => 1);
     const ctx = createRollContext();
@@ -239,6 +299,15 @@ describe("unique", () => {
 });
 
 describe("repeating handlers", () => {
+  test("a valid quantity limit still constrains the number of dice", () => {
+    expect(evaluatePool("1d6", { limits: { maxQty: 1 } }).rolls).toHaveLength(
+      1,
+    );
+    expect(() => evaluatePool("2d6", { limits: { maxQty: 1 } })).toThrow(
+      EvaluationError,
+    );
+  });
+
   test.each([
     [
       "explode",

@@ -1,6 +1,7 @@
 import { createDie, createNumber, createPool } from "../src/ast/factory.js";
 import { NotationError } from "../src/errors/NotationError.js";
 import { ImportError } from "../src/errors/ImportError.js";
+import { ValidationError } from "../src/errors/ValidationError.js";
 import type { RollMode } from "../src/evaluator/RollContext.js";
 import {
   Roll,
@@ -44,9 +45,22 @@ describe("Roller", () => {
     const roller = new Roller({ limits: { maxQty: 10 } });
 
     expect(roller.parse("4d6")).toEqual(createPool(createNumber(4), d6));
+    expect(roller.parse("10d6")).toEqual(createPool(createNumber(10), d6));
     expect(() => roller.parse("11d6")).toThrow(NotationError);
     expect(roller.limits).toEqual({ maxQty: 10, maxIterations: 1000 });
   });
+
+  test.each(["maxQty", "maxIterations"] as const)(
+    "rejects an invalid %s before rolling",
+    (limit) => {
+      const next = jest.fn(() => 0);
+      const options = { engine: { next }, limits: { [limit]: 0 } };
+
+      expect(() => new Roll("1d6", options)).toThrow(ValidationError);
+      expect(() => new Roller(options)).toThrow(ValidationError);
+      expect(next).not.toHaveBeenCalled();
+    },
+  );
 
   test("has its own generator, using the engine", () => {
     const engine = engines.MersenneTwister19937.seed(42);
@@ -130,13 +144,34 @@ describe("Roller", () => {
 });
 
 describe("RollSettings", () => {
-  test("from() keeps settings, resolves options, and shares the defaults", () => {
+  test("from() keeps settings, resolves options, and creates fresh defaults", () => {
     const settings = new RollSettings();
 
     expect(RollSettings.from(settings)).toBe(settings);
     expect(RollSettings.from({ limits: { maxQty: 3 } }).limits.maxQty).toBe(3);
-    expect(RollSettings.from()).toBe(RollSettings.from());
+    expect(RollSettings.from()).not.toBe(RollSettings.from());
+    expect(RollSettings.from(undefined)).not.toBe(RollSettings.from());
     expect(RollSettings.from({})).not.toBe(RollSettings.from());
+    expect(RollSettings.from({})).not.toBe(RollSettings.from({}));
+    expect(() => RollSettings.from({ limits: { maxQty: 0 } })).toThrow(
+      ValidationError,
+    );
+  });
+
+  test("fresh default settings have isolated registries", () => {
+    const first = RollSettings.from();
+    const second = RollSettings.from();
+
+    expect(first.dice).not.toBe(second.dice);
+    expect(first.modifiers).not.toBe(second.modifiers);
+
+    first.dice.remove("standard");
+    first.modifiers.remove("keep");
+
+    const later = RollSettings.from();
+
+    expect(later.dice.has("standard")).toBe(true);
+    expect(later.modifiers.has("keep")).toBe(true);
   });
 
   test("the presenter defaults to the default TextPresenter", () => {
@@ -145,6 +180,14 @@ describe("RollSettings", () => {
     expect(new RollSettings().presenter).toBe(presenters.defaultTextPresenter);
     expect(RollSettings.from().presenter).toBe(presenters.defaultTextPresenter);
     expect(new RollSettings({ presenter }).presenter).toBe(presenter);
+  });
+
+  test("the default presenter cannot be mutated", () => {
+    const presenter = presenters.defaultTextPresenter;
+
+    expect(Object.isFrozen(presenter)).toBe(true);
+    expect(Reflect.set(presenter, "separator", "| ")).toBe(false);
+    expect(presenter.separator).toBe("; ");
   });
 });
 

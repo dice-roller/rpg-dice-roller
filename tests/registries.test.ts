@@ -15,7 +15,10 @@ import { NotImplementedError } from "../src/errors/NotImplementedError.js";
 import { ValidationError } from "../src/errors/ValidationError.js";
 import { createRollContext } from "../src/evaluator/RollContext.js";
 import { ModifierRegistry } from "../src/modifiers/ModifierRegistry.js";
-import { keepHandler } from "../src/modifiers/handlers/index.js";
+import {
+  builtInModifierHandlers,
+  keepHandler,
+} from "../src/modifiers/handlers/index.js";
 import type { ModifierHandler } from "../src/modifiers/types.js";
 
 describe("DieRegistry", () => {
@@ -78,6 +81,24 @@ describe("DieRegistry", () => {
     expect(registry.create("standard", 6)).toEqual(standardDie(6));
   });
 
+  test("registry changes do not affect later built-in factories", () => {
+    const loaded = { min: 1, max: 6, roll: () => 6 };
+    const changed = new DieRegistry();
+
+    changed.register("standard", () => loaded);
+    changed.remove("percentile");
+    changed.register("custom", () => percentileDie);
+
+    const later = new DieRegistry();
+
+    expect(changed.create("standard", 6)).toBe(loaded);
+    expect(changed.has("percentile")).toBe(false);
+    expect(changed.has("custom")).toBe(true);
+    expect(later.create("standard", 6)).toEqual(standardDie(6));
+    expect(later.has("percentile")).toBe(true);
+    expect(later.has("custom")).toBe(false);
+  });
+
   test.each([
     ["an empty name", "", () => percentileDie],
     ["a factory that isn't a function", "x", percentileDie],
@@ -114,6 +135,22 @@ describe("ModifierRegistry", () => {
     ]);
   });
 
+  test("built-in handlers and their target arrays are frozen", () => {
+    expect(Object.isFrozen(builtInModifierHandlers)).toBe(true);
+
+    for (const handler of builtInModifierHandlers) {
+      expect(Object.isFrozen(handler)).toBe(true);
+      expect(Object.isFrozen(handler.appliesTo)).toBe(true);
+    }
+
+    const min = builtInModifierHandlers[0];
+
+    expect(Reflect.set(min, "order", 99)).toBe(false);
+    expect(Reflect.set(min.appliesTo, "0", "group")).toBe(false);
+    expect(min.order).toBe(1);
+    expect(min.appliesTo).toEqual(["pool"]);
+  });
+
   test.each<[ModifierName, string[]]>([
     ["keep", ["pool", "group"]],
     ["drop", ["pool", "group"]],
@@ -145,6 +182,22 @@ describe("ModifierRegistry", () => {
     expect(replaced.get("keep")).toBe(custom);
   });
 
+  test("custom handlers and their target arrays remain mutable", () => {
+    const custom: ModifierHandler = {
+      ...keepHandler,
+      appliesTo: [...keepHandler.appliesTo],
+      apply: (items) => [...items],
+    };
+    const registry = new ModifierRegistry().register(custom);
+
+    expect(registry.get("keep")).toBe(custom);
+    expect(Object.isFrozen(custom)).toBe(false);
+    expect(Object.isFrozen(custom.appliesTo)).toBe(false);
+    expect(Reflect.set(custom, "order", 20)).toBe(true);
+    expect(Reflect.set(custom.appliesTo, "0", "group")).toBe(true);
+    expect(custom.appliesTo[0]).toBe("group");
+  });
+
   test("an empty registry has no handlers", () => {
     const empty = ModifierRegistry.empty();
 
@@ -161,6 +214,24 @@ describe("ModifierRegistry", () => {
     expect(() => custom.getOrThrow("keep")).toThrow(EvaluationError);
     expect(custom.remove("keep")).toBe(false);
     expect(registry.has("keep")).toBe(true);
+  });
+
+  test("registry changes do not affect later built-in handlers", () => {
+    const custom: ModifierHandler = {
+      ...keepHandler,
+      appliesTo: [...keepHandler.appliesTo],
+      apply: (items) => [...items],
+    };
+    const changed = new ModifierRegistry().register(custom);
+
+    changed.remove("min");
+
+    const later = new ModifierRegistry();
+
+    expect(changed.get("keep")).toBe(custom);
+    expect(changed.has("min")).toBe(false);
+    expect(later.get("keep")).toBe(keepHandler);
+    expect(later.has("min")).toBe(true);
   });
 
   test.each<[ModifierName, string | undefined]>([
