@@ -1,4 +1,11 @@
-import { die, pool } from "../../src/ast/builders.js";
+import {
+  binary as astBinary,
+  die,
+  keep,
+  negate,
+  paren,
+  pool,
+} from "../../src/ast/builders.js";
 import type { ExpressionNode } from "../../src/ast/nodes.js";
 import {
   TextPresenter,
@@ -183,6 +190,85 @@ describe("result nodes", () => {
         roll.result.type === "binary" ? roll.result.left : roll.result,
       ),
     ).toBe("[3, 4]");
+  });
+});
+
+describe("builder expression precedence", () => {
+  test.each<[string, ExpressionNode, number[], string, number]>([
+    [
+      "nested addition inside multiplication",
+      astBinary("*", astBinary("+", 2, 3), 4),
+      [],
+      "(2+3)*4",
+      20,
+    ],
+    [
+      "negating a compound expression",
+      negate(astBinary("+", 2, 3)),
+      [],
+      "-(2+3)",
+      -5,
+    ],
+    [
+      "subtraction on the right",
+      astBinary("-", 8, astBinary("-", 3, 1)),
+      [],
+      "8-(3-1)",
+      6,
+    ],
+    [
+      "division on the right",
+      astBinary("/", 16, astBinary("/", 4, 2)),
+      [],
+      "16/(4/2)",
+      8,
+    ],
+    [
+      "modulo on the right",
+      astBinary("%", 17, astBinary("%", 5, 3)),
+      [],
+      "17%(5%3)",
+      1,
+    ],
+    [
+      "left-associated exponentiation",
+      astBinary("^", astBinary("^", 2, 3), 2),
+      [],
+      "(2^3)^2",
+      64,
+    ],
+    [
+      "right-associated exponentiation",
+      astBinary("^", 2, astBinary("^", 3, 2)),
+      [],
+      "2^3^2",
+      512,
+    ],
+    ["a negative exponent", astBinary("^", 2, -1), [], "2^-1", 0.5],
+    [
+      "dice and modifier flags inside a grouped expression",
+      astBinary(
+        "*",
+        astBinary("+", pool(2, 6, { modifiers: [keep("h")] }), 2),
+        3,
+      ),
+      [6, 2],
+      "(2d6kh1+2)*3",
+      24,
+    ],
+    [
+      "explicit parentheses",
+      astBinary("*", paren(astBinary("+", 2, 3)), astBinary("+", 4, 5)),
+      [],
+      "(2+3)*(4+5)",
+      45,
+    ],
+  ])("%s", (_description, expression, rolls, notation, total) => {
+    const roll = rollWith(expression, rolls);
+    const expectedResult = notation.replaceAll("2d6kh1", "[6, 2d]");
+
+    expect(roll.toString()).toBe(`${notation}: ${expectedResult} = ${total}`);
+    expect(defaultTextPresenter.present(roll.result)).toBe(expectedResult);
   });
 });
 

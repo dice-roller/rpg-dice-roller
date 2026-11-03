@@ -1,7 +1,13 @@
 import type { ResultFlag } from "../results/flags.js";
+import {
+  minPrecedenceForBinaryOperand,
+  minPrecedenceForUnaryOperand,
+  needsParentheses,
+} from "../ast/precedence.js";
 import type {
   BinaryResult,
   DieResult,
+  ExpressionResult,
   FunctionResult,
   GroupMemberResult,
   GroupResult,
@@ -111,12 +117,28 @@ export class TextPresenter extends TreePresenter<string> {
 
   /** `[4, 2]+3` */
   protected binary(result: BinaryResult): string {
-    return `${this.visit(result.left)}${result.node.op}${this.visit(result.right)}`;
+    const operator = result.node.op;
+    const left = this.operand(
+      result.left,
+      minPrecedenceForBinaryOperand(operator, "left"),
+    );
+    const right = this.operand(
+      result.right,
+      minPrecedenceForBinaryOperand(operator, "right"),
+    );
+
+    return `${left}${operator}${right}`;
   }
 
   /** `-5` */
   protected unary(result: UnaryResult): string {
-    return `${result.node.op}${this.visit(result.operand)}`;
+    return `${result.node.op}${this.operand(result.operand, minPrecedenceForUnaryOperand())}`;
+  }
+
+  protected operand(result: ExpressionResult, minPrecedence: number): string {
+    const text = this.visit(result);
+
+    return needsParentheses(result.node, minPrecedence) ? `(${text})` : text;
   }
 
   /** `([4, 2]*2)` */

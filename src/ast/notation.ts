@@ -6,7 +6,6 @@
  * added where the tree needs them, so nodes from the builders are written correctly too.
  */
 import type {
-  BinaryOperator,
   ComparePoint,
   DescriptionNode,
   DieNode,
@@ -14,22 +13,11 @@ import type {
   ModifierNode,
   PoolNode,
 } from "./nodes.js";
-
-/** Precedence levels, matching the grammar (higher binds tighter). */
-const ADDITIVE = 1;
-const MULTIPLICATIVE = 2;
-const UNARY = 3;
-const POWER = 4;
-const PRIMARY = 5;
-
-const operatorPrecedence: Record<BinaryOperator, number> = {
-  "+": ADDITIVE,
-  "-": ADDITIVE,
-  "*": MULTIPLICATIVE,
-  "/": MULTIPLICATIVE,
-  "%": MULTIPLICATIVE,
-  "^": POWER,
-};
+import {
+  minPrecedenceForBinaryOperand,
+  minPrecedenceForUnaryOperand,
+  needsParentheses,
+} from "./precedence.js";
 
 /** Converts the node to notation, e.g. `{ type: "pool", ... }` -> `4d6kh3`. */
 export function nodeToNotation(node: ExpressionNode): string {
@@ -76,15 +64,19 @@ function write(node: ExpressionNode): string {
     case "group":
       return `{${node.expressions.map(write).join(", ")}}${modifiers(node.modifiers)}${description(node.description)}`;
     case "binary": {
-      const precedence = operatorPrecedence[node.op];
-      // `^` is right-associative, and its exponent may be a unary minus (`2^-1`)
-      const leftMin = node.op === "^" ? PRIMARY : precedence;
-      const rightMin = node.op === "^" ? UNARY : precedence + 1;
+      const left = operand(
+        node.left,
+        minPrecedenceForBinaryOperand(node.op, "left"),
+      );
+      const right = operand(
+        node.right,
+        minPrecedenceForBinaryOperand(node.op, "right"),
+      );
 
-      return `${operand(node.left, leftMin)}${node.op}${operand(node.right, rightMin)}`;
+      return `${left}${node.op}${right}`;
     }
     case "unary":
-      return `-${operand(node.operand, POWER)}`;
+      return `-${operand(node.operand, minPrecedenceForUnaryOperand())}`;
     case "paren":
       return `(${write(node.expression)})`;
     case "function":
@@ -131,22 +123,11 @@ function writeDie(die: DieNode): string {
   return `${die.name}(${die.args.map(write).join(", ")})`;
 }
 
-function precedenceOf(node: ExpressionNode): number {
-  switch (node.type) {
-    case "binary":
-      return operatorPrecedence[node.op];
-    case "unary":
-      return UNARY;
-    case "number":
-      return node.value < 0 ? UNARY : PRIMARY;
-    default:
-      return PRIMARY;
-  }
-}
-
 /** Writes the node, wrapped in parentheses if it binds looser than `minPrecedence`. */
 function operand(node: ExpressionNode, minPrecedence: number): string {
-  return precedenceOf(node) < minPrecedence ? `(${write(node)})` : write(node);
+  const notation = write(node);
+
+  return needsParentheses(node, minPrecedence) ? `(${notation})` : notation;
 }
 
 /** Writes a qty / sides: a literal number, or an expression in parentheses. */
