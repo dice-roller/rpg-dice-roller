@@ -1,15 +1,17 @@
 /**
  * Public builders for creating rolls in code, without notation.
  *
- * They produce exactly the same nodes as the parser, e.g.
+ * For supported notation they can produce the same nodes as the parser, e.g.
  * `pool(4, 6, { modifiers: [keep("h", 3)] })` equals `parse("4d6kh3")`.
  *
  * Numbers are accepted anywhere an expression is expected, and `pool()` accepts a number of sides
  * (`standard`), an expression for computed sides, or a `DieNode` for any registered die
  * (`die("fib")`, `die("range", -2, 3)`).
  *
- * Builders validate their inputs at runtime (for JS users) and throw a `ValidationError` for
- * anything the parser couldn't produce, e.g. `keep("h", 0)` or `compare(">=", NaN)`.
+ * Builders validate direct inputs at runtime, e.g. `keep("h", 0)` and `compare(">=", NaN)` throw
+ * `ValidationError`. Supplied nodes are checked by discriminator, not recursively validated or
+ * copied. Quantity, die arguments, function arity and registry availability are checked when
+ * evaluated where applicable; constructing a node does not guarantee it can be rolled or parsed.
  */
 import { ValidationError } from "../errors/ValidationError.js";
 import {
@@ -82,8 +84,9 @@ export type DieInput = ExpressionInput | DieNode;
 
 /** Options shared by pools and groups. */
 export interface ModifiableOptions {
+  /** Repeated names use the last node at the first position; keep and drop are keyed by end. */
   modifiers?: readonly ModifierNode[];
-  /** A string is stored as an `inline` description. */
+  /** Text is trimmed and must be nonempty; a string is stored as an `inline` description. */
   description?: string | DescriptionNode;
 }
 
@@ -97,8 +100,9 @@ export function num(value: number): NumberNode {
 }
 
 /**
- * A reference to a registered die factory, e.g. `die("percentile")` for `d%`, or
- * `die("range", -2, 3)`.
+ * A reference to a die factory, e.g. `die("percentile")` for `d%`, or `die("range", -2, 3)`.
+ * Register custom names in the die registry used by the evaluator before rolling. Registration is
+ * not checked here; custom dice and some built-ins have display-only notation.
  */
 export function die(name: string, ...args: ExpressionInput[]): DieNode {
   if (typeof name !== "string" || name === "") {
@@ -165,7 +169,7 @@ export function paren(expressionInput: ExpressionInput): ParenNode {
   return createParen(expression(expressionInput));
 }
 
-/** A maths function call, e.g. `fn("floor", binary("/", pool(2, 6), 2))`. */
+/** A maths function call, e.g. `fn("floor", binary("/", pool(2, 6), 2))`. Arity is checked at evaluation. */
 export function fn(
   name: MathFunctionName,
   ...args: ExpressionInput[]
@@ -195,6 +199,7 @@ export function compare(
  * Modifiers
  * --------------------------------------------------------------------------------------------- */
 
+/** Explode matching rolls; compound and penetrate default to false, and the handler supplies the default compare point. */
 export function explode(
   options: {
     compound?: boolean;
@@ -209,6 +214,7 @@ export function explode(
   );
 }
 
+/** Count successes and optional failures; the built-in handler gives successes precedence on overlap. */
 export function target(
   success: ComparePoint,
   failure?: ComparePoint,
@@ -216,14 +222,17 @@ export function target(
   return createTarget(comparePoint(success), optionalComparePoint(failure));
 }
 
+/** Drop `qty` highest (`h`) or lowest (`l`) items; quantity defaults to 1. */
 export function drop(end: PoolEnd, qty = 1): DropNode {
   return createDrop(poolEnd(end), positiveInteger(qty));
 }
 
+/** Keep `qty` highest (`h`) or lowest (`l`) items; quantity defaults to 1. */
 export function keep(end: PoolEnd, qty = 1): KeepNode {
   return createKeep(poolEnd(end), positiveInteger(qty));
 }
 
+/** Re-roll matching dice; `once` defaults to false and an omitted compare point uses the handler default. */
 export function reRoll(
   options: {
     once?: boolean;
@@ -236,6 +245,7 @@ export function reRoll(
   );
 }
 
+/** Re-roll duplicate dice with the built-in handler, optionally restricted by a compare point; `once` defaults to false. */
 export function unique(
   options: {
     once?: boolean;
@@ -248,26 +258,31 @@ export function unique(
   );
 }
 
+/** Flag critical successes using the supplied compare point or the handler default. */
 export function criticalSuccess(
   comparePoint?: ComparePoint,
 ): CriticalSuccessNode {
   return createCriticalSuccess(optionalComparePoint(comparePoint));
 }
 
+/** Flag critical failures using the supplied compare point or the handler default. */
 export function criticalFailure(
   comparePoint?: ComparePoint,
 ): CriticalFailureNode {
   return createCriticalFailure(optionalComparePoint(comparePoint));
 }
 
+/** Sort ascending (`a`, the default) or descending (`d`). */
 export function sort(direction: SortDirection = "a"): SortNode {
   return createSort(oneOf(direction, ["a", "d"] as const, "sort direction"));
 }
 
+/** Cap die values at `value` with the built-in handler. */
 export function max(value: number): MaxNode {
   return createMax(finite(value, "A max value"));
 }
 
+/** Raise die values to at least `value` with the built-in handler. */
 export function min(value: number): MinNode {
   return createMin(finite(value, "A min value"));
 }

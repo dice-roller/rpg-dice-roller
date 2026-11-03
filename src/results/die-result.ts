@@ -1,12 +1,13 @@
 /**
  * Immutable helpers for scored items (die results and group members).
  *
- * Modifier handlers use these instead of mutating results: each returns a new object.
+ * Modifier handlers can use these instead of mutating results: each returns a shallow copy,
+ * preserving other properties and nested references. They do not add flags automatically.
  */
 import type { ResultFlag } from "./flags.js";
 import type { DieResult, ScoredItem } from "./types.js";
 
-/** A fresh die result: `value`, `initialValue` and `calculationValue` all equal `value`. */
+/** A fresh included die result with no flags: `value`, `initialValue` and `calculationValue` all equal `value`. */
 export function createDieResult(value: number): DieResult {
   return {
     type: "die",
@@ -18,7 +19,7 @@ export function createDieResult(value: number): DieResult {
   };
 }
 
-/** Returns a copy with the flags added (each flag at most once). */
+/** Returns a copy with flags deduplicated in first-occurrence order; does not change scoring. */
 export function withFlags<T extends ScoredItem>(
   item: T,
   ...flags: ResultFlag[]
@@ -26,7 +27,7 @@ export function withFlags<T extends ScoredItem>(
   return { ...item, flags: [...new Set([...item.flags, ...flags])] };
 }
 
-/** Returns a copy with a new `value` (and `calculationValue`). */
+/** Returns a copy with a new `value` and `calculationValue`; preserves a die's `initialValue`. */
 export function withValue<T extends ScoredItem>(item: T, value: number): T {
   return { ...item, value, calculationValue: value };
 }
@@ -39,7 +40,7 @@ export function withCalculationValue<T extends ScoredItem>(
   return { ...item, calculationValue };
 }
 
-/** Returns a copy that is excluded from the total (`useInTotal: false`). */
+/** Returns a copy excluded from the total (`useInTotal: false`); does not add a `drop` flag. */
 export function excludeFromTotal<T extends ScoredItem>(item: T): T {
   return { ...item, useInTotal: false };
 }

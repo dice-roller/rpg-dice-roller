@@ -102,9 +102,7 @@ describe("public API documentation", () => {
     const pages = markdownPages("");
     expect(pages).toContain("index.md");
     for (const page of pages) {
-      for (const match of read(page).matchAll(
-        /]\(([^)]+\.md)(?:#[^)]*)?\)/g,
-      )) {
+      for (const match of read(page).matchAll(/]\(([^)]+\.md)(?:#[^)]*)?\)/g)) {
         const target = decodeURI(match[1]);
         if (target.startsWith("../guide/")) continue;
         expect(existsSync(resolve(dirname(join(output, page)), target))).toBe(

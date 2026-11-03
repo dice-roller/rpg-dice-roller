@@ -6,7 +6,16 @@ import type { ModifierHandler, ModifierHandlerOf } from "./types.js";
 /**
  * Modifier handlers by name.
  *
- * Replace a built-in handler by registering another with the same name.
+ * Replace a built-in handler by registering another with the same name, then pass the registry
+ * as the `modifiers` option to a `Roller` or `Roll`. Names are the existing `ModifierName` AST
+ * names; registering a handler does not add notation to the parser.
+ *
+ * @example
+ * const modifiers = new ModifierRegistry().register({
+ *   ...keepHandler,
+ *   apply: (items) => [...items],
+ * });
+ * const roller = new Roller({ modifiers });
  */
 export class ModifierRegistry {
   readonly #handlers = new Map<ModifierName, ModifierHandler>();
@@ -34,6 +43,7 @@ export class ModifierRegistry {
     return this;
   }
 
+  /** Returns the handler for the name, or `undefined` if none is registered. */
   get<K extends ModifierName>(name: K): ModifierHandlerOf<K> | undefined {
     return this.#handlers.get(name) as ModifierHandlerOf<K> | undefined;
   }
@@ -49,6 +59,7 @@ export class ModifierRegistry {
     return handler;
   }
 
+  /** Whether a handler is registered under the name. */
   has(name: ModifierName): boolean {
     return this.#handlers.has(name);
   }
@@ -69,9 +80,11 @@ export class ModifierRegistry {
   }
 
   /**
-   * Sorts modifier nodes into execution order (by their handler's `order`).
+   * Returns a sorted copy of modifier nodes by their handler's `order`. Equal orders retain their
+   * input order. This method does not validate every node: sorting zero or one node does not look
+   * up its handler. Evaluation looks up each handler separately.
    *
-   * @throws {EvaluationError} a modifier has no registered handler
+   * @throws {EvaluationError} a node compared during sorting has no registered handler
    */
   inExecutionOrder<N extends ModifierNode>(modifiers: readonly N[]): N[] {
     return [...modifiers].sort(

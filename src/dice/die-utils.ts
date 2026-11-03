@@ -110,7 +110,7 @@ export function faceCount(die: DieLike): number {
  * The die's own values / functions are used when present, otherwise the helpers above.
  *
  * @throws {ValidationError} the die isn't valid, e.g. it has no faces, `min` is greater than `max`,
- *   or a range die without its own `roll()` has non-integer bounds
+ *   or a range die without its own `roll()` has bounds that aren't safe integers
  */
 export function resolveDie(die: DieLike): ResolvedDie {
   validateDefinition(die);

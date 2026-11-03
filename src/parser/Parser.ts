@@ -4,6 +4,7 @@ import { ValidationError } from "../errors/ValidationError.js";
 import { DEFAULT_ROLL_LIMITS } from "../evaluator/RollContext.js";
 import * as grammar from "./generated/grammar.js";
 
+/** Options for parsing notation. */
 export interface ParserOptions {
   /** The maximum literal quantity of a dice pool (default `999`). */
   maxQty?: number;
@@ -15,15 +16,22 @@ export interface ParserOptions {
  * @see https://dice-roller.github.io/documentation/guide/notation/
  */
 export class Parser {
+  /** Maximum literal pool quantity accepted by the grammar. */
   readonly maxQty: number;
 
+  /** Creates a parser with the supplied literal quantity limit. */
   constructor(options: ParserOptions = {}) {
     this.maxQty = options.maxQty ?? DEFAULT_ROLL_LIMITS.maxQty;
   }
 
   /**
+   * Parses a notation string into an expression tree without rolling any dice.
+   *
+   * Literal pool quantities are checked against `maxQty`; evaluated quantities are checked
+   * separately by the evaluator's roll limits.
+   *
    * @throws {ValidationError} the notation is empty or not a string
-   * @throws {NotationError} the notation is invalid
+   * @throws {NotationError} the notation is invalid, with its source location and syntax error cause
    */
   parse(notation: string): ExpressionNode {
     if (typeof notation !== "string") {

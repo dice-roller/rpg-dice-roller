@@ -4,8 +4,8 @@ import type { RandomEngine } from "./RandomEngine.js";
 /**
  * Generates numbers in a range from a `RandomEngine`.
  *
- * Used by dice and modifier handlers. Each `Roller` has its own generator, so there is no global
- * state.
+ * Used by dice and modifier handlers. Each `Roller` has its own generator, using `nativeMath`
+ * by default. Passing the same stateful engine to multiple rollers shares that engine's state.
  */
 export class NumberGenerator {
   readonly #random: Random;
@@ -19,7 +19,7 @@ export class NumberGenerator {
     return this.#random.integer(min, max);
   }
 
-  /** Returns a real number between `min` and `max` (`max` is excluded unless `inclusive`). */
+  /** Returns a real number between `min` and `max` (`max` is excluded unless `inclusive` is true). */
   real(min: number, max: number, inclusive = false): number {
     return this.#random.real(min, max, inclusive);
   }

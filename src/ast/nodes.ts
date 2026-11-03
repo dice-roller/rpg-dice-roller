@@ -1,8 +1,9 @@
 /**
  * The notation AST.
  *
- * Every node is readonly, JSON-safe plain data with a `type` discriminator. The same shape is
- * produced by the parser, by the builders, and is accepted by `import()`.
+ * Expression, die and modifier nodes are readonly plain data with a `type` discriminator;
+ * compare points and descriptions are embedded data without one. Parser and builder output can
+ * be serialized as JSON and used in roll imports.
  */
 
 /* ------------------------------------------------------------------------------------------------
@@ -34,7 +35,7 @@ export interface PoolNode {
   /** The number of dice; a `NumberNode` for literal quantities. */
   readonly qty: ExpressionNode;
   readonly die: DieNode;
-  /** In notation order (see `createModifiers()` for de-duplication). */
+  /** In notation order after deduplication; handlers may execute in a different order. */
   readonly modifiers: readonly ModifierNode[];
   readonly description?: DescriptionNode;
 }
@@ -47,14 +48,16 @@ export const BUILT_IN_DIE_NAMES = [
   "range",
   "face",
 ] as const;
+/** A built-in die factory name; registries can also contain custom names. */
 export type BuiltInDieName = (typeof BUILT_IN_DIE_NAMES)[number];
 
 /**
  * The die of a pool: a reference to a die factory in the `DieRegistry`, and its arguments.
  *
- * The evaluator evaluates the arguments, then calls `registry.get(name)(...args)`, so a roller that
- * registers its own `standard` changes what `d6` rolls. The arguments are expressions, so computed
- * sides (`d(2+3)`) and, later, inline rolls work the same way as literal ones.
+ * The evaluator evaluates the argument expressions, then calls `registry.create(name, ...args)`.
+ * Registering a replacement for `standard` changes what `d6` rolls in that registry. Computed
+ * sides (`d(2+3)`) are expressions too. Custom factory names can be constructed with `die()`;
+ * their displayed notation is not necessarily parseable.
  *
  * - `d6`: `{ name: "standard", args: [6] }`
  * - `d(2+3)`: `{ name: "standard", args: [(2+3)] }`
@@ -78,6 +81,7 @@ export interface GroupNode {
 
 /** The binary maths operators. `**` is parsed as `^`. */
 export const BINARY_OPERATORS = ["+", "-", "*", "/", "%", "^"] as const;
+/** A supported binary operator. */
 export type BinaryOperator = (typeof BINARY_OPERATORS)[number];
 
 /** A binary maths operation, e.g. `2d6 + 3`. */
@@ -119,6 +123,7 @@ export const MATH_FUNCTION_NAMES = [
   "min",
   "trunc",
 ] as const;
+/** A supported maths function name. */
 export type MathFunctionName = (typeof MATH_FUNCTION_NAMES)[number];
 
 /** A maths function call, e.g. `floor(2d6 / 2)`. */
@@ -132,6 +137,7 @@ export interface FunctionNode {
  * Compare points and descriptions
  * --------------------------------------------------------------------------------------------- */
 
+/** Operators accepted by compare points; `!=` and `<>` both mean not equal. */
 export const COMPARE_OPERATORS = [
   "=",
   "!=",
@@ -141,6 +147,7 @@ export const COMPARE_OPERATORS = [
   "<=",
   ">=",
 ] as const;
+/** An operator accepted by a compare point. */
 export type CompareOperator = (typeof COMPARE_OPERATORS)[number];
 
 /** A comparison against a value, e.g. the `>=8` in `8d10>=8`. */
@@ -168,6 +175,7 @@ export interface DescriptionNode {
  * (e.g. explode on the die's max value).
  * --------------------------------------------------------------------------------------------- */
 
+/** A modifier selected by `name`; an omitted compare point uses the registered handler's default. */
 export type ModifierNode =
   | ExplodeNode
   | TargetNode

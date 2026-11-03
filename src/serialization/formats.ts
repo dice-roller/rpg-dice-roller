@@ -6,6 +6,7 @@ import type { ExpressionResult } from "../results/types.js";
  * - `base64`: that JSON string, base64-encoded (UTF-8)
  */
 export const EXPORT_FORMATS = ["object", "json", "base64"] as const;
+/** A supported export format. */
 export type ExportFormat = (typeof EXPORT_FORMATS)[number];
 
 /** The version of the export data, for future migrations. */
@@ -46,6 +47,7 @@ export const NON_FINITE_NUMBERS = {
   "-Infinity": Number.NEGATIVE_INFINITY,
   NaN: Number.NaN,
 } as const;
+/** The tag names used for non-finite numbers. */
 export type NonFiniteNumber = keyof typeof NON_FINITE_NUMBERS;
 
 /**

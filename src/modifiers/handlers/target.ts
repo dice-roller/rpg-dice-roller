@@ -8,7 +8,8 @@ import type { ModifierHandler } from "../types.js";
  *
  * Items matching `success` count as `1` (flag `target-success`), items matching `failure` as `-1`
  * (flag `target-failure`), and the rest as `0` (via `calculationValue`). An item matching both
- * is a success. On a group, it always counts the members by their totals.
+ * is a success. Dropped items are still scored and flagged, but remain excluded from the total.
+ * On a group, it always counts the members by their totals.
  */
 export const targetHandler: ModifierHandler<TargetNode> = {
   name: "target",

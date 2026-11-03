@@ -28,7 +28,10 @@ const builtInFactories: Record<BuiltInDieName, DieFactory> = {
  * `d%` -> `percentile()`, `dF.1` -> `fudge(1)`), so registering a factory with a built-in name
  * changes what that notation rolls, for every roll using this registry.
  *
- * Imports work the same way: the AST stores the name, so nothing needs restoring.
+ * Pass a registry as the `dice` option to a `Roll` or `Roller`. Registering a new name does not
+ * extend the notation grammar: use an AST such as `ast.pool(1, ast.die("fib"))` for custom names.
+ * The AST stores the name and arguments, not the factory; provide the same registration when
+ * re-rolling an imported expression that uses a custom name.
  */
 export class DieRegistry {
   readonly #factories = new Map<string, DieFactory>();
@@ -57,7 +60,7 @@ export class DieRegistry {
   /**
    * Registers a factory, replacing any already registered with the same name.
    *
-   * @throws {ValidationError} the name is empty, or the factory isn't a function
+   * @throws {ValidationError} the name isn't a string or is empty, or the factory isn't a function
    */
   register(name: string, factory: DieFactory): this {
     if (typeof name !== "string" || name === "") {
@@ -78,6 +81,11 @@ export class DieRegistry {
     return this.#factories.get(name);
   }
 
+  /**
+   * Returns the factory registered with the name.
+   *
+   * @throws {ValidationError} no factory is registered with the name
+   */
   getOrThrow(name: string): DieFactory {
     const factory = this.get(name);
 
@@ -106,8 +114,8 @@ export class DieRegistry {
   /**
    * Creates a die with the named factory, e.g. `registry.create("standard", 6)`.
    *
-   * @throws {ValidationError} no factory is registered with the name (or the factory rejects the
-   *   arguments)
+   * @throws {ValidationError} no factory is registered with the name
+   * @throws any error raised by the factory is propagated
    */
   create(name: string, ...args: number[]): DieLike {
     return this.getOrThrow(name)(...args);

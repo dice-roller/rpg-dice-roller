@@ -39,20 +39,23 @@ export const DEFAULT_FLAG_SYMBOLS: Readonly<Record<ResultFlag, string>> =
     "unique-once": "uo",
   });
 
+/** Options for formatting flags and roll histories. */
 export interface TextPresenterOptions {
-  /** Overrides for the flag symbols. */
+  /** Overrides individual default flag symbols; an empty string suppresses a symbol. */
   flagSymbols?: Partial<Record<ResultFlag, string>>;
-  /** Joins the rolls of a history (default `"; "`). */
+  /** Joins the rolls of a history (default `"; "`; an empty string is allowed). */
   separator?: string;
 }
 
 /**
  * Plain text output, matching v5: e.g. `4d6: [3, 5, 2, 6] = 16`, with flag symbols after each die
- * value, totals rounded to 2 decimal places, and history rolls joined with `"; "`.
+ * value and history rolls joined with `"; "`. It prints the supplied roll's total as-is: newly
+ * evaluated rolls round their total to 2 decimal places, but restored totals need not be rounded.
  *
  * Maths is written without spaces (`[4, 2]+3`), function arguments are joined with `,`
  * (`max([5],[2])`), and group members are joined with `, ` (`{[4, 5], [3]-1}`). A member with flags
  * (e.g. dropped, or a target success) is wrapped in parentheses: `([6, 3])d`.
+ * An expression result is presented without notation or a total; an empty history produces `""`.
  */
 export class TextPresenter extends TreePresenter<string> {
   readonly flagSymbols: Readonly<Record<ResultFlag, string>>;
@@ -72,7 +75,7 @@ export class TextPresenter extends TreePresenter<string> {
     return flags.map((flag) => this.flagSymbols[flag]).join("");
   }
 
-  /** Formats a number, e.g. `0.2` or `-5`. */
+  /** Formats a number with `String(value)`, including non-finite values. */
   protected formatNumber(value: number): string {
     return String(value);
   }
@@ -152,5 +155,5 @@ export class TextPresenter extends TreePresenter<string> {
   }
 }
 
-/** The shared instance used by every `toString()`. */
+/** The frozen shared instance used by roll, history, and roller `toString()` methods. */
 export const defaultTextPresenter = Object.freeze(new TextPresenter());

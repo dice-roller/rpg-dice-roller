@@ -1,8 +1,9 @@
 /**
  * The result tree.
  *
- * Mirrors the AST: every result is readonly, JSON-safe plain data with a `type`, the `node` it came
- * from, and its numeric `value`.
+ * Expression results mirror the AST with a `type`, their source `node`, and a numeric `value`.
+ * Pool dice and group members are scored items within that tree, not expression results, and do
+ * not themselves have a `node`. Results are readonly plain data; values can be non-finite.
  */
 import type {
   BinaryNode,
@@ -16,7 +17,7 @@ import type {
 import type { DieSnapshot } from "../dice/types.js";
 import type { ResultFlag } from "./flags.js";
 
-/** Something modifiers act on: a single die roll, or a member of a roll group. */
+/** A die roll or group member that modifier handlers can transform using the result helpers. */
 export interface ScoredItem {
   /** The value after modifiers (e.g. after re-rolls, or `max` / `min`). */
   readonly value: number;
@@ -24,10 +25,11 @@ export interface ScoredItem {
   readonly calculationValue: number;
   /** `false` when dropped (or otherwise excluded from the total). */
   readonly useInTotal: boolean;
+  /** Semantic markers for presenters; setting a flag alone does not change the total. */
   readonly flags: readonly ResultFlag[];
 }
 
-/** Any result. */
+/** A result for an expression node; individual dice and group members are nested within it. */
 export type ExpressionResult =
   | NumberResult
   | PoolResult
@@ -40,6 +42,7 @@ export type ExpressionResult =
 /** The `type` of every expression result. */
 export type ExpressionResultType = ExpressionResult["type"];
 
+/** The result of a numeric literal. */
 export interface NumberResult {
   readonly type: "number";
   readonly node: NumberNode;
@@ -53,6 +56,7 @@ export interface DieResult extends ScoredItem {
   readonly initialValue: number;
 }
 
+/** A pool's evaluated quantity, die arguments, die snapshot and modified rolls. */
 export interface PoolResult {
   readonly type: "pool";
   readonly node: PoolNode;
@@ -66,19 +70,23 @@ export interface PoolResult {
   readonly rolls: readonly DieResult[];
 }
 
-/** One expression of a roll group. */
+/** One expression of a roll group, with scoring separate from its nested expression result. */
 export interface GroupMemberResult extends ScoredItem {
   readonly type: "group-member";
+  /** The evaluated expression; scoring changes to the member need not change this result. */
   readonly result: ExpressionResult;
 }
 
+/** A group of evaluated members after its modifiers have been applied. */
 export interface GroupResult {
   readonly type: "group";
   readonly node: GroupNode;
+  /** The sum of `calculationValue` for members included in the total. */
   readonly value: number;
   readonly members: readonly GroupMemberResult[];
 }
 
+/** A binary operation and its evaluated operands. */
 export interface BinaryResult {
   readonly type: "binary";
   readonly node: BinaryNode;
@@ -87,6 +95,7 @@ export interface BinaryResult {
   readonly right: ExpressionResult;
 }
 
+/** A unary operation and its evaluated operand. */
 export interface UnaryResult {
   readonly type: "unary";
   readonly node: UnaryNode;
@@ -94,6 +103,7 @@ export interface UnaryResult {
   readonly operand: ExpressionResult;
 }
 
+/** A parenthesised expression and its evaluated inner result. */
 export interface ParenResult {
   readonly type: "paren";
   readonly node: ParenNode;
@@ -101,6 +111,7 @@ export interface ParenResult {
   readonly inner: ExpressionResult;
 }
 
+/** A maths function and its evaluated arguments. */
 export interface FunctionResult {
   readonly type: "function";
   readonly node: FunctionNode;

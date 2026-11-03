@@ -50,7 +50,8 @@ export function encodeNumber(value: number): EncodedNumber {
 /**
  * Copies the data with every non-finite number tagged, so it's JSON-safe.
  *
- * Properties that are `undefined` are left out, as `JSON.stringify()` would.
+ * Object properties that are `undefined` are left out; array elements are retained (and become
+ * `null` if subsequently JSON-stringified). This is intended for plain export data.
  */
 export function encodeNumbers<T>(data: T): Encoded<T> {
   return encodeValue(data) as Encoded<T>;
@@ -97,6 +98,8 @@ export function toBase64(text: string): string {
  * - `object`: the JSON-safe data
  * - `json`: `JSON.stringify()` of that data
  * - `base64`: the JSON, UTF-8 encoded then base64 encoded
+ *
+ * The default format is `json`.
  */
 export function encode<D extends ExportData>(
   data: D,

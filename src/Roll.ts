@@ -54,10 +54,11 @@ function firstDescription(
 /**
  * One evaluated notation: the result tree and its totals.
  *
- * Can be used on its own, or through a `Roller`, which adds every roll to its history.
+ * Can be used on its own, or through a `Roller`, which adds rolls made by `roll()` to its history.
  *
- * Immutable. `total` is calculated straight away; `minTotal` / `maxTotal` evaluate the expression
- * again in `min` / `max` mode on first access, and are cached (or taken from the data on import).
+ * `total` is calculated straight away; `minTotal` / `maxTotal` evaluate the expression again in
+ * `min` / `max` mode on first access, and are cached (or taken from the data on import). The
+ * readonly properties do not make the result tree or shared settings deeply immutable.
  *
  * @example
  * const roll = new Roll("4d6kh3");   // rolls straight away
@@ -65,10 +66,13 @@ function firstDescription(
  * `${roll}`;                         // e.g. "4d6kh3: [3d, 5, 6, 3] = 14"
  *
  * new Roll("4d6", { engine: engines.MersenneTwister19937.seed(42) });
+ *
+ * @typeParam T the output type of the configured presenter
  */
 export class Roll<T = string> {
   /** The original notation (or the notation of an AST input). */
   readonly notation: string;
+  /** The evaluated expression tree, including individual dice results. */
   readonly result: ExpressionResult;
   /** The total, rounded to 2 decimal places. */
   readonly total: number;
@@ -83,7 +87,7 @@ export class Roll<T = string> {
    * validating: its result and totals are used, and `reroll()` rolls its expression. Use
    * `Roll.import()` / `Roll.fromJSON()` for exported data, which validate it.
    *
-   * @param input the notation or expression to roll
+   * @param input the notation or expression to roll, or data to restore without validation
    * @param options how to roll; `RollSettings` are used as they are, so they can be shared
    * @throws {ValidationError | NotationError} the notation is invalid
    */
@@ -158,12 +162,12 @@ export class Roll<T = string> {
     return findDescription(this.expression);
   }
 
-  /** The lowest possible total. */
+  /** Total with each die at its minimum, rounded to 2 decimal places; not necessarily an expression minimum (e.g. `-d6`). */
   get minTotal(): number {
     return (this.#minTotal ??= this.#totalIn("min"));
   }
 
-  /** The highest possible total. */
+  /** Total with each die at its maximum, rounded to 2 decimal places; not necessarily an expression maximum (e.g. `-d6`). */
   get maxTotal(): number {
     return (this.#maxTotal ??= this.#totalIn("max"));
   }
@@ -177,7 +181,7 @@ export class Roll<T = string> {
     return (this.minTotal + this.maxTotal) / 2;
   }
 
-  /** Rolls the same notation again, with the same settings, as a new roll. */
+  /** Rolls the original input again with the same settings; restored rolls use their stored expression. Does not add to a history. */
   reroll(): Roll<T> {
     return new Roll<T>(this.#input, this.#settings);
   }
@@ -194,11 +198,12 @@ export class Roll<T = string> {
     return defaultTextPresenter.present(this);
   }
 
-  /** The JSON-safe export data, with non-finite numbers tagged (see `EncodedNumber`). */
+  /** JSON-safe export data with non-finite numbers tagged; evaluates uncached min/max totals. */
   toJSON(): EncodedRollData {
     return encodeNumbers(toRollData(this));
   }
 
+  /** Exports as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. Evaluates uncached min/max totals. */
   export(format: "object"): EncodedRollData;
   export(format?: "json" | "base64"): string;
   export(format: ExportFormat): EncodedRollData | string;

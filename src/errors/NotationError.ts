@@ -13,9 +13,17 @@ export interface NotationErrorLocation {
 }
 
 /**
- * Thrown when the notation is syntactically invalid.
+ * Thrown when the notation is syntactically invalid. Empty or non-string notation instead raises a
+ * `ValidationError`. Parser syntax errors retain the original notation, the start location, and the
+ * underlying syntax error as `cause`; a manually constructed error may omit location and cause.
  */
 export class NotationError extends DiceRollerError {
+  /**
+   * @param message the error message
+   * @param notation the original notation
+   * @param location the optional start of the syntax error
+   * @param options optional native error options, including `cause`
+   */
   constructor(
     message: string,
     readonly notation: string,

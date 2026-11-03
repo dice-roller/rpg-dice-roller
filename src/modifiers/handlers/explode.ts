@@ -8,14 +8,16 @@ import { comparePointOrDefault, repeatableDie } from "./utils.js";
 
 /**
  * `!`, `!!`, `!p`, `!!p`: rolls another die whenever a roll matches the compare point (the die's max
- * by default), up to `ctx.limits.maxIterations` times per roll.
+ * by default), up to `ctx.limits.maxIterations` times per roll (default 1000). At the limit the
+ * last extra roll is retained even if it matches.
  *
  * - compound (`!!`): adds the extra rolls to the original roll (flags `explode` and `compound`)
  * - penetrate (`p`): subtracts 1 from each extra roll (flag `penetrate`); whether it explodes
  *   again is checked before subtracting
  * - otherwise each extra roll is a new die result, after the roll that exploded (flag `explode`)
  *
- * @throws {EvaluationError} the die can only roll one value
+ * @throws {EvaluationError} the pool die or `rollDie` is missing, or the die can only roll one value,
+ *   even if no roll matches
  */
 export const explodeHandler: ModifierHandler<ExplodeNode> = {
   name: "explode",

@@ -10,10 +10,12 @@ import { repeatableDie } from "./utils.js";
  * matching the compare point), replacing the value (the initial value is kept). The first roll is
  * never re-rolled.
  *
- * `u` repeats until unique (up to `ctx.limits.maxIterations` per roll, flag `unique`), `uo`
- * re-rolls once (flag `unique-once`), so it can still leave duplicates.
+ * `u` repeats while the current value is a matching duplicate (up to `ctx.limits.maxIterations`
+ * per roll, default 1000, flag `unique`); `uo` re-rolls once (flag `unique-once`). Both can leave
+ * duplicates: the limit can be reached, or a replacement can fall outside the compare point.
  *
- * @throws {EvaluationError} the die can only roll one value
+ * @throws {EvaluationError} the pool die or `rollDie` is missing, or the die can only roll one value,
+ *   even if there are no duplicates
  */
 export const uniqueHandler: ModifierHandler<UniqueNode> = {
   name: "unique",

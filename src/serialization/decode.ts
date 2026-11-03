@@ -23,11 +23,12 @@ import type {
 /**
  * Decodes imported data: an object, a JSON string, or a base64-encoded (UTF-8) JSON string.
  *
- * Tagged numbers (`{ "$number": "Infinity" }`) are turned back into numbers, and the whole tree is
- * validated, so a roll can't be created from data it couldn't have produced. Nothing is rolled.
+ * Tagged numbers (`{ "$number": "Infinity" }`) are turned back into numbers in a copy of the
+ * input. The export, result and expression structures are validated, but stored totals and
+ * results are not recalculated or checked for consistency. Nothing is rolled.
  *
  * Dice need no restoring: pools refer to their die by factory name (`DieNode`), and the stored
- * results already contain the dice values.
+ * results already contain the dice values. Re-evaluating the expression requires the die factory.
  *
  * @throws {ImportError} the data is malformed, or has an unknown `type` or `version`
  */

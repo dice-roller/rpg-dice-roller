@@ -17,7 +17,10 @@ import type {
   ExportFormat,
 } from "./serialization/formats.js";
 
-/** @typeParam T the output type of the presenter */
+/** Options shared by all rolls made or imported by a roller.
+ *
+ * @typeParam T the output type of the presenter
+ */
 export type RollerOptions<T = string> = RollOptions<T>;
 
 /**
@@ -35,6 +38,7 @@ export type RollerOptions<T = string> = RollOptions<T>;
  * @typeParam T the output type of the configured presenter
  */
 export class Roller<T = string> {
+  /** Mutable history of rolls made or imported by this roller. */
   readonly history = new RollHistory();
   /** Shared by every roll of this roller (and their re-rolls). */
   readonly settings: RollSettings<T>;
@@ -68,7 +72,7 @@ export class Roller<T = string> {
     return this.settings.parse(notation);
   }
 
-  /** Rolls notation (or an AST), and adds the roll to the history. */
+  /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. */
   roll(input: string | ExpressionNode): Roll<T> {
     const roll = new Roll(input, this.settings);
 
@@ -84,7 +88,7 @@ export class Roller<T = string> {
     return (presenter ?? this.presenter).present(this.history);
   }
 
-  /** Exports the history. */
+  /** Exports the history as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. May evaluate uncached min/max totals. */
   export(format: "object"): EncodedHistoryData;
   export(format?: "json" | "base64"): string;
   export(format: ExportFormat): EncodedHistoryData | string;
@@ -96,7 +100,8 @@ export class Roller<T = string> {
    * Imports exported rolls (a roll or a whole history, as an object, JSON or base64), and adds them
    * to the history, without rolling.
    *
-   * The data is validated first, so nothing is added if any of it is invalid.
+   * The data is validated first, so nothing is added if any of it is invalid. Imported rolls share
+   * this roller's settings for later re-rolls; re-rolling does not add the new roll to the history.
    *
    * @returns the imported rolls
    * @throws {ImportError} the data is invalid

@@ -39,7 +39,10 @@ export type { ParserOptions } from "./parser/Parser.js";
 
 // types for custom dice, engines and modifier handlers
 export { Evaluator } from "./evaluator/Evaluator.js";
-export type { EvaluatorRegistries, TaggedDieResult } from "./evaluator/Evaluator.js";
+export type {
+  EvaluatorRegistries,
+  TaggedDieResult,
+} from "./evaluator/Evaluator.js";
 export type {
   RollContext,
   RollLimits,
@@ -68,10 +71,17 @@ export type {
 } from "./serialization/formats.js";
 
 // namespaces
+/** Expression tree nodes and notation helpers for inspecting or constructing rolls. */
 export * as ast from "./ast/index.js";
+/** Die definitions, presets, and registries for extending dice notation. */
 export * as dice from "./dice/index.js";
+/** Random engines for controlling how dice are rolled. */
 export * as engines from "./random/engines.js";
+/** Error classes raised while parsing, evaluating, and importing rolls. */
 export * as errors from "./errors/index.js";
+/** Modifier definitions, handlers, and registries for extending roll behavior. */
 export * as modifiers from "./modifiers/index.js";
+/** Presenters that format evaluated rolls and their results. */
 export * as presenters from "./presenters/index.js";
+/** Result types and helpers for inspecting evaluated expressions. */
 export * as results from "./results/index.js";
