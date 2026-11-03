@@ -1,0 +1,25 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "tsconfig": "tsconfig.json",
+  "plugin": [
+    "typedoc-plugin-markdown",
+    "typedoc-vitepress-theme",
+    "typedoc-plugin-frontmatter"
+  ],
+  "indexFormat": "table",
+  "out": "./docs/api",
+  "readme": "./docs/readme.md",
+  "mergeReadme": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "cleanOutputDir": true,
+  "excludeScopesInPaths": true,
+  "docsRoot": "./docs",
+  "sidebar": {
+    "format": "vuepress2",
+    "pretty": true
+  },
+  "readmeFrontmatter": {
+    "sidebarDepth": 0
+  }
+}

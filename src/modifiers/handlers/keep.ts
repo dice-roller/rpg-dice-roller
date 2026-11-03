@@ -4,6 +4,7 @@ import { dropAt, indexesByValue } from "./utils.js";
 
 /**
  * `k`, `kh`, `kl`: keeps the highest / lowest `qty` items, and drops the rest (flag `drop`).
+ * `k` defaults to highest.
  *
  * Like drop, it looks at every item, including those already dropped, so keep and drop can
  * override each other (`3d10k1dh1` drops every roll). Of two equal items, the earlier counts as

@@ -70,20 +70,29 @@ export function sumIncluded(items: readonly ScoredItem[]): number {
     );
 }
 
+/** Registries used to resolve dice and modifier handlers during evaluation. */
 export interface EvaluatorRegistries {
+  /** Factories for dice referenced by pool nodes. */
   readonly dice: DieRegistry;
+  /** Handlers for modifiers referenced by pool and group nodes. */
   readonly modifiers: ModifierRegistry;
 }
 
 /**
  * Walks the AST and builds the result tree.
  *
- * The same AST is evaluated in `random` mode for the roll, and in `min` / `max` mode for
- * `minTotal` / `maxTotal`. Maths goes through `math.ts`.
+ * Evaluation uses the supplied context's roll mode, generator and limits. The same AST can be
+ * evaluated in `random` mode for a roll and in `min` / `max` mode for its corresponding totals.
  */
 export class Evaluator {
+  /** Creates an evaluator using the given die and modifier registries. */
   constructor(readonly registries: EvaluatorRegistries) {}
 
+  /**
+   * Evaluates an expression tree into a result tree, rolling dice according to the context.
+   *
+   * @throws {EvaluationError} if a node, quantity, operation or modifier result is invalid
+   */
   evaluate(node: ExpressionNode, ctx: RollContext): ExpressionResult {
     switch (node.type) {
       case "number":
@@ -101,10 +110,8 @@ export class Evaluator {
       case "function":
         return this.evaluateFunction(node, ctx);
       default: {
-        const unknown: never = node;
-
         throw new EvaluationError(
-          `Unknown node type: ${(unknown as { type: string }).type}`,
+          `Unknown node type: ${(node as { type: string }).type}`,
         );
       }
     }
@@ -480,7 +487,8 @@ export class Evaluator {
 /** Tags flattened die results with the index of their pool (copied by the handlers' spreads). */
 const POOL = Symbol("pool");
 
-type TaggedDieResult = DieResult & { [POOL]?: number };
+/** A die result carrying an internal pool tag during flattened group modifier handling. */
+export type TaggedDieResult = DieResult & { [POOL]?: number };
 
 function withPoolRolls(
   pool: PoolResult,

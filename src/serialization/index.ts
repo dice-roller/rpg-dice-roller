@@ -1,3 +1,9 @@
+/**
+ * Serialization entry point: decode imports; encode exports; convert rolls and histories to data;
+ * encode numbers and UTF-8 base64; and access the export formats, version and data types.
+ *
+ * @module
+ */
 export { decode } from "./decode.js";
 export {
   encode,

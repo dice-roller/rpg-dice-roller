@@ -19,7 +19,13 @@ import {
   needsParentheses,
 } from "./precedence.js";
 
-/** Converts the node to notation, e.g. `{ type: "pool", ... }` -> `4d6kh3`. */
+/**
+ * Converts an expression to canonical notation, e.g. a pool to `4d6kh3`.
+ *
+ * Parentheses may be added to preserve precedence. Parsed notation round-trips through the parser,
+ * but arbitrary builder nodes need not: for example, `range`, `face`, and custom dice are written
+ * as display-only `name(args)` forms, and ambiguous `!=` comparisons may be written as `<>`.
+ */
 export function nodeToNotation(node: ExpressionNode): string {
   // inline descriptions end with a line break, which isn't needed at the very end
   return write(node).trimEnd();

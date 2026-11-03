@@ -3,7 +3,7 @@ import type { ModifierHandler } from "../types.js";
 import { compareValues } from "./utils.js";
 
 /**
- * `s`, `sa`, `sd`: sorts the items by value, ascending or descending.
+ * `s`, `sa`, `sd`: sorts the items by value, ascending or descending. `s` defaults to ascending.
  *
  * The sort is stable, so items with the same value keep their order. On a group, the members are
  * sorted by their totals, and the dice within each pool are sorted too.

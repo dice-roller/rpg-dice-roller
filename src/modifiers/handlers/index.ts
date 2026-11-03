@@ -25,7 +25,7 @@ export {
   uniqueHandler,
 };
 
-/** The built-in handlers, in execution order. */
+/** The built-in handlers, in execution order. The array, handlers, and their target arrays are frozen. */
 export const builtInModifierHandlers: readonly ModifierHandler[] =
   Object.freeze(
     [

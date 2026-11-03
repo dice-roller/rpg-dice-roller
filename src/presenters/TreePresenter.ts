@@ -19,12 +19,14 @@ import type { Presenter } from "./Presenter.js";
  * A presenter with a hook per result type.
  *
  * `present()` dispatches a history to `history()`, a roll to `roll()`, and a result node to its
- * hook (via `visit()`). Hooks call `visit()` for child results, and `pool()` calls `die()` for
- * each roll.
+ * hook (via `visit()`). Subclasses implement the hooks and control traversal: call `visit()` for
+ * child results and `die()` from `pool()` for individual dice as needed. `die()` is not dispatched
+ * by `present()` or `visit()`; an individual die is not an `ExpressionResult`.
  *
  * @typeParam T the output type
  */
 export abstract class TreePresenter<T> implements Presenter<T> {
+  /** Dispatches a history, roll, or expression result to the corresponding hook. */
   present(target: Presentable): T {
     if (isRollHistory(target)) {
       return this.history(target);

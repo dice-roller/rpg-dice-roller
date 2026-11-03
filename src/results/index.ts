@@ -5,5 +5,5 @@ export {
   withFlags,
   withValue,
 } from "./die-result.js";
-export type { ResultFlag } from "./flags.js";
+export type { ResultFlag, RESULT_FLAGS } from "./flags.js";
 export type * from "./types.js";

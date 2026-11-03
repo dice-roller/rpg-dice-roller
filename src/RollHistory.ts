@@ -13,23 +13,27 @@ export class RollHistory implements Iterable<Roll<unknown>> {
     return [...this.#rolls];
   }
 
-  /** The sum of the roll totals (`NaN` if they include both `Infinity` and `-Infinity`). */
+  /** The sum of the roll totals, or 0 when empty (`NaN` if they include both `Infinity` and `-Infinity`). */
   get total(): number {
     return this.#rolls.reduce((total, roll) => total + roll.total, 0);
   }
 
+  /** Number of rolls in the history. */
   get length(): number {
     return this.#rolls.length;
   }
 
+  /** Appends rolls in order. */
   add(...rolls: Roll<unknown>[]): void {
     this.#rolls.push(...rolls);
   }
 
+  /** Removes all rolls from the history. */
   clear(): void {
     this.#rolls.length = 0;
   }
 
+  /** Iterates over a snapshot of the rolls, oldest first. */
   [Symbol.iterator](): Iterator<Roll<unknown>> {
     return this.rolls[Symbol.iterator]();
   }
@@ -46,7 +50,7 @@ export class RollHistory implements Iterable<Roll<unknown>> {
     return defaultTextPresenter.present(this);
   }
 
-  /** The JSON-safe export data, with non-finite numbers tagged (see `EncodedNumber`). */
+  /** JSON-safe export data with non-finite numbers tagged; evaluates uncached roll min/max totals. */
   toJSON(): EncodedHistoryData {
     return encodeNumbers(toHistoryData(this));
   }

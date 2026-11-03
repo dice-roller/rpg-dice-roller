@@ -20,4 +20,5 @@ export const RESULT_FLAGS = [
   "unique-once",
 ] as const;
 
+/** A semantic marker on a scored die or group member, interpreted by presenters. */
 export type ResultFlag = (typeof RESULT_FLAGS)[number];

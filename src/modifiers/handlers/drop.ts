@@ -4,6 +4,7 @@ import { dropAt, indexesByValue } from "./utils.js";
 
 /**
  * `d`, `dl`, `dh`: drops the lowest / highest `qty` items (flag `drop`).
+ * `d` defaults to lowest.
  *
  * Like keep, it looks at every item, including those already dropped. Of two equal items, the
  * earlier counts as the lower one. Dropping more items than there are drops them all.

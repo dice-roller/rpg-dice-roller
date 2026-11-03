@@ -70,7 +70,7 @@ export function faceDie(
  *
  * Registered in the `DieRegistry` as `standard`.
  *
- * @throws {ValidationError} `sides` isn't a positive integer
+ * @throws {ValidationError} `sides` isn't a positive safe integer
  */
 export function standardDie(sides: number): RangeDieDefinition {
   if (!Number.isSafeInteger(sides) || sides < 1) {
@@ -85,7 +85,7 @@ export const percentileDie: RangeDieDefinition = rangeDie(1, 100, {
   notation: "%",
 });
 
-/** The number of faces each non-blank symbol (`-`, `+`) covers on a fudge die. */
+/** The conventional number of faces each non-blank symbol (`-`, `+`) covers on a fudge die. */
 export type FudgeNonBlanks = 1 | 2;
 
 const fudgeDiceDefinitions: Record<FudgeNonBlanks, FacesDieDefinition> = {
@@ -96,8 +96,11 @@ const fudgeDiceDefinitions: Record<FudgeNonBlanks, FacesDieDefinition> = {
 /**
  * A fudge / fate die. Registered in the `DieRegistry` as `fudge`.
  *
- * - `fudgeDie(2)` (`dF`): two faces each of `-1`, `0` and `+1`
- * - `fudgeDie(1)` (`dF.1`): one `-1`, four `0` and one `+1`
+ * - `fudgeDie(2)` (the default, `dF`): `[-1, 0, 1]`, equally likely; equivalent in
+ *   probability to two physical faces of each value, but its face count is 3
+ * - `fudgeDie(1)` (`dF.1`): `[-1, 0, 0, 0, 0, 1]`, with face count 6
+ *
+ * Each variant is a shared, frozen definition.
  *
  * @throws {ValidationError} `nonBlanks` isn't 1 or 2
  */

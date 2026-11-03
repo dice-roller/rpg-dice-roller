@@ -1,7 +1,8 @@
 import { DiceRollerError } from "./DiceRollerError.js";
 
 /**
- * Thrown by skeleton methods whose logic has not been implemented yet.
+ * Error for an unimplemented feature. Its message appends ` is not implemented yet` to the feature
+ * name. This class is not exported by the public errors namespace.
  */
 export class NotImplementedError extends DiceRollerError {
   constructor(feature: string) {

@@ -8,10 +8,12 @@ import { comparePointOrDefault, repeatableDie } from "./utils.js";
  * `r`, `ro`: re-rolls rolls that match the compare point (the die's min by default), replacing the
  * value (the initial value is kept).
  *
- * `r` repeats until the roll no longer matches (up to `ctx.limits.maxIterations`, flag `re-roll`),
- * `ro` re-rolls once (flag `re-roll-once`).
+ * `r` repeats until the roll no longer matches (up to `ctx.limits.maxIterations` per roll, default
+ * 1000, flag `re-roll`); the final value can still match at the limit. `ro` re-rolls once (flag
+ * `re-roll-once`).
  *
- * @throws {EvaluationError} the die can only roll one value
+ * @throws {EvaluationError} the pool die or `rollDie` is missing, or the die can only roll one value,
+ *   even if no roll matches
  */
 export const reRollHandler: ModifierHandler<ReRollNode> = {
   name: "re-roll",

@@ -6,5 +6,6 @@ import type { Presentable } from "./Presentable.js";
  * @typeParam T the output type
  */
 export interface Presenter<T = string> {
+  /** Presents a roll, history, or expression result in this presenter's output type. */
   present(target: Presentable): T;
 }

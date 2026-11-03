@@ -26,8 +26,9 @@ export interface RollOptions<T = string> {
   dice?: DieRegistry;
   /** Default: `new ModifierRegistry()` (the built-in modifiers). */
   modifiers?: ModifierRegistry;
+  /** Safety limits: default `maxQty` 999 and `maxIterations` 1000; each must be a positive safe integer. */
   limits?: Partial<RollLimits>;
-  /** Used by `Roller.present()` (default: the default `TextPresenter`). */
+  /** Used by `Roll.present()` and `Roller.present()` (default: the default `TextPresenter`). */
   presenter?: Presenter<T>;
 }
 
@@ -49,6 +50,7 @@ export class RollSettings<T = string> {
   readonly parser: Parser;
   readonly evaluator: Evaluator;
 
+  /** Resolves options and validates limits; supplied registries and presenter are shared by reference. */
   constructor(options: RollOptions<T> = {}) {
     this.limits = Object.freeze(resolveRollLimits(options.limits));
     this.generator = new NumberGenerator(options.engine);
@@ -80,7 +82,7 @@ export class RollSettings<T = string> {
     return this.parser.parse(notation);
   }
 
-  /** Evaluates the AST in the mode. */
+  /** Evaluates the AST in the given mode (default `random`); `min` and `max` select each die's extreme. */
   evaluate(
     expression: ExpressionNode,
     mode: RollMode = "random",
