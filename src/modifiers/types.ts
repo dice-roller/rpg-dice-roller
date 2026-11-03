@@ -34,10 +34,10 @@ export interface ModifierHandler<N extends ModifierNode = ModifierNode> {
    *
    * - `flatten`: a group with a single expression gets the dice of every pool in it, flattened,
    *   instead of its member (keep, drop: `{4d6+2d8}k2` keeps the 2 highest dice)
-   * - `each-pool`: gets the members, then the dice of each pool in every member, separately
-   *   (sort: the members are sorted by total, and the dice within each pool)
+   * - `each-pool`: gets the members of each group, then the dice of each pool, separately
+   *   (sort: nested members are sorted by total, and the dice within each pool)
    *
-   * Pools in a pool's quantity or die arguments, and in nested groups, aren't included.
+   * Pools in a pool's quantity or die arguments aren't included. Flattening stops at nested groups.
    */
   readonly groupHandling?: "flatten" | "each-pool";
 

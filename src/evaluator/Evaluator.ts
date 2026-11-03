@@ -179,7 +179,7 @@ export class Evaluator {
    * - `flatten`: as in v5, a group with a single expression (`{4d6+2d8}k2`) gives the handler the
    *   dice of every pool inside it. The die results are flattened, then the result tree is walked
    *   again to write them back into their pools and recalculate everything above them.
-   * - `each-pool`: the handler gets the members, then the dice of each pool separately.
+   * - `each-pool`: the handler gets each nested group's members and each pool's dice.
    */
   protected evaluateGroup(node: GroupNode, ctx: RollContext): GroupResult {
     if (node.expressions.length === 0) {
@@ -221,11 +221,14 @@ export class Evaluator {
           members = members.map((member) =>
             withMemberResult(
               member,
-              this.rebuildPools(member.result, (pool) =>
-                withPoolRolls(
-                  pool,
-                  this.runHandler(handler, pool.rolls, input),
-                ),
+              this.rebuildPools(
+                member.result,
+                (pool) =>
+                  withPoolRolls(
+                    pool,
+                    this.runHandler(handler, pool.rolls, input),
+                  ),
+                (nested) => this.runHandler(handler, nested, input),
               ),
             ),
           );
@@ -293,11 +296,14 @@ export class Evaluator {
    * values above it. Pools are visited in notation order.
    *
    * Pools in a pool's quantity or die arguments aren't visited (they've already been used), nor
-   * are pools in nested groups (which have applied their own modifiers).
+   * are pools in nested groups unless `transformMembers` is supplied.
    */
   protected rebuildPools(
     result: ExpressionResult,
     replace: (pool: PoolResult, index: number) => PoolResult,
+    transformMembers?: (
+      members: readonly GroupMemberResult[],
+    ) => GroupMemberResult[],
   ): ExpressionResult {
     let index = 0;
 
@@ -305,6 +311,17 @@ export class Evaluator {
       switch (current.type) {
         case "pool":
           return replace(current, index++);
+        case "group": {
+          if (!transformMembers) {
+            return current;
+          }
+
+          const members = transformMembers(current.members).map((member) =>
+            withMemberResult(member, visit(member.result)),
+          );
+
+          return { ...current, members, value: sumIncluded(members) };
+        }
         case "binary": {
           const left = visit(current.left);
           const right = visit(current.right);

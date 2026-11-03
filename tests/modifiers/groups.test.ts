@@ -1,4 +1,4 @@
-import { group, keep, pool } from "../../src/ast/builders.js";
+import { group, keep, pool, sort } from "../../src/ast/builders.js";
 import type { SortNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
@@ -255,6 +255,135 @@ describe("multiple sub-rolls", () => {
       expect(result.members.map(({ value }) => value)).toEqual(totals);
       expect(poolRolls(result)).toEqual(dice);
       expect(result.value).toBe(32.5);
+    },
+  );
+});
+
+describe("nested group modifiers", () => {
+  test.each([
+    [
+      "sd",
+      [22, 16],
+      [
+        ["6", "5", "4", "4", "3"],
+        ["5", "4", "4", "2", "1"],
+      ],
+    ],
+    [
+      "sa",
+      [16, 22],
+      [
+        ["1", "2", "4", "4", "5"],
+        ["3", "4", "4", "5", "6"],
+      ],
+    ],
+  ])("sorts nested members and dice: %s", (modifier, totals, dice) => {
+    const result = evaluateGroup(`{{5d6, 5d6}}${modifier}`, {
+      rolls: [2, 4, 1, 5, 4, 4, 3, 5, 4, 6],
+    });
+    const nested = result.members[0]?.result;
+
+    expect(nested?.type).toBe("group");
+    if (nested?.type !== "group") throw new Error("Expected nested group");
+    expect(nested.members.map(({ value }) => value)).toEqual(totals);
+    expect(poolRolls(result)).toEqual(dice);
+    expect(result.value).toBe(38);
+  });
+
+  test("sort traverses three levels, wrappers, and stable ties", () => {
+    const result = evaluateGroup("{{{2d6, 2d6}+1}, {2d6}}sd", {
+      rolls: [1, 5, 4, 2, 3, 6],
+    });
+
+    expect(poolRolls(result)).toEqual([
+      ["5", "1"],
+      ["4", "2"],
+      ["6", "3"],
+    ]);
+    expect(result.value).toBe(22);
+  });
+
+  test("keep and drop do not flatten through nested groups", () => {
+    for (const modifier of ["k1", "d1"]) {
+      const result = evaluateGroup(`{{2d6}+2d4}${modifier}`, {
+        rolls: [6, 5, 2, 3],
+      });
+      expect(poolRolls(result)[0]).toEqual(["6", "5"]);
+      expect(result.members[0]?.result).toMatchObject({
+        left: { type: "group", value: 11 },
+      });
+    }
+  });
+
+  test("target scores immediate nested group totals only", () => {
+    const result = evaluateGroup("{{2d6, 1d6}}>10f<5", { rolls: [6, 5, 3] });
+    expect(result.members[0]).toMatchObject({
+      value: 14,
+      calculationValue: 1,
+      flags: ["target-success"],
+    });
+    expect(poolRolls(result)).toEqual([["6", "5"], ["3"]]);
+    expect(result.value).toBe(1);
+  });
+
+  test("sorting leaves quantity and sides dice and handler inputs untouched", () => {
+    const inputs: { original: unknown; snapshot: unknown }[] = [];
+    const tracking: ModifierHandler<SortNode> = {
+      ...sortHandler,
+      apply(items, input) {
+        inputs.push({ original: items, snapshot: structuredClone(items) });
+        return sortHandler.apply(items, input);
+      },
+    };
+    const modifiers = new ModifierRegistry().register(tracking);
+    const node = group([group([pool(pool(2, 2), pool(2, 3))])], {
+      modifiers: [sort("d")],
+    });
+    const before = structuredClone(node);
+    const result = evaluateGroup(node, {
+      rolls: [2, 1, 3, 2, 1, 5, 3],
+      modifiers,
+    });
+    const [rolled] = poolsOf(result);
+
+    expect(rolled && rollsOf(rolled)).toEqual(["5", "3", "1"]);
+    expect(rolled?.qty).toMatchObject({ rolls: [{ value: 2 }, { value: 1 }] });
+    expect(rolled?.dieArgs[0]).toMatchObject({
+      rolls: [{ value: 3 }, { value: 2 }],
+    });
+    expect(node).toEqual(before);
+    for (const { original, snapshot } of inputs)
+      expect(original).toEqual(snapshot);
+  });
+
+  test.each(["k1", "d1"])(
+    "sort preserves nested %s and target metadata",
+    (modifier) => {
+      const result = evaluateGroup(`{{2d6, 2d6}${modifier}>8f<5}sd`, {
+        rolls: [1, 2, 5, 6],
+      });
+      const nested = result.members[0]?.result;
+      expect(nested?.type).toBe("group");
+      if (nested?.type !== "group") throw new Error("Expected nested group");
+      expect(nested.members).toMatchObject([
+        {
+          value: 11,
+          calculationValue: 1,
+          useInTotal: true,
+          flags: ["target-success"],
+        },
+        {
+          value: 3,
+          calculationValue: -1,
+          useInTotal: false,
+          flags: ["drop", "target-failure"],
+        },
+      ]);
+      expect(poolRolls(result)).toEqual([
+        ["6", "5"],
+        ["2", "1"],
+      ]);
+      expect(result.value).toBe(1);
     },
   );
 });
