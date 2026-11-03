@@ -47,6 +47,35 @@ describe("min", () => {
       calculationValue: 3,
     });
   });
+
+  test("only rolls below the minimum are changed and flagged", () => {
+    expect(evaluatePool("3d6min4", { rolls: [1, 4, 5] }).rolls).toEqual([
+      {
+        type: "die",
+        value: 4,
+        initialValue: 1,
+        calculationValue: 4,
+        useInTotal: true,
+        flags: ["min"],
+      },
+      {
+        type: "die",
+        value: 4,
+        initialValue: 4,
+        calculationValue: 4,
+        useInTotal: true,
+        flags: [],
+      },
+      {
+        type: "die",
+        value: 5,
+        initialValue: 5,
+        calculationValue: 5,
+        useInTotal: true,
+        flags: [],
+      },
+    ]);
+  });
 });
 
 describe("max", () => {
@@ -108,6 +137,38 @@ describe("drop", () => {
     expect(result.value).toBe(total);
   });
 
+  test("drop flags preserve values and exclude only the selected dice", () => {
+    const result = evaluatePool("3d6dh1", { rolls: [6, 2, 6] });
+
+    expect(result.rolls).toEqual([
+      {
+        type: "die",
+        value: 6,
+        initialValue: 6,
+        calculationValue: 6,
+        useInTotal: true,
+        flags: [],
+      },
+      {
+        type: "die",
+        value: 2,
+        initialValue: 2,
+        calculationValue: 2,
+        useInTotal: true,
+        flags: [],
+      },
+      {
+        type: "die",
+        value: 6,
+        initialValue: 6,
+        calculationValue: 6,
+        useInTotal: false,
+        flags: ["drop"],
+      },
+    ]);
+    expect(result.value).toBe(8);
+  });
+
   test.each<Example>([
     // both look at the whole pool, so they can override each other
     ["3d10k1dh1", [7, 1, 2], ["7d", "1d", "2d"], 0],
@@ -149,6 +210,40 @@ describe("target", () => {
     expect(
       result.rolls.map(({ calculationValue }) => calculationValue),
     ).toEqual([1, 0, -1]);
+  });
+
+  test("success and failure flags apply at their inclusive boundaries", () => {
+    const result = evaluatePool("4d6>=5f<=2", { rolls: [5, 4, 2, 1] });
+
+    expect(
+      result.rolls.map(({ value, calculationValue, useInTotal, flags }) => ({
+        value,
+        calculationValue,
+        useInTotal,
+        flags,
+      })),
+    ).toEqual([
+      {
+        value: 5,
+        calculationValue: 1,
+        useInTotal: true,
+        flags: ["target-success"],
+      },
+      { value: 4, calculationValue: 0, useInTotal: true, flags: [] },
+      {
+        value: 2,
+        calculationValue: -1,
+        useInTotal: true,
+        flags: ["target-failure"],
+      },
+      {
+        value: 1,
+        calculationValue: -1,
+        useInTotal: true,
+        flags: ["target-failure"],
+      },
+    ]);
+    expect(result.value).toBe(-1);
   });
 
   test("dropped rolls aren't counted", () => {
@@ -222,6 +317,23 @@ describe("sort", () => {
 
     expect(rollsOf(result)).toEqual(expected);
     expect(result.value).toBe(total);
+  });
+
+  test("sorting is stable when an earlier modifier makes values tie", () => {
+    const result = evaluatePool("4d6min4s", { rolls: [2, 1, 4, 3] });
+
+    expect(
+      result.rolls.map(({ initialValue, value, flags }) => ({
+        initialValue,
+        value,
+        flags,
+      })),
+    ).toEqual([
+      { initialValue: 2, value: 4, flags: ["min"] },
+      { initialValue: 1, value: 4, flags: ["min"] },
+      { initialValue: 4, value: 4, flags: [] },
+      { initialValue: 3, value: 4, flags: ["min"] },
+    ]);
   });
 
   test("equal values keep their order", () => {
