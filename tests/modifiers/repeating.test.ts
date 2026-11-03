@@ -8,7 +8,14 @@ import {
   uniqueHandler,
 } from "../../src/modifiers/handlers/index.js";
 import { createDieResult } from "../../src/results/die-result.js";
-import { evaluate, evaluatePool, parser, rollsOf } from "./helpers.js";
+import {
+  evaluate,
+  evaluateGroup,
+  evaluatePool,
+  parser,
+  poolsOf,
+  rollsOf,
+} from "./helpers.js";
 
 /** Notation, the generator's values (initial rolls first), the expected rolls, and the total. */
 type Example = [string, number[], string[], number];
@@ -160,8 +167,25 @@ describe("explode", () => {
   });
 
   test("dice in a group can explode", () => {
-    expect(evaluate("{2d6!}k1", { rolls: [6, 2, 3] }).value).toBe(6);
+    const result = evaluateGroup("{2d6!}k1", { rolls: [6, 2, 3] });
+    const [pool] = poolsOf(result);
+
+    expect(pool && rollsOf(pool)).toEqual(["6!", "3d", "2d"]);
+    expect(result.members[0]).toMatchObject({
+      value: 6,
+      calculationValue: 6,
+      useInTotal: true,
+      flags: [],
+    });
+    expect(result.value).toBe(6);
   });
+
+  test.each(["{2d6}r", "{2d6}ro", "{2d6}u", "{2d6}uo"])(
+    "%s cannot be used directly on a group",
+    (notation) => {
+      expect(() => evaluate(notation)).toThrow(EvaluationError);
+    },
+  );
 });
 
 describe("re-roll", () => {

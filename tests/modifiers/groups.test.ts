@@ -65,6 +65,85 @@ describe("single sub-roll", () => {
     expect(result.value).toBe(-2);
   });
 
+  test("keep-low selects tied dice across pools and recalculates parentheses", () => {
+    const result = evaluateGroup("{2d6+(2d8*2)}kl1", {
+      rolls: [2, 2, 5, 8],
+    });
+
+    expect(poolRolls(result)).toEqual([
+      ["2", "2d"],
+      ["5d", "8d"],
+    ]);
+    expect(result.members[0]).toMatchObject({
+      value: 2,
+      calculationValue: 2,
+      useInTotal: true,
+      flags: [],
+      result: {
+        type: "binary",
+        value: 2,
+        left: { type: "pool", value: 2 },
+        right: { type: "paren", value: 0 },
+      },
+    });
+    expect(result.value).toBe(2);
+  });
+
+  test("drop-high selects dice across pools", () => {
+    const result = evaluateGroup("{2d6+2d8}dh2", {
+      rolls: [1, 6, 5, 2],
+    });
+
+    expect(poolRolls(result)).toEqual([
+      ["1", "6d"],
+      ["5d", "2"],
+    ]);
+    expect(result.members[0]).toMatchObject({
+      value: 3,
+      calculationValue: 3,
+      useInTotal: true,
+      flags: [],
+    });
+    expect(result.value).toBe(3);
+  });
+
+  test("pool min runs before group keep selects across its dice", () => {
+    const result = evaluateGroup("{2d6min4+2d6}k2", {
+      rolls: [1, 3, 5, 2],
+    });
+
+    expect(poolRolls(result)).toEqual([
+      ["4^d", "4^"],
+      ["5", "2d"],
+    ]);
+    expect(result.members[0]).toMatchObject({
+      value: 9,
+      calculationValue: 9,
+      useInTotal: true,
+      flags: [],
+    });
+    expect(result.value).toBe(9);
+  });
+
+  test.each([
+    ["k3", [["3"], ["4"]], 7],
+    ["d3", [["3d"], ["4d"]], 0],
+  ])(
+    "a single expression handles %s beyond its dice count",
+    (modifier, rolls, total) => {
+      const result = evaluateGroup(`{1d6+1d8}${modifier}`, { rolls: [3, 4] });
+
+      expect(poolRolls(result)).toEqual(rolls);
+      expect(result.members[0]).toMatchObject({
+        value: total,
+        calculationValue: total,
+        useInTotal: true,
+        flags: [],
+      });
+      expect(result.value).toBe(total);
+    },
+  );
+
   test("keep and drop override each other across pools", () => {
     const result = evaluateGroup("{2d10+1d10}k1dh1", { rolls: [7, 1, 2] });
 
@@ -78,6 +157,26 @@ describe("single sub-roll", () => {
     expect(evaluate("{3d10+5}>30f<15", { rolls: [5, 3, 1] }).value).toBe(-1);
   });
 
+  test.each<[number[], number, number, string[]]>([
+    [[4, 5], 12, 1, ["target-success"]],
+    [[4, 4], 11, 0, []],
+    [[1, 2], 6, -1, ["target-failure"]],
+  ])(
+    "target scores the complete expression total %i once",
+    (rolls, total, score, flags) => {
+      const result = evaluateGroup("{2d6+3}>=12f<=6", { rolls });
+
+      expect(result.members[0]).toMatchObject({
+        value: total,
+        calculationValue: score,
+        useInTotal: true,
+        flags,
+      });
+      expect(poolRolls(result)).toEqual([rolls.map(String)]);
+      expect(result.value).toBe(score);
+    },
+  );
+
   test("target after keep counts the recalculated total", () => {
     // keep 6 and 5: 11 is a success; all four dice would be 14
     const result = evaluateGroup("{4d6}k2>10", { rolls: [6, 5, 1, 2] });
@@ -88,6 +187,21 @@ describe("single sub-roll", () => {
       flags: ["target-success"],
     });
     expect(result.value).toBe(1);
+  });
+
+  test("group target runs after keep regardless of notation order", () => {
+    for (const notation of ["{4d6}k2>12", "{4d6}>12k2"]) {
+      const result = evaluateGroup(notation, { rolls: [6, 5, 1, 2] });
+
+      expect(poolRolls(result)).toEqual([["6", "5", "1d", "2d"]]);
+      expect(result.members[0]).toMatchObject({
+        value: 11,
+        calculationValue: 0,
+        useInTotal: true,
+        flags: [],
+      });
+      expect(result.value).toBe(0);
+    }
   });
 
   test.each([
@@ -187,6 +301,68 @@ describe("multiple sub-rolls", () => {
     );
   });
 
+  test.each([
+    ["kl1", [true, false, false], [[], ["drop"], ["drop"]], 4],
+    ["dh1", [true, true, false], [[], [], ["drop"]], 8],
+  ])(
+    "%s selects whole tied sub-rolls without changing their dice",
+    (modifier, uses, flags, total) => {
+      const result = evaluateGroup(`{1d6, 1d8+2, 2d4}${modifier}`, {
+        rolls: [4, 2, 1, 3],
+      });
+
+      expect(
+        result.members.map(
+          ({ value, calculationValue, useInTotal, flags: memberFlags }) => ({
+            value,
+            calculationValue,
+            useInTotal,
+            flags: memberFlags,
+          }),
+        ),
+      ).toEqual(
+        uses.map((useInTotal, index) => ({
+          value: 4,
+          calculationValue: 4,
+          useInTotal,
+          flags: flags[index],
+        })),
+      );
+      expect(poolRolls(result)).toEqual([["4"], ["2"], ["1", "3"]]);
+      expect(result.value).toBe(total);
+    },
+  );
+
+  test.each([
+    ["k3", [true, true], [[], []], 7],
+    ["d3", [false, false], [["drop"], ["drop"]], 0],
+  ])(
+    "multiple sub-rolls handle %s beyond their member count",
+    (modifier, uses, flags, total) => {
+      const result = evaluateGroup(`{1d6, 1d8}${modifier}`, { rolls: [3, 4] });
+
+      expect(
+        result.members.map(
+          ({ value, calculationValue, useInTotal, flags: memberFlags }) => ({
+            value,
+            calculationValue,
+            useInTotal,
+            flags: memberFlags,
+          }),
+        ),
+      ).toEqual(
+        [3, 4].map((value, index) => ({
+          value,
+          calculationValue: value,
+          useInTotal: uses[index],
+          flags: flags[index],
+        })),
+      );
+      expect(poolRolls(result)).toEqual([["3"], ["4"]]);
+      expect(result.value).toBe(total);
+    },
+  );
+
   const targetRolls = [4, 3, 3, 2, 2, 6, 17, 5, 20, 7, 9, 6, 10, 8];
 
   test("target counts the successful sub-rolls (documented example)", () => {
@@ -214,6 +390,37 @@ describe("multiple sub-rolls", () => {
       ["target-success"],
     ]);
     expect(result.value).toBe(1);
+  });
+
+  test("target scores each complete expression once at inclusive boundaries", () => {
+    const result = evaluateGroup("{1d6+4, 1d6+4, 1d6+1}>=10f<=5", {
+      rolls: [6, 5, 4],
+    });
+
+    expect(
+      result.members.map(({ value, calculationValue, useInTotal, flags }) => ({
+        value,
+        calculationValue,
+        useInTotal,
+        flags,
+      })),
+    ).toEqual([
+      {
+        value: 10,
+        calculationValue: 1,
+        useInTotal: true,
+        flags: ["target-success"],
+      },
+      { value: 9, calculationValue: 0, useInTotal: true, flags: [] },
+      {
+        value: 5,
+        calculationValue: -1,
+        useInTotal: true,
+        flags: ["target-failure"],
+      },
+    ]);
+    expect(poolRolls(result)).toEqual([["6"], ["5"], ["4"]]);
+    expect(result.value).toBe(0);
   });
 
   // totals: 6.5, 14, 12
@@ -255,6 +462,65 @@ describe("multiple sub-rolls", () => {
       expect(result.members.map(({ value }) => value)).toEqual(totals);
       expect(poolRolls(result)).toEqual(dice);
       expect(result.value).toBe(32.5);
+    },
+  );
+
+  test.each<[string, string[][]]>([
+    [
+      "sa",
+      [
+        ["4^", "4"],
+        ["3", "5"],
+        ["2", "3"],
+      ],
+    ],
+    [
+      "sd",
+      [
+        ["4^", "4"],
+        ["5", "3"],
+        ["3", "2"],
+      ],
+    ],
+  ])(
+    "%s keeps tied members stable and sorts dice within each pool",
+    (modifier, expected) => {
+      const result = evaluateGroup(`{2d6min4, 2d8, 2d4+3}${modifier}`, {
+        rolls: [1, 4, 3, 5, 2, 3],
+      });
+
+      expect(
+        result.members.map(
+          ({ value, calculationValue, useInTotal, flags }) => ({
+            value,
+            calculationValue,
+            useInTotal,
+            flags,
+          }),
+        ),
+      ).toEqual([
+        { value: 8, calculationValue: 8, useInTotal: true, flags: [] },
+        { value: 8, calculationValue: 8, useInTotal: true, flags: [] },
+        { value: 8, calculationValue: 8, useInTotal: true, flags: [] },
+      ]);
+      expect(poolRolls(result)).toEqual(expected);
+      expect(poolsOf(result)[0]?.rolls).toMatchObject([
+        {
+          initialValue: 1,
+          value: 4,
+          calculationValue: 4,
+          useInTotal: true,
+          flags: ["min"],
+        },
+        {
+          initialValue: 4,
+          value: 4,
+          calculationValue: 4,
+          useInTotal: true,
+          flags: [],
+        },
+      ]);
+      expect(result.value).toBe(24);
     },
   );
 });
@@ -308,10 +574,23 @@ describe("nested group modifiers", () => {
       const result = evaluateGroup(`{{2d6}+2d4}${modifier}`, {
         rolls: [6, 5, 2, 3],
       });
-      expect(poolRolls(result)[0]).toEqual(["6", "5"]);
-      expect(result.members[0]?.result).toMatchObject({
-        left: { type: "group", value: 11 },
+      expect(poolRolls(result)).toEqual([
+        ["6", "5"],
+        ["2d", "3"],
+      ]);
+      expect(result.members[0]).toMatchObject({
+        value: 14,
+        calculationValue: 14,
+        useInTotal: true,
+        flags: [],
+        result: {
+          type: "binary",
+          value: 14,
+          left: { type: "group", value: 11 },
+          right: { type: "pool", value: 3 },
+        },
       });
+      expect(result.value).toBe(14);
     }
   });
 
