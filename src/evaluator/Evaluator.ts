@@ -101,10 +101,8 @@ export class Evaluator {
       case "function":
         return this.evaluateFunction(node, ctx);
       default: {
-        const unknown: never = node;
-
         throw new EvaluationError(
-          `Unknown node type: ${(unknown as { type: string }).type}`,
+          `Unknown node type: ${(node as { type: string }).type}`,
         );
       }
     }
@@ -480,7 +478,7 @@ export class Evaluator {
 /** Tags flattened die results with the index of their pool (copied by the handlers' spreads). */
 const POOL = Symbol("pool");
 
-type TaggedDieResult = DieResult & { [POOL]?: number };
+export type TaggedDieResult = DieResult & { [POOL]?: number };
 
 function withPoolRolls(
   pool: PoolResult,

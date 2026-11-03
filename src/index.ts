@@ -34,7 +34,12 @@ export { Roller } from "./Roller.js";
 export type { RollerOptions } from "./Roller.js";
 export { RollHistory } from "./RollHistory.js";
 
+export { Parser } from "./parser/Parser.js";
+export type { ParserOptions } from "./parser/Parser.js";
+
 // types for custom dice, engines and modifier handlers
+export { Evaluator } from "./evaluator/Evaluator.js";
+export type { EvaluatorRegistries, TaggedDieResult } from "./evaluator/Evaluator.js";
 export type {
   RollContext,
   RollLimits,
@@ -49,13 +54,16 @@ export type { ExpressionNode } from "./ast/nodes.js";
 export type { Presentable } from "./presenters/Presentable.js";
 export type { Presenter } from "./presenters/Presenter.js";
 export type { ExpressionResult } from "./results/types.js";
+export { EXPORT_FORMATS, NON_FINITE_NUMBERS } from "./serialization/formats.js";
 export type {
+  Encoded,
   EncodedExportData,
   EncodedHistoryData,
   EncodedNumber,
   EncodedRollData,
   ExportFormat,
   HistoryData,
+  NonFiniteNumber,
   RollData,
 } from "./serialization/formats.js";
 

@@ -318,8 +318,6 @@ test("namespaces are exported", () => {
 test.each([
   "math",
   "serialization",
-  "Parser",
-  "Evaluator",
   "createRollContext",
   "DEFAULT_ROLL_LIMITS",
   "NumberGenerator",
