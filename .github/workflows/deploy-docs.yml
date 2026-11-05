@@ -4,7 +4,7 @@ on:
     branches:
       - main
       - next
-      - 'versions/*'
+      - 'releases/*'
 
 concurrency:
   group: api-docs-${{ github.ref }}
@@ -41,15 +41,17 @@ jobs:
       - name: Select documentation branch
         working-directory: ./documentation
         run: |
+          case "$DOCS_BRANCH" in
+            releases/*) DOCS_BRANCH="versions/${DOCS_BRANCH#releases/}" ;;
+          esac
           if git ls-remote --exit-code --heads origin "refs/heads/$DOCS_BRANCH" > /dev/null; then
             git fetch --depth=1 origin "refs/heads/$DOCS_BRANCH"
             git switch -C "$DOCS_BRANCH" FETCH_HEAD
           else
             status=$?
-            # Exit code 2 means no matching branch; other failures must stop deployment.
-            if [ "$status" -ne 2 ]; then exit "$status"; fi
-            git switch -c "$DOCS_BRANCH"
+            exit "$status"
           fi
+          echo "DOCS_BRANCH=$DOCS_BRANCH" >> "$GITHUB_ENV"
 
       - name: Copy API docs to documentation repository
         run: |
