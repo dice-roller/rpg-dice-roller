@@ -3,9 +3,18 @@ on:
   push:
     branches:
       - main
+      - next
+      - 'versions/*'
+
+concurrency:
+  group: api-docs-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build-api-docs:
     runs-on: ubuntu-latest
+    env:
+      DOCS_BRANCH: ${{ github.ref_name }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -26,16 +35,36 @@ jobs:
         with:
           token: ${{ secrets.DOCS_DEPLOY_GHP }}
           repository: 'dice-roller/documentation'
+          ref: main
           path: './documentation'
+
+      - name: Select documentation branch
+        working-directory: ./documentation
+        run: |
+          if git ls-remote --exit-code --heads origin "refs/heads/$DOCS_BRANCH" > /dev/null; then
+            git fetch --depth=1 origin "refs/heads/$DOCS_BRANCH"
+            git switch -C "$DOCS_BRANCH" FETCH_HEAD
+          else
+            status=$?
+            # Exit code 2 means no matching branch; other failures must stop deployment.
+            if [ "$status" -ne 2 ]; then exit "$status"; fi
+            git switch -c "$DOCS_BRANCH"
+          fi
 
       - name: Copy API docs to documentation repository
         run: |
+          test -d ./docs/api
           rm -rf ./documentation/docs/api
           mv ./docs/api ./documentation/docs/api
 
-      - name: Commit and push API doc changes
+      - name: Commit API doc changes
         uses: EndBug/add-and-commit@v9
         with:
           cwd: './documentation'
-          add: './docs/api'
+          add: '-A ./docs/api'
+          push: false
           message: 'Auto API update from github workflow'
+
+      - name: Push API doc changes
+        working-directory: ./documentation
+        run: git push --set-upstream origin "$DOCS_BRANCH"
