@@ -240,10 +240,41 @@ describe("dice pools", () => {
   test("range and face dice can be rolled from builder nodes", () => {
     expect(
       evaluatePool(pool(2, die("range", -2, 3)), { mode: "min" }),
-    ).toMatchObject({ value: -4, die: { notation: "-2..3" } });
+    ).toMatchObject({ value: -4, die: { notation: "{-2...3}" } });
     expect(
       evaluatePool(pool(2, die("face", 1, 1, 2)), { rolls: [0, 2] }),
     ).toMatchObject({ value: 3, die: { notation: "{1,1,2}", faceCount: 3 } });
+  });
+
+  test("custom notation uses the registered range and face factories", () => {
+    const weighted = evaluatePool("3d{1,1,2}", { rolls: [0, 1, 2] });
+    expect(weighted.rolls.map(({ value }) => value)).toEqual([1, 1, 2]);
+    expect(weighted.die.faceCount).toBe(3);
+
+    const compact = evaluatePool("d{1...4}", { rolls: [4] });
+    expect(compact).toMatchObject({
+      value: 4,
+      die: { min: 1, max: 4, faceCount: 4 },
+    });
+
+    const stepped = evaluatePool("3d{0:0.5:1}", { rolls: [0, 1, 2] });
+    expect(stepped.rolls.map(({ value }) => value)).toEqual([0, 0.5, 1]);
+
+    const weightedTarget = evaluatePool("4d{1:10}>=8:2", {
+      rolls: [8, 7, 10, 1],
+    });
+    expect(
+      weightedTarget.rolls.map(({ calculationValue }) => calculationValue),
+    ).toEqual([2, 0, 2, 0]);
+    expect(weightedTarget.value).toBe(4);
+  });
+
+  test("custom notation rolls repeated large finite faces", () => {
+    const face = "9".repeat(308);
+    const result = evaluatePool(`d{${face},${face}}`, { rolls: [1] });
+
+    expect(result.rolls[0].value).toBe(Number(face));
+    expect(result.die.average).toBe(Number(face));
   });
 
   test("registered dice are created by name", () => {

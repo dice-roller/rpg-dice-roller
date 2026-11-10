@@ -177,8 +177,20 @@ describe("notation and descriptions", () => {
       rollWith(pool(2, 6, { description: "fire" }), [3, 4]).toString(),
     ).toBe("2d6 // fire: [3, 4] = 7");
     expect(rollWith(pool(2, die("range", -2, 3)), [-2, 3]).toString()).toBe(
-      "2drange(-2, 3): [-2, 3] = 1",
+      "2d{-2...3}: [-2, 3] = 1",
     );
+    expect(rollWith(pool(3, die("face", 1, 1, 2)), [0, 1, 2]).toString()).toBe(
+      "3d{1,1,2}: [1, 1, 2] = 4",
+    );
+  });
+
+  test("custom string notation and descriptions are preserved", () => {
+    const notation = "2d{ 1, 1, 2 } [damage]";
+    const roll = rollWith(notation, [0, 2]);
+
+    expect(roll.notation).toBe(notation);
+    expect(roll.description).toMatchObject({ text: "damage", style: "block" });
+    expect(roll.toString()).toBe(`${notation}: [1, 2] = 3`);
   });
 });
 

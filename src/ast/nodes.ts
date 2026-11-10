@@ -63,6 +63,8 @@ export type BuiltInDieName = (typeof BUILT_IN_DIE_NAMES)[number];
  * - `d(2+3)`: `{ name: "standard", args: [(2+3)] }`
  * - `d%`: `{ name: "percentile", args: [] }`
  * - `dF` / `dF.1` / `dF.2`: `{ name: "fudge", args: [] }` / `[1]` / `[2]`
+ * - `d{0...2}`: `{ name: "range", args: [0, 2] }`
+ * - `d{1,1,2}`: `{ name: "face", args: [1, 1, 2] }`
  */
 export interface DieNode {
   readonly type: "die";

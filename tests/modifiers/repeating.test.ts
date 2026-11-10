@@ -49,6 +49,7 @@ describe("explode", () => {
     // other dice
     ["2dF!", [2, 0, 1], ["1!", "0", "-1"], 0],
     ["d%!", [100, 7], ["100!", "7"], 107],
+    ["d{4:2:8}!", [2, 1], ["8!", "6"], 14],
   ])("%s", (notation, rolls, expected, total) => {
     const result = evaluatePool(notation, { rolls });
 

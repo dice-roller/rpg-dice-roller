@@ -103,7 +103,8 @@ export function num(value: number): NumberNode {
 /**
  * A reference to a die factory, e.g. `die("percentile")` for `d%`, or `die("range", -2, 3)`.
  * Register custom names in the die registry used by the evaluator before rolling. Registration is
- * not checked here; custom dice and some built-ins have display-only notation.
+ * not checked here; valid literal `range` and `face` dice use brace notation, while custom names
+ * and unsupported arguments have display-only notation.
  */
 export function die(name: string, ...args: ExpressionInput[]): DieNode {
   if (typeof name !== "string" || name === "") {

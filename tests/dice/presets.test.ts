@@ -58,6 +58,10 @@ describe("faceDie", () => {
     expect(Object.isFrozen(die.faces)).toBe(true);
   });
 
+  test("programmatic face lists are not limited by notation's face cap", () => {
+    expect(faceDie(Array(1_001).fill(1)).faces).toHaveLength(1_001);
+  });
+
   test.each([
     ["no faces", []],
     ["a non-finite face", [1, Number.NaN]],

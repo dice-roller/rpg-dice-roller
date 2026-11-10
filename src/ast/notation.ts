@@ -14,6 +14,10 @@ import type {
   PoolNode,
 } from "./nodes.js";
 import {
+  formatCustomDieNumber,
+  MAX_CUSTOM_DIE_FACES,
+} from "../dice/custom-die-notation.js";
+import {
   minPrecedenceForBinaryOperand,
   minPrecedenceForUnaryOperand,
   needsParentheses,
@@ -23,8 +27,9 @@ import {
  * Converts an expression to canonical notation, e.g. a pool to `4d6kh3`.
  *
  * Parentheses may be added to preserve precedence. Parsed notation round-trips through the parser,
- * but arbitrary builder nodes need not: for example, `range`, `face`, and custom dice are written
- * as display-only `name(args)` forms, and ambiguous `!=` comparisons may be written as `<>`.
+ * but arbitrary builder nodes need not: custom factories, unsupported `range` / `face` arguments,
+ * and face lists above the notation limit use display-only `name(args)` forms. Ambiguous `!=`
+ * comparisons may be written as `<>`.
  */
 export function nodeToNotation(node: ExpressionNode): string {
   // inline descriptions end with a line break, which isn't needed at the very end
@@ -106,8 +111,8 @@ function writePool(node: PoolNode): string {
 /**
  * Writes the die after the `d`: `6`, `(2+3)`, `%`, `F`, `F.1`.
  *
- * Other dice (`range`, `face` and user-registered dice) have no notation yet, so they're written
- * as `name(args)`, e.g. `range(-2, 3)`. That is for display only and doesn't parse back.
+ * Literal `range` and `face` dice use custom brace notation. User-registered dice and unsupported
+ * expressions retain the display-only `name(args)` fallback.
  */
 function writeDie(die: DieNode): string {
   const [first, ...rest] = die.args;
@@ -130,8 +135,49 @@ function writeDie(die: DieNode): string {
     }
   }
 
-  // @todo this needs to use correct notation once decided on format
+  if (die.name === "range") {
+    const values = literalValues(die.args, 2);
+
+    if (
+      values?.length === 2 &&
+      Number.isSafeInteger(values[0]) &&
+      Number.isSafeInteger(values[1]) &&
+      values[0] <= values[1]
+    ) {
+      return `{${formatCustomDieNumber(values[0])}...${formatCustomDieNumber(values[1])}}`;
+    }
+  }
+
+  if (die.name === "face") {
+    const values = literalValues(die.args, MAX_CUSTOM_DIE_FACES);
+
+    if (values) {
+      return `{${values.map(formatCustomDieNumber).join(",")}}`;
+    }
+  }
+
   return `${die.name}(${die.args.map(write).join(", ")})`;
+}
+
+function literalValues(
+  args: readonly ExpressionNode[],
+  maxLength: number,
+): number[] | undefined {
+  if (args.length === 0 || args.length > maxLength) {
+    return undefined;
+  }
+
+  const values: number[] = [];
+
+  for (const arg of args) {
+    if (arg.type !== "number" || !Number.isFinite(arg.value)) {
+      return undefined;
+    }
+
+    values.push(arg.value);
+  }
+
+  return values;
 }
 
 /** Writes the node, wrapped in parentheses if it binds looser than `minPrecedence`. */

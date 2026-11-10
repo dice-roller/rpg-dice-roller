@@ -559,6 +559,43 @@ describe("min / max mode", () => {
   });
 });
 
+describe("custom dice", () => {
+  test("face indices preserve order and duplicate weights with keep and drop", () => {
+    expect(
+      evaluatePool("3d{2,1,2}", { rolls: [0, 1, 2] }).rolls.map(
+        ({ value }) => value,
+      ),
+    ).toEqual([2, 1, 2]);
+
+    const kept = evaluatePool("4d{1,1,2}kh2", { rolls: [0, 1, 2, 2] });
+    expect(rollsOf(kept)).toEqual(["1d", "1d", "2", "2"]);
+    expect(kept.value).toBe(4);
+
+    const dropped = evaluatePool("4d{0:2}dl1", { rolls: [0, 2, 1, 2] });
+    expect(rollsOf(dropped)).toEqual(["0d", "2", "1", "2"]);
+    expect(dropped.value).toBe(5);
+  });
+
+  test("a target amount after a custom range is not part of the range", () => {
+    const result = evaluatePool("4d{1:10}>=8:2", { rolls: [8, 7, 10, 1] });
+
+    expect(
+      result.rolls.map(({ calculationValue }) => calculationValue),
+    ).toEqual([2, 0, 2, 0]);
+    expect(result.value).toBe(4);
+  });
+
+  test("custom dice remain distinct from roll groups", () => {
+    const result = evaluateGroup("{d{0:2}, d6}k1", { rolls: [2, 3] });
+
+    expect(result.members.map(({ useInTotal }) => useInTotal)).toEqual([
+      false,
+      true,
+    ]);
+    expect(result.value).toBe(3);
+  });
+});
+
 describe("groups", () => {
   test.each<[string, number[], boolean[], number]>([
     // members are 2d6 = 7, 3d4 = 6

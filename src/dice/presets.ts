@@ -10,7 +10,8 @@ export interface DieOptions {
 /**
  * A die with every integer from `min` to `max`, e.g. `rangeDie(-2, 3)`.
  *
- * Registered in the `DieRegistry` as `range`.
+ * Registered in the `DieRegistry` as `range`; notation such as `d{0...2}` or `d{0:2}` uses it
+ * for implicit ascending safe-integer ranges.
  *
  * @throws {ValidationError} `min` or `max` isn't a safe integer, or `min` is greater than `max`
  */
@@ -39,6 +40,7 @@ export function rangeDie(
  *
  * Repeated faces act as weights. The faces are copied and frozen, so changing the array afterwards
  * doesn't change the die. Registered in the `DieRegistry` as `face`, with the faces as arguments.
+ * Notation such as `d{1,1,2}` materializes at most 1,000 faces; this limit does not apply here.
  *
  * @throws {ValidationError} there are no faces, or a face isn't a finite number
  */
