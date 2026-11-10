@@ -9,6 +9,7 @@ export default defineConfig(
     "coverage/",
     "docs/",
     "dist/",
+    "manual-testing/",
     "types/",
     "src/parser/generated/",
     // the v5 tests are kept for reference only, until they are converted

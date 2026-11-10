@@ -69,6 +69,7 @@ import type {
   SortDirection,
   SortNode,
   TargetNode,
+  TargetRule,
   UnaryNode,
   UniqueNode,
 } from "./nodes.js";
@@ -214,12 +215,57 @@ export function explode(
   );
 }
 
-/** Count successes and optional failures; the built-in handler gives successes precedence on overlap. */
+/** A target block starts with a success and can contain further success or failure rules. Amounts are 1–10 and default to 1; the last matching rule wins. */
+export function target(rules: readonly TargetRule[]): TargetNode;
+/** Count successes and optional failures using unweighted compare points. */
 export function target(
   success: ComparePoint,
   failure?: ComparePoint,
+): TargetNode;
+export function target(
+  success: ComparePoint | readonly TargetRule[],
+  failure?: ComparePoint,
 ): TargetNode {
-  return createTarget(comparePoint(success), optionalComparePoint(failure));
+  if (!Array.isArray(success)) {
+    return createTarget(
+      comparePoint(success as ComparePoint),
+      optionalComparePoint(failure),
+    );
+  }
+
+  if (failure !== undefined || success.length === 0) {
+    throw new ValidationError(
+      "A target needs a success rule and no second argument",
+    );
+  }
+
+  const rules = success.map((rule: TargetRule, index: number): TargetRule => {
+    if (
+      (index === 0 && rule?.kind !== "success") ||
+      (rule?.kind !== "success" && rule?.kind !== "failure")
+    ) {
+      throw new ValidationError(
+        "A target block must start with a success and contain only success or failure rules",
+      );
+    }
+
+    if (
+      rule.amount !== undefined &&
+      (!Number.isInteger(rule.amount) || rule.amount < 1 || rule.amount > 10)
+    ) {
+      throw new ValidationError(
+        "A target amount must be an integer between 1 and 10",
+      );
+    }
+
+    return {
+      kind: rule.kind,
+      comparePoint: comparePoint(rule.comparePoint),
+      ...(rule.amount !== undefined && { amount: rule.amount }),
+    };
+  });
+
+  return createTarget(rules);
 }
 
 /** Drop `qty` highest (`h`) or lowest (`l`) items; quantity defaults to 1. */

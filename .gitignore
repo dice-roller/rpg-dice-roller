@@ -55,6 +55,7 @@ bower_components
 
 ## Testing
 /coverage
+/manual-testing/
 
 ## Docs
 /docs/api

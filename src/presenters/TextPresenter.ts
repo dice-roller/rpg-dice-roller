@@ -20,13 +20,13 @@ import type { Roll } from "../Roll.js";
 import type { RollHistory } from "../RollHistory.js";
 import { TreePresenter } from "./TreePresenter.js";
 
-/** The v5 flag symbols, e.g. `[6!, 2, 1d]`. */
+/** Default flag symbols, e.g. `[6!, 2, 1d]. */
 export const DEFAULT_FLAG_SYMBOLS: Readonly<Record<ResultFlag, string>> =
   Object.freeze({
     compound: "!",
     explode: "!",
-    "critical-failure": "__",
-    "critical-success": "**",
+    "critical-failure": "cf",
+    "critical-success": "cs",
     drop: "d",
     max: "v",
     min: "^",
@@ -71,8 +71,18 @@ export class TextPresenter extends TreePresenter<string> {
   }
 
   /** The symbols for the flags, e.g. `["explode", "drop"]` -> `!d`. */
-  protected flags(flags: readonly ResultFlag[]): string {
-    return flags.map((flag) => this.flagSymbols[flag]).join("");
+  protected flags(
+    flags: readonly ResultFlag[],
+    calculationValue: number,
+  ): string {
+    return flags
+      .map((flag) => {
+        const count = ["target-success", "target-failure"].includes(flag)
+          ? Math.abs(calculationValue)
+          : 1;
+        return this.flagSymbols[flag].repeat(count);
+      })
+      .join("");
   }
 
   /** Formats a number with `String(value)`, including non-finite values. */
@@ -101,7 +111,7 @@ export class TextPresenter extends TreePresenter<string> {
 
   /** `6!`, `1d` */
   protected die(result: DieResult, _pool: PoolResult): string {
-    return `${this.formatNumber(result.value)}${this.flags(result.flags)}`;
+    return `${this.formatNumber(result.value)}${this.flags(result.flags, result.calculationValue)}`;
   }
 
   /** `{[3, 5]+2, ([4])d}` */
@@ -115,7 +125,7 @@ export class TextPresenter extends TreePresenter<string> {
 
     return member.flags.length === 0
       ? inner
-      : `(${inner})${this.flags(member.flags)}`;
+      : `(${inner})${this.flags(member.flags, member.calculationValue)}`;
   }
 
   /** `[4, 2]+3` */

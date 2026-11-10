@@ -93,6 +93,63 @@ describe("modifiers", () => {
     ]);
   });
 
+  test.each(["4d10", "{d10,d10}"])(
+    "groups adjacent target conditions into one modifier in %s",
+    (prefix) => {
+      expect(modifiersOf(`${prefix}>=8:1=10:2f<=2:3=10:2k1`)).toEqual([
+        createTarget([
+          { kind: "success", comparePoint: cp(">=", 8), amount: 1 },
+          { kind: "success", comparePoint: cp("=", 10), amount: 2 },
+          { kind: "failure", comparePoint: cp("<=", 2), amount: 3 },
+          { kind: "success", comparePoint: cp("=", 10), amount: 2 },
+        ]),
+        createKeep("h", 1),
+      ]);
+    },
+  );
+
+  test.each([
+    "4d10>=8:1k1>=10:2",
+    "{d10,d10}>=8:1k1>=10:2",
+    "4d10>=8:1min4=4:3",
+  ])(
+    "rejects target conditions separated by another modifier in %s",
+    (notation) => {
+      expect(() => parser.parse(notation)).toThrow();
+    },
+  );
+
+  test("a target followed by != retains the explode interpretation", () => {
+    expect(modifiersOf("4d6>3!=4")).toEqual([
+      createTarget(cp(">", 3)),
+      createExplode(false, false, cp("=", 4)),
+    ]);
+    expect(modifiersOf("4d6>3<>4f!=1")).toEqual([
+      createTarget([
+        { kind: "success", comparePoint: cp(">", 3) },
+        { kind: "success", comparePoint: cp("<>", 4) },
+        { kind: "failure", comparePoint: cp("!=", 1) },
+      ]),
+    ]);
+  });
+
+  test.each(["d10>=8:1", "d10>=8:10", "d10>=8"])(
+    "accepts target amounts in %s",
+    (notation) => expect(() => parser.parse(notation)).not.toThrow(),
+  );
+
+  test.each([
+    "d10>=8:0",
+    "d10>=8:11",
+    "d10>=8:-1",
+    "d10>=8:1.5",
+    "d10>=8:",
+    "d10>=8f=1:0",
+    "d10>=8f=1:",
+  ])("rejects invalid target amount in %s", (notation) => {
+    expect(() => parser.parse(notation)).toThrow();
+  });
+
   test("keep and drop are only replaced by the same end", () => {
     expect(modifiersOf("4d10dh1dl2")).toEqual([
       createDrop("h", 1),
