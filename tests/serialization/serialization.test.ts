@@ -104,6 +104,17 @@ describe("rolls round-trip", () => {
     },
   );
 
+  test("exports without a limit still import as legacy AST nodes", () => {
+    const data = dataOf("d6ro");
+    const modifier = (data.result as { node: { modifiers: unknown[] } }).node
+      .modifiers[0];
+
+    expect(modifier).not.toHaveProperty("limit");
+    expect(Roll.import(data as EncodedRollData).result.node).toEqual(
+      new Roll("d6ro", seeded()).result.node,
+    );
+  });
+
   test("a group containing custom dice survives import", () => {
     const original = new Roll("{d{0:2}, d6}k1 [group]", seeded());
     const imported = Roll.import(original.export());
@@ -156,6 +167,28 @@ describe("rolls round-trip", () => {
     expect(imported.averageTotal).toBe(original.averageTotal);
     expect(imported.toString()).toBe(original.toString());
   });
+
+  test.each(EXPORT_FORMATS)(
+    "modifier limits and aliases survive %s round trips",
+    (format) => {
+      for (const notation of [
+        "4d6!3=6>=5:2",
+        "d6r1<=2",
+        "4d6u1<=2",
+        "d6ro<=2",
+        "4d6uo<=2",
+      ]) {
+        const original = new Roll(notation, seeded());
+        const imported = Roll.import(original.export(format));
+
+        expect(imported.notation).toBe(original.notation);
+        expect(imported.result.node).toEqual(original.result.node);
+        expect(imported.result).toEqual(original.result);
+        expect(imported.toString()).toBe(original.toString());
+        expect(imported.export("object")).toEqual(original.export("object"));
+      }
+    },
+  );
 
   test("the object format is JSON-safe", () => {
     const data = new Roll("1/0+2d6", seeded()).export("object");
@@ -474,6 +507,16 @@ describe("invalid data", () => {
     return JSON.stringify(data);
   }
 
+  test("a consistent once flag and limit of one imports as an alias", () => {
+    const input = corrupt("d6ro", "result.node.modifiers.0.limit", 1);
+    const imported = Roll.import(input);
+
+    expect(imported.result.node).toMatchObject({
+      modifiers: [{ name: "re-roll", once: true, limit: 1 }],
+    });
+    expect(imported.notation).toBe("d6ro");
+  });
+
   test.each<[string, string, string, unknown]>([
     ["an unknown type", "2d6", "type", "dice"],
     ["a missing type", "2d6", "type", DELETE],
@@ -506,6 +549,32 @@ describe("invalid data", () => {
       "a bad target amount",
       "d10>=1:2",
       "result.node.modifiers.0.rules.0.amount",
+      0,
+    ],
+    ["a zero explode limit", "d6!", "result.node.modifiers.0.limit", 0],
+    ["a fractional re-roll limit", "d6r", "result.node.modifiers.0.limit", 1.5],
+    [
+      "an unsafe unique limit",
+      "d6u",
+      "result.node.modifiers.0.limit",
+      Number.MAX_SAFE_INTEGER + 1,
+    ],
+    [
+      "a non-finite explode limit",
+      "d6!",
+      "result.node.modifiers.0.limit",
+      { $number: "Infinity" },
+    ],
+    [
+      "a re-roll alias with a conflicting limit",
+      "d6ro",
+      "result.node.modifiers.0.limit",
+      2,
+    ],
+    [
+      "an invalid modifier limit in a nested AST",
+      "{d6!, d8}",
+      "result.node.expressions.0.modifiers.0.limit",
       0,
     ],
     [

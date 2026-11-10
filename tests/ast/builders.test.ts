@@ -29,6 +29,11 @@ import type {
 import { nodeToNotation } from "../../src/ast/notation.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
 import { Parser } from "../../src/parser/Parser.js";
+import {
+  createExplode,
+  createReRoll,
+  createUnique,
+} from "../../src/ast/factory.js";
 
 const parser = new Parser();
 
@@ -48,6 +53,7 @@ describe("builders match the parser", () => {
     ["4d6d1", pool(4, 6, { modifiers: [drop("l")] })],
     ["4d6dh2", pool(4, 6, { modifiers: [drop("h", 2)] })],
     ["2d6!", pool(2, 6, { modifiers: [explode()] })],
+    ["2d6!3", pool(2, 6, { modifiers: [explode({ limit: 3 })] })],
     ["2d6!!", pool(2, 6, { modifiers: [explode({ compound: true })] })],
     ["2d6!p", pool(2, 6, { modifiers: [explode({ penetrate: true })] })],
     [
@@ -79,6 +85,8 @@ describe("builders match the parser", () => {
       }),
     ],
     ["2d20r", pool(2, 20, { modifiers: [reRoll()] })],
+    ["2d20r3", pool(2, 20, { modifiers: [reRoll({ limit: 3 })] })],
+    ["2d20r1", pool(2, 20, { modifiers: [reRoll({ limit: 1 })] })],
     [
       "2d20ro<3",
       pool(2, 20, {
@@ -86,6 +94,8 @@ describe("builders match the parser", () => {
       }),
     ],
     ["4d6u", pool(4, 6, { modifiers: [unique()] })],
+    ["4d6u3", pool(4, 6, { modifiers: [unique({ limit: 3 })] })],
+    ["4d6u1", pool(4, 6, { modifiers: [unique({ limit: 1 })] })],
     [
       "4d6uo=1",
       pool(4, 6, {
@@ -185,6 +195,24 @@ describe("defaults and options", () => {
     expect(node).not.toHaveProperty("description");
     expect(JSON.parse(JSON.stringify(node))).toEqual(node);
     expect(Object.keys(explode())).not.toContain("comparePoint");
+  });
+
+  test("once with a limit of one normalizes to the alias representation", () => {
+    expect(reRoll({ once: true, limit: 1 })).toEqual(reRoll({ once: true }));
+    expect(unique({ once: true, limit: 1 })).toEqual(unique({ once: true }));
+  });
+
+  test.each([
+    ["factory explode", () => createExplode(false, false, undefined, 0)],
+    ["factory re-roll", () => createReRoll(false, undefined, 1.5)],
+    ["factory unique", () => createUnique(false, undefined, Number.NaN)],
+    ["explode builder", () => explode({ limit: Number.POSITIVE_INFINITY })],
+    ["re-roll builder", () => reRoll({ limit: Number.MAX_SAFE_INTEGER + 1 })],
+    ["unique builder", () => unique({ limit: -1 })],
+    ["re-roll alias conflict", () => reRoll({ once: true, limit: 2 })],
+    ["unique alias conflict", () => unique({ once: true, limit: 2 })],
+  ])("%s rejects invalid limits", (_, build) => {
+    expect(build).toThrow(ValidationError);
   });
 
   test("repeated modifiers are de-duplicated like the parser (last wins)", () => {

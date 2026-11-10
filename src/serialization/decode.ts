@@ -8,6 +8,7 @@ import type {
   ExpressionNode,
   ModifierName,
 } from "../ast/nodes.js";
+import { isPositiveSafeInteger } from "../ast/validation.js";
 import { ImportError } from "../errors/ImportError.js";
 import { RESULT_FLAGS } from "../results/flags.js";
 import type { ExpressionResult } from "../results/types.js";
@@ -182,6 +183,12 @@ function finite(value: unknown, path: string): number {
   }
 
   return value as number;
+}
+
+function positiveSafeInteger(value: unknown, path: string): void {
+  if (!isPositiveSafeInteger(value)) {
+    fail(path, "expected a positive safe integer");
+  }
 }
 
 function oneOf<T extends string>(
@@ -449,6 +456,7 @@ function modifier(value: unknown, path: string): void {
       boolean(node.compound, `${path}.compound`);
       boolean(node.penetrate, `${path}.penetrate`);
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
+      optional(node.limit, `${path}.limit`, positiveSafeInteger);
       break;
     case "target": {
       if (node.rules === undefined) {
@@ -500,6 +508,11 @@ function modifier(value: unknown, path: string): void {
     case "unique":
       boolean(node.once, `${path}.once`);
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
+      optional(node.limit, `${path}.limit`, positiveSafeInteger);
+
+      if (node.once && node.limit !== undefined && node.limit !== 1) {
+        fail(`${path}.limit`, "a once modifier can only have a limit of 1");
+      }
       break;
     case "critical-success":
     case "critical-failure":

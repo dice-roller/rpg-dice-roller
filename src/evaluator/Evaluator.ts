@@ -17,6 +17,7 @@ import { EvaluationError } from "../errors/EvaluationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
 import { validateTargetAmounts } from "../modifiers/handlers/target.js";
+import { resolveIterationBudget } from "../modifiers/handlers/utils.js";
 import type {
   ModifierHandler,
   ModifierInput,
@@ -194,6 +195,8 @@ export class Evaluator {
     if (node.expressions.length === 0) {
       throw new EvaluationError("A group needs at least one expression");
     }
+
+    this.validateIterationLimits(node.modifiers, ctx);
 
     let members = node.expressions.map((expression): GroupMemberResult => {
       const result = this.evaluate(expression, ctx);
@@ -436,6 +439,8 @@ export class Evaluator {
     target: ModifierTarget,
     input: Omit<ModifierInput, "modifier">,
   ): T[] {
+    this.validateIterationLimits(modifiers, input.ctx);
+
     return this.orderedModifiers(modifiers).reduce<T[]>(
       (current, modifier) =>
         this.runHandler(this.handlerFor(modifier, target), current, {
@@ -444,6 +449,21 @@ export class Evaluator {
         }),
       [...items],
     );
+  }
+
+  private validateIterationLimits(
+    modifiers: readonly ModifierNode[],
+    ctx: RollContext,
+  ): void {
+    for (const modifier of modifiers) {
+      if (
+        modifier.name === "explode" ||
+        modifier.name === "re-roll" ||
+        modifier.name === "unique"
+      ) {
+        resolveIterationBudget(modifier, ctx.limits);
+      }
+    }
   }
 
   private orderedModifiers(modifiers: readonly ModifierNode[]): ModifierNode[] {

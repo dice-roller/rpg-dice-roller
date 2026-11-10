@@ -213,6 +213,8 @@ export interface ExplodeNode {
   readonly compound: boolean;
   readonly penetrate: boolean;
   readonly comparePoint?: ComparePoint;
+  /** Maximum additional explosions per initial die; omitted limits use the context cap. */
+  readonly limit?: number;
 }
 
 /** A target comparison; amount is a whole number from 1 to 10 and defaults to 1. */
@@ -245,20 +247,24 @@ export interface KeepNode {
   readonly qty: number;
 }
 
-/** `r`, `ro`. */
+/** `r`, `ro` and numeric re-roll limits. */
 export interface ReRollNode {
   readonly type: "modifier";
   readonly name: "re-roll";
   readonly once: boolean;
   readonly comparePoint?: ComparePoint;
+  /** Maximum additional re-rolls per die; omitted limits use the context cap. */
+  readonly limit?: number;
 }
 
-/** `u`, `uo`. */
+/** `u`, `uo` and numeric uniqueness limits. */
 export interface UniqueNode {
   readonly type: "modifier";
   readonly name: "unique";
   readonly once: boolean;
   readonly comparePoint?: ComparePoint;
+  /** Maximum additional re-rolls per duplicate die; omitted limits use the context cap. */
+  readonly limit?: number;
 }
 
 /** `cs`. */

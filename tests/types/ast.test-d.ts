@@ -9,6 +9,7 @@ import type {
   ModifierNodeOf,
   PoolNode,
 } from "../../src/ast/nodes.js";
+import { explode, reRoll, unique } from "../../src/ast/builders.js";
 import type { ResultFlag } from "../../src/results/flags.js";
 import type {
   ExpressionResult,
@@ -53,6 +54,15 @@ assertType<
   >
 >();
 assertType<Equals<ModifierNodeOf<"keep">["end"], "h" | "l">>();
+assertType<Equals<ModifierNodeOf<"explode">["limit"], number | undefined>>();
+assertType<Equals<ModifierNodeOf<"re-roll">["limit"], number | undefined>>();
+assertType<Equals<ModifierNodeOf<"unique">["limit"], number | undefined>>();
+
+explode({ limit: 3 });
+reRoll({ limit: 1 });
+unique({ once: true, limit: 1 });
+// @ts-expect-error - limits are numeric
+reRoll({ limit: "1" });
 
 // the 14 maths functions
 assertType<
