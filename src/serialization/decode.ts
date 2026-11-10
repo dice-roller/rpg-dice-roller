@@ -432,7 +432,11 @@ const MODIFIER_NAMES: readonly ModifierName[] = [
 ];
 
 function modifiers(value: unknown, path: string): void {
-  each(value, path, modifier);
+  const nodes = list(value, path);
+  each(nodes, path, modifier);
+  if (nodes.filter((node) => (node as Data).name === "target").length > 1) {
+    fail(path, "target rules must be in one modifier");
+  }
 }
 
 function modifier(value: unknown, path: string): void {
@@ -446,10 +450,41 @@ function modifier(value: unknown, path: string): void {
       boolean(node.penetrate, `${path}.penetrate`);
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
       break;
-    case "target":
-      comparePoint(node.success, `${path}.success`);
-      optional(node.failure, `${path}.failure`, comparePoint);
+    case "target": {
+      if (node.rules === undefined) {
+        const success = comparePoint(node.success, `${path}.success`);
+        const failure =
+          node.failure === undefined
+            ? undefined
+            : comparePoint(node.failure, `${path}.failure`);
+        const mutable = node as Record<string, unknown>;
+        mutable.rules = [
+          { kind: "success", comparePoint: success },
+          ...(failure ? [{ kind: "failure", comparePoint: failure }] : []),
+        ];
+        delete mutable.success;
+        delete mutable.failure;
+      }
+
+      const rules = list(node.rules, `${path}.rules`);
+      if (rules.length === 0) {
+        fail(`${path}.rules`, "expected at least one rule");
+      }
+
+      each(rules, `${path}.rules`, (value, rulePath) => {
+        const rule = record(value, rulePath);
+        oneOf(rule.kind, ["success", "failure"] as const, `${rulePath}.kind`);
+        comparePoint(rule.comparePoint, `${rulePath}.comparePoint`);
+
+        if (rule.amount !== undefined) {
+          const amount = finite(rule.amount, `${rulePath}.amount`);
+          if (!Number.isInteger(amount) || amount < 1 || amount > 10) {
+            fail(`${rulePath}.amount`, "expected an integer between 1 and 10");
+          }
+        }
+      });
       break;
+    }
     case "drop":
     case "keep":
       oneOf(node.end, ["h", "l"] as const, `${path}.end`);

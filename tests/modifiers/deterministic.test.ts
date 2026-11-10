@@ -1,4 +1,5 @@
 import { createKeep, createMin, createSort } from "../../src/ast/factory.js";
+import type { MinNode, TargetNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
@@ -194,8 +195,8 @@ describe("target", () => {
     ["2d6<>4", [4, 5], ["4", "5*"], 1],
     ["4d6>4f<3", [2, 5, 4, 5], ["2_", "5*", "4", "5*"], 1],
     ["4d6>4f<3", [1, 2, 3, 6], ["1_", "2_", "3", "6*"], -1],
-    // matching both counts as a success
-    ["2d6>2f<5", [3, 1], ["3*", "1_"], 0],
+    // the last matching rule wins
+    ["2d6>2f<5", [3, 1], ["3_", "1_"], -2],
   ])("%s", (notation, rolls, expected, total) => {
     const result = evaluatePool(notation, { rolls });
 
@@ -252,6 +253,149 @@ describe("target", () => {
     expect(rollsOf(result)).toEqual(["5d*", "6*", "2d", "5*"]);
     expect(result.value).toBe(2);
   });
+
+  test.each([
+    ["5d10>=6:2f<=2:3>=10:5", [1, 2, 5, 6, 10], [-3, -3, 0, 2, 5]],
+    ["5d10>=10:5>=6:2f<=2:3", [1, 2, 5, 6, 10], [-3, -3, 0, 2, 2]],
+    ["4d6>2:2f<5:3=3:4", [1, 3, 4, 6], [-3, 4, -3, 2]],
+    ["3d6<-1:2<>2:10", [1, 2, 3], [10, 0, 10]],
+  ])("%s uses the last matching rule", (notation, rolls, expected) => {
+    const result = evaluatePool(notation, { rolls });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual(rolls);
+    expect(
+      result.rolls.map(({ calculationValue }) => calculationValue),
+    ).toEqual(expected);
+    expect(result.value).toBe(expected.reduce((a, b) => a + b, 0));
+  });
+
+  test.each<[number[], number]>([
+    [[1, 2, 3, 3], 2],
+    [[1, 2, 4, 5], 1],
+    [[1, 3, 5, 6], 0],
+  ])("4d6<=5=3:2k1 scores the kept result in %s", (rolls, total) => {
+    expect(evaluatePool("4d6<=5=3:2k1", { rolls }).value).toBe(total);
+  });
+
+  test("clears stale target flags and preserves other flags and exclusion", () => {
+    const items = [
+      {
+        ...createDieResult(6),
+        useInTotal: false,
+        flags: ["target-failure", "critical-success"] as const,
+      },
+      { ...createDieResult(3), flags: ["target-success", "drop"] as const },
+    ];
+    const modifier = {
+      type: "modifier",
+      name: "target",
+      rules: [
+        {
+          kind: "success",
+          comparePoint: { operator: ">", value: 4 },
+          amount: 2,
+        },
+      ],
+    } as const;
+    const result = targetHandler.apply(items, {
+      modifier,
+      ctx: createRollContext(),
+    });
+
+    expect(result).toMatchObject([
+      {
+        value: 6,
+        useInTotal: false,
+        calculationValue: 2,
+        flags: ["critical-success", "target-success"],
+      },
+      { value: 3, calculationValue: 0, flags: ["drop"] },
+    ]);
+    expect(items[0]?.flags).toEqual(["target-failure", "critical-success"]);
+  });
+
+  test("weighted targets preserve dropped, min, and independent critical flags", () => {
+    const result = evaluatePool("3d6min2kh2>=2:2f=2:3cs>=2cf=2", {
+      rolls: [1, 2, 6],
+    });
+
+    expect(
+      result.rolls.map(({ value, useInTotal, calculationValue, flags }) => ({
+        value,
+        useInTotal,
+        calculationValue,
+        flags,
+      })),
+    ).toEqual([
+      {
+        value: 2,
+        useInTotal: false,
+        calculationValue: -3,
+        flags: [
+          "min",
+          "drop",
+          "target-failure",
+          "critical-success",
+          "critical-failure",
+        ],
+      },
+      {
+        value: 2,
+        useInTotal: true,
+        calculationValue: -3,
+        flags: ["target-failure", "critical-success", "critical-failure"],
+      },
+      {
+        value: 6,
+        useInTotal: true,
+        calculationValue: 2,
+        flags: ["target-success", "critical-success"],
+      },
+    ]);
+    expect(result.value).toBe(-1);
+  });
+
+  test.each([0, -1, 1.5, 11, NaN, Infinity, null, "2"])(
+    "rejects invalid supplied target amount %s even with a custom handler",
+    (amount) => {
+      const node = parser.parse("d6>4");
+      if (node.type !== "pool") throw new Error("Expected a pool");
+      const modifier = {
+        type: "modifier",
+        name: "target",
+        rules: [
+          {
+            kind: "success",
+            comparePoint: { operator: ">", value: 4 },
+            amount,
+          },
+        ],
+      };
+      const modifiers = new ModifierRegistry().register({
+        ...targetHandler,
+        apply: (items) => [...items],
+      });
+      expect(() =>
+        evaluate({ ...node, modifiers: [modifier] } as never, { modifiers }),
+      ).toThrow(ValidationError);
+    },
+  );
+
+  test.each(["d6>4", "{1,2}>1"])(
+    "rejects multiple targets in a directly supplied AST for %s",
+    (notation) => {
+      const node = parser.parse(notation);
+      if (node.type !== "pool" && node.type !== "group") {
+        throw new Error("Expected a pool or group");
+      }
+      const target = node.modifiers[0];
+      if (!target) throw new Error("Expected a target");
+
+      expect(() =>
+        evaluate({ ...node, modifiers: [target, createKeep("h", 1), target] }),
+      ).toThrow(ValidationError);
+    },
+  );
 
   test("!= straight after the die is an explode, not a target", () => {
     // `2d6!=4` explodes on 4; `2d6<>4` is the documented "not equal" target
@@ -344,6 +488,36 @@ describe("sort", () => {
 });
 
 describe("execution order", () => {
+  test("target rules run once at their equal-order position", () => {
+    const calls: string[] = [];
+    const modifiers = new ModifierRegistry().register(
+      {
+        ...targetHandler,
+        order: 1,
+        apply: (items, input) => {
+          calls.push(`target:${input.modifier.rules.length}`);
+          return targetHandler.apply(items, input);
+        },
+      } satisfies ModifierHandler<TargetNode>,
+      {
+        ...minHandler,
+        order: 1,
+        apply: (items, input) => {
+          calls.push("min");
+          return minHandler.apply(items, input);
+        },
+      } satisfies ModifierHandler<MinNode>,
+    );
+    const result = evaluatePool("2d6>4:2=4:3min4", {
+      rolls: [1, 5],
+      modifiers,
+    });
+
+    expect(calls).toEqual(["target:2", "min"]);
+    expect(
+      result.rolls.map(({ calculationValue }) => calculationValue),
+    ).toEqual([4, 2]);
+  });
   test.each([
     ["4d6kh2s", "4d6skh2"],
     ["4d6>4kh2", "4d6kh2>4"],
@@ -473,7 +647,9 @@ describe("errors", () => {
         {
           type: "modifier",
           name: "target",
-          success: { operator: "~", value: 3 },
+          rules: [
+            { kind: "success", comparePoint: { operator: "~", value: 3 } },
+          ],
         },
       ],
     };
@@ -517,8 +693,10 @@ describe("handlers are immutable", () => {
       {
         type: "modifier",
         name: "target",
-        success: { operator: ">", value: 3 },
-        failure: { operator: "<", value: 2 },
+        rules: [
+          { kind: "success", comparePoint: { operator: ">", value: 3 } },
+          { kind: "failure", comparePoint: { operator: "<", value: 2 } },
+        ],
       },
     ],
     [

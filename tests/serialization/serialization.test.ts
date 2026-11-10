@@ -70,6 +70,38 @@ describe("encoding numbers", () => {
 });
 
 describe("rolls round-trip", () => {
+  test.each(EXPORT_FORMATS)(
+    "weighted targets round-trip through %s",
+    (format) => {
+      const original = new Roll("4d10>=5:2f=1:10>=10:3k2", seeded());
+      const imported = Roll.import(original.export(format as "json"));
+      expect(imported.result).toEqual(original.result);
+      expect(imported.toString()).toBe(original.toString());
+    },
+  );
+
+  test("legacy success and failure nodes are normalized on import", () => {
+    const input = JSON.parse(new Roll("d10>=5f=1", seeded()).export()) as {
+      result: {
+        node: {
+          modifiers: {
+            rules?: { comparePoint: unknown }[];
+            success?: unknown;
+            failure?: unknown;
+          }[];
+        };
+      };
+    };
+    const target = input.result.node.modifiers[0];
+    target.success = target.rules![0].comparePoint;
+    target.failure = target.rules![1].comparePoint;
+    delete target.rules;
+    const imported = Roll.import(JSON.stringify(input));
+    expect(imported.result.node).toEqual(
+      new Roll("d10>=5f=1", seeded()).result.node,
+    );
+  });
+
   test.each(EXPORT_FORMATS)("through %s", (format) => {
     const original = new Roll("4d6!kh3+{2d8, 1d4}k1*floor(d%/10)", seeded());
     const imported = Roll.import(original.export(format as "json"));
@@ -319,6 +351,19 @@ describe("re-rolling imported rolls", () => {
 });
 
 describe("invalid data", () => {
+  test.each(["d6>4", "{1,2}>1"])(
+    "rejects imported ASTs with multiple targets for %s",
+    (notation) => {
+      const data = dataOf(notation) as {
+        result: { node: { modifiers: unknown[] } };
+      };
+      const { modifiers } = data.result.node;
+      modifiers.push(modifiers[0]);
+
+      expect(() => Roll.import(JSON.stringify(data))).toThrow(ImportError);
+    },
+  );
+
   test.each([
     ["an empty string", ""],
     ["whitespace", "   "],
@@ -388,6 +433,12 @@ describe("invalid data", () => {
     ["a missing die snapshot", "2d6", "result.die", DELETE],
     ["a non-boolean useInTotal", "2d6", "result.rolls.0.useInTotal", 1],
     [
+      "a bad target amount",
+      "d10>=1:2",
+      "result.node.modifiers.0.rules.0.amount",
+      0,
+    ],
+    [
       "a non-finite number in the notation",
       "2d6+1",
       "result.node.right.value",
@@ -401,7 +452,7 @@ describe("invalid data", () => {
     [
       "an unknown compare operator",
       "4d6>3",
-      "result.node.modifiers.0.success.operator",
+      "result.node.modifiers.0.rules.0.comparePoint.operator",
       "~",
     ],
     [

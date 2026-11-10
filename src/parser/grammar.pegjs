@@ -130,7 +130,7 @@ BinaryFunctionName
 // Dice pools, e.g. `4d6`, `d%`, `2dF.1`, `(1+2)d(3*2)`
 
 DicePool
-  = qty:Quantity? "d" die:Die modifiers:Modifier* description:Descriptions {
+  = qty:Quantity? "d" die:Die modifiers:Modifiers description:Descriptions {
     const maxQty = options.maxQty ?? DEFAULT_MAX_QTY;
 
     if (qty && qty.type === "number" && qty.value > maxQty) {
@@ -172,16 +172,20 @@ ComputedValue
 // Roll groups, e.g. `{4d6+2d8, 3d20}k1`
 
 RollGroup
-  = "{" _ head:Expression tail:(_ "," _ @Expression)* _ "}" modifiers:Modifier* description:Descriptions {
+  = "{" _ head:Expression tail:(_ "," _ @Expression)* _ "}" modifiers:Modifiers description:Descriptions {
     return ast.createGroup([head, ...tail], modifiers, description);
   }
 
 
 // Modifiers
 
-Modifier
+Modifiers
+  = before:NonTargetModifier* target:TargetModifier? after:NonTargetModifier* {
+    return [...before, ...(target ? [target] : []), ...after];
+  }
+
+NonTargetModifier
   = ExplodeModifier
-  / TargetModifier
   / DropModifier
   / KeepModifier
   / ReRollModifier
@@ -198,10 +202,29 @@ ExplodeModifier
     return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined);
   }
 
-// `>=8`, `>=8f<=2`
+// `>=8`, `>=8:2f<=2:1=10:3`
 TargetModifier
-  = success:ComparePoint failure:("f" @ComparePoint)? {
-    return ast.createTarget(success, failure ?? undefined);
+  = success:TargetSuccess rest:(TargetSuccess / TargetFailure)* {
+    return ast.createTarget([success, ...rest]);
+  }
+
+TargetSuccess
+  = !"!=" comparePoint:ComparePoint amount:TargetAmount? {
+    return { kind: "success", comparePoint, ...(amount !== null && { amount }) };
+  }
+
+TargetFailure
+  = "f" comparePoint:ComparePoint amount:TargetAmount? {
+    return { kind: "failure", comparePoint, ...(amount !== null && { amount }) };
+  }
+
+TargetAmount
+  = ":" value:$[0-9]+ ![0-9.] {
+    const amount = Number(value);
+    if (!Number.isInteger(amount) || amount < 1 || amount > 10) {
+      error("Target amount must be an integer between 1 and 10");
+    }
+    return amount;
   }
 
 // `d1`, `dl1`, `dh1` (lowest by default)

@@ -1,10 +1,11 @@
 import { group, keep, pool, sort } from "../../src/ast/builders.js";
-import type { SortNode } from "../../src/ast/nodes.js";
+import type { SortNode, TargetNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import {
   keepHandler,
   sortHandler,
+  targetHandler,
 } from "../../src/modifiers/handlers/index.js";
 import { createDieResult } from "../../src/results/die-result.js";
 import type { ModifierHandler } from "../../src/modifiers/types.js";
@@ -390,6 +391,70 @@ describe("multiple sub-rolls", () => {
       ["target-success"],
     ]);
     expect(result.value).toBe(1);
+  });
+
+  test("weighted targets score group members in written order even when dropped", () => {
+    const result = evaluateGroup("{1, 4, 6, 10}>=4:2f<=6:3>=10:5kh2");
+
+    expect(result.members.map(({ value }) => value)).toEqual([1, 4, 6, 10]);
+    expect(
+      result.members.map(({ calculationValue }) => calculationValue),
+    ).toEqual([-3, -3, -3, 5]);
+    expect(result.members.map(({ useInTotal }) => useInTotal)).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ]);
+    expect(result.members.map(({ flags }) => flags)).toEqual([
+      ["drop", "target-failure"],
+      ["drop", "target-failure"],
+      ["target-failure"],
+      ["target-success"],
+    ]);
+    expect(result.value).toBe(2);
+  });
+
+  test("negative group totals and later successes outside earlier ranges are scored", () => {
+    const result = evaluateGroup("{-3, -1, 0, 4}<-2:10f>=0:2=4:3");
+
+    expect(
+      result.members.map(({ calculationValue }) => calculationValue),
+    ).toEqual([10, 0, -2, 3]);
+    expect(result.value).toBe(11);
+  });
+
+  test("group target rules invoke the handler once in written order", () => {
+    let calls = 0;
+    const modifiers = new ModifierRegistry().register({
+      ...targetHandler,
+      apply: (items, input) => {
+        calls += 1;
+        return targetHandler.apply(items, input);
+      },
+    } satisfies ModifierHandler<TargetNode>);
+    const result = evaluateGroup("{1, 4, 6}>=4:2f<=4:3=4:5kh2", { modifiers });
+
+    expect(calls).toBe(1);
+    expect(
+      result.members.map(({ calculationValue }) => calculationValue),
+    ).toEqual([-3, 5, 2]);
+    expect(result.value).toBe(7);
+  });
+
+  test("later flattened modifiers can change a target score equal to the old value", () => {
+    const modifiers = new ModifierRegistry().register({
+      ...targetHandler,
+      order: 0,
+    });
+    const result = evaluateGroup("{2d6-1}>0kh1", { rolls: [1, 1], modifiers });
+
+    expect(result.members[0]).toMatchObject({
+      value: 0,
+      calculationValue: 0,
+      flags: ["target-success"],
+    });
+    expect(result.value).toBe(0);
   });
 
   test("target scores each complete expression once at inclusive boundaries", () => {

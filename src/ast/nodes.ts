@@ -213,12 +213,18 @@ export interface ExplodeNode {
   readonly comparePoint?: ComparePoint;
 }
 
-/** Success / failure counting, e.g. `>=8f<=2`. */
+/** A target comparison; amount is a whole number from 1 to 10 and defaults to 1. */
+export interface TargetRule {
+  readonly kind: "success" | "failure";
+  readonly comparePoint: ComparePoint;
+  readonly amount?: number;
+}
+
+/** Success / failure counting, e.g. `>=8:2f<=2`. The last matching rule in the block wins. */
 export interface TargetNode {
   readonly type: "modifier";
   readonly name: "target";
-  readonly success: ComparePoint;
-  readonly failure?: ComparePoint;
+  readonly rules: readonly TargetRule[];
 }
 
 /** `d`, `dh`, `dl`. */

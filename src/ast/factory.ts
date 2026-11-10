@@ -32,6 +32,7 @@ import type {
   SortDirection,
   SortNode,
   TargetNode,
+  TargetRule,
   UnaryNode,
   UniqueNode,
 } from "./nodes.js";
@@ -157,9 +158,11 @@ export function createModifiers(
 }
 
 function modifierKey(modifier: ModifierNode): string {
-  return modifier.name === "keep" || modifier.name === "drop"
-    ? `${modifier.name}-${modifier.end}`
-    : modifier.name;
+  if (modifier.name === "keep" || modifier.name === "drop") {
+    return `${modifier.name}-${modifier.end}`;
+  }
+
+  return modifier.name;
 }
 
 export function createExplode(
@@ -176,15 +179,27 @@ export function createExplode(
   };
 }
 
+export function createTarget(rules: readonly TargetRule[]): TargetNode;
 export function createTarget(
   success: ComparePoint,
   failure?: ComparePoint,
+): TargetNode;
+export function createTarget(
+  input: ComparePoint | readonly TargetRule[],
+  failure?: ComparePoint,
 ): TargetNode {
+  const rules: readonly TargetRule[] = Array.isArray(input)
+    ? input
+    : [
+        { kind: "success", comparePoint: input as ComparePoint },
+        ...(failure
+          ? [{ kind: "failure" as const, comparePoint: failure }]
+          : []),
+      ];
   return {
     type: "modifier",
     name: "target",
-    success,
-    ...(failure && { failure }),
+    rules,
   };
 }
 

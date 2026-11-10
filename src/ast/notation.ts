@@ -39,7 +39,12 @@ export function modifierToNotation(modifier: ModifierNode): string {
       return `${prefix}${comparePoint(modifier.comparePoint, prefix === "!")}`;
     }
     case "target":
-      return `${comparePoint(modifier.success, true)}${modifier.failure ? `f${comparePoint(modifier.failure)}` : ""}`;
+      return modifier.rules
+        .map(
+          (rule) =>
+            `${rule.kind === "failure" ? "f" : ""}${comparePoint(rule.comparePoint, rule.kind === "success")}${rule.amount !== undefined ? `:${rule.amount}` : ""}`,
+        )
+        .join("");
     case "drop":
       return `d${modifier.end}${modifier.qty}`;
     case "keep":

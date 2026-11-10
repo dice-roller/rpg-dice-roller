@@ -53,7 +53,7 @@ function isWrittenAsDiamond(modifier: ModifierNode): boolean {
         modifier.comparePoint?.operator === "!="
       );
     case "target":
-      return modifier.success.operator === "!=";
+      return modifier.rules[0].comparePoint.operator === "!=";
     default:
       return false;
   }
@@ -106,6 +106,8 @@ const notations = [
   "4d(2+3)",
   "4d6!!p>5",
   "8d10>=8f<=2",
+  "4d10>=8:1>=10:2f=1:10k1",
+  "{d10,d10}>=8:10>=8:1k1",
   "4d6dh1",
   "4d6kl2",
   "2d20ro<3",

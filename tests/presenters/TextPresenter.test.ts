@@ -7,6 +7,8 @@ import {
   pool,
 } from "../../src/ast/builders.js";
 import type { ExpressionNode } from "../../src/ast/nodes.js";
+import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
+import { maxHandler } from "../../src/modifiers/handlers/index.js";
 import {
   TextPresenter,
   defaultTextPresenter,
@@ -84,7 +86,7 @@ describe("dice and modifier flags (v5 output and documented examples)", () => {
   test.each<[string, number[], string]>([
     ["d%", [42], "d%: [42] = 42"],
     ["4dF", [0, 1, 2, 2], "4dF: [-1, 0, 1, 1] = 1"],
-    ["3d6cs>3cf<3", [5, 4, 1], "3d6cs>3cf<3: [5**, 4**, 1__] = 10"],
+    ["3d6cs>3cf<3", [5, 4, 1], "3d6cs>3cf<3: [5cs, 4cs, 1cf] = 10"],
     ["4d6sd", [1, 4, 6, 5], "4d6sd: [6, 5, 4, 1] = 16"],
     ["2d6r<=4", [3, 5, 6], "2d6r<=4: [6r, 5] = 11"],
     ["2d6ro", [1, 5, 1], "2d6ro: [1ro, 5] = 6"],
@@ -110,8 +112,8 @@ describe("dice and modifier flags (v5 output and documented examples)", () => {
     ["4d6min3", [1, 4, 3, 2], "4d6min3: [3^, 4, 3, 3^] = 13"],
     ["4d6max3", [5, 4, 3, 2], "4d6max3: [3v, 3v, 3, 2] = 11"],
     ["4d6>4f<3", [2, 5, 4, 5], "4d6>4f<3: [2_, 5*, 4, 5*] = 1"],
-    ["2d20cs", [4, 20], "2d20cs: [4, 20**] = 24"],
-    ["2d20cf", [4, 1], "2d20cf: [4, 1__] = 5"],
+    ["2d20cs", [4, 20], "2d20cs: [4, 20cs] = 24"],
+    ["2d20cf", [4, 1], "2d20cf: [4, 1cf] = 5"],
   ])("%s", (notation, rolls, expected) => {
     expect(rollWith(notation, rolls).toString()).toBe(expected);
   });
@@ -273,6 +275,63 @@ describe("builder expression precedence", () => {
 });
 
 describe("options", () => {
+  test("target markers follow the absolute calculationValue after a later custom handler", () => {
+    const modifiers = new ModifierRegistry().register({
+      ...maxHandler,
+      order: 20,
+      apply: (items) =>
+        items.map((item) => ({ ...item, calculationValue: -9 })),
+    });
+    const settings = new RollSettings({ modifiers });
+    jest.spyOn(settings.generator, "integer").mockReturnValue(10);
+    expect(new Roll("d10>=8:3max10", settings).toString()).toBe(
+      "d10>=8:3max10: [10*********] = -9",
+    );
+  });
+
+  test("failure markers follow a positive calculationValue", () => {
+    const modifiers = new ModifierRegistry().register({
+      ...maxHandler,
+      order: 20,
+      apply: (items) => items.map((item) => ({ ...item, calculationValue: 2 })),
+    });
+    const settings = new RollSettings({ modifiers });
+    jest.spyOn(settings.generator, "integer").mockReturnValue(1);
+    const presenter = new TextPresenter({
+      flagSymbols: { "target-failure": "no" },
+    });
+
+    expect(
+      presenter.present(new Roll("d10>=2f=1:3max10", settings).result),
+    ).toBe("[1nono]");
+  });
+
+  test("target markers disappear when calculationValue is zero", () => {
+    const modifiers = new ModifierRegistry().register({
+      ...maxHandler,
+      order: 20,
+      apply: (items) => items.map((item) => ({ ...item, calculationValue: 0 })),
+    });
+    const settings = new RollSettings({ modifiers });
+    jest.spyOn(settings.generator, "integer").mockReturnValue(10);
+
+    expect(new Roll("d10>=8:3max10", settings).toString()).toBe(
+      "d10>=8:3max10: [10] = 0",
+    );
+  });
+
+  test("weighted target flags repeat custom symbols independently of critical flags", () => {
+    const presenter = new TextPresenter({
+      flagSymbols: { "target-success": "ok", "target-failure": "no" },
+    });
+    expect(
+      presenter.present(rollWith("2d10>=8:2f=1:3cs=10cf=1", [10, 1])),
+    ).toBe("2d10>=8:2f=1:3cs=10cf=1: [10okokcs, 1nononocf] = -1");
+    expect(rollWith("{d10,d10}>=8:2", [10, 1]).toString()).toBe(
+      "{d10,d10}>=8:2: {([10])**, [1]} = 2",
+    );
+  });
+
   test("flag symbols can be overridden", () => {
     const presenter = new TextPresenter({
       flagSymbols: { drop: "x", explode: "*" },

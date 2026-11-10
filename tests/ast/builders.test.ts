@@ -175,7 +175,7 @@ describe("defaults and options", () => {
     expect(target(compare(">", 3))).toEqual({
       type: "modifier",
       name: "target",
-      success: { operator: ">", value: 3 },
+      rules: [{ kind: "success", comparePoint: { operator: ">", value: 3 } }],
     });
   });
 
@@ -198,6 +198,79 @@ describe("defaults and options", () => {
 
     expect(node.modifiers).toEqual([drop("h", 1), drop("l", 2)]);
     expect(node).toEqual(parser.parse("4d10dh1dl2"));
+  });
+
+  test.each(["pool", "group"] as const)(
+    "%s deduplicates repeated target nodes like other modifiers",
+    (kind) => {
+      const first = target([
+        { kind: "success", comparePoint: compare(">=", 8), amount: 1 },
+      ]);
+      const last = target([
+        { kind: "success", comparePoint: compare(">=", 10), amount: 2 },
+      ]);
+      const modifiers = [first, keep("h", 1), last, keep("h", 2)];
+      const node =
+        kind === "pool"
+          ? pool(4, 10, { modifiers })
+          : group([pool(1, 10)], { modifiers });
+
+      expect(node.modifiers).toEqual([last, keep("h", 2)]);
+      expect(parser.parse(nodeToNotation(node))).toEqual(node);
+    },
+  );
+
+  test("ordered target rules preserve explicit and omitted amounts", () => {
+    const node = pool(4, 10, {
+      modifiers: [
+        target([
+          { kind: "success", comparePoint: compare(">=", 8), amount: 1 },
+          { kind: "failure", comparePoint: compare("<=", 2), amount: 10 },
+          { kind: "failure", comparePoint: compare("=", 0) },
+          { kind: "success", comparePoint: compare("=", 10), amount: 2 },
+        ]),
+      ],
+    });
+
+    expect(nodeToNotation(node)).toBe("4d10>=8:1f<=2:10f=0=10:2");
+    expect(parser.parse(nodeToNotation(node))).toEqual(node);
+    expect(target(compare(">=", 8), compare("<=", 2))).toEqual(
+      target([
+        { kind: "success", comparePoint: compare(">=", 8) },
+        { kind: "failure", comparePoint: compare("<=", 2) },
+      ]),
+    );
+  });
+
+  test.each([0, 11, -1, 1.5, NaN, Infinity])(
+    "target rejects amount %s",
+    (amount) => {
+      expect(() =>
+        target([{ kind: "success", comparePoint: compare("=", 1), amount }]),
+      ).toThrow(ValidationError);
+    },
+  );
+
+  test.each([1, 10])("target accepts amount %s", (amount) => {
+    expect(
+      target([{ kind: "success", comparePoint: compare("=", 1), amount }])
+        .rules[0].amount,
+    ).toBe(amount);
+  });
+
+  test("target validates the structure of a rule block", () => {
+    expect(() => target([])).toThrow(ValidationError);
+    expect(() =>
+      target([{ kind: "failure", comparePoint: compare("=", 1) }]),
+    ).toThrow(ValidationError);
+    expect(() =>
+      target([
+        {
+          kind: "success",
+          comparePoint: { operator: "~", value: 1 } as unknown as ComparePoint,
+        },
+      ]),
+    ).toThrow(ValidationError);
   });
 
   test("a die node can be used for any registered die", () => {

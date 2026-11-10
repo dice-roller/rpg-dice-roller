@@ -14,7 +14,9 @@ import type { DieRegistry } from "../dice/DieRegistry.js";
 import { dieSnapshot, resolveDie, rollDie } from "../dice/die-utils.js";
 import type { ResolvedDie } from "../dice/types.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
+import { ValidationError } from "../errors/ValidationError.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
+import { validateTargetAmounts } from "../modifiers/handlers/target.js";
 import type {
   ModifierHandler,
   ModifierInput,
@@ -206,9 +208,7 @@ export class Evaluator {
       };
     });
 
-    for (const modifier of this.registries.modifiers.inExecutionOrder(
-      node.modifiers,
-    )) {
+    for (const modifier of this.orderedModifiers(node.modifiers)) {
       const handler = this.handlerFor(modifier, "group");
       const input: ModifierInput = { modifier, ctx };
 
@@ -436,7 +436,7 @@ export class Evaluator {
     target: ModifierTarget,
     input: Omit<ModifierInput, "modifier">,
   ): T[] {
-    return this.registries.modifiers.inExecutionOrder(modifiers).reduce<T[]>(
+    return this.orderedModifiers(modifiers).reduce<T[]>(
       (current, modifier) =>
         this.runHandler(this.handlerFor(modifier, target), current, {
           ...input,
@@ -444,6 +444,14 @@ export class Evaluator {
         }),
       [...items],
     );
+  }
+
+  private orderedModifiers(modifiers: readonly ModifierNode[]): ModifierNode[] {
+    if (modifiers.filter(({ name }) => name === "target").length > 1) {
+      throw new ValidationError("Target rules must be in one modifier");
+    }
+
+    return this.registries.modifiers.inExecutionOrder(modifiers);
   }
 
   /**
@@ -455,6 +463,10 @@ export class Evaluator {
     modifier: ModifierNode,
     target: ModifierTarget,
   ): ModifierHandler {
+    if (modifier.name === "target") {
+      validateTargetAmounts(modifier);
+    }
+
     const handler = this.registries.modifiers.getOrThrow(modifier.name);
 
     if (!handler.appliesTo.includes(target)) {
