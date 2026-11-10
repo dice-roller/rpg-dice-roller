@@ -1,6 +1,7 @@
 import type { DescriptionNode, ExpressionNode } from "./ast/nodes.js";
 import { nodeToNotation } from "./ast/notation.js";
 import { ImportError } from "./errors/ImportError.js";
+import { averageResult } from "./evaluator/average.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { ExpressionResult } from "./results/types.js";
@@ -79,6 +80,7 @@ export class Roll<T = string> {
 
   #minTotal: number | undefined;
   #maxTotal: number | undefined;
+  #averageTotal: number | undefined;
   readonly #input: string | ExpressionNode;
   readonly #settings: RollSettings<T>;
 
@@ -106,6 +108,7 @@ export class Roll<T = string> {
       this.total = input.total;
       this.#minTotal = input.minTotal;
       this.#maxTotal = input.maxTotal;
+      this.#averageTotal = input.averageTotal;
     } else {
       this.#input = input;
       this.notation = typeof input === "string" ? input : nodeToNotation(input);
@@ -173,12 +176,15 @@ export class Roll<T = string> {
   }
 
   /**
-   * The midpoint of `minTotal` and `maxTotal`, as in v5.
+   * The expression evaluated with each pool's quantity times its die's average.
+   * Uses the stored die snapshots without rolling again or rounding intermediate averages.
    *
-   * This is not the statistical mean for notations like `4d6kh3` or exploding dice.
+   * Rolls containing modifiers retain the midpoint of `minTotal` and `maxTotal` for now.
+   * This is not a statistical mean for modifiers, non-linear maths or random die parameters.
    */
   get averageTotal(): number {
-    return (this.minTotal + this.maxTotal) / 2;
+    return (this.#averageTotal ??=
+      averageResult(this.result) ?? (this.minTotal + this.maxTotal) / 2);
   }
 
   /** Rolls the original input again with the same settings; restored rolls use their stored expression. Does not add to a history. */
