@@ -201,18 +201,23 @@ export function compare(
  * Modifiers
  * --------------------------------------------------------------------------------------------- */
 
-/** Explode matching rolls; compound and penetrate default to false, and the handler supplies the default compare point. */
+/**
+ * Explode matching rolls. An optional positive safe-integer `limit` bounds additional rolls per
+ * initial die and is capped by the roll context's `maxIterations`.
+ */
 export function explode(
   options: {
     compound?: boolean;
     penetrate?: boolean;
     comparePoint?: ComparePoint;
+    limit?: number;
   } = {},
 ): ExplodeNode {
   return createExplode(
     options.compound ?? false,
     options.penetrate ?? false,
     optionalComparePoint(options.comparePoint),
+    options.limit,
   );
 }
 
@@ -279,29 +284,39 @@ export function keep(end: PoolEnd, qty = 1): KeepNode {
   return createKeep(poolEnd(end), positiveInteger(qty));
 }
 
-/** Re-roll matching dice; `once` defaults to false and an omitted compare point uses the handler default. */
+/**
+ * Re-roll matching dice. `once` is the `ro` alias; numeric `limit: 1` has the same budget but
+ * retains `r1` notation. Limits count additional rolls per die and cannot exceed the context cap.
+ */
 export function reRoll(
   options: {
     once?: boolean;
     comparePoint?: ComparePoint;
+    limit?: number;
   } = {},
 ): ReRollNode {
   return createReRoll(
     options.once ?? false,
     optionalComparePoint(options.comparePoint),
+    options.limit,
   );
 }
 
-/** Re-roll duplicate dice with the built-in handler, optionally restricted by a compare point; `once` defaults to false. */
+/**
+ * Re-roll duplicate dice. `once` is the `uo` alias; numeric `limit: 1` has the same budget but
+ * retains `u1` notation. Limits count additional rolls per die and cannot exceed the context cap.
+ */
 export function unique(
   options: {
     once?: boolean;
     comparePoint?: ComparePoint;
+    limit?: number;
   } = {},
 ): UniqueNode {
   return createUnique(
     options.once ?? false,
     optionalComparePoint(options.comparePoint),
+    options.limit,
   );
 }
 

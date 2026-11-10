@@ -1,7 +1,9 @@
 import { explode, group, pool } from "../../src/ast/builders.js";
 import { createComparePoint } from "../../src/ast/factory.js";
+import type { ModifierNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
+import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import {
   explodeHandler,
   reRollHandler,
@@ -109,6 +111,120 @@ describe("explode", () => {
   });
 
   test.each([
+    [false, false, 40],
+    [true, false, 40],
+    [false, true, 37],
+    [true, true, 37],
+  ])(
+    "a limit of three bounds the %s %s explosion chain and retains its final roll",
+    (compound, penetrate, total) => {
+      const rollDie = jest.fn(() => createDieResult(10));
+      const result = explodeHandler.apply([createDieResult(10)], {
+        modifier: {
+          type: "modifier",
+          name: "explode",
+          compound,
+          penetrate,
+          limit: 3,
+        },
+        ctx: createRollContext({ limits: { maxIterations: 5 } }),
+        die: repeatableTestDie,
+        rollDie,
+      });
+
+      expect(rollDie).toHaveBeenCalledTimes(3);
+      expect(result.reduce((sum, item) => sum + item.value, 0)).toBe(total);
+      expect(result).toHaveLength(compound ? 1 : 4);
+    },
+  );
+
+  test.each([
+    [false, false, 12],
+    [true, false, 12],
+    [false, true, 11],
+    [true, true, 11],
+  ])(
+    "a %s %s explosion stops before its limit when the extra roll does not match",
+    (compound, penetrate, total) => {
+      const rollDie = jest.fn(() => createDieResult(2));
+      const result = explodeHandler.apply([createDieResult(10)], {
+        modifier: {
+          type: "modifier",
+          name: "explode",
+          compound,
+          penetrate,
+          limit: 3,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie,
+      });
+
+      expect(rollDie).toHaveBeenCalledTimes(1);
+      expect(result.reduce((sum, item) => sum + item.value, 0)).toBe(total);
+    },
+  );
+
+  test("the context cap can lower an explicit explosion limit", () => {
+    const rollDie = jest.fn(() => createDieResult(10));
+    const result = explodeHandler.apply([createDieResult(10)], {
+      modifier: {
+        type: "modifier",
+        name: "explode",
+        compound: false,
+        penetrate: false,
+        limit: 3,
+      },
+      ctx: createRollContext({ limits: { maxIterations: 2 } }),
+      die: repeatableTestDie,
+      rollDie,
+    });
+
+    expect(rollDie).toHaveBeenCalledTimes(2);
+    expect(result).toHaveLength(3);
+  });
+
+  test("an equal context cap still permits the explicit explosion budget", () => {
+    const rollDie = jest.fn(() => createDieResult(10));
+    explodeHandler.apply([createDieResult(10)], {
+      modifier: {
+        type: "modifier",
+        name: "explode",
+        compound: false,
+        penetrate: false,
+        limit: 3,
+      },
+      ctx: createRollContext({ limits: { maxIterations: 3 } }),
+      die: repeatableTestDie,
+      rollDie,
+    });
+
+    expect(rollDie).toHaveBeenCalledTimes(3);
+  });
+
+  test("each initial die has an independent explosion budget", () => {
+    const rollDie = jest.fn(() => createDieResult(10));
+    const result = explodeHandler.apply(
+      [createDieResult(10), createDieResult(10)],
+      {
+        modifier: {
+          type: "modifier",
+          name: "explode",
+          compound: false,
+          penetrate: false,
+          limit: 2,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie,
+      },
+    );
+
+    expect(rollDie).toHaveBeenCalledTimes(4);
+    expect(result).toHaveLength(6);
+  });
+
+  test.each([
     ["1d10!>0", 1001],
     ["2d10!>0", 2002],
     ["1d10!!>0", 1],
@@ -156,6 +272,13 @@ describe("explode", () => {
     expect(evaluate("d6!", { mode }).value).toBe(total);
   });
 
+  test.each([
+    ["max", 18],
+    ["min", 1],
+  ] as const)("in %s mode, an explicit limit is respected", (mode, total) => {
+    expect(evaluate("d6!2", { mode }).value).toBe(total);
+  });
+
   test("a die with one value can't explode", () => {
     expect(() => evaluate("2d1!")).toThrow(EvaluationError);
     expect(() => evaluate("2d1!>5")).toThrow(EvaluationError);
@@ -179,6 +302,18 @@ describe("explode", () => {
       flags: [],
     });
     expect(result.value).toBe(6);
+  });
+
+  test("a limited explosion in a pool inside a group retains its per-die budget", () => {
+    const result = evaluateGroup("{2d6!2, d4}k1", {
+      rolls: [6, 6, 6, 6, 6, 6, 1],
+    });
+    const [pool, otherPool] = poolsOf(result);
+
+    expect(pool?.rolls).toHaveLength(6);
+    expect(pool?.value).toBe(36);
+    expect(otherPool?.rolls).toHaveLength(1);
+    expect(result.members[1]?.useInTotal).toBe(false);
   });
 
   test.each(["{2d6}r", "{2d6}ro", "{2d6}u", "{2d6}uo"])(
@@ -214,6 +349,99 @@ describe("re-roll", () => {
     });
   });
 
+  test.each([
+    [3, 5, 3],
+    [3, 2, 2],
+    [2, 2, 2],
+  ])(
+    "a limit of %i uses the lower of it and the context cap %i",
+    (limit, maxIterations, expectedRolls) => {
+      const rollDie = jest.fn(() => createDieResult(1));
+      const result = reRollHandler.apply([createDieResult(1)], {
+        modifier: { type: "modifier", name: "re-roll", once: false, limit },
+        ctx: createRollContext({ limits: { maxIterations } }),
+        die: repeatableTestDie,
+        rollDie,
+      });
+
+      expect(rollDie).toHaveBeenCalledTimes(expectedRolls);
+      expect(result[0]).toMatchObject({ value: 1, initialValue: 1 });
+      expect(result[0]?.flags).toEqual(["re-roll"]);
+    },
+  );
+
+  test("a replacement that stops matching ends before the limit", () => {
+    const rollDie = jest
+      .fn()
+      .mockReturnValueOnce(createDieResult(4))
+      .mockReturnValue(createDieResult(1));
+    const result = reRollHandler.apply([createDieResult(1)], {
+      modifier: { type: "modifier", name: "re-roll", once: false, limit: 3 },
+      ctx: createRollContext(),
+      die: repeatableTestDie,
+      rollDie,
+    });
+
+    expect(rollDie).toHaveBeenCalledTimes(1);
+    expect(result[0]).toMatchObject({ value: 4, initialValue: 1 });
+  });
+
+  test.each([
+    ["default", undefined, 1],
+    ["compare point", createComparePoint("<=", 2), 2],
+  ] as const)(
+    "numeric one and the once alias have the same budget and distinct flags with %s",
+    (_label, comparePoint, value) => {
+      const aliasRoll = jest.fn(() => createDieResult(value));
+      const numericRoll = jest.fn(() => createDieResult(value));
+      const alias = reRollHandler.apply([createDieResult(value)], {
+        modifier: {
+          type: "modifier",
+          name: "re-roll",
+          once: true,
+          comparePoint,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie: aliasRoll,
+      });
+      const numeric = reRollHandler.apply([createDieResult(value)], {
+        modifier: {
+          type: "modifier",
+          name: "re-roll",
+          once: false,
+          limit: 1,
+          comparePoint,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie: numericRoll,
+      });
+
+      expect(aliasRoll).toHaveBeenCalledTimes(1);
+      expect(numericRoll).toHaveBeenCalledTimes(1);
+      expect(alias[0]?.value).toBe(numeric[0]?.value);
+      expect(alias[0]?.flags).toEqual(["re-roll-once"]);
+      expect(numeric[0]?.flags).toEqual(["re-roll"]);
+    },
+  );
+
+  test("each matching die gets its own re-roll budget", () => {
+    const rollDie = jest.fn(() => createDieResult(1));
+    const result = reRollHandler.apply(
+      [createDieResult(1), createDieResult(1)],
+      {
+        modifier: { type: "modifier", name: "re-roll", once: false, limit: 2 },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie,
+      },
+    );
+
+    expect(rollDie).toHaveBeenCalledTimes(4);
+    expect(result.map(({ value }) => value)).toEqual([1, 1]);
+  });
+
   test("re-rolls are limited to 1000 per roll", () => {
     const result = evaluatePool("2d10r>0");
 
@@ -235,6 +463,7 @@ describe("re-roll", () => {
 
   test("in min mode the re-rolls stop at the iteration limit", () => {
     expect(evaluate("d6r", { mode: "min" }).value).toBe(1);
+    expect(evaluate("d6r2", { mode: "min" }).value).toBe(1);
   });
 
   test("a die with one value can't be re-rolled", () => {
@@ -246,6 +475,34 @@ describe("re-roll", () => {
     expect(rollsOf(evaluatePool("d6r!", { rolls: [6, 1, 3] }))).toEqual([
       "6!",
       "3r",
+    ]);
+  });
+
+  test("a limited explode compare point stays separate from a weighted target", () => {
+    const result = evaluatePool("4d6!3=6>=5:2", {
+      rolls: [6, 6, 2, 1, 6, 6, 6, 2],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([
+      6, 6, 6, 6, 6, 2, 2, 1,
+    ]);
+    expect(result.value).toBe(10);
+    expect(result.node.modifiers).toMatchObject([
+      {
+        name: "explode",
+        limit: 3,
+        comparePoint: { operator: "=", value: 6 },
+      },
+      {
+        name: "target",
+        rules: [
+          {
+            kind: "success",
+            amount: 2,
+            comparePoint: { operator: ">=", value: 5 },
+          },
+        ],
+      },
     ]);
   });
 });
@@ -271,6 +528,122 @@ describe("unique", () => {
       "5",
       "6",
     ]);
+  });
+
+  test.each([
+    [2, 2],
+    [3, 3],
+    [5, 3],
+  ])(
+    "a duplicate uses the lower of its limit and context cap (%i -> %i retries)",
+    (maxIterations, expectedRetries) => {
+      const rollDie = jest.fn(() => createDieResult(2));
+      const result = uniqueHandler.apply(
+        [createDieResult(2), createDieResult(2)],
+        {
+          modifier: {
+            type: "modifier",
+            name: "unique",
+            once: false,
+            limit: 3,
+          },
+          ctx: createRollContext({ limits: { maxIterations } }),
+          die: repeatableTestDie,
+          rollDie,
+        },
+      );
+
+      expect(rollDie).toHaveBeenCalledTimes(expectedRetries);
+      expect(result.map(({ value }) => value)).toEqual([2, 2]);
+      expect(result[1]?.flags).toEqual(["unique"]);
+    },
+  );
+
+  test("a unique replacement stops as soon as it no longer duplicates", () => {
+    const rollDie = jest.fn(() => createDieResult(3));
+    const result = uniqueHandler.apply(
+      [createDieResult(2), createDieResult(2)],
+      {
+        modifier: { type: "modifier", name: "unique", once: false, limit: 3 },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie,
+      },
+    );
+
+    expect(rollDie).toHaveBeenCalledTimes(1);
+    expect(result.map(({ value }) => value)).toEqual([2, 3]);
+  });
+
+  test.each([
+    ["default", undefined],
+    ["compare point", createComparePoint("<=", 2)],
+  ] as const)(
+    "numeric one and the once alias have the same budget and distinct flags with %s",
+    (_label, comparePoint) => {
+      const aliasRoll = jest.fn(() => createDieResult(2));
+      const numericRoll = jest.fn(() => createDieResult(2));
+      const items = [createDieResult(2), createDieResult(2)];
+      const alias = uniqueHandler.apply(items, {
+        modifier: {
+          type: "modifier",
+          name: "unique",
+          once: true,
+          comparePoint,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie: aliasRoll,
+      });
+      const numeric = uniqueHandler.apply(items, {
+        modifier: {
+          type: "modifier",
+          name: "unique",
+          once: false,
+          limit: 1,
+          comparePoint,
+        },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie: numericRoll,
+      });
+
+      expect(aliasRoll).toHaveBeenCalledTimes(1);
+      expect(numericRoll).toHaveBeenCalledTimes(1);
+      expect(alias.map(({ value }) => value)).toEqual(
+        numeric.map(({ value }) => value),
+      );
+      expect(alias[1]?.flags).toEqual(["unique-once"]);
+      expect(numeric[1]?.flags).toEqual(["unique"]);
+    },
+  );
+
+  test("duplicate dice have independent budgets and use earlier settled values", () => {
+    const repeated = jest.fn(() => createDieResult(2));
+    const items = [createDieResult(2), createDieResult(2), createDieResult(2)];
+    uniqueHandler.apply(items, {
+      modifier: { type: "modifier", name: "unique", once: false, limit: 2 },
+      ctx: createRollContext(),
+      die: repeatableTestDie,
+      rollDie: repeated,
+    });
+    expect(repeated).toHaveBeenCalledTimes(4);
+
+    const replacements = jest
+      .fn()
+      .mockReturnValueOnce(createDieResult(3))
+      .mockReturnValueOnce(createDieResult(4));
+    const settled = uniqueHandler.apply(
+      [createDieResult(2), createDieResult(2), createDieResult(3)],
+      {
+        modifier: { type: "modifier", name: "unique", once: false, limit: 3 },
+        ctx: createRollContext(),
+        die: repeatableTestDie,
+        rollDie: replacements,
+      },
+    );
+    expect(replacements).toHaveBeenCalledTimes(2);
+    expect(settled.map(({ value }) => value)).toEqual([2, 3, 4]);
   });
 
   test.each([1, 3])(
@@ -324,6 +697,57 @@ describe("unique", () => {
 });
 
 describe("repeating handlers", () => {
+  test("invalid group modifiers are rejected before custom handler dispatch", () => {
+    const dispatched = jest.fn();
+    const modifiers = new ModifierRegistry().register({
+      ...explodeHandler,
+      appliesTo: ["group"],
+      apply(items) {
+        dispatched();
+        return [...items];
+      },
+    });
+    const invalid = { ...explode(), limit: 0 };
+    const node = group([pool(1, 6)], { modifiers: [invalid] });
+
+    expect(() => evaluate(node, { modifiers })).toThrow(EvaluationError);
+    expect(dispatched).not.toHaveBeenCalled();
+
+    const valid = group([pool(1, 6)], {
+      modifiers: [{ ...explode(), limit: 2 }],
+    });
+    expect(() => evaluate(valid, { modifiers })).not.toThrow();
+    expect(dispatched).toHaveBeenCalledTimes(1);
+  });
+
+  test("successive modifiers have independent iteration budgets", () => {
+    const ctx = createRollContext();
+    const explodeRoll = jest.fn(() => createDieResult(1));
+    const reRoll = jest.fn(() => createDieResult(1));
+    const exploded = explodeHandler.apply([createDieResult(10)], {
+      modifier: {
+        type: "modifier",
+        name: "explode",
+        compound: false,
+        penetrate: false,
+        limit: 1,
+      },
+      ctx,
+      die: repeatableTestDie,
+      rollDie: explodeRoll,
+    });
+    const result = reRollHandler.apply(exploded, {
+      modifier: { type: "modifier", name: "re-roll", once: false, limit: 2 },
+      ctx,
+      die: repeatableTestDie,
+      rollDie: reRoll,
+    });
+
+    expect(explodeRoll).toHaveBeenCalledTimes(1);
+    expect(reRoll).toHaveBeenCalledTimes(2);
+    expect(result.map(({ value }) => value)).toEqual([10, 1]);
+  });
+
   test("a valid quantity limit still constrains the number of dice", () => {
     expect(evaluatePool("1d6", { limits: { maxQty: 1 } }).rolls).toHaveLength(
       1,
@@ -331,6 +755,31 @@ describe("repeating handlers", () => {
     expect(() => evaluatePool("2d6", { limits: { maxQty: 1 } })).toThrow(
       EvaluationError,
     );
+  });
+
+  test.each([
+    {
+      type: "modifier",
+      name: "explode",
+      compound: false,
+      penetrate: false,
+      limit: 0,
+    },
+    { type: "modifier", name: "re-roll", once: false, limit: 1.5 },
+    { type: "modifier", name: "unique", once: true, limit: 2 },
+    {
+      type: "modifier",
+      name: "explode",
+      compound: false,
+      penetrate: false,
+      limit: Number.MAX_SAFE_INTEGER + 1,
+    },
+  ])("evaluation rejects invalid raw modifier limits", (modifier) => {
+    expect(() =>
+      evaluate(
+        pool(1, 6, { modifiers: [modifier as unknown as ModifierNode] }),
+      ),
+    ).toThrow(EvaluationError);
   });
 
   test.each([

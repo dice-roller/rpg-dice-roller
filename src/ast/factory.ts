@@ -1,9 +1,10 @@
 /**
  * Node creators used by the grammar.
  *
- * Trivial object constructors: no validation and no defaults beyond omitting missing optional
- * properties, so the nodes stay JSON round-trippable.
+ * Plain-data constructors that omit missing optional properties so nodes stay JSON round-trippable.
+ * Modifier limits are validated here because factories are also used directly by the grammar.
  */
+import { normalizeModifierLimit } from "./validation.js";
 import type {
   BinaryNode,
   BinaryOperator,
@@ -169,13 +170,17 @@ export function createExplode(
   compound: boolean,
   penetrate: boolean,
   comparePoint?: ComparePoint,
+  limit?: number,
 ): ExplodeNode {
+  const normalizedLimit = normalizeModifierLimit(limit);
+
   return {
     type: "modifier",
     name: "explode",
     compound,
     penetrate,
     ...(comparePoint && { comparePoint }),
+    ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
   };
 }
 
@@ -214,24 +219,32 @@ export function createKeep(end: PoolEnd, qty: number): KeepNode {
 export function createReRoll(
   once: boolean,
   comparePoint?: ComparePoint,
+  limit?: number,
 ): ReRollNode {
+  const normalizedLimit = normalizeModifierLimit(limit, once);
+
   return {
     type: "modifier",
     name: "re-roll",
     once,
     ...(comparePoint && { comparePoint }),
+    ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
   };
 }
 
 export function createUnique(
   once: boolean,
   comparePoint?: ComparePoint,
+  limit?: number,
 ): UniqueNode {
+  const normalizedLimit = normalizeModifierLimit(limit, once);
+
   return {
     type: "modifier",
     name: "unique",
     once,
     ...(comparePoint && { comparePoint }),
+    ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
   };
 }
 

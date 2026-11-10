@@ -43,8 +43,13 @@ describe("modifiers", () => {
   test.each<[string, ModifierNode]>([
     // explode
     ["4d6!", createExplode(false, false)],
+    ["4d6!3", createExplode(false, false, undefined, 3)],
+    ["4d6!12>=5", createExplode(false, false, cp(">=", 5), 12)],
     ["4d6!!", createExplode(true, false)],
+    ["4d6!!12", createExplode(true, false, undefined, 12)],
     ["4d6!p", createExplode(false, true)],
+    ["4d6!p3", createExplode(false, true, undefined, 3)],
+    ["4d6!!p12>=5", createExplode(true, true, cp(">=", 5), 12)],
     ["4d6!=3", createExplode(false, false, cp("=", 3))],
     // target
     ["8d10>=8", createTarget(cp(">=", 8))],
@@ -58,8 +63,12 @@ describe("modifiers", () => {
     ["4d6kl2", createKeep("l", 2)],
     // re-roll / unique
     ["2d20r", createReRoll(false)],
+    ["2d20r12", createReRoll(false, undefined, 12)],
+    ["2d20r3<=2", createReRoll(false, cp("<=", 2), 3)],
     ["2d20ro<3", createReRoll(true, cp("<", 3))],
     ["6d6u", createUnique(false)],
+    ["6d6u12", createUnique(false, undefined, 12)],
+    ["6d6u3<=2", createUnique(false, cp("<=", 2), 3)],
     ["6d6uo", createUnique(true)],
     ["6d6u=5", createUnique(false, cp("=", 5))],
     // critical success / failure
@@ -131,6 +140,28 @@ describe("modifiers", () => {
         { kind: "failure", comparePoint: cp("!=", 1) },
       ]),
     ]);
+  });
+
+  test("explode limits leave weighted target compare points separate", () => {
+    expect(modifiersOf("4d6!3=6>=5:2")).toEqual([
+      createExplode(false, false, cp("=", 6), 3),
+      createTarget([{ kind: "success", comparePoint: cp(">=", 5), amount: 2 }]),
+    ]);
+  });
+
+  test("a limit leaves following arithmetic to the expression grammar", () => {
+    expect(parser.parse("d6!3+2")).toEqual({
+      type: "binary",
+      op: "+",
+      left: parser.parse("d6!3"),
+      right: { type: "number", value: 2 },
+    });
+    expect(parser.parse("d6!3-2")).toEqual({
+      type: "binary",
+      op: "-",
+      left: parser.parse("d6!3"),
+      right: { type: "number", value: 2 },
+    });
   });
 
   test.each(["d10>=8:1", "d10>=8:10", "d10>=8"])(

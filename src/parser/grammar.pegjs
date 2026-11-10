@@ -15,6 +15,7 @@
 
 {{
 import * as ast from "../../ast/factory.js";
+import { isPositiveSafeInteger } from "../../ast/validation.js";
 import { customDieFaces, customDieRange } from "../../dice/custom-die-notation.js";
 import { DEFAULT_ROLL_LIMITS } from "../../evaluator/RollContext.js";
 
@@ -256,10 +257,19 @@ NonTargetModifier
   / MaxModifier
   / MinModifier
 
-// `!`, `!!` (compound), `!p` (penetrate)
+// `!`, `!!` (compound), `!p` (penetrate), with an optional additional-roll limit
 ExplodeModifier
-  = "!" compound:"!"? penetrate:"p"? comparePoint:ComparePoint? {
-    return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined);
+  = "!" compound:"!"? penetrate:"p"? limit:ModifierLimit? comparePoint:ComparePoint? {
+    return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined, limit ?? undefined);
+  }
+
+ModifierLimit
+  = value:$([1-9] [0-9]*) ![0-9.] {
+    const limit = Number(value);
+    if (!isPositiveSafeInteger(limit)) {
+      error("Modifier limit must be a positive safe integer");
+    }
+    return limit;
   }
 
 // `>=8`, `>=8:2f<=2:1=10:3`
@@ -299,16 +309,22 @@ KeepModifier
     return ast.createKeep(end ?? "h", qty);
   }
 
-// `r`, `ro`, `r<3`
+// `r`, `ro`, `r3`, `r<3`
 ReRollModifier
-  = "r" once:"o"? comparePoint:ComparePoint? {
-    return ast.createReRoll(once !== null, comparePoint ?? undefined);
+  = "r" once:"o"? limit:ModifierLimit? comparePoint:ComparePoint? {
+    if (once !== null && limit !== null) {
+      error("A re-roll modifier cannot combine the once alias and a numeric limit");
+    }
+    return ast.createReRoll(once !== null, comparePoint ?? undefined, limit ?? undefined);
   }
 
-// `u`, `uo`, `u=5`
+// `u`, `uo`, `u3`, `u=5`
 UniqueModifier
-  = "u" once:"o"? comparePoint:ComparePoint? {
-    return ast.createUnique(once !== null, comparePoint ?? undefined);
+  = "u" once:"o"? limit:ModifierLimit? comparePoint:ComparePoint? {
+    if (once !== null && limit !== null) {
+      error("A unique modifier cannot combine the once alias and a numeric limit");
+    }
+    return ast.createUnique(once !== null, comparePoint ?? undefined, limit ?? undefined);
   }
 
 // `cs`, `cs>18`

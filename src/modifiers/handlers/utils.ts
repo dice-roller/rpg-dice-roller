@@ -9,12 +9,42 @@ import type {
   ReRollNode,
   UniqueNode,
 } from "../../ast/nodes.js";
+import { isPositiveSafeInteger } from "../../ast/validation.js";
 import { createComparePoint } from "../../ast/factory.js";
 import { EvaluationError } from "../../errors/EvaluationError.js";
+import type { RollLimits } from "../../evaluator/RollContext.js";
 import { excludeFromTotal, withFlags } from "../../results/die-result.js";
 import type { ResolvedDie } from "../../dice/types.js";
 import type { DieResult, ScoredItem } from "../../results/types.js";
 import type { ModifierInput } from "../types.js";
+
+/**
+ * The effective number of additional rolls allowed for one repeating modifier and item.
+ *
+ * @throws {EvaluationError} the AST contains an invalid modifier limit or conflicting once setting
+ */
+export function resolveIterationBudget(
+  modifier: { readonly limit?: number; readonly once?: boolean },
+  limits: RollLimits,
+): number {
+  const { limit, once } = modifier;
+
+  if (limit !== undefined && !isPositiveSafeInteger(limit)) {
+    throw new EvaluationError(
+      "A modifier limit must be a positive safe integer",
+    );
+  }
+
+  if (once && limit !== undefined && limit !== 1) {
+    throw new EvaluationError(
+      "A once modifier cannot have a limit other than 1",
+    );
+  }
+
+  const requested = once ? 1 : (limit ?? limits.maxIterations);
+
+  return Math.min(requested, limits.maxIterations);
+}
 
 /**
  * Compares two values for sorting, ascending. Safe for infinite values (`Infinity - Infinity` is

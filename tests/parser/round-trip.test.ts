@@ -50,6 +50,7 @@ function isWrittenAsDiamond(modifier: ModifierNode): boolean {
       return (
         !modifier.compound &&
         !modifier.penetrate &&
+        modifier.limit === undefined &&
         modifier.comparePoint?.operator === "!="
       );
     case "target":
@@ -86,9 +87,18 @@ const modifierNodes: ModifierNode[] = [
       createUnique(once, point),
     ]),
   ),
+  createExplode(false, false, undefined, 3),
+  createExplode(true, true, createComparePoint(">=", 5), 12),
+  createReRoll(false, undefined, 1),
+  createUnique(false, createComparePoint("<=", 2), 3),
   ...optionalComparePoints.flatMap((point) => [
     createCriticalSuccess(point),
     createCriticalFailure(point),
+  ]),
+  ...optionalComparePoints.flatMap((point) => [
+    createExplode(false, false, point, 12),
+    createReRoll(false, point, 12),
+    createUnique(false, point, 12),
   ]),
   createSort("a"),
   createSort("d"),
@@ -115,13 +125,18 @@ const notations = [
   "(2+3)d6",
   "4d(2+3)",
   "4d6!!p>5",
+  "4d6!3=6",
+  "4d6!3!=5",
+  "4d6!!p12>=5",
   "8d10>=8f<=2",
   "4d10>=8:1>=10:2f=1:10k1",
   "{d10,d10}>=8:10>=8:1k1",
   "4d6dh1",
   "4d6kl2",
   "2d20ro<3",
+  "2d20r1<=2",
   "6d6uo",
+  "6d6u1=2",
   "d20cs>18cf<3",
   "4d6sd",
   "4d6max5min-2",

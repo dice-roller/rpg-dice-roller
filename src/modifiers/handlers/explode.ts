@@ -4,12 +4,16 @@ import type { ResultFlag } from "../../results/flags.js";
 import type { DieResult, ScoredItem } from "../../results/types.js";
 import { matchesComparePoint } from "../compare-point.js";
 import type { ModifierHandler, ModifierInput } from "../types.js";
-import { comparePointOrDefault, repeatableDie } from "./utils.js";
+import {
+  comparePointOrDefault,
+  repeatableDie,
+  resolveIterationBudget,
+} from "./utils.js";
 
 /**
  * `!`, `!!`, `!p`, `!!p`: rolls another die whenever a roll matches the compare point (the die's max
- * by default), up to `ctx.limits.maxIterations` times per roll (default 1000). At the limit the
- * last extra roll is retained even if it matches.
+ * by default), up to the modifier limit or `ctx.limits.maxIterations` times per initial die (default
+ * 1000). At the limit the last extra roll is retained even if it matches.
  *
  * - compound (`!!`): adds the extra rolls to the original roll (flags `explode` and `compound`)
  * - penetrate (`p`): subtracts 1 from each extra roll (flag `penetrate`); whether it explodes
@@ -28,6 +32,7 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
     input: ModifierInput<ExplodeNode>,
   ): T[] {
     const { modifier, ctx } = input;
+    const iterations = resolveIterationBudget(modifier, ctx.limits);
     const { rollDie } = repeatableDie(input, "explode");
     const comparePoint = comparePointOrDefault(input, "max");
     const flags: ResultFlag[] = modifier.penetrate
@@ -41,8 +46,7 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
 
       for (
         let i = 0;
-        i < ctx.limits.maxIterations &&
-        matchesComparePoint(comparePoint, rolled);
+        i < iterations && matchesComparePoint(comparePoint, rolled);
         i++
       ) {
         const extra: DieResult = rollDie();
