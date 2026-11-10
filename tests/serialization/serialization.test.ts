@@ -1,6 +1,6 @@
 import { die, pool } from "../../src/ast/builders.js";
 import { DieRegistry } from "../../src/dice/DieRegistry.js";
-import { faceDie } from "../../src/dice/presets.js";
+import { faceDie, rangeDie } from "../../src/dice/presets.js";
 import { ImportError } from "../../src/errors/ImportError.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
 import { engines } from "../../src/index.js";
@@ -70,6 +70,48 @@ describe("encoding numbers", () => {
 });
 
 describe("rolls round-trip", () => {
+  test.each(EXPORT_FORMATS)(
+    "custom weighted dice round-trip and re-roll through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const originalIndices = [0, 2];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation(() => originalIndices.shift() ?? 0);
+      const original = new Roll("2d{ 1, 1, 2 } [damage]", settings);
+
+      const rerollSettings = new RollSettings();
+      const rerollIndices = [1, 2];
+      const integer = jest
+        .spyOn(rerollSettings.generator, "integer")
+        .mockImplementation(() => rerollIndices.shift() ?? 0);
+      const imported = Roll.import(
+        original.export(format as "json"),
+        rerollSettings,
+      );
+
+      expect(imported.notation).toBe(original.notation);
+      expect(imported.result).toEqual(original.result);
+      expect(integer).not.toHaveBeenCalled();
+
+      const rerolled = imported.reroll();
+      expect(rerolled.notation).toBe("2d{1,1,2} [damage]");
+      expect(rerolled.result).toMatchObject({
+        type: "pool",
+        rolls: [{ value: 1 }, { value: 2 }],
+      });
+      expect(integer).toHaveBeenCalledTimes(2);
+    },
+  );
+
+  test("a group containing custom dice survives import", () => {
+    const original = new Roll("{d{0:2}, d6}k1 [group]", seeded());
+    const imported = Roll.import(original.export());
+
+    expect(imported.notation).toBe(original.notation);
+    expect(imported.result).toEqual(original.result);
+  });
+
   test.each(EXPORT_FORMATS)(
     "weighted targets round-trip through %s",
     (format) => {
@@ -336,6 +378,34 @@ describe("re-rolling imported rolls", () => {
 
     expect(rerolled.result.type).toBe("pool");
     expect(rerolled.result.value).toBeGreaterThanOrEqual(2);
+  });
+
+  test("custom notation re-rolls use replacement range and face factories", () => {
+    const dice = new DieRegistry()
+      .register("face", (...faces) => faceDie(faces.map((face) => face + 10)))
+      .register("range", (min, max) => rangeDie(min + 10, max + 10));
+    const settings = new RollSettings({ dice });
+    jest.spyOn(settings.generator, "integer").mockImplementation((min) => min);
+
+    const faceData = new Roll("d{1,1,2}", seeded()).export("object");
+    const rangeData = new Roll("d{0:2}", seeded()).export("object");
+
+    expect(Roll.import(faceData, settings).reroll().total).toBe(11);
+    expect(Roll.import(rangeData, settings).reroll().total).toBe(10);
+  });
+
+  test("imported face nodes retain explicit precision when re-rolled", () => {
+    const settings = new RollSettings();
+    jest.spyOn(settings.generator, "integer").mockReturnValue(0);
+
+    const data = new Roll("d{0.123456789012345}", settings).export("object");
+    const imported = Roll.import(data, settings);
+    const rerolled = imported.reroll();
+
+    expect(rerolled.result).toMatchObject({
+      type: "pool",
+      rolls: [{ value: 0.123456789012345 }],
+    });
   });
 
   test("keeps the configured presenter", () => {

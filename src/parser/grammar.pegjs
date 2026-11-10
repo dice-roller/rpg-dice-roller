@@ -15,6 +15,7 @@
 
 {{
 import * as ast from "../../ast/factory.js";
+import { customDieFaces, customDieRange } from "../../dice/custom-die-notation.js";
 import { DEFAULT_ROLL_LIMITS } from "../../evaluator/RollContext.js";
 
 const DEFAULT_MAX_QTY = DEFAULT_ROLL_LIMITS.maxQty;
@@ -56,6 +57,32 @@ function createDescription(text, style) {
   }
 
   return ast.createDescription(trimmed, style);
+}
+
+function createCustomFaceDie(faceTokens) {
+  try {
+    const faces = customDieFaces(faceTokens);
+    return ast.createDie("face", faces.map(ast.createNumber));
+  } catch (cause) {
+    error(cause instanceof Error ? cause.message : String(cause));
+  }
+}
+
+function createCustomRangeDie(start, end, step) {
+  try {
+    const range = customDieRange(start, end, step);
+
+    if (range.kind === "range") {
+      return ast.createDie("range", [
+        ast.createNumber(range.start),
+        ast.createNumber(range.end),
+      ]);
+    }
+
+    return ast.createDie("face", range.faces.map(ast.createNumber));
+  } catch (cause) {
+    error(cause instanceof Error ? cause.message : String(cause));
+  }
 }
 }
 
@@ -148,7 +175,8 @@ Quantity
 
 // A reference to a die factory in the `DieRegistry`, resolved by the evaluator
 Die
-  = "%" {
+  = CustomDie
+  / "%" {
     return ast.createDie("percentile");
   }
   / "F" nonBlanks:("." @[12])? {
@@ -160,6 +188,38 @@ Die
   }
   / sides:ComputedValue {
     return ast.createDie("standard", [sides]);
+  }
+
+CustomDie
+  = "{" _ start:CustomDieNumber tail:CustomDieTail? _ "}" {
+    if (!tail) {
+      return createCustomFaceDie([start]);
+    }
+
+    if (tail.kind === "faces") {
+      return createCustomFaceDie([start, ...tail.values]);
+    }
+
+    return createCustomRangeDie(start, tail.end, tail.step);
+  }
+
+CustomDieTail
+  = _ "," _ first:CustomDieNumber rest:(_ "," _ @CustomDieNumber)* {
+    return { kind: "faces", values: [first, ...rest] };
+  }
+  / _ "..." _ end:CustomDieNumber {
+    return { kind: "range", end };
+  }
+  / _ ":" _ step:CustomDieNumber _ ":" _ end:CustomDieNumber {
+    return { kind: "stepped", step, end };
+  }
+  / _ ":" _ end:CustomDieNumber {
+    return { kind: "range", end };
+  }
+
+CustomDieNumber
+  = [-+]? Decimal {
+    return text();
   }
 
 // Numeric maths in parentheses, with at least one operator, e.g. `(2+3)`

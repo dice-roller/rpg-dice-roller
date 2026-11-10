@@ -20,6 +20,7 @@ import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
 import type { RollMode } from "../../src/evaluator/RollContext.js";
+import { Parser } from "../../src/parser/Parser.js";
 import { NumberGenerator } from "../../src/random/NumberGenerator.js";
 import { MersenneTwister19937 } from "../../src/random/engines.js";
 
@@ -44,9 +45,9 @@ describe("die values", () => {
     ["percentileDie", percentileDie, ["%", 1, 100, 50.5, 100]],
     ["fudgeDie(2)", fudgeDie(2), ["F", -1, 1, 0, 3]],
     ["fudgeDie(1)", fudgeDie(1), ["F.1", -1, 1, 0, 6]],
-    ["rangeDie(-2, 3)", rangeDie(-2, 3), ["-2..3", -2, 3, 0.5, 6]],
+    ["rangeDie(-2, 3)", rangeDie(-2, 3), ["{-2...3}", -2, 3, 0.5, 6]],
     ["rangeDie(1, 4)", rangeDie(1, 4), ["4", 1, 4, 2.5, 4]],
-    ["rangeDie(0, 9)", rangeDie(0, 9), ["0..9", 0, 9, 4.5, 10]],
+    ["rangeDie(0, 9)", rangeDie(0, 9), ["{0...9}", 0, 9, 4.5, 10]],
     [
       "faceDie([1, 1, 2, 3, 5, 8])",
       faceDie([1, 1, 2, 3, 5, 8]),
@@ -73,6 +74,71 @@ describe("die values", () => {
 
   test("the display-only label never uses description brackets", () => {
     expect(dieNotation(faceDie([1, 2]))).not.toMatch(/[[\]]/);
+  });
+
+  test("face labels expand exponent-form values into decimal notation", () => {
+    const notation = dieNotation(faceDie([1e-7, 1e21]));
+    expect(notation).toBe("{0.0000001,1000000000000000000000}");
+    expect(() => new Parser().parse(`d${notation}`)).not.toThrow();
+    expect(() =>
+      new Parser().parse(`d${dieNotation(rangeDie(-2, 3))}`),
+    ).not.toThrow();
+  });
+
+  test("an explicit range label is not replaced", () => {
+    expect(dieNotation(rangeDie(0, 9, { notation: "custom" }))).toBe("custom");
+  });
+
+  test.each<[string, number[], number]>([
+    ["repeated positive faces", [Number.MAX_VALUE, Number.MAX_VALUE], 1],
+    [
+      "three repeated positive faces",
+      [Number.MAX_VALUE, Number.MAX_VALUE, Number.MAX_VALUE],
+      1,
+    ],
+    ["repeated negative faces", [-Number.MAX_VALUE, -Number.MAX_VALUE], -1],
+    [
+      "mixed-sign faces",
+      [Number.MAX_VALUE, Number.MAX_VALUE, -Number.MAX_VALUE],
+      1 / 3,
+    ],
+    [
+      "mixed-sign negative faces",
+      [-Number.MAX_VALUE, -Number.MAX_VALUE, Number.MAX_VALUE],
+      -1 / 3,
+    ],
+  ])("%s have a finite average", (_label, faces, ratio) => {
+    const average = resolveDie(faceDie(faces)).average;
+
+    expect(Number.isFinite(average)).toBe(true);
+    expect(average / Number.MAX_VALUE).toBeCloseTo(ratio, 14);
+  });
+
+  test("an overflow followed by cancellation preserves a small finite remainder", () => {
+    const average = resolveDie(
+      faceDie([
+        Number.MAX_VALUE,
+        Number.MAX_VALUE,
+        -Number.MAX_VALUE,
+        -Number.MAX_VALUE,
+        1e-308,
+      ]),
+    ).average;
+
+    expect(average).toBe(1e-308 / 5);
+  });
+
+  test("rounding in a divided sum cannot overflow the fallback average", () => {
+    const faces = Array<number>(100).fill(Number.MAX_VALUE);
+    faces[99] = Number.MAX_VALUE * (1 - Number.EPSILON);
+    const average = resolveDie(faceDie(faces)).average;
+
+    expect(Number.isFinite(average)).toBe(true);
+    expect(average / Number.MAX_VALUE).toBeCloseTo(1, 14);
+  });
+
+  test("finite ordinary sums retain their previous average", () => {
+    expect(dieAverage(faceDie([0.1, 0.2, 0.3]))).toBe((0.1 + 0.2 + 0.3) / 3);
   });
 
   test("values the die provides are used before the defaults", () => {
@@ -119,7 +185,7 @@ describe("resolveDie", () => {
     const resolved = resolveDie(die);
 
     expect(dieSnapshot(resolved)).toEqual({
-      notation: "-2..3",
+      notation: "{-2...3}",
       min: -2,
       max: 3,
       average: 0.5,

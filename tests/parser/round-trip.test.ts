@@ -102,6 +102,16 @@ const notations = [
   "dF",
   "dF.1",
   "dF.2",
+  "d{1,1,2}",
+  "d{0.0000001,0.0000001}",
+  "2d{-1,1.5,2}",
+  "d{4...8}",
+  "d{4:2:8}",
+  "d{0:0.1:0.3}",
+  "d{0:0.0001:0.0003}",
+  "4d{1:10}>=8:2",
+  "d{1,2} [damage]",
+  "{d{0:2}, d6}k1",
   "(2+3)d6",
   "4d(2+3)",
   "4d6!!p>5",
@@ -154,6 +164,81 @@ describe("round-trip", () => {
     ["4d6 # fire", "4d6 // fire"],
   ])("%s is written as %s", (notation, expected) => {
     expect(nodeToNotation(parser.parse(notation))).toBe(expected);
+  });
+
+  test.each([
+    [
+      "a literal range die",
+      createPool(
+        createNumber(1),
+        createDie("range", [createNumber(-2), createNumber(3)]),
+      ),
+      "d{-2...3}",
+    ],
+    [
+      "a literal face die",
+      createPool(
+        createNumber(1),
+        createDie("face", [createNumber(1), createNumber(1), createNumber(2)]),
+      ),
+      "d{1,1,2}",
+    ],
+    [
+      "exponent-form face values",
+      createPool(
+        createNumber(1),
+        createDie("face", [createNumber(1e-7), createNumber(1e21)]),
+      ),
+      "d{0.0000001,1000000000000000000000}",
+    ],
+  ])("%s uses parseable custom notation", (_label, node, expected) => {
+    expect(nodeToNotation(node)).toBe(expected);
+    expect(parser.parse(expected)).toEqual(node);
+  });
+
+  test("the smallest and largest finite numbers round-trip as face literals", () => {
+    const node = createPool(
+      createNumber(1),
+      createDie("face", [
+        createNumber(Number.MIN_VALUE),
+        createNumber(Number.MAX_VALUE),
+        createNumber(Number.MIN_VALUE),
+      ]),
+    );
+    const notation = nodeToNotation(node);
+
+    expect(notation).not.toMatch(/[eE][+-]?\d/);
+    expect(parser.parse(notation)).toEqual(node);
+  });
+
+  test("unsupported custom factory arguments retain display-only notation", () => {
+    const expression = createBinary("+", createNumber(1), createNumber(2));
+
+    expect(
+      nodeToNotation(
+        createPool(createNumber(1), createDie("face", [expression])),
+      ),
+    ).toBe("dface(1+2)");
+    expect(
+      nodeToNotation(
+        createPool(
+          createNumber(1),
+          createDie("range", [expression, createNumber(4)]),
+        ),
+      ),
+    ).toBe("drange(1+2, 4)");
+    expect(
+      nodeToNotation(
+        createPool(createNumber(1), createDie("custom", [createNumber(3)])),
+      ),
+    ).toBe("dcustom(3)");
+
+    const tooManyFaces = Array.from({ length: 1_001 }, () => createNumber(1));
+    expect(
+      nodeToNotation(
+        createPool(createNumber(1), createDie("face", tooManyFaces)),
+      ),
+    ).toMatch(/^dface\(/);
   });
 
   // starts from the nodes, so the writer can't output something the grammar rejects or reads

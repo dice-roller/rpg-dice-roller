@@ -6,6 +6,10 @@
  */
 import { EvaluationError } from "../errors/EvaluationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
+import {
+  formatCustomDieNumber,
+  MAX_CUSTOM_DIE_FACES,
+} from "./custom-die-notation.js";
 import type { RollContext } from "../evaluator/RollContext.js";
 import type { NumberGenerator } from "../random/NumberGenerator.js";
 import type {
@@ -35,11 +39,11 @@ export function resolveNumber(value: NumberOrGetter, die: DieLike): number {
 /**
  * The display label used after the `d`, e.g. `6`, `%`, `F` or `F.1`.
  *
- * Uses the die's `notation` if set; otherwise a range die from 1 to a number uses that number
- * (`{ min: 1, max: 6 }` -> `6`).
+ * Uses the die's `notation` if set; otherwise a standard range from 1 to a safe integer uses that
+ * number (`{ min: 1, max: 6 }` -> `6`), while other safe integer ranges and materializable face
+ * lists use custom brace notation.
  *
- * Other dice get a display-only label, e.g. `-2..3` for `rangeDie(-2, 3)` and `{1,1,2,3,5,8}` for a
- * face die. It doesn't parse back, and avoids `[...]`, which is the description syntax.
+ * Ranges with non-integer bounds and face lists over the notation limit retain a display-only label.
  */
 export function dieNotation(die: DieLike): string {
   if (die.notation !== undefined) {
@@ -47,13 +51,27 @@ export function dieNotation(die: DieLike): string {
   }
 
   if (isFacesDie(die)) {
+    if (
+      die.faces.length > 0 &&
+      die.faces.length <= MAX_CUSTOM_DIE_FACES &&
+      die.faces.every(Number.isFinite)
+    ) {
+      return `{${die.faces.map(formatCustomDieNumber).join(",")}}`;
+    }
+
     return `{${die.faces.join(",")}}`;
   }
 
   const min = dieMin(die);
   const max = dieMax(die);
 
-  return min === 1 ? String(max) : `${min}..${max}`;
+  if (Number.isSafeInteger(min) && Number.isSafeInteger(max) && min <= max) {
+    return min === 1
+      ? formatCustomDieNumber(max)
+      : `{${formatCustomDieNumber(min)}...${formatCustomDieNumber(max)}}`;
+  }
+
+  return `${min}..${max}`;
 }
 
 /** The lowest value the die can roll. */
@@ -85,7 +103,38 @@ export function dieAverage(die: DieLike): number {
   }
 
   if (isFacesDie(die)) {
-    return die.faces.reduce((sum, face) => sum + face, 0) / die.faces.length;
+    const count = die.faces.length;
+    const sum = die.faces.reduce((total, face) => total + face, 0);
+
+    if (Number.isFinite(sum) || !die.faces.every(Number.isFinite)) {
+      return sum / count;
+    }
+
+    const first = die.faces[0];
+
+    if (die.faces.every((face) => face === first)) {
+      return first;
+    }
+
+    // Divide first to avoid overflow while preserving small remainders after cancellation.
+    const dividedSum = die.faces.reduce(
+      (total, face) => total + face / count,
+      0,
+    );
+
+    if (Number.isFinite(dividedSum)) {
+      return dividedSum;
+    }
+
+    // Rounding can still overflow the divided sum; normalise it to the largest face magnitude.
+    const scale = die.faces.reduce(
+      (largest, face) => Math.max(largest, Math.abs(face)),
+      0,
+    );
+    const normalized =
+      die.faces.reduce((total, face) => total + face / scale, 0) / count;
+
+    return Math.max(-1, Math.min(1, normalized)) * scale;
   }
 
   return (dieMin(die) + dieMax(die)) / 2;

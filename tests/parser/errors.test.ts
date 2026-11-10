@@ -32,11 +32,66 @@ describe("invalid notation", () => {
     " 4d6",
     "4d6 []",
     "4d6 //",
+    "d{}",
+    "d{,1}",
+    "d{1,}",
+    "d{1,,2}",
+    "d{1..3}",
+    "d{1:}",
+    "d{:2}",
+    "d{1:2:}",
+    "d{1:2:3:4}",
+    "d{1,2...4}",
+    "d{1:2,3}",
+    "d{1+1}",
+    "d{0:0:2}",
+    "d{0:0.00001:0.00003}",
+    "d{450359962737.0496:450359962737.0496}",
+    "d{0:450359962737.0496:0}",
+    "d{3:1}",
+    "d{3...1}",
+    "d{0:1:1000}",
+    "d{9007199254740992:1:9007199254740994}",
     // `f` only follows a target compare point
     "4d6!=3f=1",
     "1000d6",
   ])("%s throws a NotationError", (notation) => {
     expect(() => parser.parse(notation)).toThrow(NotationError);
+  });
+
+  test("a non-finite custom-die bound throws a NotationError", () => {
+    expect(() => parser.parse(`d{${"9".repeat(309)}}`)).toThrow(NotationError);
+  });
+
+  test("a custom face list over the notation limit throws a NotationError", () => {
+    const values = Array(1_001).fill("1").join(",");
+
+    expect(() => parser.parse(`d{${values}}`)).toThrow(NotationError);
+  });
+
+  test.each([
+    [
+      "a fifth fractional place",
+      "d{0:0.00001:0.0001}",
+      "Custom die step cannot have more than 4 decimal places",
+    ],
+    [
+      "an expanded bound above the magnitude limit",
+      "d{450359962737.0496:450359962737.0496}",
+      "Custom die range start cannot exceed an absolute value of 450359962737.0495",
+    ],
+  ])("%s retains a useful message and location", (_, notation, message) => {
+    let error: unknown;
+
+    try {
+      parser.parse(notation);
+    } catch (caught) {
+      error = caught;
+    }
+
+    expect(error).toBeInstanceOf(NotationError);
+    expect((error as NotationError).message).toContain(message);
+    expect((error as NotationError).location).toBeDefined();
   });
 
   test("the error has the notation and location", () => {
