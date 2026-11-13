@@ -1,0 +1,50 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version increment (restrictions depend on selected branch)
+        required: true
+        type: choice
+        default: patch
+        options:
+          - patch
+          - minor
+          - major
+          - prerelease
+          - prepatch
+          - preminor
+          - premajor
+      prerelease-id:
+        description: Prerelease identifier (e.g. beta or rc)
+        required: false
+        type: string
+        default: beta
+  pull_request:
+    types: [closed]
+    branches: [main, next, 'releases/v*']
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  prepare:
+    if: github.event_name == 'workflow_dispatch'
+    uses: dice-roller/.github/.github/workflows/prepare-release.yml@main
+    with:
+      mode: prepare
+      bump: ${{ inputs.bump }}
+      prerelease-id: ${{ inputs.prerelease-id }}
+
+  tag:
+    if: >-
+      github.event_name == 'pull_request' &&
+      github.event.pull_request.merged == true &&
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release/prepare/') &&
+      contains(github.event.pull_request.body, '<!-- dice-roller-release-pr -->')
+    uses: dice-roller/.github/.github/workflows/prepare-release.yml@main
+    with:
+      mode: tag
