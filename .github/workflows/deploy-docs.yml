@@ -28,7 +28,7 @@ jobs:
         run: npm ci
 
       - name: Build API docs
-        run: npm run docs:build
+        run: npm run docs:build -- --gitRevision "$GITHUB_REF_NAME"
 
       - name: Checkout documentation repository
         uses: actions/checkout@v7
