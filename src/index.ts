@@ -49,7 +49,13 @@ export type {
   RollMode,
 } from "./evaluator/RollContext.js";
 export type { NumberGenerator } from "./random/NumberGenerator.js";
-export type { RandomEngine } from "./random/RandomEngine.js";
+export { EngineRegistry } from "./random/EngineRegistry.js";
+export type {
+  EngineDefinition,
+  EngineFactory,
+  EngineOption,
+  RandomEngine,
+} from "./random/RandomEngine.js";
 
 // the most used types
 export type { DieLike } from "./dice/types.js";

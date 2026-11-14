@@ -3,7 +3,6 @@ import { DieRegistry } from "../../src/dice/DieRegistry.js";
 import { faceDie, rangeDie } from "../../src/dice/presets.js";
 import { ImportError } from "../../src/errors/ImportError.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
-import { engines } from "../../src/index.js";
 import { Roll } from "../../src/Roll.js";
 import { Roller } from "../../src/Roller.js";
 import { RollSettings } from "../../src/RollSettings.js";
@@ -19,7 +18,7 @@ import { EXPORT_FORMATS } from "../../src/serialization/formats.js";
 import type { EncodedRollData } from "../../src/serialization/formats.js";
 
 const seeded = (seed = 1) =>
-  new RollSettings({ engine: engines.MersenneTwister19937.seed(seed) });
+  new RollSettings({ engine: { name: "mersenne", seed } });
 
 /** A roll's JSON-safe data, as a plain mutable object, for corrupting. */
 function dataOf(notation: string): Record<string, unknown> {
@@ -302,7 +301,7 @@ describe("non-finite numbers", () => {
 
 describe("histories", () => {
   test.each(EXPORT_FORMATS)("round-trip through %s", (format) => {
-    const roller = new Roller({ engine: engines.MersenneTwister19937.seed(3) });
+    const roller = new Roller({ engine: { name: "mersenne", seed: 3 } });
 
     roller.roll("4d6");
     roller.roll("2d10!+3");

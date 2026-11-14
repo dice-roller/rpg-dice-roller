@@ -21,8 +21,8 @@ import { ValidationError } from "../../src/errors/ValidationError.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
 import type { RollMode } from "../../src/evaluator/RollContext.js";
 import { Parser } from "../../src/parser/Parser.js";
+import { EngineRegistry } from "../../src/random/EngineRegistry.js";
 import { NumberGenerator } from "../../src/random/NumberGenerator.js";
-import { MersenneTwister19937 } from "../../src/random/engines.js";
 
 /** A generator whose `integer()` returns the queued values, in order. */
 function queuedGenerator(...values: number[]): NumberGenerator {
@@ -289,7 +289,7 @@ describe("rollDie", () => {
     const rollMany = () => {
       const context = ctx(
         "random",
-        new NumberGenerator(MersenneTwister19937.seed(42)),
+        new NumberGenerator(new EngineRegistry().create("mersenne", 42)),
       );
       const die = resolveDie(standardDie(20));
 

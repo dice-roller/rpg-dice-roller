@@ -3,10 +3,14 @@ import {
   Roll,
   RollSettings,
   Roller,
+  EngineRegistry,
   engines,
   roll as rollOnce,
 } from "../../src/index.js";
 import type {
+  EngineDefinition,
+  EngineOption,
+  RandomEngine,
   EncodedHistoryData,
   EncodedRollData,
   RollData,
@@ -16,6 +20,10 @@ import type { Equals } from "./helpers.js";
 
 declare const html: Presenter<HTMLElement>;
 declare const roll: Roll;
+const randomEngine: RandomEngine = { next: () => 0 };
+const engineDefinition: EngineDefinition = { name: "mersenne", seed: 42 };
+accepts<EngineOption>(randomEngine);
+accepts<EngineOption>(engineDefinition);
 
 // the roller's presenter decides the output type of `present()`
 const textRoller = new Roller();
@@ -59,4 +67,13 @@ accepts<Roll>(new Roll("4d6", new RollSettings()));
 accepts<Roll>(rollOnce("4d6", { limits: { maxQty: 10 } }));
 accepts<Roll<HTMLElement>>(new Roll("4d6", { presenter: html }));
 accepts<Roll>(roll.reroll());
+const engineRegistry = new EngineRegistry();
+const overrideRoller = new Roller({
+  engines: engineRegistry,
+  engine: "mersenne",
+});
+accepts<Roll>(overrideRoller.roll("d6", { engine: engineDefinition }));
+accepts<Roll>(roll.reroll({ engine: randomEngine }));
+// @ts-expect-error - engine names, instances, or definitions are required
+new Roller({ engine: 42 });
 accepts<Roll>(Roll.import(""));
