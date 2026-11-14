@@ -2,9 +2,9 @@ import commonjs from '@rollup/plugin-commonjs';
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import { babel } from '@rollup/plugin-babel';
 import banner from 'rollup-plugin-banner';
+import terser from '@rollup/plugin-terser';
 // import eslint from '@rollup/plugin-eslint';
 
-const { terser } = require('rollup-plugin-terser');
 const path = require('path');
 
 const production = !process.env.BUILD || (process.env.BUILD === 'prod');

@@ -1,0 +1,21 @@
+name: Publish to npm
+
+on:
+  push:
+    branches: [main, next, 'releases/v*']
+    # Do not stage an unchanged package just because workflows or docs change.
+    paths: ['package.json']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/next' || startsWith(github.ref, 'refs/heads/releases/v')
+    uses: dice-roller/.github/.github/workflows/npm-publish.yml@main
+    # Optional package-specific commands:
+    # with:
+    #   test-command: npm run test:coverage
+    #   build-command: npm run build
