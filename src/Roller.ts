@@ -5,6 +5,7 @@ import type { ModifierRegistry } from "./modifiers/ModifierRegistry.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { NumberGenerator } from "./random/NumberGenerator.js";
+import type { EngineOption } from "./random/RandomEngine.js";
 import { Roll } from "./Roll.js";
 import { RollHistory } from "./RollHistory.js";
 import { RollSettings } from "./RollSettings.js";
@@ -73,8 +74,16 @@ export class Roller<T = string> {
   }
 
   /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. */
-  roll(input: string | ExpressionNode): Roll<T> {
-    const roll = new Roll(input, this.settings);
+  roll(
+    input: string | ExpressionNode,
+    options?: { engine?: EngineOption },
+  ): Roll<T> {
+    const engine = options?.engine;
+    const settings =
+      engine === undefined
+        ? this.settings
+        : RollSettings.withEngine(this.settings, engine);
+    const roll = new Roll(input, settings);
 
     this.history.add(roll);
 

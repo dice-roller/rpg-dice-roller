@@ -9,7 +9,6 @@ import {
   RollSettings,
   Roller,
   dice,
-  engines,
   errors,
   modifiers,
   presenters,
@@ -63,7 +62,7 @@ describe("Roller", () => {
   );
 
   test("has its own generator, using the engine", () => {
-    const engine = engines.MersenneTwister19937.seed(42);
+    const engine = { next: () => 0 };
     const roller = new Roller({ engine });
 
     expect(roller.generator.engine).toBe(engine);
@@ -85,7 +84,7 @@ describe("Roller", () => {
   });
 
   test("rolling is wired to the evaluator", () => {
-    const roller = new Roller({ engine: engines.MersenneTwister19937.seed(3) });
+    const roller = new Roller({ engine: { name: "mersenne", seed: 3 } });
     const result = roller.roll("4d6+2");
 
     expect(result.result.type).toBe("binary");
@@ -102,7 +101,7 @@ describe("Roller", () => {
   test("seeded rollers roll the same totals", () => {
     const totals = () => {
       const roller = new Roller({
-        engine: engines.MersenneTwister19937.seed(42),
+        engine: { name: "mersenne", seed: 42 },
       });
 
       return Array.from({ length: 5 }, () => roller.roll("3d20+dF").total);
@@ -132,7 +131,7 @@ describe("Roller", () => {
   });
 
   test("options are passed on to the settings, including the presenter", () => {
-    const engine = engines.MersenneTwister19937.seed(1);
+    const engine = { next: () => 0 };
     const presenter = { present: () => 42 };
     const roller = new Roller({ engine, limits: { maxQty: 5 }, presenter });
 
@@ -282,7 +281,7 @@ describe("Roll", () => {
 
   test("an imported roll re-rolls its expression, with the settings given", () => {
     const settings = new RollSettings({
-      engine: engines.MersenneTwister19937.seed(5),
+      engine: { name: "mersenne", seed: 5 },
     });
     const imported = Roll.import(new Roll("4d6kh3").export(), settings);
     const rerolled = imported.reroll();

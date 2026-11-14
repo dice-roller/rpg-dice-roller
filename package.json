@@ -79,7 +79,7 @@
   },
   "dependencies": {
     "mathjs": "^15.2.0",
-    "random-js": "^2.1.0"
+    "pure-rand": "^7.0.1"
   },
   "engines": {
     "node": ">=22"

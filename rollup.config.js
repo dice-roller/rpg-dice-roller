@@ -62,7 +62,7 @@ export default [
       format: "esm",
     },
     plugins: plugins(production),
-    external: [/^mathjs(\/.*)?$/, /^random-js(\/.*)?$/],
+    external: [/^mathjs(\/.*)?$/, /^pure-rand(\/.*)?$/],
     onwarn,
   },
   // UMD: self-contained, with only the used parts of mathjs bundled

@@ -17,8 +17,8 @@ import { createRollContext } from "../../src/evaluator/RollContext.js";
 import type { RollLimits, RollMode } from "../../src/evaluator/RollContext.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import { Parser } from "../../src/parser/Parser.js";
+import { EngineRegistry } from "../../src/random/EngineRegistry.js";
 import { NumberGenerator } from "../../src/random/NumberGenerator.js";
-import { MersenneTwister19937 } from "../../src/random/engines.js";
 import {
   createDieResult,
   excludeFromTotal,
@@ -44,7 +44,9 @@ function evaluate(
     limits,
   }: EvaluateOptions = {},
 ) {
-  const generator = new NumberGenerator(MersenneTwister19937.seed(7));
+  const generator = new NumberGenerator(
+    new EngineRegistry().create("mersenne", 7),
+  );
 
   if (rolls) {
     jest

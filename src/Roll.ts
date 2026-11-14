@@ -4,6 +4,7 @@ import { ImportError } from "./errors/ImportError.js";
 import { averageResult } from "./evaluator/average.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
+import type { EngineOption } from "./random/RandomEngine.js";
 import type { ExpressionResult } from "./results/types.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
@@ -66,7 +67,7 @@ function firstDescription(
  * roll.total;                        // e.g. 14
  * `${roll}`;                         // e.g. "4d6kh3: [3d, 5, 6, 3] = 14"
  *
- * new Roll("4d6", { engine: engines.MersenneTwister19937.seed(42) });
+ * new Roll("4d6", { engine: { name: "mersenne", seed: 42 } });
  *
  * @typeParam T the output type of the configured presenter
  */
@@ -187,9 +188,15 @@ export class Roll<T = string> {
       averageResult(this.result) ?? (this.minTotal + this.maxTotal) / 2);
   }
 
-  /** Rolls the original input again with the same settings; restored rolls use their stored expression. Does not add to a history. */
-  reroll(): Roll<T> {
-    return new Roll<T>(this.#input, this.#settings);
+  /** Rolls the original input again; an engine override applies only to this reroll. Does not add to a history. */
+  reroll(options?: { engine?: EngineOption }): Roll<T> {
+    const engine = options?.engine;
+    const settings =
+      engine === undefined
+        ? this.#settings
+        : RollSettings.withEngine(this.#settings, engine);
+
+    return new Roll<T>(this.#input, settings);
   }
 
   /** Presents the roll with the presenter, or the one from the options (default `TextPresenter`). */
