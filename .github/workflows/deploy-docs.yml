@@ -10,6 +10,9 @@ concurrency:
   group: api-docs-${{ github.ref }}
   cancel-in-progress: false
 
+permissions:
+  contents: read
+
 jobs:
   build-api-docs:
     runs-on: ubuntu-latest
