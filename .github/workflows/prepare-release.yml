@@ -48,5 +48,6 @@ jobs:
     uses: dice-roller/.github/.github/workflows/prepare-release.yml@main
     with:
       mode: tag
+      release-app-id: ${{ vars.RELEASE_APP_ID }}
     secrets:
-      RELEASE_DEPLOY_KEY: ${{ secrets.RELEASE_DEPLOY_KEY }}
+      RELEASE_APP_PRIVATE_KEY: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
