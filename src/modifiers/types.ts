@@ -14,8 +14,8 @@ export interface ModifierInput<N extends ModifierNode = ModifierNode> {
   readonly ctx: RollContext;
   /** The pool's die (pools only). */
   readonly die?: ResolvedDie;
-  /** Rolls one more die of the pool (pools only), e.g. for explode and re-roll. */
-  readonly rollDie?: () => DieResult;
+  /** Rolls one more die of the pool, or returns `undefined` when its per-pool budget is spent. Initial dice are excluded; repeating handlers must handle exhaustion and keep the results rolled so far. */
+  readonly rollDie?: () => DieResult | undefined;
 }
 
 /**

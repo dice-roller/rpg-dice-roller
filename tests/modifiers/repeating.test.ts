@@ -2,7 +2,10 @@ import { explode, group, pool } from "../../src/ast/builders.js";
 import { createComparePoint } from "../../src/ast/factory.js";
 import type { ModifierNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
+import { ValidationError } from "../../src/errors/ValidationError.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
+import { Roll } from "../../src/Roll.js";
+import { RollSettings } from "../../src/RollSettings.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import {
   explodeHandler,
@@ -57,6 +60,71 @@ describe("explode", () => {
 
     expect(rollsOf(result)).toEqual(expected);
     expect(result.value).toBe(total);
+  });
+
+  test("branches every matching roll to its remaining depth", () => {
+    const result = evaluatePool("d6!2:3", { rolls: Array(13).fill(6) });
+
+    expect(result.rolls).toHaveLength(13);
+    expect(result.rolls.map(({ flags }) => flags.includes("explode"))).toEqual([
+      true,
+      true,
+      ...Array.from({ length: 3 }, () => false),
+      true,
+      ...Array.from({ length: 3 }, () => false),
+      true,
+      ...Array.from({ length: 3 }, () => false),
+    ]);
+    expect(result.value).toBe(78);
+  });
+
+  test("visits each original die's explosion tree before the next original", () => {
+    const result = evaluatePool("2d6!2:2", {
+      rolls: [6, 1, 6, 6, 6, 6, 6, 6],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([
+      6, 6, 6, 6, 6, 6, 6, 1,
+    ]);
+    expect(result.rolls.map(({ flags }) => flags.includes("explode"))).toEqual([
+      true,
+      true,
+      false,
+      false,
+      true,
+      false,
+      false,
+      false,
+    ]);
+  });
+
+  test("compounds each original die's complete branching tree independently", () => {
+    const result = evaluatePool("2d6!!2:2", {
+      rolls: [6, 1, 6, 2, 3, 4],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([21, 1]);
+    expect(result.rolls[0]?.flags).toEqual(["explode", "compound"]);
+    expect(result.value).toBe(22);
+  });
+
+  test("tests raw penetrating values and adjusts every generated descendant", () => {
+    const result = evaluatePool("d6!p2:2", {
+      rolls: [6, 6, 6, 2, 1],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([6, 5, 5, 1, 0]);
+    expect(result.rolls.map(({ initialValue }) => initialValue)).toEqual([
+      6, 6, 6, 2, 1,
+    ]);
+    expect(result.rolls.map(({ flags }) => flags)).toEqual([
+      ["explode", "penetrate"],
+      ["explode", "penetrate"],
+      [],
+      [],
+      [],
+    ]);
+    expect(result.value).toBe(17);
   });
 
   test("`2d6!!=4` compounds on rolls equal to 4", () => {
@@ -340,6 +408,85 @@ describe("re-roll", () => {
     expect(rollsOf(result)).toEqual(expected);
     expect(result.value).toBe(total);
   });
+
+  test("replaces a matching die with a depth-first branching result tree", () => {
+    const result = evaluatePool("d6r2:2", { rolls: [1, 4, 1, 3, 5] });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([4, 3, 5]);
+    expect(result.rolls.map(({ initialValue }) => initialValue)).toEqual([
+      4, 3, 5,
+    ]);
+    expect(result.rolls.map(({ flags }) => flags)).toEqual([
+      ["re-roll"],
+      ["re-roll"],
+      ["re-roll"],
+    ]);
+    expect(result.value).toBe(12);
+  });
+
+  test("generates nine terminal results when all branches re-roll", () => {
+    const result = evaluatePool("d6r2:3", { rolls: Array(13).fill(1) });
+
+    expect(result.rolls).toHaveLength(9);
+    expect(result.rolls.map(({ value }) => value)).toEqual(Array(9).fill(1));
+    expect(result.rolls.map(({ initialValue }) => initialValue)).toEqual(
+      Array(9).fill(1),
+    );
+    expect(result.rolls.every(({ flags }) => flags.includes("re-roll"))).toBe(
+      true,
+    );
+  });
+
+  test("later keep, target and sort modifiers process all replacement leaves", () => {
+    const result = evaluatePool("d6r2:2k2>=4sd", {
+      rolls: [1, 4, 1, 3, 5],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([5, 4, 3]);
+    expect(result.rolls.map(({ useInTotal }) => useInTotal)).toEqual([
+      true,
+      true,
+      false,
+    ]);
+    expect(
+      result.rolls
+        .slice(0, 2)
+        .every(({ flags }) => flags.includes("target-success")),
+    ).toBe(true);
+    expect(result.value).toBe(2);
+  });
+
+  test("visits each original re-roll tree before the next original", () => {
+    const result = evaluatePool("2d6r2:2", {
+      rolls: [1, 4, 1, 3, 5, 2],
+    });
+
+    expect(result.rolls.map(({ value }) => value)).toEqual([3, 5, 2, 4]);
+    expect(result.rolls.map(({ initialValue }) => initialValue)).toEqual([
+      3, 5, 2, 4,
+    ]);
+    expect(result.rolls.map(({ flags }) => flags)).toEqual([
+      ["re-roll"],
+      ["re-roll"],
+      ["re-roll"],
+      [],
+    ]);
+  });
+
+  test.each([
+    ["ro:3", "re-roll-once"],
+    ["r1:3", "re-roll"],
+  ] as const)(
+    "%s generates three once-only replacements with its legacy flag",
+    (modifier, flag) => {
+      const result = evaluatePool(`d6${modifier}`, { rolls: [1, 1, 1, 1] });
+
+      expect(result.rolls).toHaveLength(3);
+      expect(result.rolls.every(({ flags }) => flags.includes(flag))).toBe(
+        true,
+      );
+    },
+  );
 
   test("the initial value is kept", () => {
     expect(evaluatePool("d6r", { rolls: [1, 4] }).rolls[0]).toMatchObject({
@@ -835,5 +982,376 @@ describe("repeating handlers", () => {
     });
 
     expect(items).toEqual(before);
+  });
+});
+
+describe("repeating modifier AST validation", () => {
+  test.each<[string, unknown]>([
+    ["d6!", 0],
+    ["d6r", 1.5],
+    ["d6u", 2],
+  ])(
+    "rejects an invalid amount on %s before modifier dispatch",
+    (notation, amount) => {
+      const node = parser.parse(notation);
+
+      if (node.type !== "pool") {
+        throw new Error("Expected a pool");
+      }
+
+      Object.assign(node.modifiers[0], { amount });
+      expect(() => evaluate(node)).toThrow(ValidationError);
+    },
+  );
+});
+
+describe("generated roll budgets", () => {
+  function settingsWithRolls(
+    rolls: readonly number[],
+    limits: { maxGeneratedRolls: number; maxIterations?: number },
+  ) {
+    const settings = new RollSettings({ limits });
+    const remaining = [...rolls];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation((min) => remaining.shift() ?? min);
+
+    return { settings, integer, remaining };
+  }
+
+  test("truncates an explosion after exactly the generated-roll budget", () => {
+    const { settings, integer, remaining } = settingsWithRolls([6, 6, 6, 2], {
+      maxGeneratedRolls: 2,
+    });
+    const result = settings.evaluate(settings.parse("d6!"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 18,
+      rolls: [
+        { value: 6, flags: ["explode"] },
+        { value: 6, flags: ["explode"] },
+        { value: 6, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([2]);
+  });
+
+  test("d2!:3 keeps a partial depth-first tree and only flags actual triggers", () => {
+    const { settings, integer, remaining } = settingsWithRolls([2, 2, 2, 1], {
+      maxGeneratedRolls: 2,
+    });
+    const result = settings.evaluate(settings.parse("d2!:3"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 6,
+      rolls: [
+        { value: 2, flags: ["explode"] },
+        { value: 2, flags: ["explode"] },
+        { value: 2, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([1]);
+  });
+
+  test("stops a branching explosion between siblings", () => {
+    const { settings, integer, remaining } = settingsWithRolls([6, 2, 3, 4], {
+      maxGeneratedRolls: 2,
+    });
+    const result = settings.evaluate(settings.parse("d6!2:3"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 11,
+      rolls: [
+        { value: 6, flags: ["explode"] },
+        { value: 2, flags: [] },
+        { value: 3, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([4]);
+  });
+
+  test("compounds and penetrates only the descendants actually rolled", () => {
+    const compound = settingsWithRolls([6, 6, 2, 4], {
+      maxGeneratedRolls: 2,
+    });
+    const compoundResult = compound.settings.evaluate(
+      compound.settings.parse("d6!!"),
+    );
+
+    expect(compoundResult).toMatchObject({
+      type: "pool",
+      value: 14,
+      rolls: [{ value: 14, flags: ["explode", "compound"] }],
+    });
+    expect(compound.integer).toHaveBeenCalledTimes(3);
+    expect(compound.remaining).toEqual([4]);
+
+    const penetrate = settingsWithRolls([6, 6, 2], {
+      maxGeneratedRolls: 1,
+    });
+    const penetrateResult = penetrate.settings.evaluate(
+      penetrate.settings.parse("d6!p"),
+    );
+
+    expect(penetrateResult).toMatchObject({
+      type: "pool",
+      value: 11,
+      rolls: [
+        { value: 6, flags: ["explode", "penetrate"] },
+        { value: 5, flags: [] },
+      ],
+    });
+    expect(penetrate.integer).toHaveBeenCalledTimes(2);
+    expect(penetrate.remaining).toEqual([2]);
+  });
+
+  test("large explosion amounts unwind immediately after exhaustion", () => {
+    const { settings, integer, remaining } = settingsWithRolls([6, 1, 2], {
+      maxGeneratedRolls: 1,
+    });
+    const result = settings.evaluate(settings.parse("d6!:9007199254740991"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 7,
+      rolls: [
+        { value: 6, flags: ["explode"] },
+        { value: 1, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(2);
+    expect(remaining).toEqual([2]);
+  });
+
+  test("propagates actual generated-die errors", () => {
+    const settings = new RollSettings({
+      limits: { maxGeneratedRolls: 1 },
+    });
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementationOnce(() => 6)
+      .mockImplementationOnce(() => {
+        throw new RangeError("random generator failed");
+      });
+
+    expect(() => settings.evaluate(settings.parse("d6!"))).toThrow(
+      "random generator failed",
+    );
+    expect(integer).toHaveBeenCalledTimes(2);
+  });
+
+  test("shares the pool budget across modifiers", () => {
+    const { settings, integer } = settingsWithRolls([6, 1, 2], {
+      maxGeneratedRolls: 1,
+    });
+    const result = settings.evaluate(settings.parse("d6!r"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 7,
+      rolls: [
+        { value: 6, flags: ["explode"] },
+        { value: 1, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(2);
+  });
+
+  test("branching re-rolls count discarded intermediate children before drawing siblings", () => {
+    const { settings, integer, remaining } = settingsWithRolls([1, 1, 1, 5], {
+      maxGeneratedRolls: 2,
+    });
+    const result = settings.evaluate(settings.parse("d6r2:2"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 1,
+      rolls: [{ value: 1, initialValue: 1, flags: ["re-roll"] }],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([5]);
+  });
+
+  test("keeps partial branching re-roll results without retaining replaced parents or siblings", () => {
+    const { settings, integer, remaining } = settingsWithRolls(
+      [1, 4, 1, 3, 5],
+      {
+        maxGeneratedRolls: 2,
+      },
+    );
+    const result = settings.evaluate(settings.parse("d6r2:2"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 5,
+      rolls: [
+        { value: 4, initialValue: 4, flags: ["re-roll"] },
+        { value: 1, initialValue: 1, flags: ["re-roll"] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([3, 5]);
+  });
+
+  test("keeps later original matches unchanged after an earlier re-roll exhausts the budget", () => {
+    const { settings, integer, remaining } = settingsWithRolls([1, 1, 4, 5], {
+      maxGeneratedRolls: 1,
+    });
+    const result = settings.evaluate(settings.parse("2d6r"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 5,
+      rolls: [
+        { value: 4, initialValue: 1, flags: ["re-roll"] },
+        { value: 1, initialValue: 1, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(3);
+    expect(remaining).toEqual([5]);
+  });
+
+  test("keeps exhausted matching re-rolls and unique duplicates", () => {
+    const reRoll = settingsWithRolls([1, 1, 2], {
+      maxGeneratedRolls: 1,
+    });
+    const reRollResult = reRoll.settings.evaluate(reRoll.settings.parse("d6r"));
+
+    expect(reRollResult).toMatchObject({
+      type: "pool",
+      value: 1,
+      rolls: [{ value: 1, initialValue: 1, flags: ["re-roll"] }],
+    });
+    expect(reRoll.integer).toHaveBeenCalledTimes(2);
+    expect(reRoll.remaining).toEqual([2]);
+
+    const unique = settingsWithRolls([1, 1, 1, 2, 1, 3], {
+      maxGeneratedRolls: 1,
+    });
+    const uniqueResult = unique.settings.evaluate(
+      unique.settings.parse("4d6u"),
+    );
+
+    expect(uniqueResult).toMatchObject({
+      type: "pool",
+      value: 5,
+      rolls: [
+        { value: 1, flags: [] },
+        { value: 1, flags: ["unique"] },
+        { value: 1, flags: [] },
+        { value: 2, flags: [] },
+      ],
+    });
+    expect(unique.integer).toHaveBeenCalledTimes(5);
+    expect(unique.remaining).toEqual([3]);
+  });
+
+  test("a unique replacement that spends the budget keeps later items untouched", () => {
+    const { settings, integer, remaining } = settingsWithRolls(
+      [1, 1, 2, 2, 2, 3],
+      {
+        maxGeneratedRolls: 1,
+      },
+    );
+    const result = settings.evaluate(settings.parse("4d6u"));
+
+    expect(result).toMatchObject({
+      type: "pool",
+      value: 7,
+      rolls: [
+        { value: 1, flags: [] },
+        { value: 2, flags: ["unique"] },
+        { value: 2, flags: [] },
+        { value: 2, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(5);
+    expect(remaining).toEqual([3]);
+  });
+
+  test.each([
+    ["{d6!, d6!}", [6, 1, 6, 1], 2],
+    ["{d6!, {d6!, d6!}}", [6, 1, 6, 1, 6, 1], 3],
+  ])("gives each pool in %s its own budget", (notation, rolls, poolCount) => {
+    const { settings, integer } = settingsWithRolls(rolls, {
+      maxGeneratedRolls: 1,
+    });
+    const result = settings.evaluate(settings.parse(notation));
+    const pools = poolsOf(result);
+
+    expect(pools).toHaveLength(poolCount);
+    expect(
+      pools.map(({ rolls: poolRolls }) => poolRolls.map(({ value }) => value)),
+    ).toEqual(Array.from({ length: poolCount }, () => [6, 1]));
+    expect(integer).toHaveBeenCalledTimes(poolCount * 2);
+  });
+
+  test("starts a fresh budget for random, minimum and maximum evaluations", () => {
+    const { settings, integer } = settingsWithRolls([1, 2], {
+      maxGeneratedRolls: 1,
+      maxIterations: 1,
+    });
+    const expression = settings.parse("d6!r");
+    const random = settings.evaluate(expression, "random");
+    const min = settings.evaluate(expression, "min");
+    const max = settings.evaluate(expression, "max");
+
+    expect(random).toMatchObject({
+      type: "pool",
+      value: 2,
+      rolls: [{ value: 2, initialValue: 1, flags: ["re-roll"] }],
+    });
+    expect(min).toMatchObject({
+      type: "pool",
+      value: 1,
+      rolls: [{ value: 1, initialValue: 1, flags: ["re-roll"] }],
+    });
+    expect(max).toMatchObject({
+      type: "pool",
+      value: 12,
+      rolls: [
+        { value: 6, flags: ["explode"] },
+        { value: 6, flags: [] },
+      ],
+    });
+    expect(integer).toHaveBeenCalledTimes(2);
+  });
+
+  test("minimum, maximum and export evaluations truncate at the pool budget", () => {
+    const minRoll = () => {
+      const settings = new RollSettings({
+        limits: { maxGeneratedRolls: 1 },
+      });
+
+      jest.spyOn(settings.generator, "integer").mockImplementation(() => 6);
+
+      return new Roll("d6r", settings);
+    };
+    const roll = () => {
+      const settings = new RollSettings({
+        limits: { maxGeneratedRolls: 1 },
+      });
+
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => min);
+
+      return new Roll("d6!:2", settings);
+    };
+
+    expect(minRoll().minTotal).toBe(1);
+    expect(roll().maxTotal).toBe(12);
+    expect(roll().export("object")).toMatchObject({
+      total: 1,
+      minTotal: 1,
+      maxTotal: 12,
+      averageTotal: 6.5,
+    });
   });
 });

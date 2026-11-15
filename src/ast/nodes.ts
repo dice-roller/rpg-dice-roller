@@ -215,6 +215,8 @@ export interface ExplodeNode {
   readonly comparePoint?: ComparePoint;
   /** Maximum additional explosions per initial die; omitted limits use the context cap. */
   readonly limit?: number;
+  /** Number of child dice generated for each matching roll; omitted amounts use 1. */
+  readonly amount?: number;
 }
 
 /** A target comparison; amount is a whole number from 1 to 10 and defaults to 1. */
@@ -255,6 +257,8 @@ export interface ReRollNode {
   readonly comparePoint?: ComparePoint;
   /** Maximum additional re-rolls per die; omitted limits use the context cap. */
   readonly limit?: number;
+  /** Number of replacement dice generated for each matching roll; omitted amounts use 1. */
+  readonly amount?: number;
 }
 
 /** `u`, `uo` and numeric uniqueness limits. */

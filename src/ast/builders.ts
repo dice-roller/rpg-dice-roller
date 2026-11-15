@@ -202,8 +202,9 @@ export function compare(
  * --------------------------------------------------------------------------------------------- */
 
 /**
- * Explode matching rolls. An optional positive safe-integer `limit` bounds additional rolls per
- * initial die and is capped by the roll context's `maxIterations`.
+ * Explode matching rolls. An optional positive safe-integer `limit` bounds generations per
+ * initial die and is capped by the roll context's `maxIterations`; `amount` is the positive
+ * safe-integer number of child dice generated per match and defaults to 1.
  */
 export function explode(
   options: {
@@ -211,6 +212,7 @@ export function explode(
     penetrate?: boolean;
     comparePoint?: ComparePoint;
     limit?: number;
+    amount?: number;
   } = {},
 ): ExplodeNode {
   return createExplode(
@@ -218,6 +220,7 @@ export function explode(
     options.penetrate ?? false,
     optionalComparePoint(options.comparePoint),
     options.limit,
+    options.amount,
   );
 }
 
@@ -286,19 +289,23 @@ export function keep(end: PoolEnd, qty = 1): KeepNode {
 
 /**
  * Re-roll matching dice. `once` is the `ro` alias; numeric `limit: 1` has the same budget but
- * retains `r1` notation. Limits count additional rolls per die and cannot exceed the context cap.
+ * retains `r1` notation. Limits count generations per die and cannot exceed the context cap;
+ * `amount` is the positive safe-integer number of replacement dice generated per match and defaults
+ * to 1.
  */
 export function reRoll(
   options: {
     once?: boolean;
     comparePoint?: ComparePoint;
     limit?: number;
+    amount?: number;
   } = {},
 ): ReRollNode {
   return createReRoll(
     options.once ?? false,
     optionalComparePoint(options.comparePoint),
     options.limit,
+    options.amount,
   );
 }
 

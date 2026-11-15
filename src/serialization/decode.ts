@@ -457,6 +457,7 @@ function modifier(value: unknown, path: string): void {
       boolean(node.penetrate, `${path}.penetrate`);
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
       optional(node.limit, `${path}.limit`, positiveSafeInteger);
+      optional(node.amount, `${path}.amount`, positiveSafeInteger);
       break;
     case "target": {
       if (node.rules === undefined) {
@@ -509,6 +510,14 @@ function modifier(value: unknown, path: string): void {
       boolean(node.once, `${path}.once`);
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
       optional(node.limit, `${path}.limit`, positiveSafeInteger);
+
+      if (node.name === "unique" && node.amount !== undefined) {
+        fail(`${path}.amount`, "amount is not supported on unique modifiers");
+      }
+
+      if (node.name === "re-roll") {
+        optional(node.amount, `${path}.amount`, positiveSafeInteger);
+      }
 
       if (node.once && node.limit !== undefined && node.limit !== 1) {
         fail(`${path}.limit`, "a once modifier can only have a limit of 1");

@@ -257,10 +257,10 @@ NonTargetModifier
   / MaxModifier
   / MinModifier
 
-// `!`, `!!` (compound), `!p` (penetrate), with an optional additional-roll limit
+// `!`, `!!` (compound), `!p` (penetrate), with optional additional-roll limit and amount
 ExplodeModifier
-  = "!" compound:"!"? penetrate:"p"? limit:ModifierLimit? comparePoint:ComparePoint? {
-    return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined, limit ?? undefined);
+  = "!" compound:"!"? penetrate:"p"? limit:ModifierLimit? amount:ModifierAmount? comparePoint:ComparePoint? {
+    return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined, limit ?? undefined, amount ?? undefined);
   }
 
 ModifierLimit
@@ -270,6 +270,15 @@ ModifierLimit
       error("Modifier limit must be a positive safe integer");
     }
     return limit;
+  }
+
+ModifierAmount
+  = ":" value:$([1-9] [0-9]*) ![0-9.] {
+    const amount = Number(value);
+    if (!isPositiveSafeInteger(amount)) {
+      error("Modifier amount must be a positive safe integer");
+    }
+    return amount;
   }
 
 // `>=8`, `>=8:2f<=2:1=10:3`
@@ -311,11 +320,11 @@ KeepModifier
 
 // `r`, `ro`, `r3`, `r<3`
 ReRollModifier
-  = "r" once:"o"? limit:ModifierLimit? comparePoint:ComparePoint? {
+  = "r" once:"o"? limit:ModifierLimit? amount:ModifierAmount? comparePoint:ComparePoint? {
     if (once !== null && limit !== null) {
       error("A re-roll modifier cannot combine the once alias and a numeric limit");
     }
-    return ast.createReRoll(once !== null, comparePoint ?? undefined, limit ?? undefined);
+    return ast.createReRoll(once !== null, comparePoint ?? undefined, limit ?? undefined, amount ?? undefined);
   }
 
 // `u`, `uo`, `u3`, `u=5`

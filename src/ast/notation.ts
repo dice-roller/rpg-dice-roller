@@ -41,7 +41,7 @@ export function modifierToNotation(modifier: ModifierNode): string {
   switch (modifier.name) {
     case "explode": {
       const prefix = `!${modifier.compound ? "!" : ""}${modifier.penetrate ? "p" : ""}`;
-      return `${prefix}${modifier.limit ?? ""}${comparePoint(modifier.comparePoint, prefix === "!" && modifier.limit === undefined)}`;
+      return `${prefix}${modifier.limit ?? ""}${modifier.amount !== undefined ? `:${modifier.amount}` : ""}${comparePoint(modifier.comparePoint, prefix === "!" && modifier.limit === undefined && modifier.amount === undefined)}`;
     }
     case "target":
       return modifier.rules
@@ -55,7 +55,7 @@ export function modifierToNotation(modifier: ModifierNode): string {
     case "keep":
       return `k${modifier.end}${modifier.qty}`;
     case "re-roll":
-      return `r${modifier.once ? "o" : (modifier.limit ?? "")}${comparePoint(modifier.comparePoint)}`;
+      return `r${modifier.once ? "o" : (modifier.limit ?? "")}${modifier.amount !== undefined ? `:${modifier.amount}` : ""}${comparePoint(modifier.comparePoint)}`;
     case "unique":
       return `u${modifier.once ? "o" : (modifier.limit ?? "")}${comparePoint(modifier.comparePoint)}`;
     case "critical-success":

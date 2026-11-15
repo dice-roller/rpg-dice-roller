@@ -15,6 +15,7 @@ import { dieSnapshot, resolveDie, rollDie } from "../dice/die-utils.js";
 import type { ResolvedDie } from "../dice/types.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
+import { normalizeModifierAmount } from "../ast/validation.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
 import { validateTargetAmounts } from "../modifiers/handlers/target.js";
 import { resolveIterationBudget } from "../modifiers/handlers/utils.js";
@@ -156,13 +157,23 @@ export class Evaluator {
     );
     const roll = (): DieResult => createDieResult(rollDie(die, ctx));
     const initialRolls = Array.from({ length: count }, roll);
+    let generatedRolls = 0;
+    const rollGeneratedDie = (): DieResult | undefined => {
+      if (generatedRolls >= ctx.limits.maxGeneratedRolls) {
+        return undefined;
+      }
+
+      generatedRolls++;
+
+      return roll();
+    };
     const rolls =
       node.modifiers.length === 0
         ? initialRolls
         : this.applyModifiers(initialRolls, node.modifiers, "pool", {
             ctx,
             die,
-            rollDie: roll,
+            rollDie: rollGeneratedDie,
           });
 
     return {
@@ -462,6 +473,17 @@ export class Evaluator {
         modifier.name === "unique"
       ) {
         resolveIterationBudget(modifier, ctx.limits);
+      }
+
+      if (modifier.name === "explode" || modifier.name === "re-roll") {
+        normalizeModifierAmount(modifier.amount);
+      } else if (
+        modifier.name === "unique" &&
+        Object.hasOwn(modifier, "amount")
+      ) {
+        throw new ValidationError(
+          "A modifier amount is not supported on unique",
+        );
       }
     }
   }

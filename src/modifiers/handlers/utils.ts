@@ -84,7 +84,8 @@ export function dropAt<T extends ScoredItem>(
 
 /**
  * The pool's die and a function to roll it again, for repeating modifiers (explode, re-roll and
- * unique).
+ * unique). The callback returns `undefined` when the per-pool generated-roll budget is spent, so
+ * handlers can stop while preserving the results rolled so far.
  *
  * @throws {EvaluationError} there's no die (e.g. on a group), or the die can only roll one value,
  *   so repeating would never change anything
@@ -92,7 +93,7 @@ export function dropAt<T extends ScoredItem>(
 export function repeatableDie(
   { modifier, die, rollDie }: ModifierInput,
   action: string,
-): { die: ResolvedDie; rollDie: () => DieResult } {
+): { die: ResolvedDie; rollDie: () => DieResult | undefined } {
   if (!die || !rollDie) {
     throw new EvaluationError(
       `The "${modifier.name}" modifier can only be used on a dice pool`,

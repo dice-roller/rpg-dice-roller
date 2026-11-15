@@ -55,14 +55,20 @@ assertType<
 >();
 assertType<Equals<ModifierNodeOf<"keep">["end"], "h" | "l">>();
 assertType<Equals<ModifierNodeOf<"explode">["limit"], number | undefined>>();
+assertType<Equals<ModifierNodeOf<"explode">["amount"], number | undefined>>();
 assertType<Equals<ModifierNodeOf<"re-roll">["limit"], number | undefined>>();
+assertType<Equals<ModifierNodeOf<"re-roll">["amount"], number | undefined>>();
 assertType<Equals<ModifierNodeOf<"unique">["limit"], number | undefined>>();
 
 explode({ limit: 3 });
+explode({ amount: 3 });
 reRoll({ limit: 1 });
+reRoll({ amount: 3 });
 unique({ once: true, limit: 1 });
 // @ts-expect-error - limits are numeric
 reRoll({ limit: "1" });
+// @ts-expect-error - only explode and re-roll have amounts
+unique({ amount: 2 });
 
 // the 14 maths functions
 assertType<
