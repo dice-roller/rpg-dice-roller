@@ -60,6 +60,14 @@ function createDescription(text, style) {
   return ast.createDescription(trimmed, style);
 }
 
+function modifierQuantity(value, name) {
+  if (!/^[1-9][0-9]*$/.test(value)) {
+    error(`${name} quantity must be a positive whole number without leading zeros`);
+  }
+
+  return parseInt(value, 10);
+}
+
 function createCustomFaceDie(faceTokens) {
   try {
     const faces = customDieFaces(faceTokens);
@@ -158,7 +166,10 @@ BinaryFunctionName
 // Dice pools, e.g. `4d6`, `d%`, `2dF.1`, `(1+2)d(3*2)`
 
 DicePool
-  = qty:Quantity? "d" die:Die modifiers:Modifiers description:Descriptions {
+  = invalid:$("-"? Decimal) &"d" &{ return !/^[1-9][0-9]*$/.test(invalid); } {
+    error("Dice quantity must be a positive whole number without leading zeros");
+  }
+  / qty:Quantity? "d" die:RequiredDie modifiers:Modifiers description:Descriptions {
     const maxQty = options.maxQty ?? DEFAULT_MAX_QTY;
 
     if (qty && qty.type === "number" && qty.value > maxQty) {
@@ -174,13 +185,27 @@ Quantity
   }
   / ComputedValue
 
+// Only diagnose an invalid start after `d`. Once a custom die or computed value starts,
+// keep Peggy's deeper failures instead of hiding them behind a name on the whole Die rule.
+RequiredDie
+  = !("%" / "F" / "{" / [1-9] / "(") invalid:$([0-9]+ / .)? {
+    if (invalid === "0") {
+      error("A standard die must have at least 1 side");
+    }
+    if (invalid && invalid.startsWith("0")) {
+      error("The number of sides must not have leading zeros");
+    }
+    error('Expected a number of sides or a die type after "d" (e.g. d6, d%, dF or d{1,2,3})');
+  }
+  / Die
+
 // A reference to a die factory in the `DieRegistry`, resolved by the evaluator
 Die
   = CustomDie
   / "%" {
     return ast.createDie("percentile");
   }
-  / "F" nonBlanks:("." @[12])? {
+  / "F" nonBlanks:("." @FudgeNonBlanks)? {
     // `dF.2` keeps its argument, so the notation round-trips
     return ast.createDie("fudge", nonBlanks ? [ast.createNumber(Number(nonBlanks))] : []);
   }
@@ -190,6 +215,9 @@ Die
   / sides:ComputedValue {
     return ast.createDie("standard", [sides]);
   }
+
+FudgeNonBlanks "1 or 2 after dF."
+  = [12]
 
 CustomDie
   = "{" _ start:CustomDieNumber tail:CustomDieTail? _ "}" {
@@ -219,7 +247,10 @@ CustomDieTail
   }
 
 CustomDieNumber
-  = [-+]? Decimal {
+  = !([-+] / [0-9]) .? {
+    expected("a number for a custom die face or range");
+  }
+  / [-+]? Decimal {
     return text();
   }
 
@@ -264,10 +295,10 @@ ExplodeModifier
   }
 
 ModifierLimit
-  = value:$([1-9] [0-9]*) ![0-9.] {
+  = value:UnsignedDecimalToken {
     const limit = Number(value);
-    if (!isPositiveSafeInteger(limit)) {
-      error("Modifier limit must be a positive safe integer");
+    if (!/^[1-9][0-9]*$/.test(value) || !isPositiveSafeInteger(limit)) {
+      error("Modifier limit must be a positive safe integer without leading zeros");
     }
     return limit;
   }
@@ -298,25 +329,37 @@ TargetFailure
   }
 
 TargetAmount
-  = ":" value:$[0-9]+ ![0-9.] {
+  = ":" value:TargetAmountValue { return value; }
+
+TargetAmountValue
+  = value:UnsignedDecimalToken {
     const amount = Number(value);
-    if (!Number.isInteger(amount) || amount < 1 || amount > 10) {
+    if (!/^[0-9]+$/.test(value) || !Number.isInteger(amount) || amount < 1 || amount > 10) {
       error("Target amount must be an integer between 1 and 10");
     }
     return amount;
   }
+  / .? { expected("a target amount between 1 and 10 after ':'"); }
 
 // `d1`, `dl1`, `dh1` (lowest by default)
 DropModifier
-  = "d" end:[lh]? qty:PositiveInteger {
+  = "d" end:[lh]? qty:DropQuantity {
     return ast.createDrop(end ?? "l", qty);
   }
 
 // `k1`, `kh1`, `kl1` (highest by default)
 KeepModifier
-  = "k" end:[lh]? qty:PositiveInteger {
+  = "k" end:[lh]? qty:KeepQuantity {
     return ast.createKeep(end ?? "h", qty);
   }
+
+KeepQuantity
+  = value:UnsignedDecimalToken { return modifierQuantity(value, "Keep"); }
+  / .? { expected("a positive keep quantity (e.g. kh1)"); }
+
+DropQuantity
+  = value:UnsignedDecimalToken { return modifierQuantity(value, "Drop"); }
+  / .? { expected("a positive drop quantity (e.g. dl1)"); }
 
 // `r`, `ro`, `r3`, `r<3`
 ReRollModifier
@@ -356,23 +399,35 @@ SortModifier
 
 // `max5`
 MaxModifier
-  = "max" value:SignedDecimal {
+  = "max" value:MaxValue {
     return ast.createMax(value);
   }
 
 // `min2`
 MinModifier
-  = "min" value:SignedDecimal {
+  = "min" value:MinValue {
     return ast.createMin(value);
   }
+
+MaxValue
+  = !("-" / [0-9]) .? { expected("a number after 'max' (e.g. max5)"); }
+  / SignedDecimal
+
+MinValue
+  = !("-" / [0-9]) .? { expected("a number after 'min' (e.g. min2)"); }
+  / SignedDecimal
 
 
 // Compare points
 
 ComparePoint
-  = operator:CompareOperator value:SignedDecimal {
+  = operator:CompareOperator value:CompareValue {
     return ast.createComparePoint(operator, value);
   }
+
+CompareValue
+  = !("-" / [0-9]) .? { expected("a number after the comparison operator"); }
+  / SignedDecimal
 
 CompareOperator
   = "!=" / "<=" / ">=" / "=" / "<>" / ">" / "<"
@@ -395,10 +450,15 @@ SignedDecimal
     return parseFloat(text());
   }
 
-PositiveInteger
+PositiveInteger "a positive whole number"
   = [1-9] [0-9]* {
     return parseInt(text(), 10);
   }
+
+// Read the whole numeric token before diagnosing counts, so `1.5` is not reported as a
+// valid `1` followed by unexpected punctuation. Each caller keeps its own validation rules.
+UnsignedDecimalToken
+  = $([0-9]+ ("." [0-9]*)?)
 
 
 // Descriptions

@@ -28,6 +28,15 @@ describe("errors", () => {
     expect(error.location).toEqual(location);
   });
 
+  test.each([undefined, null, new Error("original"), {}])(
+    "NotationError formatting falls back to its message without a Peggy cause: %j",
+    (cause) => {
+      expect(
+        new NotationError("bad notation", "4d", undefined, { cause }).format(),
+      ).toBe("bad notation");
+    },
+  );
+
   test("NotImplementedError names the feature", () => {
     expect(new NotImplementedError("Evaluator.evaluate").message).toBe(
       "Evaluator.evaluate is not implemented yet",
