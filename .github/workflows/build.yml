@@ -5,13 +5,13 @@ on:
       - main
       - develop
       - 'releases/**'
-      - 'next/**'
+      - 'next'
   pull_request:
     branches:
       - main
       - develop
       - 'releases/**'
-      - 'next/**'
+      - 'next'
 jobs:
   test:
     name: 'Run tests'
