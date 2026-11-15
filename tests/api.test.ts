@@ -46,7 +46,11 @@ describe("Roller", () => {
     expect(roller.parse("4d6")).toEqual(createPool(createNumber(4), d6));
     expect(roller.parse("10d6")).toEqual(createPool(createNumber(10), d6));
     expect(() => roller.parse("11d6")).toThrow(NotationError);
-    expect(roller.limits).toEqual({ maxQty: 10, maxIterations: 1000 });
+    expect(roller.limits).toEqual({
+      maxQty: 10,
+      maxIterations: 1000,
+      maxGeneratedRolls: 1_000_000,
+    });
   });
 
   test.each(["maxQty", "maxIterations"] as const)(

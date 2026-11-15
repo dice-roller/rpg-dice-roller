@@ -109,6 +109,7 @@ describe("rolls round-trip", () => {
       .modifiers[0];
 
     expect(modifier).not.toHaveProperty("limit");
+    expect(modifier).not.toHaveProperty("amount");
     expect(Roll.import(data as EncodedRollData).result.node).toEqual(
       new Roll("d6ro", seeded()).result.node,
     );
@@ -129,6 +130,17 @@ describe("rolls round-trip", () => {
       const imported = Roll.import(original.export(format as "json"));
       expect(imported.result).toEqual(original.result);
       expect(imported.toString()).toBe(original.toString());
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
+    "modifier amounts round-trip through %s",
+    (format) => {
+      const original = new Roll("d6!2:3", seeded());
+      const imported = Roll.import(original.export(format as "json"));
+
+      expect(imported.result.node).toEqual(original.result.node);
+      expect(imported.notation).toBe(original.notation);
     },
   );
 
@@ -550,6 +562,20 @@ describe("invalid data", () => {
       "result.node.modifiers.0.rules.0.amount",
       0,
     ],
+    ["a zero explode amount", "d6!", "result.node.modifiers.0.amount", 0],
+    [
+      "a fractional re-roll amount",
+      "d6r",
+      "result.node.modifiers.0.amount",
+      1.5,
+    ],
+    [
+      "an unsafe explode amount",
+      "d6!",
+      "result.node.modifiers.0.amount",
+      Number.MAX_SAFE_INTEGER + 1,
+    ],
+    ["an amount on unique", "d6u", "result.node.modifiers.0.amount", 2],
     ["a zero explode limit", "d6!", "result.node.modifiers.0.limit", 0],
     ["a fractional re-roll limit", "d6r", "result.node.modifiers.0.limit", 1.5],
     [
@@ -574,6 +600,12 @@ describe("invalid data", () => {
       "an invalid modifier limit in a nested AST",
       "{d6!, d8}",
       "result.node.expressions.0.modifiers.0.limit",
+      0,
+    ],
+    [
+      "an invalid modifier amount in a nested AST",
+      "{d6!, d8}",
+      "result.node.expressions.0.modifiers.0.amount",
       0,
     ],
     [

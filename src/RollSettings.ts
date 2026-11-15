@@ -34,7 +34,7 @@ export interface RollOptions<T = string> {
   dice?: DieRegistry;
   /** Default: `new ModifierRegistry()` (the built-in modifiers). */
   modifiers?: ModifierRegistry;
-  /** Safety limits: default `maxQty` 999 and `maxIterations` 1000; each must be a positive safe integer. */
+  /** Safety limits: `maxQty` 999, `maxIterations` 1000 and `maxGeneratedRolls` 1,000,000 generated rolls per pool/evaluation; each must be a positive safe integer. The generated-roll limit excludes initial dice and truncates repeating modifiers without throwing. */
   limits?: Partial<RollLimits>;
   /** Used by `Roll.present()` and `Roller.present()` (default: the default `TextPresenter`). */
   presenter?: Presenter<T>;
@@ -116,7 +116,7 @@ export class RollSettings<T = string> {
     return this.parser.parse(notation);
   }
 
-  /** Evaluates the AST in the given mode (default `random`); `min` and `max` select each die's extreme. */
+  /** Evaluates the AST in the given mode (default `random`); `min` and `max` select each die's extreme. Every evaluation starts a fresh generated-roll budget per pool; exhausting it returns the dice rolled so far. */
   evaluate(
     expression: ExpressionNode,
     mode: RollMode = "random",

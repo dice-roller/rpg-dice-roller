@@ -4,7 +4,10 @@
  * Plain-data constructors that omit missing optional properties so nodes stay JSON round-trippable.
  * Modifier limits are validated here because factories are also used directly by the grammar.
  */
-import { normalizeModifierLimit } from "./validation.js";
+import {
+  normalizeModifierAmount,
+  normalizeModifierLimit,
+} from "./validation.js";
 import type {
   BinaryNode,
   BinaryOperator,
@@ -171,8 +174,10 @@ export function createExplode(
   penetrate: boolean,
   comparePoint?: ComparePoint,
   limit?: number,
+  amount?: number,
 ): ExplodeNode {
   const normalizedLimit = normalizeModifierLimit(limit);
+  const normalizedAmount = normalizeModifierAmount(amount);
 
   return {
     type: "modifier",
@@ -181,6 +186,7 @@ export function createExplode(
     penetrate,
     ...(comparePoint && { comparePoint }),
     ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
+    ...(normalizedAmount !== undefined && { amount: normalizedAmount }),
   };
 }
 
@@ -220,8 +226,10 @@ export function createReRoll(
   once: boolean,
   comparePoint?: ComparePoint,
   limit?: number,
+  amount?: number,
 ): ReRollNode {
   const normalizedLimit = normalizeModifierLimit(limit, once);
+  const normalizedAmount = normalizeModifierAmount(amount);
 
   return {
     type: "modifier",
@@ -229,6 +237,7 @@ export function createReRoll(
     once,
     ...(comparePoint && { comparePoint }),
     ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
+    ...(normalizedAmount !== undefined && { amount: normalizedAmount }),
   };
 }
 

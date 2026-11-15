@@ -59,8 +59,10 @@ function firstDescription(
  * Can be used on its own, or through a `Roller`, which adds rolls made by `roll()` to its history.
  *
  * `total` is calculated straight away; `minTotal` / `maxTotal` evaluate the expression again in
- * `min` / `max` mode on first access, and are cached (or taken from the data on import). The
- * readonly properties do not make the result tree or shared settings deeply immutable.
+ * `min` / `max` mode on first access, and are cached (or taken from the data on import). Each
+ * evaluation gets a fresh generated-roll budget per pool; when it is spent, repeating modifiers
+ * return the dice rolled so far instead of throwing for the limit. The readonly properties do not
+ * make the result tree or shared settings deeply immutable.
  *
  * @example
  * const roll = new Roll("4d6kh3");   // rolls straight away
@@ -166,12 +168,12 @@ export class Roll<T = string> {
     return findDescription(this.expression);
   }
 
-  /** Total with each die at its minimum, rounded to 2 decimal places; not necessarily an expression minimum (e.g. `-d6`). */
+  /** Total with each die at its minimum, rounded to 2 decimal places; not necessarily an expression minimum (e.g. `-d6`). Modifier-generated rolls stop at the fresh per-pool budget. */
   get minTotal(): number {
     return (this.#minTotal ??= this.#totalIn("min"));
   }
 
-  /** Total with each die at its maximum, rounded to 2 decimal places; not necessarily an expression maximum (e.g. `-d6`). */
+  /** Total with each die at its maximum, rounded to 2 decimal places; not necessarily an expression maximum (e.g. `-d6`). Modifier-generated rolls stop at the fresh per-pool budget. */
   get maxTotal(): number {
     return (this.#maxTotal ??= this.#totalIn("max"));
   }
@@ -182,6 +184,7 @@ export class Roll<T = string> {
    *
    * Rolls containing modifiers retain the midpoint of `minTotal` and `maxTotal` for now.
    * This is not a statistical mean for modifiers, non-linear maths or random die parameters.
+   * Its uncached extrema use fresh per-pool budgets and include any partial results when exhausted.
    */
   get averageTotal(): number {
     return (this.#averageTotal ??=
@@ -211,12 +214,12 @@ export class Roll<T = string> {
     return defaultTextPresenter.present(this);
   }
 
-  /** JSON-safe export data with non-finite numbers tagged; evaluates uncached min/max totals. */
+  /** JSON-safe export data with non-finite numbers tagged; uncached min/max totals use fresh per-pool budgets and truncate generated rolls at the limit. */
   toJSON(): EncodedRollData {
     return encodeNumbers(toRollData(this));
   }
 
-  /** Exports as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. Evaluates uncached min/max totals. */
+  /** Exports as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. Uncached min/max totals use fresh per-pool budgets and truncate generated rolls at the limit. */
   export(format: "object"): EncodedRollData;
   export(format?: "json" | "base64"): string;
   export(format: ExportFormat): EncodedRollData | string;

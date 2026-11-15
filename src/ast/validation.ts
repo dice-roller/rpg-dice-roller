@@ -30,3 +30,17 @@ export function normalizeModifierLimit(
 
   return limit;
 }
+
+export function normalizeModifierAmount(amount: unknown): number | undefined {
+  if (amount === undefined) {
+    return undefined;
+  }
+
+  if (!isPositiveSafeInteger(amount)) {
+    throw new ValidationError(
+      "A modifier amount must be a positive safe integer",
+    );
+  }
+
+  return amount;
+}

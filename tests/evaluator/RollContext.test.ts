@@ -6,7 +6,7 @@ import {
 } from "../../src/evaluator/RollContext.js";
 import type { RollLimits } from "../../src/evaluator/RollContext.js";
 
-const limitNames = ["maxQty", "maxIterations"] as const;
+const limitNames = ["maxQty", "maxIterations", "maxGeneratedRolls"] as const;
 
 const invalidValues: readonly [string, unknown][] = [
   ["zero", 0],
@@ -37,10 +37,12 @@ describe("roll limits", () => {
     expect(new RollSettings({ limits }).limits).toEqual({
       maxQty: 3,
       maxIterations: DEFAULT_ROLL_LIMITS.maxIterations,
+      maxGeneratedRolls: DEFAULT_ROLL_LIMITS.maxGeneratedRolls,
     });
     expect(createRollContext({ limits }).limits).toEqual({
       maxQty: 3,
       maxIterations: DEFAULT_ROLL_LIMITS.maxIterations,
+      maxGeneratedRolls: DEFAULT_ROLL_LIMITS.maxGeneratedRolls,
     });
     expect(Object.isFrozen(new RollSettings({ limits }).limits)).toBe(true);
   });

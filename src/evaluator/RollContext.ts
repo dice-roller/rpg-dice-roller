@@ -13,13 +13,16 @@ export type RollMode = "random" | "min" | "max";
 export interface RollLimits {
   /** The maximum number of dice in a pool. */
   readonly maxQty: number;
-  /** The maximum number of iterations for repeating modifiers (explode, re-roll, unique). */
+  /** The maximum number of generations for explode and re-roll, or retries for unique, per die. */
   readonly maxIterations: number;
+  /** Additional rolls allowed per pool/evaluation across modifiers, including discarded rolls (default 1,000,000); initial dice are excluded and exhaustion truncates repeating results. */
+  readonly maxGeneratedRolls: number;
 }
 
 export const DEFAULT_ROLL_LIMITS: RollLimits = Object.freeze({
   maxQty: 999,
   maxIterations: 1000,
+  maxGeneratedRolls: 1000000,
 });
 
 /**
@@ -32,7 +35,11 @@ export function resolveRollLimits(
 ): RollLimits {
   const resolved = { ...DEFAULT_ROLL_LIMITS, ...limits };
 
-  for (const limit of ["maxQty", "maxIterations"] as const) {
+  for (const limit of [
+    "maxQty",
+    "maxIterations",
+    "maxGeneratedRolls",
+  ] as const) {
     const value = resolved[limit];
 
     if (!Number.isSafeInteger(value) || value < 1) {

@@ -45,10 +45,15 @@ describe("modifiers", () => {
     ["4d6!", createExplode(false, false)],
     ["4d6!3", createExplode(false, false, undefined, 3)],
     ["4d6!12>=5", createExplode(false, false, cp(">=", 5), 12)],
+    ["4d6!:1", createExplode(false, false, undefined, undefined, 1)],
+    ["4d6!:11", createExplode(false, false, undefined, undefined, 11)],
+    ["4d6!2:3>=5", createExplode(false, false, cp(">=", 5), 2, 3)],
     ["4d6!!", createExplode(true, false)],
     ["4d6!!12", createExplode(true, false, undefined, 12)],
+    ["4d6!!p12:5>=5", createExplode(true, true, cp(">=", 5), 12, 5)],
     ["4d6!p", createExplode(false, true)],
     ["4d6!p3", createExplode(false, true, undefined, 3)],
+    ["4d6!p:2", createExplode(false, true, undefined, undefined, 2)],
     ["4d6!!p12>=5", createExplode(true, true, cp(">=", 5), 12)],
     ["4d6!=3", createExplode(false, false, cp("=", 3))],
     // target
@@ -65,7 +70,10 @@ describe("modifiers", () => {
     ["2d20r", createReRoll(false)],
     ["2d20r12", createReRoll(false, undefined, 12)],
     ["2d20r3<=2", createReRoll(false, cp("<=", 2), 3)],
+    ["2d20r:3", createReRoll(false, undefined, undefined, 3)],
+    ["2d20r1:2<=2", createReRoll(false, cp("<=", 2), 1, 2)],
     ["2d20ro<3", createReRoll(true, cp("<", 3))],
+    ["2d20ro:3<3", createReRoll(true, cp("<", 3), undefined, 3)],
     ["6d6u", createUnique(false)],
     ["6d6u12", createUnique(false, undefined, 12)],
     ["6d6u3<=2", createUnique(false, cp("<=", 2), 3)],
@@ -147,6 +155,30 @@ describe("modifiers", () => {
       createExplode(false, false, cp("=", 6), 3),
       createTarget([{ kind: "success", comparePoint: cp(">=", 5), amount: 2 }]),
     ]);
+  });
+
+  test.each([
+    "d6!:0",
+    "d6!:1.5",
+    "d6!:-1",
+    "d6!:",
+    "d6!:9007199254740992",
+    "d6r:0",
+    "d6r:1.5",
+    "d6r:-1",
+    "d6r:",
+    "d6r:9007199254740992",
+  ])("rejects invalid modifier amount in %s", (notation) => {
+    expect(() => parser.parse(notation)).toThrow();
+  });
+
+  test("modifier factories reject invalid amounts", () => {
+    expect(() =>
+      createExplode(false, false, undefined, undefined, 0),
+    ).toThrow();
+    expect(() =>
+      createReRoll(false, undefined, undefined, Number.NaN),
+    ).toThrow();
   });
 
   test("a limit leaves following arithmetic to the expression grammar", () => {

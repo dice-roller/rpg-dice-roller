@@ -12,8 +12,9 @@ import { repeatableDie, resolveIterationBudget } from "./utils.js";
  *
  * `u` repeats while the current value is a matching duplicate (up to its optional limit or
  * `ctx.limits.maxIterations` per roll, default 1000, flag `unique`); `uo` re-rolls once (flag
- * `unique-once`). Both can leave duplicates: the limit can be reached, or a replacement can fall
- * outside the compare point.
+ * `unique-once`). Both can leave duplicates: a per-die limit can be reached, a replacement can fall
+ * outside the compare point, or the per-pool generated-roll budget can be spent. At the pool budget,
+ * the current value is kept and later items pass through unchanged.
  *
  * @throws {EvaluationError} the pool die or `rollDie` is missing, or the die can only roll one value,
  *   even if there are no duplicates
@@ -37,14 +38,26 @@ export const uniqueHandler: ModifierHandler<UniqueNode> = {
       (!comparePoint || matchesComparePoint(comparePoint, value)) &&
       unique.some((earlier) => earlier.value === value);
 
-    for (const item of items) {
+    for (const [index, item] of items.entries()) {
       let current = item;
+      let exhausted = false;
 
       for (let i = 0; i < iterations && shouldReRoll(current); i++) {
-        current = withFlags(withValue(current, rollDie().value), flag);
+        const extra = rollDie();
+
+        if (!extra) {
+          exhausted = true;
+          break;
+        }
+
+        current = withFlags(withValue(current, extra.value), flag);
       }
 
       unique.push(current);
+
+      if (exhausted) {
+        return unique.concat(items.slice(index + 1));
+      }
     }
 
     return unique;
