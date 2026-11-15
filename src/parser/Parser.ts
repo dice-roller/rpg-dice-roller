@@ -43,7 +43,10 @@ export class Parser {
     }
 
     try {
-      return grammar.parse(notation, { maxQty: this.maxQty });
+      return grammar.parse(notation, {
+        maxQty: this.maxQty,
+        grammarSource: "notation",
+      });
     } catch (error) {
       if (error instanceof grammar.SyntaxError) {
         const { offset, line, column } = error.location.start;

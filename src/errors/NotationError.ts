@@ -32,4 +32,45 @@ export class NotationError extends DiceRollerError {
   ) {
     super(message, options);
   }
+
+  /**
+   * Formats a parser error with its source line and a caret pointing to the problem.
+   * The normal `message` is unchanged; use this method for a CLI or text interface.
+   * Manually constructed errors without a Peggy cause return their message unchanged.
+   *
+   * @example
+   * ```ts
+   * try {
+   *   roller.parse("4de");
+   * } catch (error) {
+   *   if (error instanceof NotationError) console.error(error.format());
+   * }
+   * ```
+   */
+  format(): string {
+    const cause: unknown = this.cause;
+
+    if (
+      cause instanceof Error &&
+      "format" in cause &&
+      typeof cause.format === "function"
+    ) {
+      // Use the source attached to the cause, including errors from a directly used parser.
+      const source: unknown =
+        "location" in cause &&
+        typeof cause.location === "object" &&
+        cause.location !== null &&
+        "source" in cause.location
+          ? cause.location.source
+          : undefined;
+
+      const format = cause.format as (
+        sources: { source: unknown; text: string }[],
+      ) => string;
+
+      return format.call(cause, [{ source, text: this.notation }]);
+    }
+
+    return this.message;
+  }
 }
