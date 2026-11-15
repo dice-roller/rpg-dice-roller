@@ -20,32 +20,6 @@ import { customDieFaces, customDieRange } from "../../dice/custom-die-notation.j
 import { DEFAULT_ROLL_LIMITS } from "../../evaluator/RollContext.js";
 
 const DEFAULT_MAX_QTY = DEFAULT_ROLL_LIMITS.maxQty;
-
-// Whether the node only contains numbers and operators (no dice, groups, functions or parentheses)
-function isNumericMaths(node) {
-  switch (node.type) {
-    case "number":
-      return true;
-    case "unary":
-      return isNumericMaths(node.operand);
-    case "binary":
-      return isNumericMaths(node.left) && isNumericMaths(node.right);
-    default:
-      return false;
-  }
-}
-
-// Whether the node contains a binary operator
-function hasOperator(node) {
-  switch (node.type) {
-    case "binary":
-      return true;
-    case "unary":
-      return hasOperator(node.operand);
-    default:
-      return false;
-  }
-}
 }}
 
 {
@@ -254,9 +228,9 @@ CustomDieNumber
     return text();
   }
 
-// Numeric maths in parentheses, with at least one operator, e.g. `(2+3)`
+// Any expression in parentheses, e.g. `(2+3)`, `(d6)` or `(max(d4,2))`
 ComputedValue
-  = "(" _ expression:Expression _ ")" &{ return isNumericMaths(expression) && hasOperator(expression); } {
+  = "(" _ expression:Expression _ ")" {
     return ast.createParen(expression);
   }
 

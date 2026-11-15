@@ -5,7 +5,9 @@ import {
   createUnary,
 } from "../src/ast/factory.js";
 import { DieRegistry } from "../src/dice/DieRegistry.js";
+import { ValidationError } from "../src/errors/ValidationError.js";
 import { Roll, Roller } from "../src/index.js";
+import { RollSettings } from "../src/RollSettings.js";
 
 describe("roll averages", () => {
   test.each([
@@ -76,6 +78,33 @@ describe("roll averages", () => {
     expect(evaluate).not.toHaveBeenCalled();
     expect(integer).not.toHaveBeenCalled();
     expect(factory).not.toHaveBeenCalled();
+  });
+
+  test("a random sides parameter uses its stored value for the conditional average", () => {
+    const settings = new RollSettings();
+    const draws = [4, 2, 1, 3];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation(() => draws.shift() ?? 1);
+    const roll = new Roll("3d(d6)", settings);
+
+    expect(roll.averageTotal).toBe(7.5);
+    expect(roll.averageTotal).toBe(7.5);
+    expect(integer).toHaveBeenCalledTimes(4);
+  });
+
+  test("mode-based extrema can reject random parameters that become invalid", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValueOnce(3)
+      .mockReturnValueOnce(1);
+    const roll = new Roll("1d(d6-1)", settings);
+
+    expect(roll.total).toBe(1);
+    expect(() => roll.minTotal).toThrow(ValidationError);
+    expect(roll.maxTotal).toBe(5);
+    expect(integer).toHaveBeenCalledTimes(2);
   });
 
   test.each(["object", "json", "base64"] as const)(

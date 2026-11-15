@@ -289,6 +289,71 @@ describe("builder expression precedence", () => {
 });
 
 describe("options", () => {
+  test.each<[string, number[], string]>([
+    ["(d4)d10", [2, 3, 4], "(d4)d10: (qty: ([2]) = 2) -> [3, 4] = 7"],
+    ["3d(d6)", [4, 3, 2, 1], "3d(d6): (sides: ([4]) = 4) -> [3, 2, 1] = 6"],
+    [
+      "(d4)d(d6)",
+      [2, 4, 3, 1],
+      "(d4)d(d6): (qty: ([2]) = 2, sides: ([4]) = 4) -> [3, 1] = 4",
+    ],
+    [
+      "(max(d4,2))d6",
+      [3, 1, 2, 3],
+      "(max(d4,2))d6: (qty: (max([3],2)) = 3) -> [1, 2, 3] = 6",
+    ],
+    [
+      "({d4+1,d6}kh1)d8",
+      [3, 5, 4],
+      "({d4+1,d6}kh1)d8: (qty: ({([3]+1)d, [5]}) = 5) -> [4, 1, 1, 1, 1] = 8",
+    ],
+    [
+      "((d4)d6)d10",
+      [2, 3, 4],
+      "((d4)d6)d10: (qty: ((qty: ([2]) = 2) -> [3, 4]) = 7) -> [1, 1, 1, 1, 1, 1, 1] = 7",
+    ],
+    ["(d4-1)d6", [1], "(d4-1)d6: (qty: ([1]-1) = 0) -> [] = 0"],
+  ])("expands dice in the %s parameter", (notation, rolls, expected) => {
+    const presenter = new TextPresenter({ expandInlineRolls: true });
+
+    expect(presenter.present(rollWith(notation, rolls))).toBe(expected);
+  });
+
+  test("numeric-only parameters retain their ordinary output", () => {
+    const roll = rollWith("(2+2*2)d10", [1, 2, 3, 4, 5, 6]);
+
+    expect(new TextPresenter({ expandInlineRolls: true }).present(roll)).toBe(
+      roll.toString(),
+    );
+  });
+
+  test("expansion is disabled by default and can be disabled explicitly", () => {
+    const roll = rollWith("(d4)d10", [2, 3]);
+
+    expect(roll.toString()).toBe("(d4)d10: [3, 1] = 4");
+    expect(new TextPresenter({ expandInlineRolls: false }).present(roll)).toBe(
+      roll.toString(),
+    );
+  });
+
+  test("repeated expansion presents stored results without drawing again", () => {
+    const settings = new RollSettings();
+    const draws = [2, 3, 4];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation(() => draws.shift() ?? 1);
+    const roll = new Roll("(d4)d10", settings);
+    const presenter = new TextPresenter({ expandInlineRolls: true });
+
+    expect(presenter.present(roll)).toBe(
+      "(d4)d10: (qty: ([2]) = 2) -> [3, 4] = 7",
+    );
+    expect(presenter.present(roll)).toBe(
+      "(d4)d10: (qty: ([2]) = 2) -> [3, 4] = 7",
+    );
+    expect(integer).toHaveBeenCalledTimes(3);
+  });
+
   test("target markers follow the absolute calculationValue after a later custom handler", () => {
     const modifiers = new ModifierRegistry().register({
       ...maxHandler,

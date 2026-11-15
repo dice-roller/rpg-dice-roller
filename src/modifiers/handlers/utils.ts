@@ -93,6 +93,7 @@ export function dropAt<T extends ScoredItem>(
 export function repeatableDie(
   { modifier, die, rollDie }: ModifierInput,
   action: string,
+  hasItems = true,
 ): { die: ResolvedDie; rollDie: () => DieResult | undefined } {
   if (!die || !rollDie) {
     throw new EvaluationError(
@@ -100,7 +101,7 @@ export function repeatableDie(
     );
   }
 
-  if (die.min === die.max) {
+  if (hasItems && die.min === die.max) {
     throw new EvaluationError(
       `Can't ${action} the die "${die.notation}", because it can only roll ${die.min}`,
     );

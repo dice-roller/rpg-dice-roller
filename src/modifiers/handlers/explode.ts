@@ -36,7 +36,7 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
   ): T[] {
     const { modifier, ctx } = input;
     const iterations = resolveIterationBudget(modifier, ctx.limits);
-    const { rollDie } = repeatableDie(input, "explode");
+    const { rollDie } = repeatableDie(input, "explode", items.length > 0);
     const comparePoint = comparePointOrDefault(input, "max");
     const flags: ResultFlag[] = modifier.penetrate
       ? ["explode", "penetrate"]

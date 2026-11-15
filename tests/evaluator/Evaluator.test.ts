@@ -312,13 +312,94 @@ describe("dice pools", () => {
     expect(result.die.average).toBe(5);
   });
 
+  test("quantity and sides are evaluated once before the outer dice", () => {
+    const queuedRolls = [2, 4, 1, 3];
+    const result = evaluatePool("(d4)d(d6)", { rolls: queuedRolls });
+
+    expect(result.qty).toMatchObject({
+      type: "paren",
+      value: 2,
+      inner: { type: "pool", rolls: [{ value: 2 }] },
+    });
+    expect(result.dieArgs).toMatchObject([
+      {
+        type: "paren",
+        value: 4,
+        inner: { type: "pool", rolls: [{ value: 4 }] },
+      },
+    ]);
+    expect(result.die.max).toBe(4);
+    expect(result.rolls.map(({ value }) => value)).toEqual([1, 3]);
+    expect(result.value).toBe(4);
+    expect(queuedRolls).toEqual([]);
+  });
+
+  test.each(["(1-1)d6", "(0)d6"])("%s produces an empty pool", (notation) => {
+    const result = evaluatePool(notation);
+
+    expect(result.qty.value).toBe(0);
+    expect(result.rolls).toEqual([]);
+    expect(result.value).toBe(0);
+  });
+
+  test("a zero quantity still evaluates and validates its sides once", () => {
+    const queuedRolls = [4];
+    const result = evaluatePool("(1-1)d(d6)", { rolls: queuedRolls });
+
+    expect(result.qty.value).toBe(0);
+    expect(result.dieArgs).toMatchObject([
+      { type: "paren", value: 4, inner: { type: "pool", value: 4 } },
+    ]);
+    expect(result.die.max).toBe(4);
+    expect(result.rolls).toEqual([]);
+    expect(result.value).toBe(0);
+    expect(queuedRolls).toEqual([]);
+    expect(() => evaluatePool("(1-1)d(1-1)")).toThrow(ValidationError);
+  });
+
+  test.each(["!", "r", "u"])(
+    "a zero pool with %s does not require the die to be repeatable",
+    (modifier) => {
+      const queuedRolls = [99];
+      const result = evaluatePool(`(1-1)d{1}${modifier}`, {
+        rolls: queuedRolls,
+      });
+
+      expect(result.rolls).toEqual([]);
+      expect(result.value).toBe(0);
+      expect(queuedRolls).toEqual([99]);
+    },
+  );
+
+  test("a zero pool still validates modifiers", () => {
+    const node = parser.parse("(1-1)d6u");
+
+    if (node.type !== "pool") {
+      throw new Error("Expected a pool");
+    }
+
+    const [modifier] = node.modifiers;
+
+    if (!modifier) {
+      throw new Error("Expected a modifier");
+    }
+
+    const invalid = {
+      ...node,
+      modifiers: [{ ...modifier, amount: 2 }],
+    } as unknown as ExpressionNode;
+
+    expect(() => evaluate(invalid)).toThrow(ValidationError);
+  });
+
   test.each<[string, ExpressionNode]>([
     ["more dice than maxQty", pool(11, 6)],
     ["a computed quantity over maxQty", pool(binary("*", 4, 3), 6)],
-    ["a computed quantity of 0", pool(binary("-", 1, 1), 6)],
+    ["a literal zero quantity", pool(0, 6)],
     ["a negative quantity", pool(negate(2), 6)],
     ["a non-integer quantity", pool(binary("/", 5, 2), 6)],
     ["an infinite quantity", pool(binary("/", 1, 0), 6)],
+    ["an unsafe quantity", pool(Number.MAX_SAFE_INTEGER + 1, 6)],
   ])("%s throws an EvaluationError", (_, node) => {
     expect(() => evaluate(node, { limits: { maxQty: 10 } })).toThrow(
       EvaluationError,
@@ -329,7 +410,9 @@ describe("dice pools", () => {
     ["an unknown die", pool(1, die("nope")), new DieRegistry()],
     ["a removed built-in", pool(1, 6), DieRegistry.empty()],
     ["invalid sides", pool(1, binary("-", 1, 1)), new DieRegistry()],
+    ["negative sides", pool(1, binary("-", 1, 2)), new DieRegistry()],
     ["non-integer sides", pool(1, binary("/", 5, 2)), new DieRegistry()],
+    ["infinite sides", pool(1, binary("/", 1, 0)), new DieRegistry()],
     ["an invalid fudge die", pool(1, die("fudge", 3)), new DieRegistry()],
     [
       "an invalid custom die",
