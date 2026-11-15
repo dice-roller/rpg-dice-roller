@@ -802,6 +802,74 @@ describe('DiceRoll', () => {
       expect(importedRoll.export(exportFormats.OBJECT)).toEqual(exported);
     });
 
+    Object.entries(exportFormats).forEach(([name, format]) => {
+      describe(`Group rolls (${name})`, () => {
+        test('can import a single sub-roll', () => {
+          diceRoll = new DiceRoll('{1d20}');
+          const exported = diceRoll.export(format);
+          const spy = jest.spyOn(DiceRoll.prototype, 'roll');
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.rolls[0]).toBeInstanceOf(ResultGroup);
+          expect(importedRoll.rolls[0].results[0]).toBeInstanceOf(ResultGroup);
+          expect(importedRoll.rolls[0].results[0].results[0]).toBeInstanceOf(RollResults);
+          expect(importedRoll.rolls[0].results[0].results[0].rolls[0]).toBeInstanceOf(RollResult);
+          expect(importedRoll.export(format)).toEqual(exported);
+          expect(spy).not.toHaveBeenCalled();
+
+          // remove the spy
+          spy.mockRestore();
+        });
+
+        test('preserves expressions and multiple groups', () => {
+          diceRoll = new DiceRoll('2*{d6+2, d8/2}+{d4, d10}-3');
+          const exported = diceRoll.export(format);
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.total).toBe(diceRoll.total);
+          expect(importedRoll.output).toBe(diceRoll.output);
+          expect(importedRoll.export(format)).toEqual(exported);
+        });
+
+        test('preserves group and die keep/drop modifiers', () => {
+          diceRoll = new DiceRoll('{4d6kh3, 2d8dl1, d10}kh2sd');
+          const exported = diceRoll.export(format);
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.total).toBe(diceRoll.total);
+          expect(importedRoll.output).toBe(diceRoll.output);
+          expect(importedRoll.export(format)).toEqual(exported);
+        });
+
+        test('preserves successful group calculation values', () => {
+          diceRoll = new DiceRoll('{d6+2, d8}>0');
+          const exported = diceRoll.export(format);
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.total).toBe(2);
+          expect(importedRoll.export(format)).toEqual(exported);
+        });
+
+        test('preserves neutral group calculation values', () => {
+          diceRoll = new DiceRoll('{d6, d8}>100');
+          const exported = diceRoll.export(format);
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.total).toBe(0);
+          expect(importedRoll.export(format)).toEqual(exported);
+        });
+
+        test('preserves failed group calculation values', () => {
+          diceRoll = new DiceRoll('{d6, d8}>100f>0');
+          const exported = diceRoll.export(format);
+          const importedRoll = DiceRoll.import(exported);
+
+          expect(importedRoll.total).toBe(-2);
+          expect(importedRoll.export(format)).toEqual(exported);
+        });
+      });
+    });
+
     test('can import `RollGroup` object', () => {
       const data = {
         notation: diceRoll.notation,
@@ -817,6 +885,51 @@ describe('DiceRoll', () => {
 
       expect(importedRoll).toBeInstanceOf(DiceRoll);
       expect(importedRoll.rolls).toEqual(data.rolls.results);
+    });
+
+    test('can import result groups with optional properties omitted', () => {
+      const importedRoll = DiceRoll.import({
+        notation: '{d6+2}',
+        rolls: [{
+          isRollGroup: true,
+          results: [{ results: [{ rolls: [4] }, '+', 2] }],
+        }],
+      });
+
+      expect(importedRoll.total).toBe(6);
+      expect(importedRoll.output).toBe('{d6+2}: {[4]+2} = 6');
+      expect(importedRoll.rolls[0].results[0]).toEqual(new ResultGroup([
+        new RollResults([4]), '+', 2,
+      ]));
+    });
+
+    test('preserves live results inside imported result groups', () => {
+      const rolls = new RollResults([4]);
+      const group = new ResultGroup([new RollResults([3])]);
+      const importedRoll = DiceRoll.import({
+        notation: '{d6, d6}',
+        rolls: [{ isRollGroup: true, results: [group, { results: [rolls] }] }],
+      });
+
+      expect(importedRoll.rolls[0].results[0]).toBe(group);
+      expect(importedRoll.rolls[0].results[1].results[0]).toBe(rolls);
+      expect(importedRoll.total).toBe(7);
+    });
+
+    test('rejects invalid results inside imported result groups', () => {
+      expect(() => {
+        DiceRoll.import({
+          notation: '{d6}',
+          rolls: [{ results: [{ results: [{ foo: 'bar' }] }] }],
+        });
+      }).toThrow(TypeError);
+
+      expect(() => {
+        DiceRoll.import({
+          notation: '{d6}',
+          rolls: [{ results: [null] }],
+        });
+      }).toThrow(TypeError);
     });
 
     test('can import `RollResults` object', () => {

@@ -93,6 +93,53 @@ const totalSymbol = Symbol('total');
 const calculateTotal = (results) => toFixed(results.calculationValue, 2);
 
 /**
+ * Restore a result and its children from exported data.
+ *
+ * @private
+ *
+ * @param {ResultGroup|RollResults|string|number|{}|Array.<RollResult|number>} roll
+ *
+ * @returns {ResultGroup|RollResults|string|number}
+ */
+const importResult = (roll) => {
+  if ((roll instanceof ResultGroup) || (roll instanceof RollResults)) {
+    // already a valid result object
+    return roll;
+  }
+
+  if (Array.isArray(roll)) {
+    // array of values
+    return new RollResults(roll);
+  }
+
+  if (roll && (typeof roll === 'object')) {
+    // a result group
+    if (Array.isArray(roll.results)) {
+      const group = new ResultGroup(
+        roll.results.map(importResult),
+        roll.modifiers || [],
+        roll.isRollGroup || false,
+        (typeof roll.useInTotal === 'boolean') ? roll.useInTotal : true,
+      );
+
+      // group targets can use a calculation value different from their rolled value
+      if (typeof roll.calculationValue === 'number') {
+        group.calculationValue = roll.calculationValue;
+      }
+
+      return group;
+    }
+
+    // roll results
+    if (Array.isArray(roll.rolls)) {
+      return new RollResults(roll.rolls);
+    }
+  }
+
+  return roll;
+};
+
+/**
  * A `DiceRoll` handles rolling of a single dice notation and storing the result.
  *
  * @see {@link DiceRoller} if you need to keep a history of rolls
@@ -496,36 +543,7 @@ class DiceRoll {
     } else if (rolls instanceof RollResults) {
       this[rollsSymbol] = new ResultGroup([rolls]);
     } else if (Array.isArray(rolls)) {
-      this[rollsSymbol] = new ResultGroup(rolls.map((roll) => {
-        if ((roll instanceof ResultGroup) || (roll instanceof RollResults)) {
-          // already a RollResults object
-          return roll;
-        }
-
-        // @todo should this be a ResultGroup, or a RollResults?
-        if (Array.isArray(roll)) {
-          // array of values
-          return new RollResults(roll);
-        }
-
-        if (typeof roll === 'object') {
-          // a result group
-          if (Array.isArray(roll.results)) {
-            return new ResultGroup(
-              roll.results,
-              roll.modifiers || [],
-              roll.isRollGroup || false,
-              (typeof roll.useInTotal === 'boolean') ? roll.useInTotal : true,
-            );
-          }
-          // roll results
-          if (Array.isArray(roll.rolls)) {
-            return new RollResults(roll.rolls);
-          }
-        }
-
-        return roll;
-      }));
+      this[rollsSymbol] = new ResultGroup(rolls.map(importResult));
     } else {
       throw new TypeError('Rolls must be a valid result object, or an array');
     }

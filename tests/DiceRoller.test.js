@@ -321,6 +321,19 @@ describe('DiceRoller', () => {
       test('returns DiceRoller object', () => {
         expect(DiceRoller.import(roller.export())).toBeInstanceOf(DiceRoller);
       });
+
+      Object.entries(exportFormats).forEach(([name, format]) => {
+        test(`can import group rolls (${name})`, () => {
+          roller.roll('d6', '{d20}', '{d6, d8}kh1', '{d6, d8}>100f>0');
+          const exported = roller.export(format);
+          const importedRoller = DiceRoller.import(exported);
+
+          expect(importedRoller.log).toHaveLength(4);
+          expect(importedRoller.total).toBe(roller.total);
+          expect(importedRoller.output).toBe(roller.output);
+          expect(importedRoller.export(format)).toEqual(exported);
+        });
+      });
     });
 
     describe('prototype', () => {
@@ -364,6 +377,18 @@ describe('DiceRoller', () => {
         roller.import(data);
 
         expect(roller.export(exportFormats.OBJECT)).toEqual(data);
+      });
+
+      test('can append group rolls to an existing log', () => {
+        const existingRoll = roller.roll('d4');
+        importRoller.roll('{d6, d8}kh1', '{d6, d8}>100');
+
+        roller.import(importRoller.export());
+
+        expect(roller.log[0]).toBe(existingRoll);
+        expect(roller.log).toHaveLength(importRoller.log.length + 1);
+        expect(roller.log.slice(1).map((roll) => roll.export()))
+          .toEqual(importRoller.log.map((roll) => roll.export()));
       });
 
       test('can import data array of logs', () => {
