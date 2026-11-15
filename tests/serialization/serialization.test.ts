@@ -70,6 +70,55 @@ describe("encoding numbers", () => {
 
 describe("rolls round-trip", () => {
   test.each(EXPORT_FORMATS)(
+    "nested quantity and sides results import without rolling and reroll through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const originalDraws = [2, 4, 3, 1];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation(() => originalDraws.shift() ?? 1);
+      const original = new Roll("(d6)d(d6)", settings);
+
+      const importedSettings = new RollSettings();
+      const rerollDraws = [1, 6, 4];
+      const integer = jest
+        .spyOn(importedSettings.generator, "integer")
+        .mockImplementation(() => rerollDraws.shift() ?? 1);
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(integer).not.toHaveBeenCalled();
+      expect(imported.reroll().result).toMatchObject({
+        type: "pool",
+        qty: { value: 1 },
+        dieArgs: [{ value: 6 }],
+        die: { max: 6 },
+        rolls: [{ value: 4 }],
+      });
+      expect(integer).toHaveBeenCalledTimes(3);
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
+    "calculated empty pools import and reroll through %s",
+    (format) => {
+      const original = new Roll("(1-1)d6u", seeded());
+      const imported = Roll.import(original.export(format as "json"));
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.reroll().result).toMatchObject({
+        type: "pool",
+        value: 0,
+        qty: { value: 0 },
+        rolls: [],
+      });
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
     "custom weighted dice round-trip and re-roll through %s",
     (format) => {
       const settings = new RollSettings();

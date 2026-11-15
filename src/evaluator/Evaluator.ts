@@ -139,14 +139,15 @@ export class Evaluator {
   protected evaluatePool(node: PoolNode, ctx: RollContext): PoolResult {
     const qty = this.evaluate(node.qty, ctx);
     const count = qty.value;
+    const minQty = node.qty.type === "number" ? 1 : 0;
 
     if (
       !Number.isSafeInteger(count) ||
-      count < 1 ||
+      count < minQty ||
       count > ctx.limits.maxQty
     ) {
       throw new EvaluationError(
-        `Dice quantity must be an integer between 1 and ${ctx.limits.maxQty}: ${count}`,
+        `Dice quantity must be an integer between ${minQty} and ${ctx.limits.maxQty}: ${count}`,
       );
     }
 

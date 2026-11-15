@@ -135,4 +135,22 @@ describe("dice pools", () => {
       expect(() => parser.parse(notation)).not.toThrow();
     },
   );
+
+  test.each([
+    "(d6)d10",
+    "3d(d6)",
+    "(max(d4,2))d6",
+    "({d4+1,d6}kh1)d8",
+    "((d4)d6)d10",
+    "(2+(4*2)d(2*d10))d10",
+  ])("dice expressions are accepted as quantities or sides: %s", (notation) => {
+    expect(() => parser.parse(notation)).not.toThrow();
+  });
+
+  test.each(["(d6)d", "3d(d6+)"])(
+    "malformed inline expression %s is still rejected",
+    (notation) => {
+      expect(() => parser.parse(notation)).toThrow();
+    },
+  );
 });

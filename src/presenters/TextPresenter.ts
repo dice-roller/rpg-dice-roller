@@ -20,6 +20,25 @@ import type { Roll } from "../Roll.js";
 import type { RollHistory } from "../RollHistory.js";
 import { TreePresenter } from "./TreePresenter.js";
 
+function containsDice(result: ExpressionResult): boolean {
+  switch (result.type) {
+    case "number":
+      return false;
+    case "pool":
+      return true;
+    case "group":
+      return result.members.some(({ result }) => containsDice(result));
+    case "binary":
+      return containsDice(result.left) || containsDice(result.right);
+    case "unary":
+      return containsDice(result.operand);
+    case "paren":
+      return containsDice(result.inner);
+    case "function":
+      return result.args.some(containsDice);
+  }
+}
+
 /** Default flag symbols, e.g. `[6!, 2, 1d]. */
 export const DEFAULT_FLAG_SYMBOLS: Readonly<Record<ResultFlag, string>> =
   Object.freeze({
@@ -45,6 +64,8 @@ export interface TextPresenterOptions {
   flagSymbols?: Partial<Record<ResultFlag, string>>;
   /** Joins the rolls of a history (default `"; "`; an empty string is allowed). */
   separator?: string;
+  /** Shows stored dice results used to calculate pool quantities or sides (default `false`). */
+  expandInlineRolls?: boolean;
 }
 
 /**
@@ -60,6 +81,7 @@ export interface TextPresenterOptions {
 export class TextPresenter extends TreePresenter<string> {
   readonly flagSymbols: Readonly<Record<ResultFlag, string>>;
   readonly separator: string;
+  readonly expandInlineRolls: boolean;
 
   constructor(options: TextPresenterOptions = {}) {
     super();
@@ -68,6 +90,7 @@ export class TextPresenter extends TreePresenter<string> {
       ...options.flagSymbols,
     });
     this.separator = options.separator ?? "; ";
+    this.expandInlineRolls = options.expandInlineRolls ?? false;
   }
 
   /** The symbols for the flags, e.g. `["explode", "drop"]` -> `!d`. */
@@ -106,7 +129,31 @@ export class TextPresenter extends TreePresenter<string> {
 
   /** `[3, 5, 2, 6]` */
   protected pool(result: PoolResult): string {
-    return `[${result.rolls.map((roll) => this.die(roll, result)).join(", ")}]`;
+    const rolls = `[${result.rolls.map((roll) => this.die(roll, result)).join(", ")}]`;
+
+    if (!this.expandInlineRolls) {
+      return rolls;
+    }
+
+    const parameters: string[] = [];
+
+    if (containsDice(result.qty)) {
+      parameters.push(
+        `qty: ${this.visit(result.qty)} = ${this.formatNumber(result.qty.value)}`,
+      );
+    }
+
+    for (const sides of result.dieArgs) {
+      if (containsDice(sides)) {
+        parameters.push(
+          `sides: ${this.visit(sides)} = ${this.formatNumber(sides.value)}`,
+        );
+      }
+    }
+
+    return parameters.length > 0
+      ? `(${parameters.join(", ")}) -> ${rolls}`
+      : rolls;
   }
 
   /** `6!`, `1d` */

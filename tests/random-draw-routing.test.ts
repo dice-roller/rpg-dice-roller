@@ -17,6 +17,25 @@ describe("random draw routing", () => {
     expect(sequence.next).toHaveBeenCalledTimes(2);
   });
 
+  test("quantity and sides rolls precede all outer dice", () => {
+    const sequence = controlledEngine([
+      d6Word(2),
+      d6Word(4),
+      d6Word(3),
+      d6Word(1),
+    ]);
+    const roll = new Roll("(d6)d(d6)", { engine: sequence.engine });
+
+    expect(roll.result).toMatchObject({
+      type: "pool",
+      qty: { value: 2 },
+      dieArgs: [{ value: 4 }],
+      die: { max: 4 },
+      rolls: [{ value: 3 }, { value: 1 }],
+    });
+    expect(sequence.next).toHaveBeenCalledTimes(4);
+  });
+
   test.each([
     ["1d6!1", [d6Word(6), d6Word(6)], 2],
     ["1d6r", [d6Word(1), d6Word(2)], 2],

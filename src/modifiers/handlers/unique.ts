@@ -28,7 +28,7 @@ export const uniqueHandler: ModifierHandler<UniqueNode> = {
     input: ModifierInput<UniqueNode>,
   ): T[] {
     const { modifier, ctx } = input;
-    const { rollDie } = repeatableDie(input, "re-roll");
+    const { rollDie } = repeatableDie(input, "re-roll", items.length > 0);
     const { comparePoint } = modifier;
     const flag = modifier.once ? "unique-once" : "unique";
     const iterations = resolveIterationBudget(modifier, ctx.limits);
