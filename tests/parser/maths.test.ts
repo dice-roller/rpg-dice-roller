@@ -1,5 +1,6 @@
 import {
   createBinary as bin,
+  createComparison,
   createDie,
   createFunction,
   createGroup,
@@ -9,6 +10,7 @@ import {
   createUnary as neg,
 } from "../../src/ast/factory.js";
 import { MATH_FUNCTION_NAMES } from "../../src/ast/nodes.js";
+import { NotationError } from "../../src/errors/NotationError.js";
 import { Parser } from "../../src/parser/Parser.js";
 
 const parser = new Parser();
@@ -91,5 +93,81 @@ describe("maths", () => {
       createGroup([bin("+", d(4, 6), d(2, 8)), d(3, 20)]),
     );
     expect(parser.parse("{ 2 }")).toEqual(createGroup([num(2)]));
+  });
+
+  describe("comparisons", () => {
+    test.each(["=", "!=", "<>", "<", ">", "<=", ">="] as const)(
+      "parses %s",
+      (operator) => {
+        expect(parser.parse(`1${operator}2`)).toEqual(
+          createComparison(operator, num(1), num(2)),
+        );
+      },
+    );
+
+    test("binds below arithmetic and parses both operands as expressions", () => {
+      expect(parser.parse("1+2*3>=7")).toEqual(
+        createComparison(
+          ">=",
+          bin("+", num(1), bin("*", num(2), num(3))),
+          num(7),
+        ),
+      );
+      expect(parser.parse("1<2+3")).toEqual(
+        createComparison("<", num(1), bin("+", num(2), num(3))),
+      );
+    });
+
+    test("permits explicitly parenthesized nested comparisons", () => {
+      const inner = createComparison("<", num(1), num(2));
+
+      expect(parser.parse("(1<2)=1")).toEqual(
+        createComparison("=", createParen(inner), num(1)),
+      );
+      expect(parser.parse("1<(2<3)")).toEqual(
+        createComparison(
+          "<",
+          num(1),
+          createParen(createComparison("<", num(2), num(3))),
+        ),
+      );
+    });
+
+    test("preserves pool modifier precedence and allows comparison of a parenthesized total", () => {
+      expect(parser.parse("2d6>=5")).toMatchObject({
+        type: "pool",
+        modifiers: [{ type: "modifier", name: "target" }],
+      });
+      expect(parser.parse("(2d6)>=5")).toEqual(
+        createComparison(">=", createParen(d(2, 6)), num(5)),
+      );
+    });
+
+    test("works inside functions, groups, and calculated die parameters", () => {
+      expect(parser.parse("abs(1<2)")).toEqual(
+        createFunction("abs", [createComparison("<", num(1), num(2))]),
+      );
+      expect(parser.parse("{1<2, 3>2}")).toEqual(
+        createGroup([
+          createComparison("<", num(1), num(2)),
+          createComparison(">", num(3), num(2)),
+        ]),
+      );
+      expect(parser.parse("d(1<2)")).toEqual(
+        createPool(
+          num(1),
+          createDie("standard", [
+            createParen(createComparison("<", num(1), num(2))),
+          ]),
+        ),
+      );
+    });
+
+    test.each(["1<2<3", "1<=2>=3", "1<2!=3", "1===2", "1<", "1<2)"])(
+      "rejects malformed or chained comparison %s",
+      (notation) => {
+        expect(() => parser.parse(notation)).toThrow(NotationError);
+      },
+    );
   });
 });

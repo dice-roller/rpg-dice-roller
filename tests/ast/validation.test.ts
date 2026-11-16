@@ -3,6 +3,7 @@ import {
   conditionReference,
   conditional,
   compare,
+  comparison,
   criticalFailure,
   criticalSuccess,
   die,
@@ -117,6 +118,7 @@ describe("expression validation", () => {
       group([num(1)], { description: { text: "bundle", style: "block" } }),
     ],
     ["binary", binary("+", 1, 2)],
+    ["comparison", comparison(">=", 1, 2)],
     ["unary", negate(1)],
     ["parenthesized", paren(1)],
     ["function", fn("abs", -2)],
@@ -203,6 +205,11 @@ describe("expression validation", () => {
       "Expected an expression node",
     ],
     [
+      "a comparison node with a missing operand",
+      { type: "comparison", op: "=", left: null, right: num(1) },
+      "Expected an expression node",
+    ],
+    [
       "a unary node with a missing operand",
       { type: "unary", op: "-", operand: undefined },
       "Expected an expression node",
@@ -241,6 +248,11 @@ describe("expression validation", () => {
       "binary",
       { type: "binary", op: "**", left: num(1), right: num(2) },
       "A binary node must contain a valid operator",
+    ],
+    [
+      "comparison",
+      { type: "comparison", op: "~", left: num(1), right: num(2) },
+      "A comparison node must contain a valid operator",
     ],
     [
       "unary",

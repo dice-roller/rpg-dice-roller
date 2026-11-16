@@ -17,6 +17,7 @@ import { ValidationError } from "../errors/ValidationError.js";
 import {
   createBinary,
   createComparePoint,
+  createComparison,
   createConditional,
   createConditionReference,
   createCriticalFailure,
@@ -49,6 +50,7 @@ import type {
   BinaryOperator,
   ConditionalNode,
   ConditionReferenceNode,
+  ComparisonNode,
   ComparePoint,
   CompareOperator,
   CriticalFailureNode,
@@ -160,6 +162,19 @@ export function binary(
 ): BinaryNode {
   return createBinary(
     oneOf(op, BINARY_OPERATORS, "binary operator"),
+    expression(left),
+    expression(right),
+  );
+}
+
+/** A numeric comparison, e.g. `comparison(">=", pool(2, 6), 8)`. */
+export function comparison(
+  op: CompareOperator,
+  left: ExpressionInput,
+  right: ExpressionInput,
+): ComparisonNode {
+  return createComparison(
+    oneOf(op, COMPARE_OPERATORS, "comparison operator"),
     expression(left),
     expression(right),
   );
@@ -387,6 +402,7 @@ const EXPRESSION_TYPES: ReadonlySet<string> = new Set<ExpressionNode["type"]>([
   "pool",
   "group",
   "binary",
+  "comparison",
   "unary",
   "paren",
   "function",

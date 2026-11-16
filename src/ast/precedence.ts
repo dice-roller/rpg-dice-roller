@@ -2,6 +2,7 @@ import type { BinaryOperator, ExpressionNode } from "./nodes.js";
 
 /** Precedence levels, matching the grammar (higher binds tighter). */
 const ADDITIVE = 1;
+const COMPARISON = 0;
 const MULTIPLICATIVE = 2;
 const UNARY = 3;
 const POWER = 4;
@@ -18,6 +19,8 @@ const operatorPrecedence: Record<BinaryOperator, number> = {
 
 export function precedenceOf(node: ExpressionNode): number {
   switch (node.type) {
+    case "comparison":
+      return COMPARISON;
     case "binary":
       return operatorPrecedence[node.op];
     case "unary":
@@ -27,6 +30,10 @@ export function precedenceOf(node: ExpressionNode): number {
     default:
       return PRIMARY;
   }
+}
+
+export function minPrecedenceForComparisonOperand(): number {
+  return ADDITIVE;
 }
 
 export function minPrecedenceForBinaryOperand(

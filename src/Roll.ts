@@ -37,6 +37,7 @@ function findDescription(node: ExpressionNode): DescriptionNode | undefined {
     case "group":
       return node.description ?? firstDescription(node.expressions);
     case "binary":
+    case "comparison":
       return firstDescription([node.left, node.right]);
     case "unary":
       return findDescription(node.operand);

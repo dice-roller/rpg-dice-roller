@@ -4,6 +4,7 @@
 // Emits the plain-data AST from `src/ast/nodes.ts`, using the creators in `src/ast/factory.ts`.
 //
 // Precedence (lowest to highest) matches mathjs:
+//   Comparison      = != <> < > <= >= (non-associative)
 //   Additive        + -          left-associative
 //   Multiplicative  * / %        left-associative
 //   Unary           -            only directly before a number (as in v5)
@@ -76,7 +77,14 @@ Start
 // Expressions, by precedence
 
 Expression
-  = Additive
+  = Comparison
+
+Comparison
+  = left:Additive comparison:(_ operator:ExpressionCompareOperator _ right:Additive { return [operator, right]; })? !(_ ExpressionCompareOperator) {
+    return comparison
+      ? ast.createComparison(comparison[0], left, comparison[1])
+      : left;
+  }
 
 Additive
   = head:Multiplicative tail:(_ @AdditiveOperator _ @Multiplicative)* {
@@ -423,6 +431,15 @@ CompareValue
 
 CompareOperator
   = "!=" / "<=" / ">=" / "=" / "<>" / ">" / "<"
+
+ExpressionCompareOperator
+  = "!="
+  / "<>"
+  / "<="
+  / ">="
+  / $("=" ![=<>!])
+  / $("<" ![=<>!])
+  / $(">" ![=<>!])
 
 
 // Numbers

@@ -1,5 +1,6 @@
 import type {
   BinaryResult,
+  ComparisonResult,
   ConditionalResult,
   ConditionReferenceResult,
   DieResult,
@@ -25,8 +26,9 @@ import type { Presenter } from "./Presenter.js";
  * child results and `die()` from `pool()` for individual dice as needed. `die()` is not dispatched
  * by `present()` or `visit()`; an individual die is not an `ExpressionResult`.
  * For conditionals, visit `condition` and `selectedResult`; the unselected branch has no result.
- * Direct subclasses must implement `conditional()` and `conditionReference()` as well as the
- * other hooks. Subclasses of `TextPresenter` inherit implementations and can override them.
+ * Direct subclasses must implement `comparison()`, `conditional()` and `conditionReference()` as
+ * well as the other hooks. Subclasses of `TextPresenter` inherit implementations and can override
+ * them.
  *
  * @typeParam T the output type
  */
@@ -55,6 +57,8 @@ export abstract class TreePresenter<T> implements Presenter<T> {
         return this.group(result);
       case "binary":
         return this.binary(result);
+      case "comparison":
+        return this.comparison(result);
       case "unary":
         return this.unary(result);
       case "paren":
@@ -76,6 +80,8 @@ export abstract class TreePresenter<T> implements Presenter<T> {
   protected abstract die(result: DieResult, pool: PoolResult): T;
   protected abstract group(result: GroupResult): T;
   protected abstract binary(result: BinaryResult): T;
+  /** Presents a comparison; visit its `left` and `right` operands as needed. */
+  protected abstract comparison(result: ComparisonResult): T;
   protected abstract unary(result: UnaryResult): T;
   protected abstract paren(result: ParenResult): T;
   protected abstract fn(result: FunctionResult): T;

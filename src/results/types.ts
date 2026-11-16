@@ -7,6 +7,7 @@
  */
 import type {
   BinaryNode,
+  ComparisonNode,
   ConditionalNode,
   ConditionReferenceNode,
   FunctionNode,
@@ -37,6 +38,7 @@ export type ExpressionResult =
   | PoolResult
   | GroupResult
   | BinaryResult
+  | ComparisonResult
   | UnaryResult
   | ParenResult
   | FunctionResult
@@ -94,6 +96,15 @@ export interface GroupResult {
 export interface BinaryResult {
   readonly type: "binary";
   readonly node: BinaryNode;
+  readonly value: number;
+  readonly left: ExpressionResult;
+  readonly right: ExpressionResult;
+}
+
+/** A numeric comparison and its evaluated operands. */
+export interface ComparisonResult {
+  readonly type: "comparison";
+  readonly node: ComparisonNode;
   readonly value: number;
   readonly left: ExpressionResult;
   readonly right: ExpressionResult;

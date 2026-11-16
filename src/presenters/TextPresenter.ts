@@ -1,11 +1,13 @@
 import type { ResultFlag } from "../results/flags.js";
 import {
   minPrecedenceForBinaryOperand,
+  minPrecedenceForComparisonOperand,
   minPrecedenceForUnaryOperand,
   needsParentheses,
 } from "../ast/precedence.js";
 import type {
   BinaryResult,
+  ComparisonResult,
   ConditionalResult,
   ConditionReferenceResult,
   DieResult,
@@ -32,6 +34,7 @@ function containsDice(result: ExpressionResult): boolean {
     case "group":
       return result.members.some(({ result }) => containsDice(result));
     case "binary":
+    case "comparison":
       return containsDice(result.left) || containsDice(result.right);
     case "unary":
       return containsDice(result.operand);
@@ -198,6 +201,15 @@ export class TextPresenter extends TreePresenter<string> {
     );
 
     return `${left}${operator}${right}`;
+  }
+
+  /** `[4, 2]>3` */
+  protected comparison(result: ComparisonResult): string {
+    const minPrecedence = minPrecedenceForComparisonOperand();
+    const left = this.operand(result.left, minPrecedence);
+    const right = this.operand(result.right, minPrecedence);
+
+    return `${left}${result.node.op}${right}`;
   }
 
   /** `-5` */

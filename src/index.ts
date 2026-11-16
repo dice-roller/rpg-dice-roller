@@ -59,10 +59,14 @@ export type {
 
 // the most used types
 export type { DieLike } from "./dice/types.js";
-export type { ExpressionNode } from "./ast/nodes.js";
+export type {
+  CompareOperator,
+  ComparisonNode,
+  ExpressionNode,
+} from "./ast/nodes.js";
 export type { Presentable } from "./presenters/Presentable.js";
 export type { Presenter } from "./presenters/Presenter.js";
-export type { ExpressionResult } from "./results/types.js";
+export type { ComparisonResult, ExpressionResult } from "./results/types.js";
 export { EXPORT_FORMATS, NON_FINITE_NUMBERS } from "./serialization/formats.js";
 export type {
   Encoded,
