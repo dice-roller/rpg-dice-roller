@@ -6,10 +6,63 @@ import {
 } from "../src/ast/factory.js";
 import { DieRegistry } from "../src/dice/DieRegistry.js";
 import { ValidationError } from "../src/errors/ValidationError.js";
+import { averageResult } from "../src/evaluator/average.js";
 import { Roll, Roller } from "../src/index.js";
 import { RollSettings } from "../src/RollSettings.js";
 
 describe("roll averages", () => {
+  test("conditional mode totals are not bounds or statistical averages", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(3);
+    const roll = new Roll("(d6=3) ? (100) : (0)", settings);
+    expect(roll.total).toBe(100);
+    expect(roll.minTotal).toBe(0);
+    expect(roll.maxTotal).toBe(0);
+    expect(roll.averageTotal).toBe(0);
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test("averageResult defers conditional results to the whole-roll fallback", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(3);
+    const roll = new Roll("(d6=3) ? (100) : (0)", settings);
+
+    expect(averageResult(roll.result)).toBeUndefined();
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test("mode-specific checks bind their own values without drawing", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(3);
+    const roll = new Roll("(d6) ? ($condition*2) : (0)", settings);
+    expect(roll.total).toBe(6);
+    expect(roll.minTotal).toBe(2);
+    expect(roll.maxTotal).toBe(12);
+    expect(roll.averageTotal).toBe(7);
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([
+    "2d6+((d6) ? ($condition) : (2))",
+    "((d6) ?: (1))d6",
+    "1d((d6) ?: (2))",
+    "(0) ? (d6) : (2d6)",
+  ])("uses a whole-roll mode midpoint for %s", (notation) => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(2);
+    const roll = new Roll(notation, settings);
+    const count = integer.mock.calls.length;
+    expect(roll.averageTotal).toBe((roll.minTotal + roll.maxTotal) / 2);
+    expect(integer).toHaveBeenCalledTimes(count);
+  });
   test.each([
     ["standard", "3d6", 10.5],
     ["percentile", "2d%", 101],

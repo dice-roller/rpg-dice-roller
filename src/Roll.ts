@@ -1,7 +1,8 @@
 import type { DescriptionNode, ExpressionNode } from "./ast/nodes.js";
 import { nodeToNotation } from "./ast/notation.js";
+import { validateExpression } from "./ast/validation.js";
 import { ImportError } from "./errors/ImportError.js";
-import { averageResult } from "./evaluator/average.js";
+import { averageResult, containsConditional } from "./evaluator/average.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { EngineOption } from "./random/RandomEngine.js";
@@ -23,7 +24,14 @@ const roundTotal = (value: number): number => parseFloat(value.toFixed(2));
 function findDescription(node: ExpressionNode): DescriptionNode | undefined {
   switch (node.type) {
     case "number":
+    case "condition-reference":
       return undefined;
+    case "conditional":
+      return firstDescription([
+        node.condition,
+        ...(node.trueBranch ? [node.trueBranch] : []),
+        node.falseBranch,
+      ]);
     case "pool":
       return node.description;
     case "group":
@@ -114,6 +122,11 @@ export class Roll<T = string> {
       this.#averageTotal = input.averageTotal;
     } else {
       this.#input = input;
+
+      if (typeof input !== "string") {
+        validateExpression(input);
+      }
+
       this.notation = typeof input === "string" ? input : nodeToNotation(input);
       const expression =
         typeof input === "string" ? this.#settings.parse(input) : input;
@@ -182,13 +195,17 @@ export class Roll<T = string> {
    * The expression evaluated with each pool's quantity times its die's average.
    * Uses the stored die snapshots without rolling again or rounding intermediate averages.
    *
-   * Rolls containing modifiers retain the midpoint of `minTotal` and `maxTotal` for now.
+   * Rolls containing modifiers or conditionals retain the midpoint of `minTotal` and `maxTotal`.
+   * Conditional mode totals are not guaranteed bounds and their midpoint is not a statistical mean
+   * (see #293).
    * This is not a statistical mean for modifiers, non-linear maths or random die parameters.
    * Its uncached extrema use fresh per-pool budgets and include any partial results when exhausted.
    */
   get averageTotal(): number {
     return (this.#averageTotal ??=
-      averageResult(this.result) ?? (this.minTotal + this.maxTotal) / 2);
+      (containsConditional(this.expression)
+        ? undefined
+        : averageResult(this.result)) ?? (this.minTotal + this.maxTotal) / 2);
   }
 
   /** Rolls the original input again; an engine override applies only to this reroll. Does not add to a history. */

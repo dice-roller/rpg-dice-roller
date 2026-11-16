@@ -1,5 +1,30 @@
 import type { ExpressionResult } from "../results/types.js";
+import type { ExpressionNode } from "../ast/nodes.js";
 import { functions, negate, operators } from "./math.js";
+
+/** Whether any part of the source expression contains a conditional. */
+export function containsConditional(node: ExpressionNode): boolean {
+  switch (node.type) {
+    case "conditional":
+      return true;
+    case "pool":
+      return (
+        containsConditional(node.qty) || node.die.args.some(containsConditional)
+      );
+    case "group":
+      return node.expressions.some(containsConditional);
+    case "binary":
+      return containsConditional(node.left) || containsConditional(node.right);
+    case "unary":
+      return containsConditional(node.operand);
+    case "paren":
+      return containsConditional(node.expression);
+    case "function":
+      return node.args.some(containsConditional);
+    default:
+      return false;
+  }
+}
 
 /**
  * Evaluates an existing result using each pool's quantity and resolved die average.
@@ -11,7 +36,10 @@ import { functions, negate, operators } from "./math.js";
 export function averageResult(result: ExpressionResult): number | undefined {
   switch (result.type) {
     case "number":
+    case "condition-reference":
       return result.value;
+    case "conditional":
+      return undefined;
     case "pool":
       return result.node.modifiers.length > 0
         ? undefined

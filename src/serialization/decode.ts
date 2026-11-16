@@ -274,42 +274,64 @@ const RESULT_TYPES = [
   "unary",
   "paren",
   "function",
+  "conditional",
+  "condition-reference",
 ] as const;
 
-function result(value: unknown, path: string): ExpressionResult {
+function result(
+  value: unknown,
+  path: string,
+  conditionAvailable = false,
+): ExpressionResult {
   const data = record(value, path);
   const type = oneOf(data.type, RESULT_TYPES, `${path}.type`);
 
   number(data.value, `${path}.value`);
 
-  if (expression(data.node, `${path}.node`).type !== type) {
+  if (expression(data.node, `${path}.node`, conditionAvailable).type !== type) {
     fail(`${path}.node`, `expected a ${type} node`);
   }
 
   switch (type) {
     case "number":
+    case "condition-reference":
       break;
     case "pool":
-      result(data.qty, `${path}.qty`);
-      each(data.dieArgs, `${path}.dieArgs`, result);
+      result(data.qty, `${path}.qty`, conditionAvailable);
+      each(data.dieArgs, `${path}.dieArgs`, (item, itemPath) =>
+        result(item, itemPath, conditionAvailable),
+      );
       dieSnapshot(data.die, `${path}.die`);
       each(data.rolls, `${path}.rolls`, dieResult);
       break;
     case "group":
-      each(data.members, `${path}.members`, groupMember);
+      each(data.members, `${path}.members`, (item, itemPath) =>
+        groupMember(item, itemPath, conditionAvailable),
+      );
       break;
     case "binary":
-      result(data.left, `${path}.left`);
-      result(data.right, `${path}.right`);
+      result(data.left, `${path}.left`, conditionAvailable);
+      result(data.right, `${path}.right`, conditionAvailable);
       break;
     case "unary":
-      result(data.operand, `${path}.operand`);
+      result(data.operand, `${path}.operand`, conditionAvailable);
       break;
     case "paren":
-      result(data.inner, `${path}.inner`);
+      result(data.inner, `${path}.inner`, conditionAvailable);
       break;
     case "function":
-      each(data.args, `${path}.args`, result);
+      each(data.args, `${path}.args`, (item, itemPath) =>
+        result(item, itemPath, conditionAvailable),
+      );
+      break;
+    case "conditional":
+      result(data.condition, `${path}.condition`, conditionAvailable);
+      oneOf(
+        data.selectedBranch,
+        ["true", "false"] as const,
+        `${path}.selectedBranch`,
+      );
+      result(data.selectedResult, `${path}.selectedResult`, true);
       break;
   }
 
@@ -333,11 +355,15 @@ function dieResult(value: unknown, path: string): void {
   scoredItem(data, path);
 }
 
-function groupMember(value: unknown, path: string): void {
+function groupMember(
+  value: unknown,
+  path: string,
+  conditionAvailable: boolean,
+): void {
   const data = record(value, path);
 
   oneOf(data.type, ["group-member"] as const, `${path}.type`);
-  result(data.result, `${path}.result`);
+  result(data.result, `${path}.result`, conditionAvailable);
   scoredItem(data, path);
 }
 
@@ -353,16 +379,25 @@ function dieSnapshot(value: unknown, path: string): void {
 
 /* --- AST ---------------------------------------------------------------------------------- */
 
-function expression(value: unknown, path: string): ExpressionNode {
+function expression(
+  value: unknown,
+  path: string,
+  conditionAvailable = false,
+): ExpressionNode {
   const node = record(value, path);
 
   switch (oneOf(node.type, RESULT_TYPES, `${path}.type`)) {
     case "number":
       finite(node.value, `${path}.value`);
       break;
+    case "condition-reference":
+      if (!conditionAvailable) {
+        fail(path, "$condition is only available inside a conditional branch");
+      }
+      break;
     case "pool":
-      expression(node.qty, `${path}.qty`);
-      dieNode(node.die, `${path}.die`);
+      expression(node.qty, `${path}.qty`, conditionAvailable);
+      dieNode(node.die, `${path}.die`, conditionAvailable);
       modifiers(node.modifiers, `${path}.modifiers`);
       optional(node.description, `${path}.description`, description);
       break;
@@ -371,32 +406,47 @@ function expression(value: unknown, path: string): ExpressionNode {
         fail(`${path}.expressions`, "a group needs at least one expression");
       }
 
-      each(node.expressions, `${path}.expressions`, expression);
+      each(node.expressions, `${path}.expressions`, (item, itemPath) =>
+        expression(item, itemPath, conditionAvailable),
+      );
       modifiers(node.modifiers, `${path}.modifiers`);
       optional(node.description, `${path}.description`, description);
       break;
     case "binary":
       oneOf(node.op, BINARY_OPERATORS, `${path}.op`);
-      expression(node.left, `${path}.left`);
-      expression(node.right, `${path}.right`);
+      expression(node.left, `${path}.left`, conditionAvailable);
+      expression(node.right, `${path}.right`, conditionAvailable);
       break;
     case "unary":
       oneOf(node.op, ["-"] as const, `${path}.op`);
-      expression(node.operand, `${path}.operand`);
+      expression(node.operand, `${path}.operand`, conditionAvailable);
       break;
     case "paren":
-      expression(node.expression, `${path}.expression`);
+      expression(node.expression, `${path}.expression`, conditionAvailable);
       break;
     case "function":
       oneOf(node.name, MATH_FUNCTION_NAMES, `${path}.name`);
-      each(node.args, `${path}.args`, expression);
+      each(node.args, `${path}.args`, (item, itemPath) =>
+        expression(item, itemPath, conditionAvailable),
+      );
+      break;
+    case "conditional":
+      expression(node.condition, `${path}.condition`, conditionAvailable);
+      if (node.trueBranch !== null) {
+        expression(node.trueBranch, `${path}.trueBranch`, true);
+      }
+      expression(node.falseBranch, `${path}.falseBranch`, true);
       break;
   }
 
   return node as unknown as ExpressionNode;
 }
 
-function dieNode(value: unknown, path: string): void {
+function dieNode(
+  value: unknown,
+  path: string,
+  conditionAvailable: boolean,
+): void {
   const node = record(value, path);
 
   oneOf(node.type, ["die"] as const, `${path}.type`);
@@ -405,7 +455,9 @@ function dieNode(value: unknown, path: string): void {
     fail(`${path}.name`, "a die needs a name");
   }
 
-  each(node.args, `${path}.args`, expression);
+  each(node.args, `${path}.args`, (item, itemPath) =>
+    expression(item, itemPath, conditionAvailable),
+  );
 }
 
 function description(value: unknown, path: string): void {

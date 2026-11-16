@@ -1,5 +1,7 @@
 import type {
   BuiltInDieName,
+  ConditionReferenceNode,
+  ConditionalNode,
   DieNode,
   ExpressionNode,
   ExpressionNodeType,
@@ -9,7 +11,13 @@ import type {
   ModifierNodeOf,
   PoolNode,
 } from "../../src/ast/nodes.js";
-import { explode, reRoll, unique } from "../../src/ast/builders.js";
+import {
+  conditionReference,
+  conditional,
+  explode,
+  reRoll,
+  unique,
+} from "../../src/ast/builders.js";
 import type { ResultFlag } from "../../src/results/flags.js";
 import type {
   ExpressionResult,
@@ -23,10 +31,22 @@ import type { Equals } from "./helpers.js";
 assertType<
   Equals<
     ExpressionNodeType,
-    "number" | "pool" | "group" | "binary" | "unary" | "paren" | "function"
+    | "number"
+    | "pool"
+    | "group"
+    | "binary"
+    | "unary"
+    | "paren"
+    | "function"
+    | "conditional"
+    | "condition-reference"
   >
 >();
 assertType<Equals<ExpressionResultType, ExpressionNodeType>>();
+assertType<Equals<ConditionalNode["trueBranch"], ExpressionNode | null>>();
+assertType<Equals<ConditionReferenceNode["type"], "condition-reference">>();
+accepts<ExpressionNode>(conditional(2, null, 4));
+accepts<ExpressionNode>(conditional(2, conditionReference(), 4));
 
 // every result points back at the node of the same type
 assertType<
@@ -136,6 +156,8 @@ export function describeResult(result: ExpressionResult): string {
     case "paren":
     case "function":
     case "group":
+    case "conditional":
+    case "condition-reference":
       return result.type;
     case "pool":
       accepts<PoolResult>(result);

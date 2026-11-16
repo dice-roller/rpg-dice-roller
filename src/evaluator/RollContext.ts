@@ -55,6 +55,8 @@ export interface RollContext {
   readonly generator: NumberGenerator;
   readonly mode: RollMode;
   readonly limits: RollLimits;
+  /** The current branch's check, absent outside a conditional. */
+  readonly condition?: number;
 }
 
 export interface RollContextOptions {

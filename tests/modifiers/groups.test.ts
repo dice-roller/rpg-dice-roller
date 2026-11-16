@@ -1,4 +1,13 @@
-import { group, keep, pool, sort } from "../../src/ast/builders.js";
+import {
+  binary,
+  conditional,
+  fn,
+  group,
+  keep,
+  negate,
+  pool,
+  sort,
+} from "../../src/ast/builders.js";
 import type { SortNode, TargetNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
@@ -17,6 +26,70 @@ const poolRolls = (result: GroupResult): string[][] =>
   poolsOf(result).map(rollsOf);
 
 describe("single sub-roll", () => {
+  test("flattening modifies only the selected branch, not the check or binding", () => {
+    const result = evaluateGroup("{(d6) ? (2d6+$condition) : (d6)}k1", {
+      rolls: [3, 2, 5],
+    });
+    expect(result.value).toBe(8);
+    expect(result.members[0]?.result).toMatchObject({
+      type: "conditional",
+      condition: { value: 3 },
+      selectedBranch: "true",
+      selectedResult: { value: 8, right: { value: 3 } },
+    });
+  });
+
+  test("each-pool sorting reaches only the selected branch", () => {
+    const result = evaluateGroup("{(d6) ? (2d6+$condition) : (d6)}sd", {
+      rolls: [3, 2, 5],
+    });
+    expect(result.members[0]?.result).toMatchObject({
+      condition: { value: 3 },
+      selectedResult: {
+        value: 10,
+        left: { rolls: [{ value: 5 }, { value: 2 }] },
+        right: { value: 3 },
+      },
+    });
+  });
+
+  test("group modifiers recalculate unary and function results in selected branches", () => {
+    const result = evaluateGroup(
+      group(
+        [
+          conditional(
+            1,
+            binary("+", negate(pool(1, 6)), fn("abs", pool(1, 6))),
+            0,
+          ),
+        ],
+        { modifiers: [keep("h", 1)] },
+      ),
+      { rolls: [6, 4] },
+    );
+
+    expect(result.members[0]?.result).toMatchObject({
+      type: "conditional",
+      condition: { value: 1 },
+      selectedBranch: "true",
+      selectedResult: {
+        type: "binary",
+        value: -6,
+        left: {
+          type: "unary",
+          value: -6,
+          operand: { type: "pool", value: 6 },
+        },
+        right: {
+          type: "function",
+          value: 0,
+          args: [{ type: "pool", value: 0 }],
+        },
+      },
+    });
+    expect(result.value).toBe(-6);
+  });
+
   test.each([
     ["{4d10}", [3, 5, 1, 8], 17],
     ["{4d10*3}", [3, 5, 1, 8], 51],

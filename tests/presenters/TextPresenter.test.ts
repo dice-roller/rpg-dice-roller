@@ -1,5 +1,7 @@
 import {
   binary as astBinary,
+  conditional,
+  conditionReference,
   die,
   keep,
   negate,
@@ -209,6 +211,160 @@ describe("result nodes", () => {
   });
 });
 
+describe("conditional results", () => {
+  test.each([
+    [
+      conditional(2, astBinary("+", conditionReference(), 3), pool(1, 6)),
+      [],
+      "(condition: 2 = 2, true: $condition+3)",
+    ],
+    [
+      conditional(0, pool(1, 6), conditionReference()),
+      [],
+      "(condition: 0 = 0, false: $condition)",
+    ],
+    [
+      conditional(pool(1, 6), null, 9),
+      [3],
+      "(condition: [3] = 3, true: $condition)",
+    ],
+    [conditional(0, null, 9), [], "(condition: 0 = 0, false: 9)"],
+    [
+      conditional(
+        2,
+        astBinary(
+          "+",
+          conditional(
+            astBinary("-", conditionReference(), 1),
+            conditionReference(),
+            0,
+          ),
+          conditionReference(),
+        ),
+        0,
+      ),
+      [],
+      "(condition: 2 = 2, true: (condition: $condition-1 = 1, true: $condition)+$condition)",
+    ],
+    [
+      astBinary("*", conditional(2, 3, 4), 5),
+      [],
+      "(condition: 2 = 2, true: 3)*5",
+    ],
+  ] as [ExpressionNode, number[], string][])(
+    "presents the evaluated conditional %#",
+    (node, draws, expected) => {
+      const roll = rollWith(node, draws);
+      expect(defaultTextPresenter.present(roll.result)).toBe(expected);
+      expect(defaultTextPresenter.present(roll)).toBe(
+        `${roll.notation}: ${expected} = ${roll.total}`,
+      );
+    },
+  );
+
+  test("shows a deterministic target check value once without reevaluating", () => {
+    const notation = "(2d6>=5) ? (4d10+$condition) : (0)";
+    const settings = new RollSettings();
+    const draws = [2, 5, 3, 10, 2, 3];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation((min) => draws.shift() ?? min);
+    const roll = new Roll(notation, settings);
+    const result = roll.result;
+
+    expect(roll.toString()).toBe(
+      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition) = 19`,
+    );
+    expect(roll.result).toBe(result);
+    expect(roll.total).toBe(19);
+    expect(integer).toHaveBeenCalledTimes(6);
+    expect(roll.toString()).toBe(
+      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition) = 19`,
+    );
+    expect(integer).toHaveBeenCalledTimes(6);
+  });
+
+  test("histories and subclasses present conditionals without drawing again", () => {
+    class FixedPresenter extends TextPresenter {
+      protected override formatNumber(value: number): string {
+        return value.toFixed(1);
+      }
+    }
+    const settings = settingsWith([3, 4]);
+    const integer = jest.spyOn(settings.generator, "integer");
+    const roll = new Roll(
+      conditional(pool(1, 6), conditionReference(), pool(1, 6)),
+      settings,
+    );
+    const history = new RollHistory();
+    history.add(roll);
+    const presenter = new FixedPresenter();
+
+    expect(presenter.present(history)).toBe(
+      `${roll.notation}: (condition: [3.0] = 3.0, true: $condition) = 3.0`,
+    );
+    expect(presenter.present(history)).toBe(
+      `${roll.notation}: (condition: [3.0] = 3.0, true: $condition) = 3.0`,
+    );
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test.each([
+    [
+      pool(conditional(pool(1, 4), 2, 3), 6),
+      [1, 4, 5],
+      "(qty: (condition: [1] = 1, true: 2) = 2) -> [4, 5]",
+    ],
+    [
+      pool(conditional(1, pool(1, 4), 3), 6),
+      [2, 4, 5],
+      "(qty: (condition: 1 = 1, true: [2]) = 2) -> [4, 5]",
+    ],
+    [
+      pool(1, conditional(0, 3, pool(1, 6))),
+      [4, 3],
+      "(sides: (condition: 0 = 0, false: [4]) = 4) -> [3]",
+    ],
+    [pool(conditional(1, 2, pool(1, 4)), 6), [4, 5], "[4, 5]"],
+    [pool(1, conditional(1, 6, pool(1, 6))), [4], "[4]"],
+    [pool(conditional(2, conditionReference(), 3), 6), [4, 5], "[4, 5]"],
+    [
+      pool(conditional(1, conditional(0, 3, pool(1, 4)), 4), 6),
+      [2, 4, 5],
+      "(qty: (condition: 1 = 1, true: (condition: 0 = 0, false: [2])) = 2) -> [4, 5]",
+    ],
+    [
+      pool(conditional(1, conditional(0, pool(1, 4), 2), 4), 6),
+      [4, 5],
+      "[4, 5]",
+    ],
+  ] as [ExpressionNode, number[], string][])(
+    "detects evaluated dice in pool parameters %#",
+    (node, draws, expected) => {
+      const roll = rollWith(node, draws);
+      expect(
+        new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+      ).toBe(expected);
+    },
+  );
+
+  test("presents a condition reference on its own without changing its value", () => {
+    const roll = rollWith(conditional(2, conditionReference(), 0));
+
+    expect(roll.result.type).toBe("conditional");
+    if (roll.result.type !== "conditional") {
+      throw new Error("Expected a conditional result");
+    }
+    expect(defaultTextPresenter.present(roll.result.selectedResult)).toBe(
+      "$condition",
+    );
+    expect(roll.result.selectedResult).toMatchObject({
+      type: "condition-reference",
+      value: 2,
+    });
+  });
+});
+
 describe("builder expression precedence", () => {
   test.each<[string, ExpressionNode, number[], string, number]>([
     [
@@ -317,6 +473,16 @@ describe("options", () => {
     const presenter = new TextPresenter({ expandInlineRolls: true });
 
     expect(presenter.present(rollWith(notation, rolls))).toBe(expected);
+  });
+
+  test("detects unary dice in a calculated quantity", () => {
+    const quantity = astBinary("+", negate(pool(1, 4)), 5);
+    const roll = rollWith(pool(quantity, 10), [2, 1, 3, 7]);
+
+    expect(roll.toString()).toBe("(-d4+5)d10: [1, 3, 7] = 11");
+    expect(new TextPresenter({ expandInlineRolls: true }).present(roll)).toBe(
+      "(-d4+5)d10: (qty: -[2]+5 = 3) -> [1, 3, 7] = 11",
+    );
   });
 
   test("numeric-only parameters retain their ordinary output", () => {

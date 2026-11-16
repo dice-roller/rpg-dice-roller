@@ -1,3 +1,4 @@
+import { fn, group as astGroup, negate, paren } from "../src/ast/builders.js";
 import { createDie, createNumber, createPool } from "../src/ast/factory.js";
 import { NotationError } from "../src/errors/NotationError.js";
 import { ImportError } from "../src/errors/ImportError.js";
@@ -281,6 +282,44 @@ describe("Roll", () => {
 
     expect(result.description).toEqual(description);
     expect(new Roll("4d6").description).toBeUndefined();
+  });
+
+  test("finds descriptions in conditional source order, including skipped branches", () => {
+    expect(new Roll("(1) ? (2) : (d6 [fallback])").description).toEqual({
+      text: "fallback",
+      style: "block",
+    });
+    expect(new Roll("(d6 [check]) ? (d6 [branch]) : (1)").description).toEqual({
+      text: "check",
+      style: "block",
+    });
+  });
+
+  test("finds the first description under groups, unary, parentheses, and functions", () => {
+    const describedPool = new Roll("d6 [ember]").expression;
+    const expressions = [
+      ["group", astGroup([describedPool])],
+      ["unary", negate(describedPool)],
+      ["parentheses", paren(describedPool)],
+      ["function", fn("abs", describedPool)],
+    ] as const;
+
+    for (const [, expression] of expressions) {
+      expect(new Roll(expression).description).toEqual({
+        text: "ember",
+        style: "block",
+      });
+    }
+  });
+
+  test("a group description takes precedence over a nested description", () => {
+    const describedPool = new Roll("d6 [inner]").expression;
+    const expression = astGroup([describedPool], { description: "outer" });
+
+    expect(new Roll(expression).description).toEqual({
+      text: "outer",
+      style: "inline",
+    });
   });
 
   test("an imported roll re-rolls its expression, with the settings given", () => {

@@ -17,6 +17,8 @@ import { ValidationError } from "../errors/ValidationError.js";
 import {
   createBinary,
   createComparePoint,
+  createConditional,
+  createConditionReference,
   createCriticalFailure,
   createCriticalSuccess,
   createDescription,
@@ -45,6 +47,8 @@ import {
 import type {
   BinaryNode,
   BinaryOperator,
+  ConditionalNode,
+  ConditionReferenceNode,
   ComparePoint,
   CompareOperator,
   CriticalFailureNode,
@@ -180,6 +184,24 @@ export function fn(
     oneOf(name, MATH_FUNCTION_NAMES, "maths function"),
     args.map(expression),
   );
+}
+
+/** A conditional expression, using `null` for the shorthand's omitted true branch. */
+export function conditional(
+  condition: ExpressionInput,
+  trueBranch: ExpressionInput | null,
+  falseBranch: ExpressionInput,
+): ConditionalNode {
+  return createConditional(
+    expression(condition),
+    trueBranch === null ? null : expression(trueBranch),
+    expression(falseBranch),
+  );
+}
+
+/** A read-only reference to the evaluated check in the current conditional branch. */
+export function conditionReference(): ConditionReferenceNode {
+  return createConditionReference();
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -368,6 +390,8 @@ const EXPRESSION_TYPES: ReadonlySet<string> = new Set<ExpressionNode["type"]>([
   "unary",
   "paren",
   "function",
+  "conditional",
+  "condition-reference",
 ]);
 
 function isNode<T extends string>(

@@ -6,6 +6,8 @@ import {
 } from "../ast/precedence.js";
 import type {
   BinaryResult,
+  ConditionalResult,
+  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -23,6 +25,7 @@ import { TreePresenter } from "./TreePresenter.js";
 function containsDice(result: ExpressionResult): boolean {
   switch (result.type) {
     case "number":
+    case "condition-reference":
       return false;
     case "pool":
       return true;
@@ -36,6 +39,10 @@ function containsDice(result: ExpressionResult): boolean {
       return containsDice(result.inner);
     case "function":
       return result.args.some(containsDice);
+    case "conditional":
+      return (
+        containsDice(result.condition) || containsDice(result.selectedResult)
+      );
   }
 }
 
@@ -77,6 +84,9 @@ export interface TextPresenterOptions {
  * (`max([5],[2])`), and group members are joined with `, ` (`{[4, 5], [3]-1}`). A member with flags
  * (e.g. dropped, or a target success) is wrapped in parentheses: `([6, 3])d`.
  * An expression result is presented without notation or a total; an empty history produces `""`.
+ * Conditionals show the evaluated condition and selected result, e.g.
+ * `(condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition)`. References are rendered as `$condition`;
+ * their numeric value is shown once beside the conditional's check.
  */
 export class TextPresenter extends TreePresenter<string> {
   readonly flagSymbols: Readonly<Record<ResultFlag, string>>;
@@ -209,6 +219,14 @@ export class TextPresenter extends TreePresenter<string> {
   /** `floor([4, 5]/2)`, `max([5],[2])` */
   protected fn(result: FunctionResult): string {
     return `${result.node.name}(${result.args.map((arg) => this.visit(arg)).join(",")})`;
+  }
+
+  protected conditional(result: ConditionalResult): string {
+    return `(condition: ${this.visit(result.condition)} = ${this.formatNumber(result.condition.value)}, ${result.selectedBranch}: ${this.visit(result.selectedResult)})`;
+  }
+
+  protected conditionReference(_result: ConditionReferenceResult): string {
+    return "$condition";
   }
 }
 
