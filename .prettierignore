@@ -6,9 +6,6 @@
 # Generated parser
 /src/parser/generated
 
-# The v5 tests are kept for reference only, until they are converted
-/tests/v5
-
 # Not covered by the new code style
 /.github
 /.idea

@@ -12,8 +12,6 @@ export default defineConfig(
     "manual-testing/",
     "types/",
     "src/parser/generated/",
-    // the v5 tests are kept for reference only, until they are converted
-    "tests/v5/",
   ]),
   js.configs.recommended,
   tseslint.configs.recommendedTypeChecked,

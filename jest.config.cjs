@@ -2,8 +2,7 @@
 module.exports = {
   testEnvironment: "node",
   testMatch: ["<rootDir>/tests/**/*.test.ts"],
-  // the v5 tests are kept for reference only, until they are converted
-  testPathIgnorePatterns: ["/node_modules/", "<rootDir>/tests/v5/"],
+  testPathIgnorePatterns: ["/node_modules/"],
   transform: {
     // `.js` is included for the generated (ES module) parser
     "^.+\\.[jt]s$": [
