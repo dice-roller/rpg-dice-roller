@@ -7,6 +7,8 @@ import {
 } from "../../src/presenters/index.js";
 import type {
   BinaryResult,
+  ConditionalResult,
+  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -50,6 +52,12 @@ class HookPresenter extends TreePresenter<string> {
   }
   protected fn(): string {
     return "fn";
+  }
+  protected conditional(result: ConditionalResult): string {
+    return `conditional(${this.visit(result.condition)}, ${result.selectedBranch}, ${this.visit(result.selectedResult)})`;
+  }
+  protected conditionReference(result: ConditionReferenceResult): string {
+    return `reference(${result.value})`;
   }
 }
 
@@ -96,6 +104,26 @@ const sum: BinaryResult = {
   right: number(2),
 };
 
+const reference: ConditionReferenceResult = {
+  type: "condition-reference",
+  node: { type: "condition-reference" },
+  value: 2,
+};
+
+const conditional: ConditionalResult = {
+  type: "conditional",
+  node: {
+    type: "conditional",
+    condition: createNumber(2),
+    trueBranch: reference.node,
+    falseBranch: createNumber(0),
+  },
+  value: 2,
+  condition: number(2),
+  selectedBranch: "true",
+  selectedResult: reference,
+};
+
 const roll = (result: ExpressionResult) =>
   Roll.fromJSON({
     type: "roll",
@@ -130,6 +158,8 @@ describe("TreePresenter", () => {
     ["number", number(4), "number(4)"],
     ["pool", pool, "pool(die(3), die(4))"],
     ["binary", sum, "binary(pool(die(3), die(4)) + number(2))"],
+    ["condition-reference", reference, "reference(2)"],
+    ["conditional", conditional, "conditional(number(2), true, reference(2))"],
     [
       "paren",
       {

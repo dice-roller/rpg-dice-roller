@@ -18,7 +18,9 @@ export type ExpressionNode =
   | BinaryNode
   | UnaryNode
   | ParenNode
-  | FunctionNode;
+  | FunctionNode
+  | ConditionalNode
+  | ConditionReferenceNode;
 
 /** The `type` of every expression node. */
 export type ExpressionNodeType = ExpressionNode["type"];
@@ -133,6 +135,19 @@ export interface FunctionNode {
   readonly type: "function";
   readonly name: MathFunctionName;
   readonly args: readonly ExpressionNode[];
+}
+
+/** A conditional expression; `null` preserves the omitted true-branch shorthand. */
+export interface ConditionalNode {
+  readonly type: "conditional";
+  readonly condition: ExpressionNode;
+  readonly trueBranch: ExpressionNode | null;
+  readonly falseBranch: ExpressionNode;
+}
+
+/** A read-only reference to the current conditional's evaluated check. */
+export interface ConditionReferenceNode {
+  readonly type: "condition-reference";
 }
 
 /* ------------------------------------------------------------------------------------------------

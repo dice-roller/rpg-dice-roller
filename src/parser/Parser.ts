@@ -1,6 +1,7 @@
 import type { ExpressionNode } from "../ast/nodes.js";
 import { NotationError } from "../errors/NotationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
+import { validateExpression } from "../ast/validation.js";
 import { DEFAULT_ROLL_LIMITS } from "../evaluator/RollContext.js";
 import * as grammar from "./generated/grammar.js";
 
@@ -43,10 +44,12 @@ export class Parser {
     }
 
     try {
-      return grammar.parse(notation, {
+      const expression = grammar.parse(notation, {
         maxQty: this.maxQty,
         grammarSource: "notation",
       });
+      validateExpression(expression);
+      return expression;
     } catch (error) {
       if (error instanceof grammar.SyntaxError) {
         const { offset, line, column } = error.location.start;

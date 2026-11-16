@@ -1,5 +1,7 @@
 import type {
   BinaryNode,
+  ConditionalNode,
+  ConditionReferenceNode,
   ExpressionNode,
   FunctionNode,
   GroupNode,
@@ -15,7 +17,11 @@ import { dieSnapshot, resolveDie, rollDie } from "../dice/die-utils.js";
 import type { ResolvedDie } from "../dice/types.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
-import { normalizeModifierAmount } from "../ast/validation.js";
+import {
+  normalizeModifierAmount,
+  validateExpression,
+} from "../ast/validation.js";
+import { createConditionReference } from "../ast/factory.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
 import { validateTargetAmounts } from "../modifiers/handlers/target.js";
 import { resolveIterationBudget } from "../modifiers/handlers/utils.js";
@@ -27,6 +33,8 @@ import type {
 import { createDieResult } from "../results/die-result.js";
 import type {
   BinaryResult,
+  ConditionalResult,
+  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -98,6 +106,14 @@ export class Evaluator {
    * @throws {EvaluationError} if a node, quantity, operation or modifier result is invalid
    */
   evaluate(node: ExpressionNode, ctx: RollContext): ExpressionResult {
+    validateExpression(node);
+    return this.evaluateNode(node, ctx);
+  }
+
+  protected evaluateNode(
+    node: ExpressionNode,
+    ctx: RollContext,
+  ): ExpressionResult {
     switch (node.type) {
       case "number":
         return this.evaluateNumber(node, ctx);
@@ -113,12 +129,56 @@ export class Evaluator {
         return this.evaluateParen(node, ctx);
       case "function":
         return this.evaluateFunction(node, ctx);
+      case "conditional":
+        return this.evaluateConditional(node, ctx);
+      case "condition-reference":
+        return this.evaluateConditionReference(node, ctx);
       default: {
         throw new EvaluationError(
           `Unknown node type: ${(node as { type: string }).type}`,
         );
       }
     }
+  }
+
+  protected evaluateConditional(
+    node: ConditionalNode,
+    ctx: RollContext,
+  ): ConditionalResult {
+    const condition = this.evaluateNode(node.condition, ctx);
+    const selectedBranch = condition.value === 0 ? "false" : "true";
+    const branch =
+      selectedBranch === "true" ? node.trueBranch : node.falseBranch;
+    const branchContext: RollContext = { ...ctx, condition: condition.value };
+    const selectedResult =
+      branch === null
+        ? this.evaluateConditionReference(
+            createConditionReference(),
+            branchContext,
+          )
+        : this.evaluateNode(branch, branchContext);
+
+    return {
+      type: "conditional",
+      node,
+      value: selectedResult.value,
+      condition,
+      selectedBranch,
+      selectedResult,
+    };
+  }
+
+  protected evaluateConditionReference(
+    node: ConditionReferenceNode,
+    ctx: RollContext,
+  ): ConditionReferenceResult {
+    if (ctx.condition === undefined) {
+      throw new ValidationError(
+        "$condition is only available inside a conditional branch",
+      );
+    }
+
+    return { type: "condition-reference", node, value: ctx.condition };
   }
 
   protected evaluateNumber(node: NumberNode, _ctx: RollContext): NumberResult {
@@ -137,7 +197,7 @@ export class Evaluator {
    * rolls it `qty` times with `rollDie()`, then applies the modifiers.
    */
   protected evaluatePool(node: PoolNode, ctx: RollContext): PoolResult {
-    const qty = this.evaluate(node.qty, ctx);
+    const qty = this.evaluateNode(node.qty, ctx);
     const count = qty.value;
     const minQty = node.qty.type === "number" ? 1 : 0;
 
@@ -151,7 +211,7 @@ export class Evaluator {
       );
     }
 
-    const dieArgs = node.die.args.map((arg) => this.evaluate(arg, ctx));
+    const dieArgs = node.die.args.map((arg) => this.evaluateNode(arg, ctx));
     const die = this.createDie(
       node,
       dieArgs.map(({ value }) => value),
@@ -211,7 +271,7 @@ export class Evaluator {
     this.validateIterationLimits(node.modifiers, ctx);
 
     let members = node.expressions.map((expression): GroupMemberResult => {
-      const result = this.evaluate(expression, ctx);
+      const result = this.evaluateNode(expression, ctx);
 
       return {
         type: "group-member",
@@ -376,6 +436,10 @@ export class Evaluator {
             ),
           };
         }
+        case "conditional": {
+          const selectedResult = visit(current.selectedResult);
+          return { ...current, selectedResult, value: selectedResult.value };
+        }
         default:
           return current;
       }
@@ -390,8 +454,8 @@ export class Evaluator {
       throw new EvaluationError(`Unknown operator: ${String(node.op)}`);
     }
 
-    const left = this.evaluate(node.left, ctx);
-    const right = this.evaluate(node.right, ctx);
+    const left = this.evaluateNode(node.left, ctx);
+    const right = this.evaluateNode(node.right, ctx);
 
     return {
       type: "binary",
@@ -404,13 +468,13 @@ export class Evaluator {
 
   /** Uses `negate` from `math.ts`. */
   protected evaluateUnary(node: UnaryNode, ctx: RollContext): UnaryResult {
-    const operand = this.evaluate(node.operand, ctx);
+    const operand = this.evaluateNode(node.operand, ctx);
 
     return { type: "unary", node, value: negate(operand.value), operand };
   }
 
   protected evaluateParen(node: ParenNode, ctx: RollContext): ParenResult {
-    const inner = this.evaluate(node.expression, ctx);
+    const inner = this.evaluateNode(node.expression, ctx);
 
     return { type: "paren", node, value: inner.value, inner };
   }
@@ -430,7 +494,7 @@ export class Evaluator {
       );
     }
 
-    const args = node.args.map((arg) => this.evaluate(arg, ctx));
+    const args = node.args.map((arg) => this.evaluateNode(arg, ctx));
 
     return {
       type: "function",

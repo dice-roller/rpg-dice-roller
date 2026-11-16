@@ -111,7 +111,9 @@ PowerOperator
   = "^" / "**"
 
 Primary
-  = MathFunction
+  = Conditional
+  / ConditionReference
+  / MathFunction
   / DicePool
   / RollGroup
   / Number
@@ -233,6 +235,22 @@ ComputedValue
   = "(" _ expression:Expression _ ")" {
     return ast.createParen(expression);
   }
+
+Conditional
+  = "(" _ condition:Expression _ ")" _ "?:" _ "(" _ falseBranch:Expression _ ")" {
+      return ast.createConditional(condition, null, falseBranch);
+    }
+  / "(" _ condition:Expression _ ")" _ "?" !":" _ "(" _ trueBranch:Expression _ ")" _ ":" _ "(" _ falseBranch:Expression _ ")" {
+      return ast.createConditional(condition, trueBranch, falseBranch);
+    }
+
+ConditionReference
+  = "$" name:$([a-zA-Z_] [a-zA-Z0-9_]*) {
+      if (name !== "condition") {
+        error("Unknown variable `$" + name + "`; only `$condition` is supported");
+      }
+      return ast.createConditionReference();
+    }
 
 
 // Roll groups, e.g. `{4d6+2d8, 3d20}k1`

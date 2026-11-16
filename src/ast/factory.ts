@@ -11,6 +11,8 @@ import {
 import type {
   BinaryNode,
   BinaryOperator,
+  ConditionalNode,
+  ConditionReferenceNode,
   ComparePoint,
   CompareOperator,
   CriticalFailureNode,
@@ -118,6 +120,18 @@ export function createFunction(
   args: readonly ExpressionNode[],
 ): FunctionNode {
   return { type: "function", name, args };
+}
+
+export function createConditional(
+  condition: ExpressionNode,
+  trueBranch: ExpressionNode | null,
+  falseBranch: ExpressionNode,
+): ConditionalNode {
+  return { type: "conditional", condition, trueBranch, falseBranch };
+}
+
+export function createConditionReference(): ConditionReferenceNode {
+  return { type: "condition-reference" };
 }
 
 /* ------------------------------------------------------------------------------------------------

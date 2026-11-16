@@ -1,4 +1,252 @@
 import { ValidationError } from "../errors/ValidationError.js";
+import { EvaluationError } from "../errors/EvaluationError.js";
+import { BINARY_OPERATORS, MATH_FUNCTION_NAMES } from "./nodes.js";
+import type { ExpressionNode } from "./nodes.js";
+
+/** Validates expression structure and lexical `$condition` scope without evaluating it. */
+export function validateExpression(
+  node: unknown,
+): asserts node is ExpressionNode {
+  validateNode(node, false);
+}
+
+function validateNode(node: unknown, conditionAvailable: boolean): void {
+  if (typeof node !== "object" || node === null) {
+    throw new ValidationError("Expected an expression node");
+  }
+
+  const expression = node as Record<string, unknown>;
+
+  switch (expression.type) {
+    case "number":
+      if (typeof expression.value !== "number") {
+        throw new ValidationError("A number node must contain a numeric value");
+      }
+      return;
+    case "condition-reference":
+      if (!conditionAvailable) {
+        throw new ValidationError(
+          "$condition is only available inside a conditional branch",
+        );
+      }
+      return;
+    case "pool": {
+      validateNode(expression.qty, conditionAvailable);
+
+      const die = expression.die;
+
+      if (
+        typeof die !== "object" ||
+        die === null ||
+        (die as Record<string, unknown>).type !== "die" ||
+        typeof (die as Record<string, unknown>).name !== "string" ||
+        !Array.isArray((die as Record<string, unknown>).args)
+      ) {
+        throw new ValidationError("A pool must contain a valid die node");
+      }
+
+      for (const arg of (die as { args: unknown[] }).args) {
+        validateNode(arg, conditionAvailable);
+      }
+
+      if (!Array.isArray(expression.modifiers)) {
+        throw new ValidationError("A pool's modifiers must be a list");
+      }
+
+      expression.modifiers.forEach(validateModifierStructure);
+      validateDescriptionStructure(expression.description);
+
+      return;
+    }
+    case "group":
+      if (
+        !Array.isArray(expression.expressions) ||
+        expression.expressions.length === 0
+      ) {
+        throw new ValidationError(
+          "A group must contain at least one expression",
+        );
+      }
+
+      for (const child of expression.expressions) {
+        validateNode(child, conditionAvailable);
+      }
+
+      if (!Array.isArray(expression.modifiers)) {
+        throw new ValidationError("A group's modifiers must be a list");
+      }
+
+      expression.modifiers.forEach(validateModifierStructure);
+      validateDescriptionStructure(expression.description);
+
+      return;
+    case "binary":
+      if (
+        !BINARY_OPERATORS.includes(
+          expression.op as (typeof BINARY_OPERATORS)[number],
+        )
+      ) {
+        throw new EvaluationError(
+          "A binary node must contain a valid operator",
+        );
+      }
+
+      validateNode(expression.left, conditionAvailable);
+      validateNode(expression.right, conditionAvailable);
+
+      return;
+    case "unary":
+      if (expression.op !== "-") {
+        throw new EvaluationError("A unary node must contain a valid operator");
+      }
+
+      validateNode(expression.operand, conditionAvailable);
+      return;
+    case "paren":
+      validateNode(expression.expression, conditionAvailable);
+      return;
+    case "function":
+      if (
+        !MATH_FUNCTION_NAMES.includes(
+          expression.name as (typeof MATH_FUNCTION_NAMES)[number],
+        ) ||
+        !Array.isArray(expression.args)
+      ) {
+        throw new EvaluationError(
+          "A function node must contain a valid name and argument list",
+        );
+      }
+
+      for (const arg of expression.args) {
+        validateNode(arg, conditionAvailable);
+      }
+
+      return;
+    case "conditional":
+      validateNode(expression.condition, conditionAvailable);
+      if (expression.trueBranch !== null) {
+        validateNode(expression.trueBranch, true);
+      }
+
+      if (
+        expression.falseBranch === undefined ||
+        expression.falseBranch === null
+      ) {
+        throw new ValidationError(
+          "A conditional expression requires a false branch",
+        );
+      }
+
+      validateNode(expression.falseBranch, true);
+      return;
+    default:
+      throw new EvaluationError(
+        `Unknown expression node type: ${String(expression.type)}`,
+      );
+  }
+}
+
+function validateDescriptionStructure(description: unknown): void {
+  if (description === undefined) {
+    return;
+  }
+
+  if (
+    typeof description !== "object" ||
+    description === null ||
+    typeof (description as Record<string, unknown>).text !== "string" ||
+    !["inline", "block"].includes(
+      String((description as Record<string, unknown>).style),
+    )
+  ) {
+    throw new ValidationError("Invalid description node");
+  }
+}
+
+function validateModifierStructure(value: unknown): void {
+  if (typeof value !== "object" || value === null) {
+    throw new ValidationError("Invalid modifier node");
+  }
+
+  const modifier = value as Record<string, unknown>;
+  const optionalNumber = (name: string) =>
+    modifier[name] === undefined || typeof modifier[name] === "number";
+  const compare = (point: unknown) =>
+    point === undefined ||
+    (typeof point === "object" &&
+      point !== null &&
+      typeof (point as Record<string, unknown>).operator === "string" &&
+      typeof (point as Record<string, unknown>).value === "number");
+
+  if (modifier.type !== "modifier") {
+    throw new ValidationError("Invalid modifier node");
+  }
+
+  let valid = false;
+
+  switch (modifier.name) {
+    case "explode":
+      valid =
+        typeof modifier.compound === "boolean" &&
+        typeof modifier.penetrate === "boolean" &&
+        optionalNumber("limit") &&
+        optionalNumber("amount") &&
+        compare(modifier.comparePoint);
+      break;
+    case "re-roll":
+      valid =
+        typeof modifier.once === "boolean" &&
+        optionalNumber("limit") &&
+        optionalNumber("amount") &&
+        compare(modifier.comparePoint);
+      break;
+    case "unique":
+      valid =
+        typeof modifier.once === "boolean" &&
+        optionalNumber("limit") &&
+        compare(modifier.comparePoint);
+      break;
+    case "target":
+      valid =
+        Array.isArray(modifier.rules) &&
+        modifier.rules.every((rule: unknown) => {
+          if (typeof rule !== "object" || rule === null) {
+            return false;
+          }
+
+          const r = rule as Record<string, unknown>;
+
+          return (
+            (r.kind === "success" || r.kind === "failure") &&
+            r.comparePoint !== undefined &&
+            compare(r.comparePoint) &&
+            (r.amount === undefined || typeof r.amount === "number")
+          );
+        });
+      break;
+    case "keep":
+    case "drop":
+      valid =
+        (modifier.end === "h" || modifier.end === "l") &&
+        typeof modifier.qty === "number";
+      break;
+    case "sort":
+      valid = modifier.direction === "a" || modifier.direction === "d";
+      break;
+    case "min":
+    case "max":
+      valid = typeof modifier.value === "number";
+      break;
+    case "critical-success":
+    case "critical-failure":
+      valid = compare(modifier.comparePoint);
+      break;
+  }
+
+  if (!valid) {
+    throw new ValidationError("Invalid modifier node");
+  }
+}
 
 export function isPositiveSafeInteger(value: unknown): value is number {
   return typeof value === "number" && Number.isSafeInteger(value) && value > 0;

@@ -97,6 +97,16 @@ function write(node: ExpressionNode): string {
       return `(${write(node.expression)})`;
     case "function":
       return `${node.name}(${node.args.map(write).join(", ")})`;
+    case "conditional": {
+      const condition = `(${write(node.condition)})`;
+      const falseBranch = `(${write(node.falseBranch)})`;
+
+      return node.trueBranch === null
+        ? `${condition}?:${falseBranch}`
+        : `${condition}?(${write(node.trueBranch)}):${falseBranch}`;
+    }
+    case "condition-reference":
+      return "$condition";
   }
 }
 

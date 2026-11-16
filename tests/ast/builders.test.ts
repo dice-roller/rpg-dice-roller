@@ -1,6 +1,8 @@
 import {
   binary,
   compare,
+  conditionReference,
+  conditional,
   criticalFailure,
   criticalSuccess,
   die,
@@ -41,6 +43,11 @@ describe("builders match the parser", () => {
   test.each<[string, ExpressionNode]>([
     ["4", num(4)],
     ["2.5", num(2.5)],
+    [
+      "(2) ? ($condition+3) : (4)",
+      conditional(2, binary("+", conditionReference(), 3), 4),
+    ],
+    ["(2) ?: (4)", conditional(2, null, 4)],
     ["4d6", pool(4, 6)],
     ["d6", pool(1, 6)],
     ["d%", pool(1, die("percentile"))],

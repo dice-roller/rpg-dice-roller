@@ -1,5 +1,7 @@
 import type {
   BinaryResult,
+  ConditionalResult,
+  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -22,6 +24,9 @@ import type { Presenter } from "./Presenter.js";
  * hook (via `visit()`). Subclasses implement the hooks and control traversal: call `visit()` for
  * child results and `die()` from `pool()` for individual dice as needed. `die()` is not dispatched
  * by `present()` or `visit()`; an individual die is not an `ExpressionResult`.
+ * For conditionals, visit `condition` and `selectedResult`; the unselected branch has no result.
+ * Direct subclasses must implement `conditional()` and `conditionReference()` as well as the
+ * other hooks. Subclasses of `TextPresenter` inherit implementations and can override them.
  *
  * @typeParam T the output type
  */
@@ -56,6 +61,10 @@ export abstract class TreePresenter<T> implements Presenter<T> {
         return this.paren(result);
       case "function":
         return this.fn(result);
+      case "conditional":
+        return this.conditional(result);
+      case "condition-reference":
+        return this.conditionReference(result);
     }
   }
 
@@ -70,4 +79,6 @@ export abstract class TreePresenter<T> implements Presenter<T> {
   protected abstract unary(result: UnaryResult): T;
   protected abstract paren(result: ParenResult): T;
   protected abstract fn(result: FunctionResult): T;
+  protected abstract conditional(result: ConditionalResult): T;
+  protected abstract conditionReference(result: ConditionReferenceResult): T;
 }

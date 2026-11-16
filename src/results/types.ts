@@ -7,6 +7,8 @@
  */
 import type {
   BinaryNode,
+  ConditionalNode,
+  ConditionReferenceNode,
   FunctionNode,
   GroupNode,
   NumberNode,
@@ -37,7 +39,9 @@ export type ExpressionResult =
   | BinaryResult
   | UnaryResult
   | ParenResult
-  | FunctionResult;
+  | FunctionResult
+  | ConditionalResult
+  | ConditionReferenceResult;
 
 /** The `type` of every expression result. */
 export type ExpressionResultType = ExpressionResult["type"];
@@ -117,4 +121,21 @@ export interface FunctionResult {
   readonly node: FunctionNode;
   readonly value: number;
   readonly args: readonly ExpressionResult[];
+}
+
+/** A check and its one evaluated branch. */
+export interface ConditionalResult {
+  readonly type: "conditional";
+  readonly node: ConditionalNode;
+  readonly value: number;
+  readonly condition: ExpressionResult;
+  readonly selectedBranch: "true" | "false";
+  readonly selectedResult: ExpressionResult;
+}
+
+/** A resolved reference to the current branch's check. */
+export interface ConditionReferenceResult {
+  readonly type: "condition-reference";
+  readonly node: ConditionReferenceNode;
+  readonly value: number;
 }
