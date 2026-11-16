@@ -1,6 +1,7 @@
 import {
   binary,
   compare,
+  comparison,
   conditionReference,
   conditional,
   criticalFailure,
@@ -43,6 +44,7 @@ describe("builders match the parser", () => {
   test.each<[string, ExpressionNode]>([
     ["4", num(4)],
     ["2.5", num(2.5)],
+    ["1>=2", comparison(">=", 1, 2)],
     [
       "(2) ? ($condition+3) : (4)",
       conditional(2, binary("+", conditionReference(), 3), 4),
@@ -329,6 +331,15 @@ describe("defaults and options", () => {
 
     expect(pool(qty, 6).qty).toBe(qty);
   });
+
+  test.each(["=", "!=", "<>", "<", ">", "<=", ">="] as const)(
+    "comparison builder and parser use %s",
+    (operator) => {
+      const expression = comparison(operator, 1, binary("+", 2, 3));
+
+      expect(parser.parse(`1${operator}2+3`)).toEqual(expression);
+    },
+  );
 });
 
 describe("invalid input", () => {
@@ -360,6 +371,7 @@ describe("invalid input", () => {
     ],
     ["group([])", () => group([])],
     ["binary('x')", () => binary("x" as "+", 1, 2)],
+    ["comparison('~')", () => comparison("~" as "=", 1, 2)],
     ["negate(undefined)", () => negate(undefined as unknown as number)],
     ["fn('nope')", () => fn("nope" as "abs", 1)],
     ["compare('~')", () => compare("~" as "=", 1)],

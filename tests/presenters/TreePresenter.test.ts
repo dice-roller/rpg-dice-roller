@@ -7,6 +7,7 @@ import {
 } from "../../src/presenters/index.js";
 import type {
   BinaryResult,
+  ComparisonResult,
   ConditionalResult,
   ConditionReferenceResult,
   DieResult,
@@ -43,6 +44,9 @@ class HookPresenter extends TreePresenter<string> {
   }
   protected binary(result: BinaryResult): string {
     return `binary(${this.visit(result.left)} ${result.node.op} ${this.visit(result.right)})`;
+  }
+  protected comparison(result: ComparisonResult): string {
+    return `comparison(${this.visit(result.left)} ${result.node.op} ${this.visit(result.right)})`;
   }
   protected unary(): string {
     return "unary";
@@ -158,6 +162,17 @@ describe("TreePresenter", () => {
     ["number", number(4), "number(4)"],
     ["pool", pool, "pool(die(3), die(4))"],
     ["binary", sum, "binary(pool(die(3), die(4)) + number(2))"],
+    [
+      "comparison",
+      {
+        type: "comparison",
+        node: { type: "comparison", op: ">", left: sum.node, right: pool.node },
+        value: 1,
+        left: sum,
+        right: pool,
+      } satisfies ComparisonResult,
+      "comparison(binary(pool(die(3), die(4)) + number(2)) > pool(die(3), die(4)))",
+    ],
     ["condition-reference", reference, "reference(2)"],
     ["conditional", conditional, "conditional(number(2), true, reference(2))"],
     [

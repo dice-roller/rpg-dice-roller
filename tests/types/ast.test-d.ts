@@ -35,6 +35,7 @@ assertType<
     | "pool"
     | "group"
     | "binary"
+    | "comparison"
     | "unary"
     | "paren"
     | "function"
@@ -152,6 +153,7 @@ export function describeResult(result: ExpressionResult): string {
   switch (result.type) {
     case "number":
     case "binary":
+    case "comparison":
     case "unary":
     case "paren":
     case "function":

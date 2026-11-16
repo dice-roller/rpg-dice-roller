@@ -271,6 +271,7 @@ const RESULT_TYPES = [
   "pool",
   "group",
   "binary",
+  "comparison",
   "unary",
   "paren",
   "function",
@@ -310,6 +311,7 @@ function result(
       );
       break;
     case "binary":
+    case "comparison":
       result(data.left, `${path}.left`, conditionAvailable);
       result(data.right, `${path}.right`, conditionAvailable);
       break;
@@ -414,6 +416,11 @@ function expression(
       break;
     case "binary":
       oneOf(node.op, BINARY_OPERATORS, `${path}.op`);
+      expression(node.left, `${path}.left`, conditionAvailable);
+      expression(node.right, `${path}.right`, conditionAvailable);
+      break;
+    case "comparison":
+      oneOf(node.op, COMPARE_OPERATORS, `${path}.op`);
       expression(node.left, `${path}.left`, conditionAvailable);
       expression(node.right, `${path}.right`, conditionAvailable);
       break;

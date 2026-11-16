@@ -11,6 +11,43 @@ import { Roll, Roller } from "../src/index.js";
 import { RollSettings } from "../src/RollSettings.js";
 
 describe("roll averages", () => {
+  test("comparisons substitute averages and mode totals without random draws", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(4);
+    const roll = new Roll("(d6)>3", settings);
+
+    expect(roll.total).toBe(1);
+    expect(roll.minTotal).toBe(0);
+    expect(roll.maxTotal).toBe(1);
+    expect(roll.averageTotal).toBe(1);
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test("comparison operands with modifiers use the existing midpoint fallback", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(4);
+    const roll = new Roll("(d6kh1)>3", settings);
+
+    expect(averageResult(roll.result)).toBeUndefined();
+    expect(roll.averageTotal).toBe((roll.minTotal + roll.maxTotal) / 2);
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
+  test("conditionals nested in comparisons retain the whole-roll fallback", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(4);
+    const roll = new Roll("((d6) ? (4) : (0))>3", settings);
+
+    expect(roll.averageTotal).toBe((roll.minTotal + roll.maxTotal) / 2);
+    expect(integer).toHaveBeenCalledTimes(1);
+  });
+
   test("conditional mode totals are not bounds or statistical averages", () => {
     const settings = new RollSettings();
     const integer = jest

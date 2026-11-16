@@ -1,8 +1,11 @@
 import {
   binary as astBinary,
+  comparison,
   conditional,
   conditionReference,
   die,
+  fn,
+  group,
   keep,
   negate,
   paren,
@@ -15,7 +18,7 @@ import {
   TextPresenter,
   defaultTextPresenter,
 } from "../../src/presenters/TextPresenter.js";
-import type { PoolResult } from "../../src/results/types.js";
+import type { ComparisonResult, PoolResult } from "../../src/results/types.js";
 import { Roll } from "../../src/Roll.js";
 import { Roller } from "../../src/Roller.js";
 import { RollHistory } from "../../src/RollHistory.js";
@@ -362,6 +365,108 @@ describe("conditional results", () => {
       type: "condition-reference",
       value: 2,
     });
+  });
+});
+
+describe("comparison results", () => {
+  test.each(["=", "!=", "<>", "<", ">", "<=", ">="] as const)(
+    "renders the %s operator",
+    (op) => {
+      const roll = rollWith(comparison(op, 2, 3));
+      expect(defaultTextPresenter.present(roll.result)).toBe(`2${op}3`);
+      expect(defaultTextPresenter.present(roll)).toBe(
+        `${roll.notation}: 2${op}3 = ${roll.total}`,
+      );
+    },
+  );
+
+  test.each<[ExpressionNode, string]>([
+    [comparison("=", comparison("<", 1, 2), 1), "(1<2)=1"],
+    [comparison("<", 1, comparison(">", 3, 2)), "1<(3>2)"],
+    [comparison("=", paren(comparison("<", 1, 2)), 1), "(1<2)=1"],
+    [comparison(">", astBinary("+", 1, 2), astBinary("*", 2, 3)), "1+2>2*3"],
+    [astBinary("+", comparison("<", 1, 2), 3), "(1<2)+3"],
+    [astBinary("*", 3, comparison("<", 1, 2)), "3*(1<2)"],
+    [negate(comparison("<", 1, 2)), "-(1<2)"],
+    [fn("max", comparison("<", 1, 2), 3), "max(1<2,3)"],
+    [group([comparison("<", 1, 2), comparison(">", 3, 2)]), "{1<2, 3>2}"],
+    [
+      conditional(comparison("<", 1, 2), comparison("=", 2, 2), 0),
+      "(condition: 1<2 = 1, true: 2=2)",
+    ],
+  ])("formats nested comparisons %#", (node, expected) => {
+    expect(defaultTextPresenter.present(rollWith(node).result)).toBe(expected);
+  });
+
+  test.each<[ExpressionNode, number[], string]>([
+    [
+      pool(comparison(">", pool(1, 4), 1), 6),
+      [2, 5],
+      "(qty: [2]>1 = 1) -> [5]",
+    ],
+    [
+      pool(comparison("<", 1, pool(1, 4)), 6),
+      [2, 5],
+      "(qty: 1<[2] = 1) -> [5]",
+    ],
+    [
+      pool(1, comparison(">", pool(1, 4), 1)),
+      [2, 1],
+      "(sides: [2]>1 = 1) -> [1]",
+    ],
+    [
+      pool(1, comparison("<", 1, pool(1, 4))),
+      [2, 1],
+      "(sides: 1<[2] = 1) -> [1]",
+    ],
+    [pool(comparison("<", 1, 2), 6), [5], "[5]"],
+  ])("detects dice in comparison parameters %#", (node, draws, expected) => {
+    const roll = rollWith(node, draws);
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe(expected);
+  });
+
+  test("presents stored dice through subclasses and histories without rerolling", () => {
+    class FixedPresenter extends TextPresenter {
+      protected override formatNumber(value: number): string {
+        return value.toFixed(1);
+      }
+    }
+    const settings = settingsWith([4, 2, 1]);
+    const integer = jest.spyOn(settings.generator, "integer");
+    const roll = new Roll(comparison(">", pool(1, 6), pool(1, 6)), settings);
+    const history = new RollHistory();
+    history.add(roll);
+    const presenter = new FixedPresenter();
+    const expected = `${roll.notation}: [4.0]>[2.0] = 1.0`;
+
+    expect(presenter.present(history)).toBe(expected);
+    expect(presenter.present(history)).toBe(expected);
+    expect(integer).toHaveBeenCalledTimes(2);
+  });
+
+  test("allows comparison hooks to be overridden", () => {
+    class CustomPresenter extends TextPresenter {
+      protected override comparison(result: ComparisonResult): string {
+        return `compare(${this.visit(result.left)},${this.visit(result.right)})`;
+      }
+    }
+
+    expect(
+      new CustomPresenter().present(rollWith(comparison("<", 1, 2)).result),
+    ).toBe("compare(1,2)");
+  });
+
+  test("repeated inline comparison expansion does not draw again", () => {
+    const settings = settingsWith([2, 5]);
+    const integer = jest.spyOn(settings.generator, "integer");
+    const roll = new Roll(pool(comparison("<", 1, pool(1, 4)), 6), settings);
+    const presenter = new TextPresenter({ expandInlineRolls: true });
+
+    expect(presenter.present(roll.result)).toBe("(qty: 1<[2] = 1) -> [5]");
+    expect(presenter.present(roll.result)).toBe("(qty: 1<[2] = 1) -> [5]");
+    expect(integer).toHaveBeenCalledTimes(2);
   });
 });
 

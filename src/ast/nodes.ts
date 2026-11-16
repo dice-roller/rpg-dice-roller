@@ -16,6 +16,7 @@ export type ExpressionNode =
   | PoolNode
   | GroupNode
   | BinaryNode
+  | ComparisonNode
   | UnaryNode
   | ParenNode
   | FunctionNode
@@ -92,6 +93,14 @@ export type BinaryOperator = (typeof BINARY_OPERATORS)[number];
 export interface BinaryNode {
   readonly type: "binary";
   readonly op: BinaryOperator;
+  readonly left: ExpressionNode;
+  readonly right: ExpressionNode;
+}
+
+/** A numeric comparison, e.g. `2d6 >= 8`; its result is `1` or `0`. */
+export interface ComparisonNode {
+  readonly type: "comparison";
+  readonly op: CompareOperator;
   readonly left: ExpressionNode;
   readonly right: ExpressionNode;
 }

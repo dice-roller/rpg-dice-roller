@@ -11,6 +11,7 @@ import {
 import type {
   BinaryNode,
   BinaryOperator,
+  ComparisonNode,
   ConditionalNode,
   ConditionReferenceNode,
   ComparePoint,
@@ -92,6 +93,14 @@ export function createBinary(
   right: ExpressionNode,
 ): BinaryNode {
   return { type: "binary", op, left, right };
+}
+
+export function createComparison(
+  op: CompareOperator,
+  left: ExpressionNode,
+  right: ExpressionNode,
+): ComparisonNode {
+  return { type: "comparison", op, left, right };
 }
 
 /**

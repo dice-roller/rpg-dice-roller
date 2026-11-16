@@ -19,6 +19,7 @@ import {
 } from "../dice/custom-die-notation.js";
 import {
   minPrecedenceForBinaryOperand,
+  minPrecedenceForComparisonOperand,
   minPrecedenceForUnaryOperand,
   needsParentheses,
 } from "./precedence.js";
@@ -91,6 +92,15 @@ function write(node: ExpressionNode): string {
 
       return `${left}${node.op}${right}`;
     }
+    case "comparison": {
+      const minPrecedence = minPrecedenceForComparisonOperand();
+      const left = endsWithPoolOrGroup(node.left)
+        ? `(${write(node.left)})`
+        : operand(node.left, minPrecedence);
+      const right = operand(node.right, minPrecedence);
+
+      return `${left}${node.op}${right}`;
+    }
     case "unary":
       return `-${operand(node.operand, minPrecedenceForUnaryOperand())}`;
     case "paren":
@@ -107,6 +117,19 @@ function write(node: ExpressionNode): string {
     }
     case "condition-reference":
       return "$condition";
+  }
+}
+
+/** A following comparison token could otherwise be consumed as a modifier. */
+function endsWithPoolOrGroup(node: ExpressionNode): boolean {
+  switch (node.type) {
+    case "pool":
+    case "group":
+      return true;
+    case "binary":
+      return endsWithPoolOrGroup(node.right);
+    default:
+      return false;
   }
 }
 

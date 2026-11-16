@@ -1,6 +1,10 @@
 import { ValidationError } from "../errors/ValidationError.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
-import { BINARY_OPERATORS, MATH_FUNCTION_NAMES } from "./nodes.js";
+import {
+  BINARY_OPERATORS,
+  COMPARE_OPERATORS,
+  MATH_FUNCTION_NAMES,
+} from "./nodes.js";
 import type { ExpressionNode } from "./nodes.js";
 
 /** Validates expression structure and lexical `$condition` scope without evaluating it. */
@@ -94,6 +98,20 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
       validateNode(expression.left, conditionAvailable);
       validateNode(expression.right, conditionAvailable);
 
+      return;
+    case "comparison":
+      if (
+        !COMPARE_OPERATORS.includes(
+          expression.op as (typeof COMPARE_OPERATORS)[number],
+        )
+      ) {
+        throw new EvaluationError(
+          "A comparison node must contain a valid operator",
+        );
+      }
+
+      validateNode(expression.left, conditionAvailable);
+      validateNode(expression.right, conditionAvailable);
       return;
     case "unary":
       if (expression.op !== "-") {

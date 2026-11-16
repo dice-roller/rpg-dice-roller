@@ -1,5 +1,6 @@
 import type { ExpressionResult } from "../results/types.js";
 import type { ExpressionNode } from "../ast/nodes.js";
+import { matchesComparePoint } from "../modifiers/compare-point.js";
 import { functions, negate, operators } from "./math.js";
 
 /** Whether any part of the source expression contains a conditional. */
@@ -14,6 +15,7 @@ export function containsConditional(node: ExpressionNode): boolean {
     case "group":
       return node.expressions.some(containsConditional);
     case "binary":
+    case "comparison":
       return containsConditional(node.left) || containsConditional(node.right);
     case "unary":
       return containsConditional(node.operand);
@@ -62,6 +64,19 @@ export function averageResult(result: ExpressionResult): number | undefined {
       return left === undefined || right === undefined
         ? undefined
         : operators[result.node.op](left, right);
+    }
+    case "comparison": {
+      const left = averageResult(result.left);
+      const right = averageResult(result.right);
+
+      return left === undefined || right === undefined
+        ? undefined
+        : Number(
+            matchesComparePoint(
+              { operator: result.node.op, value: right },
+              left,
+            ),
+          );
     }
     case "unary": {
       const value = averageResult(result.operand);

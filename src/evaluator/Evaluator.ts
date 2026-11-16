@@ -1,5 +1,6 @@
 import type {
   BinaryNode,
+  ComparisonNode,
   ConditionalNode,
   ConditionReferenceNode,
   ExpressionNode,
@@ -23,6 +24,7 @@ import {
 } from "../ast/validation.js";
 import { createConditionReference } from "../ast/factory.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
+import { matchesComparePoint } from "../modifiers/compare-point.js";
 import { validateTargetAmounts } from "../modifiers/handlers/target.js";
 import { resolveIterationBudget } from "../modifiers/handlers/utils.js";
 import type {
@@ -33,6 +35,7 @@ import type {
 import { createDieResult } from "../results/die-result.js";
 import type {
   BinaryResult,
+  ComparisonResult,
   ConditionalResult,
   ConditionReferenceResult,
   DieResult,
@@ -123,6 +126,8 @@ export class Evaluator {
         return this.evaluateGroup(node, ctx);
       case "binary":
         return this.evaluateBinary(node, ctx);
+      case "comparison":
+        return this.evaluateComparison(node, ctx);
       case "unary":
         return this.evaluateUnary(node, ctx);
       case "paren":
@@ -415,6 +420,22 @@ export class Evaluator {
             value: operators[current.node.op](left.value, right.value),
           };
         }
+        case "comparison": {
+          const left = visit(current.left);
+          const right = visit(current.right);
+
+          return {
+            ...current,
+            left,
+            right,
+            value: Number(
+              matchesComparePoint(
+                { operator: current.node.op, value: right.value },
+                left.value,
+              ),
+            ),
+          };
+        }
         case "unary": {
           const operand = visit(current.operand);
 
@@ -461,6 +482,27 @@ export class Evaluator {
       type: "binary",
       node,
       value: operators[node.op](left.value, right.value),
+      left,
+      right,
+    };
+  }
+
+  protected evaluateComparison(
+    node: ComparisonNode,
+    ctx: RollContext,
+  ): ComparisonResult {
+    const left = this.evaluateNode(node.left, ctx);
+    const right = this.evaluateNode(node.right, ctx);
+
+    return {
+      type: "comparison",
+      node,
+      value: Number(
+        matchesComparePoint(
+          { operator: node.op, value: right.value },
+          left.value,
+        ),
+      ),
       left,
       right,
     };
