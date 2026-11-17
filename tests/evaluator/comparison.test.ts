@@ -202,7 +202,7 @@ describe("comparison expressions", () => {
 
   test("a comparison check is evaluated once and only its selected branch rolls", () => {
     const { evaluate, integer } = createEvaluator([4, 2, 5]);
-    const result = evaluate("((d6)>(d6)) ? (d6+$condition) : (1d(0))");
+    const result = evaluate("((d6)>(d6)) ? (d6+$$condition) : (1d(0))");
 
     expect(result).toMatchObject({
       type: "conditional",
@@ -227,7 +227,11 @@ describe("comparison expressions", () => {
     const truthy = createEvaluator([5, 2]);
     expect(truthy.evaluate("((d6)>(d6)) ?: (1d(0))")).toMatchObject({
       value: 1,
-      selectedResult: { type: "condition-reference", value: 1 },
+      selectedResult: {
+        type: "reference",
+        node: { type: "reference", namespace: "system", path: ["condition"] },
+        value: 1,
+      },
     });
     expect(truthy.integer).toHaveBeenCalledTimes(2);
   });

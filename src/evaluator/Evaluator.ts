@@ -2,7 +2,6 @@ import type {
   BinaryNode,
   ComparisonNode,
   ConditionalNode,
-  ConditionReferenceNode,
   ExpressionNode,
   FunctionNode,
   GroupNode,
@@ -11,6 +10,7 @@ import type {
   NumberNode,
   ParenNode,
   PoolNode,
+  ReferenceNode,
   UnaryNode,
 } from "../ast/nodes.js";
 import type { DieRegistry } from "../dice/DieRegistry.js";
@@ -22,7 +22,7 @@ import {
   normalizeModifierAmount,
   validateExpression,
 } from "../ast/validation.js";
-import { createConditionReference } from "../ast/factory.js";
+import { createReference } from "../ast/factory.js";
 import type { ModifierRegistry } from "../modifiers/ModifierRegistry.js";
 import { matchesComparePoint } from "../modifiers/compare-point.js";
 import { validateTargetAmounts } from "../modifiers/handlers/target.js";
@@ -37,7 +37,6 @@ import type {
   BinaryResult,
   ComparisonResult,
   ConditionalResult,
-  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -46,11 +45,13 @@ import type {
   NumberResult,
   ParenResult,
   PoolResult,
+  ReferenceResult,
   ScoredItem,
   UnaryResult,
 } from "../results/types.js";
 import { functions, negate, operators } from "./math.js";
 import type { RollContext } from "./RollContext.js";
+import { resolveReference } from "./roll-input-data.js";
 
 /** The number of arguments each maths function takes (matching the grammar). */
 const functionArity: Readonly<Record<MathFunctionName, number>> = {
@@ -136,8 +137,8 @@ export class Evaluator {
         return this.evaluateFunction(node, ctx);
       case "conditional":
         return this.evaluateConditional(node, ctx);
-      case "condition-reference":
-        return this.evaluateConditionReference(node, ctx);
+      case "reference":
+        return this.evaluateReference(node, ctx);
       default: {
         throw new EvaluationError(
           `Unknown node type: ${(node as { type: string }).type}`,
@@ -154,11 +155,14 @@ export class Evaluator {
     const selectedBranch = condition.value === 0 ? "false" : "true";
     const branch =
       selectedBranch === "true" ? node.trueBranch : node.falseBranch;
-    const branchContext: RollContext = { ...ctx, condition: condition.value };
+    const branchContext: RollContext = {
+      ...ctx,
+      system: Object.freeze({ ...ctx.system, condition: condition.value }),
+    };
     const selectedResult =
       branch === null
-        ? this.evaluateConditionReference(
-            createConditionReference(),
+        ? this.evaluateReference(
+            createReference("system", ["condition"]),
             branchContext,
           )
         : this.evaluateNode(branch, branchContext);
@@ -173,17 +177,15 @@ export class Evaluator {
     };
   }
 
-  protected evaluateConditionReference(
-    node: ConditionReferenceNode,
+  protected evaluateReference(
+    node: ReferenceNode,
     ctx: RollContext,
-  ): ConditionReferenceResult {
-    if (ctx.condition === undefined) {
-      throw new ValidationError(
-        "$condition is only available inside a conditional branch",
-      );
-    }
-
-    return { type: "condition-reference", node, value: ctx.condition };
+  ): ReferenceResult {
+    return {
+      type: "reference",
+      node,
+      value: resolveReference(node.namespace, node.path, ctx.system, ctx.data),
+    };
   }
 
   protected evaluateNumber(node: NumberNode, _ctx: RollContext): NumberResult {

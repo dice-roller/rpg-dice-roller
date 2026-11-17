@@ -15,9 +15,13 @@ import { EXPORT_FORMATS } from "../../src/serialization/formats.js";
 import type { EncodedRollData } from "../../src/serialization/formats.js";
 
 const DELETE = Symbol("delete");
-const reference = { type: "condition-reference" };
+const reference = {
+  type: "reference",
+  namespace: "system",
+  path: ["condition"],
+};
 const referenceResult = {
-  type: "condition-reference",
+  type: "reference",
   node: reference,
   value: 1,
 };
@@ -153,12 +157,8 @@ describe("comparison serialization", () => {
     ["result.node.op", DELETE],
     ["result.node.left", DELETE],
     ["result.node.right", null],
-    ["result.node.left", reference],
-    ["result.node.right", reference],
     ["result.left", DELETE],
     ["result.right", null],
-    ["result.left", referenceResult],
-    ["result.right", referenceResult],
     ["result.left.node", { type: "pool" }],
     ["result.right.value", "2"],
     ["result.node.left.value", { $number: "Infinity" }],
@@ -174,6 +174,16 @@ describe("comparison serialization", () => {
       }
     },
   );
+
+  test.each<[string, unknown]>([
+    ["result.node.left", reference],
+    ["result.node.right", reference],
+    ["result.left", referenceResult],
+    ["result.right", referenceResult],
+  ])("imports references without requiring bindings at %s", (path, value) => {
+    const data = corrupt(path, value);
+    expect(Roll.import(data).export("object")).toEqual(data);
+  });
 
   test("invalid comparison data leaves history unchanged", () => {
     const roller = new Roller();

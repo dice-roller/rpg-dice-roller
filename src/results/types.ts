@@ -9,12 +9,12 @@ import type {
   BinaryNode,
   ComparisonNode,
   ConditionalNode,
-  ConditionReferenceNode,
   FunctionNode,
   GroupNode,
   NumberNode,
   ParenNode,
   PoolNode,
+  ReferenceNode,
   UnaryNode,
 } from "../ast/nodes.js";
 import type { DieSnapshot } from "../dice/types.js";
@@ -43,7 +43,7 @@ export type ExpressionResult =
   | ParenResult
   | FunctionResult
   | ConditionalResult
-  | ConditionReferenceResult;
+  | ReferenceResult;
 
 /** The `type` of every expression result. */
 export type ExpressionResultType = ExpressionResult["type"];
@@ -144,9 +144,9 @@ export interface ConditionalResult {
   readonly selectedResult: ExpressionResult;
 }
 
-/** A resolved reference to the current branch's check. */
-export interface ConditionReferenceResult {
-  readonly type: "condition-reference";
-  readonly node: ConditionReferenceNode;
+/** A system or caller-data reference resolved to a numeric value. */
+export interface ReferenceResult {
+  readonly type: "reference";
+  readonly node: ReferenceNode;
   readonly value: number;
 }

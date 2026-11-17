@@ -18,6 +18,7 @@ import {
   num,
   paren,
   pool,
+  reference,
   reRoll,
   sort,
   target,
@@ -46,8 +47,8 @@ describe("builders match the parser", () => {
     ["2.5", num(2.5)],
     ["1>=2", comparison(">=", 1, 2)],
     [
-      "(2) ? ($condition+3) : (4)",
-      conditional(2, binary("+", conditionReference(), 3), 4),
+      "(2) ? ($$condition+3) : (4)",
+      conditional(2, binary("+", reference("system", "condition"), 3), 4),
     ],
     ["(2) ?: (4)", conditional(2, null, 4)],
     ["4d6", pool(4, 6)],
@@ -340,6 +341,26 @@ describe("defaults and options", () => {
       expect(parser.parse(`1${operator}2+3`)).toEqual(expression);
     },
   );
+
+  test.each([
+    ["system", ["character", "level"], "$$character.level"],
+    ["data", ["character", "level"], "$character.level"],
+    ["system", ["data"], "$$data"],
+    ["data", ["data", "strength"], "$data.strength"],
+  ] as const)(
+    "reference builder matches %s notation",
+    (namespace, path, notation) => {
+      const node = reference(namespace, ...path);
+
+      expect(node).toEqual(parser.parse(notation));
+      expect(nodeToNotation(node)).toBe(notation);
+      expect(parser.parse(nodeToNotation(node))).toEqual(node);
+    },
+  );
+
+  test("conditionReference is the generic system condition reference", () => {
+    expect(conditionReference()).toEqual(reference("system", "condition"));
+  });
 });
 
 describe("invalid input", () => {
@@ -374,6 +395,8 @@ describe("invalid input", () => {
     ["comparison('~')", () => comparison("~" as "=", 1, 2)],
     ["negate(undefined)", () => negate(undefined as unknown as number)],
     ["fn('nope')", () => fn("nope" as "abs", 1)],
+    ["reference without a path", () => reference("system")],
+    ["reference with an invalid segment", () => reference("data", "bad-name")],
     ["compare('~')", () => compare("~" as "=", 1)],
     ["compare(NaN)", () => compare("=", Number.NaN)],
     ["keep(0)", () => keep("h", 0)],

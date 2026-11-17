@@ -11,6 +11,7 @@ import type {
   EngineDefinition,
   EngineOption,
   RandomEngine,
+  RollInputData,
   EncodedHistoryData,
   EncodedRollData,
   RollData,
@@ -22,8 +23,10 @@ declare const html: Presenter<HTMLElement>;
 declare const roll: Roll;
 const randomEngine: RandomEngine = { next: () => 0 };
 const engineDefinition: EngineDefinition = { name: "mersenne", seed: 42 };
+const rollData: RollInputData = { character: { score: 18, proficient: true } };
 accepts<EngineOption>(randomEngine);
 accepts<EngineOption>(engineDefinition);
+accepts<RollInputData>(rollData);
 
 // the roller's presenter decides the output type of `present()`
 const textRoller = new Roller();
@@ -63,7 +66,11 @@ htmlRoller.import(htmlRoller.export("object"));
 // standalone rolls take roll options or shared settings, but no presenter
 accepts<Roll>(new Roll("4d6"));
 accepts<Roll>(new Roll("4d6", { engine: engines.nativeMath }));
+accepts<Roll>(new Roll("$character.score", { data: rollData }));
 accepts<Roll>(new Roll("4d6", new RollSettings()));
+accepts<Roll>(
+  new Roll("$character.score", new RollSettings({ data: rollData })),
+);
 accepts<Roll>(rollOnce("4d6", { limits: { maxQty: 10 } }));
 accepts<Roll<HTMLElement>>(new Roll("4d6", { presenter: html }));
 accepts<Roll>(roll.reroll());
@@ -73,7 +80,9 @@ const overrideRoller = new Roller({
   engine: "mersenne",
 });
 accepts<Roll>(overrideRoller.roll("d6", { engine: engineDefinition }));
+accepts<Roll>(overrideRoller.roll("$character.score", { data: rollData }));
 accepts<Roll>(roll.reroll({ engine: randomEngine }));
+accepts<Roll>(roll.reroll({ engine: randomEngine, data: rollData }));
 // @ts-expect-error - engine names, instances, or definitions are required
 new Roller({ engine: 42 });
 accepts<Roll>(Roll.import(""));

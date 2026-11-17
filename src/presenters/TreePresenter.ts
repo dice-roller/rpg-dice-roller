@@ -2,7 +2,6 @@ import type {
   BinaryResult,
   ComparisonResult,
   ConditionalResult,
-  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -10,6 +9,7 @@ import type {
   NumberResult,
   ParenResult,
   PoolResult,
+  ReferenceResult,
   UnaryResult,
 } from "../results/types.js";
 import type { Roll } from "../Roll.js";
@@ -26,9 +26,10 @@ import type { Presenter } from "./Presenter.js";
  * child results and `die()` from `pool()` for individual dice as needed. `die()` is not dispatched
  * by `present()` or `visit()`; an individual die is not an `ExpressionResult`.
  * For conditionals, visit `condition` and `selectedResult`; the unselected branch has no result.
- * Direct subclasses must implement `comparison()`, `conditional()` and `conditionReference()` as
- * well as the other hooks. Subclasses of `TextPresenter` inherit implementations and can override
- * them.
+ * Direct subclasses must implement `comparison()` and `conditional()` as well as the other hooks.
+ * References default to the presenter's numeric rendering; subclasses
+ * can override `reference()`. Subclasses of `TextPresenter` inherit implementations and can
+ * override them.
  *
  * @typeParam T the output type
  */
@@ -67,8 +68,8 @@ export abstract class TreePresenter<T> implements Presenter<T> {
         return this.fn(result);
       case "conditional":
         return this.conditional(result);
-      case "condition-reference":
-        return this.conditionReference(result);
+      case "reference":
+        return this.reference(result);
     }
   }
 
@@ -86,5 +87,13 @@ export abstract class TreePresenter<T> implements Presenter<T> {
   protected abstract paren(result: ParenResult): T;
   protected abstract fn(result: FunctionResult): T;
   protected abstract conditional(result: ConditionalResult): T;
-  protected abstract conditionReference(result: ConditionReferenceResult): T;
+
+  /** Presents a resolved reference as its numeric value unless a presenter overrides it. */
+  protected reference(result: ReferenceResult): T {
+    return this.number({
+      type: "number",
+      node: result.node as unknown as NumberResult["node"],
+      value: result.value,
+    });
+  }
 }

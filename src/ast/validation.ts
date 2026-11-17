@@ -7,14 +7,14 @@ import {
 } from "./nodes.js";
 import type { ExpressionNode } from "./nodes.js";
 
-/** Validates expression structure and lexical `$condition` scope without evaluating it. */
+/** Validates expression structure without resolving any references. */
 export function validateExpression(
   node: unknown,
 ): asserts node is ExpressionNode {
-  validateNode(node, false);
+  validateNode(node);
 }
 
-function validateNode(node: unknown, conditionAvailable: boolean): void {
+function validateNode(node: unknown): void {
   if (typeof node !== "object" || node === null) {
     throw new ValidationError("Expected an expression node");
   }
@@ -27,15 +27,26 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
         throw new ValidationError("A number node must contain a numeric value");
       }
       return;
-    case "condition-reference":
-      if (!conditionAvailable) {
-        throw new ValidationError(
-          "$condition is only available inside a conditional branch",
-        );
+    case "reference": {
+      const path = expression.path;
+
+      if (
+        !["system", "data"].includes(expression.namespace as string) ||
+        !Array.isArray(path) ||
+        path.length === 0 ||
+        !path.every(
+          (segment) =>
+            typeof segment === "string" &&
+            /^[A-Za-z_][A-Za-z0-9_]*$/.test(segment),
+        )
+      ) {
+        throw new ValidationError("Invalid reference node");
       }
+
       return;
+    }
     case "pool": {
-      validateNode(expression.qty, conditionAvailable);
+      validateNode(expression.qty);
 
       const die = expression.die;
 
@@ -50,7 +61,7 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
       }
 
       for (const arg of (die as { args: unknown[] }).args) {
-        validateNode(arg, conditionAvailable);
+        validateNode(arg);
       }
 
       if (!Array.isArray(expression.modifiers)) {
@@ -73,7 +84,7 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
       }
 
       for (const child of expression.expressions) {
-        validateNode(child, conditionAvailable);
+        validateNode(child);
       }
 
       if (!Array.isArray(expression.modifiers)) {
@@ -95,8 +106,8 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
         );
       }
 
-      validateNode(expression.left, conditionAvailable);
-      validateNode(expression.right, conditionAvailable);
+      validateNode(expression.left);
+      validateNode(expression.right);
 
       return;
     case "comparison":
@@ -110,18 +121,18 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
         );
       }
 
-      validateNode(expression.left, conditionAvailable);
-      validateNode(expression.right, conditionAvailable);
+      validateNode(expression.left);
+      validateNode(expression.right);
       return;
     case "unary":
       if (expression.op !== "-") {
         throw new EvaluationError("A unary node must contain a valid operator");
       }
 
-      validateNode(expression.operand, conditionAvailable);
+      validateNode(expression.operand);
       return;
     case "paren":
-      validateNode(expression.expression, conditionAvailable);
+      validateNode(expression.expression);
       return;
     case "function":
       if (
@@ -136,14 +147,14 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
       }
 
       for (const arg of expression.args) {
-        validateNode(arg, conditionAvailable);
+        validateNode(arg);
       }
 
       return;
     case "conditional":
-      validateNode(expression.condition, conditionAvailable);
+      validateNode(expression.condition);
       if (expression.trueBranch !== null) {
-        validateNode(expression.trueBranch, true);
+        validateNode(expression.trueBranch);
       }
 
       if (
@@ -155,7 +166,7 @@ function validateNode(node: unknown, conditionAvailable: boolean): void {
         );
       }
 
-      validateNode(expression.falseBranch, true);
+      validateNode(expression.falseBranch);
       return;
     default:
       throw new EvaluationError(

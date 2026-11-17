@@ -27,7 +27,7 @@ const poolRolls = (result: GroupResult): string[][] =>
 
 describe("single sub-roll", () => {
   test("flattening modifies only the selected branch, not the check or binding", () => {
-    const result = evaluateGroup("{(d6) ? (2d6+$condition) : (d6)}k1", {
+    const result = evaluateGroup("{(d6) ? (2d6+$$condition) : (d6)}k1", {
       rolls: [3, 2, 5],
     });
     expect(result.value).toBe(8);
@@ -40,7 +40,7 @@ describe("single sub-roll", () => {
   });
 
   test("each-pool sorting reaches only the selected branch", () => {
-    const result = evaluateGroup("{(d6) ? (2d6+$condition) : (d6)}sd", {
+    const result = evaluateGroup("{(d6) ? (2d6+$$condition) : (d6)}sd", {
       rolls: [3, 2, 5],
     });
     expect(result.members[0]?.result).toMatchObject({

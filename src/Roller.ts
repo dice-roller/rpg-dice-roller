@@ -1,6 +1,7 @@
 import type { ExpressionNode } from "./ast/nodes.js";
 import type { DieRegistry } from "./dice/DieRegistry.js";
 import type { RollLimits } from "./evaluator/RollContext.js";
+import type { RollInputData } from "./evaluator/roll-input-data.js";
 import type { ModifierRegistry } from "./modifiers/ModifierRegistry.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
@@ -73,16 +74,21 @@ export class Roller<T = string> {
     return this.settings.parse(notation);
   }
 
-  /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. */
+  /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. Per-roll data replaces the roller's defaults and is snapshotted for the roll. */
   roll(
     input: string | ExpressionNode,
-    options?: { engine?: EngineOption },
+    options?: { engine?: EngineOption; data?: RollInputData },
   ): Roll<T> {
     const engine = options?.engine;
-    const settings =
+    let settings =
       engine === undefined
         ? this.settings
         : RollSettings.withEngine(this.settings, engine);
+
+    if (options?.data !== undefined) {
+      settings = RollSettings.withData(settings, options.data);
+    }
+
     const roll = new Roll(input, settings);
 
     this.history.add(roll);

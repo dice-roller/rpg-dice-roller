@@ -77,7 +77,7 @@ describe("roll averages", () => {
     const integer = jest
       .spyOn(settings.generator, "integer")
       .mockReturnValue(3);
-    const roll = new Roll("(d6) ? ($condition*2) : (0)", settings);
+    const roll = new Roll("(d6) ? ($$condition*2) : (0)", settings);
     expect(roll.total).toBe(6);
     expect(roll.minTotal).toBe(2);
     expect(roll.maxTotal).toBe(12);
@@ -86,7 +86,7 @@ describe("roll averages", () => {
   });
 
   test.each([
-    "2d6+((d6) ? ($condition) : (2))",
+    "2d6+((d6) ? ($$condition) : (2))",
     "((d6) ?: (1))d6",
     "1d((d6) ?: (2))",
     "(0) ? (d6) : (2d6)",

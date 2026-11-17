@@ -7,6 +7,8 @@ import {
 } from "./evaluator/RollContext.js";
 import type { RollLimits, RollMode } from "./evaluator/RollContext.js";
 import { ValidationError } from "./errors/ValidationError.js";
+import type { RollInputData } from "./evaluator/roll-input-data.js";
+import { snapshotRollInputData } from "./evaluator/roll-input-data.js";
 import { ModifierRegistry } from "./modifiers/ModifierRegistry.js";
 import { Parser } from "./parser/Parser.js";
 import { EngineRegistry } from "./random/EngineRegistry.js";
@@ -28,6 +30,8 @@ import type { ExpressionResult } from "./results/types.js";
 export interface RollOptions<T = string> {
   /** The source of randomness (default `nativeMath`); may be a name, engine instance, or definition. */
   engine?: EngineOption;
+  /** Default nested values available through `$path`; each roll snapshots these unless replaced by per-roll data. */
+  data?: RollInputData;
   /** Engine factories used to resolve names (default: the built-in engines). */
   engines?: EngineRegistry;
   /** Default: `new DieRegistry()` (the built-in dice). */
@@ -55,6 +59,8 @@ export class RollSettings<T = string> {
   readonly dice: DieRegistry;
   readonly modifiers: ModifierRegistry;
   readonly limits: RollLimits;
+  /** A validated, deeply frozen snapshot of the default roll data. */
+  readonly data: RollInputData;
   readonly presenter: Presenter<T>;
   readonly parser: Parser;
   readonly evaluator: Evaluator;
@@ -62,6 +68,7 @@ export class RollSettings<T = string> {
   /** Resolves options and validates limits; supplied registries and presenter are shared by reference. */
   constructor(options: RollOptions<T> = {}) {
     this.limits = Object.freeze(resolveRollLimits(options.limits));
+    this.data = snapshotRollInputData(options.data ?? {});
     if (
       options.engines !== undefined &&
       !(options.engines instanceof EngineRegistry)
@@ -103,6 +110,23 @@ export class RollSettings<T = string> {
   ): RollSettings<T> {
     return new RollSettings({
       engine,
+      data: settings.data,
+      engines: settings.engines,
+      dice: settings.dice,
+      modifiers: settings.modifiers,
+      limits: settings.limits,
+      presenter: settings.presenter,
+    });
+  }
+
+  /** Creates settings with replacement data and all other configuration shared with the source. */
+  static withData<T>(
+    settings: RollSettings<T>,
+    data: RollInputData,
+  ): RollSettings<T> {
+    return new RollSettings({
+      engine: settings.generator.engine,
+      data,
       engines: settings.engines,
       dice: settings.dice,
       modifiers: settings.modifiers,
@@ -116,10 +140,11 @@ export class RollSettings<T = string> {
     return this.parser.parse(notation);
   }
 
-  /** Evaluates the AST in the given mode (default `random`); `min` and `max` select each die's extreme. Every evaluation starts a fresh generated-roll budget per pool; exhausting it returns the dice rolled so far. */
+  /** Evaluates the AST in the given mode (default `random`); `min` and `max` select each die's extreme. Optional data replaces the settings defaults. Every evaluation starts a fresh generated-roll budget per pool; exhausting it returns the dice rolled so far. */
   evaluate(
     expression: ExpressionNode,
     mode: RollMode = "random",
+    data: RollInputData = this.data,
   ): ExpressionResult {
     return this.evaluator.evaluate(
       expression,
@@ -127,6 +152,7 @@ export class RollSettings<T = string> {
         generator: this.generator,
         mode,
         limits: this.limits,
+        data,
       }),
     );
   }

@@ -13,7 +13,6 @@ import type {
   BinaryOperator,
   ComparisonNode,
   ConditionalNode,
-  ConditionReferenceNode,
   ComparePoint,
   CompareOperator,
   CriticalFailureNode,
@@ -36,6 +35,8 @@ import type {
   PoolEnd,
   PoolNode,
   ReRollNode,
+  ReferenceNamespace,
+  ReferenceNode,
   SortDirection,
   SortNode,
   TargetNode,
@@ -139,8 +140,11 @@ export function createConditional(
   return { type: "conditional", condition, trueBranch, falseBranch };
 }
 
-export function createConditionReference(): ConditionReferenceNode {
-  return { type: "condition-reference" };
+export function createReference(
+  namespace: ReferenceNamespace,
+  path: readonly string[],
+): ReferenceNode {
+  return { type: "reference", namespace, path };
 }
 
 /* ------------------------------------------------------------------------------------------------

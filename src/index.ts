@@ -48,6 +48,7 @@ export type {
   RollLimits,
   RollMode,
 } from "./evaluator/RollContext.js";
+export type { RollInputData } from "./evaluator/roll-input-data.js";
 export type { NumberGenerator } from "./random/NumberGenerator.js";
 export { EngineRegistry } from "./random/EngineRegistry.js";
 export type {

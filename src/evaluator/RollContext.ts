@@ -1,5 +1,7 @@
 import { ValidationError } from "../errors/ValidationError.js";
 import { NumberGenerator } from "../random/NumberGenerator.js";
+import type { RollInputData } from "./roll-input-data.js";
+import { snapshotRollInputData } from "./roll-input-data.js";
 
 /**
  * How dice are rolled.
@@ -55,23 +57,71 @@ export interface RollContext {
   readonly generator: NumberGenerator;
   readonly mode: RollMode;
   readonly limits: RollLimits;
-  /** The current branch's check, absent outside a conditional. */
-  readonly condition?: number;
+  /** Bindings reserved for built-ins and evaluator-defined values. */
+  readonly system: Readonly<Record<string, unknown>>;
+  /** A validated snapshot of caller-provided values. */
+  readonly data: RollInputData;
 }
 
 export interface RollContextOptions {
   generator?: NumberGenerator;
   mode?: RollMode;
   limits?: Partial<RollLimits>;
+  system?: Readonly<Record<string, unknown>>;
+  data?: RollInputData;
 }
 
 /** Creates a roll context, filling in the defaults. */
 export function createRollContext(
   options: RollContextOptions = {},
 ): RollContext {
+  let inputData = options.data;
+
+  if (inputData === null) {
+    throw new ValidationError("Roll input data must be a plain object");
+  }
+  inputData ??= Object.create(null) as RollInputData;
+
   return {
     generator: options.generator ?? new NumberGenerator(),
     mode: options.mode ?? "random",
     limits: resolveRollLimits(options.limits),
+    system: copySystemBindings(options.system),
+    data: snapshotRollInputData(inputData),
   };
+}
+
+function copySystemBindings(
+  bindings: Readonly<Record<string, unknown>> = {},
+): Readonly<Record<string, unknown>> {
+  const copied = Object.create(null) as Record<string, unknown>;
+
+  try {
+    for (const key of Reflect.ownKeys(bindings)) {
+      if (typeof key !== "string") {
+        throw new ValidationError("System bindings must use string names");
+      }
+
+      const descriptor = Object.getOwnPropertyDescriptor(bindings, key);
+
+      if (descriptor === undefined || !("value" in descriptor)) {
+        throw new ValidationError("System bindings cannot use accessors");
+      }
+
+      Object.defineProperty(copied, key, {
+        value: descriptor.value,
+        enumerable: true,
+        writable: false,
+        configurable: false,
+      });
+    }
+  } catch (error) {
+    if (error instanceof ValidationError) {
+      throw error;
+    }
+
+    throw new ValidationError("System bindings must be a plain object");
+  }
+
+  return Object.freeze(copied);
 }

@@ -16,9 +16,13 @@ import { toBase64 } from "../../src/serialization/encode.js";
 import { EXPORT_FORMATS } from "../../src/serialization/formats.js";
 import type { EncodedRollData } from "../../src/serialization/formats.js";
 
-const reference = { type: "condition-reference" };
+const reference = {
+  type: "reference",
+  namespace: "system",
+  path: ["condition"],
+};
 const referenceResult = {
-  type: "condition-reference",
+  type: "reference",
   node: reference,
   value: 1,
 };
@@ -48,13 +52,13 @@ describe("conditional serialization", () => {
     (format) => {
       const roller = new Roller({ engine: { name: "mersenne", seed: 1 } });
       const notations = [
-        "(2) ? ($condition+3) : (4)",
-        "(0) ? (4) : ($condition+7)",
+        "(2) ? ($$condition+3) : (4)",
+        "(0) ? (4) : ($$condition+7)",
         "(2) ?: (4)",
-        "(0) ?: ($condition+4)",
-        "(2) ? ((($condition-1) ? ($condition+10) : (0))+$condition) : (0)",
-        "(2) ? ((0+$condition)d($condition+1)) : (0)",
-        "(2) ? ({$condition, floor($condition)}) : (0)",
+        "(0) ?: ($$condition+4)",
+        "(2) ? ((($$condition-1) ? ($$condition+10) : (0))+$$condition) : (0)",
+        "(2) ? ((0+$$condition)d($$condition+1)) : (0)",
+        "(2) ? ({$$condition, floor($$condition)}) : (0)",
       ];
       const originals = notations.map((notation) => roller.roll(notation));
       const importedRoller = new Roller();
@@ -119,7 +123,7 @@ describe("conditional serialization", () => {
   test.each(EXPORT_FORMATS)(
     "non-finite conditional results round-trip through %s",
     (format) => {
-      const original = new Roll("(1/0) ? ($condition) : (0)");
+      const original = new Roll("(1/0) ? ($$condition) : (0)");
       const imported = Roll.import(original.export(format));
       expect(imported.result).toEqual(original.result);
       expect(imported.total).toBe(Infinity);
@@ -247,15 +251,13 @@ describe("conditional serialization", () => {
     ["result.node.trueBranch", "missing true branch", DELETE],
     ["result.node.falseBranch", "missing false branch", DELETE],
     ["result.node.falseBranch", "null false branch", null],
-    ["result.node.condition", "out-of-scope check reference", reference],
     ["result.node.condition", "missing check", DELETE],
-    ["result.condition", "out-of-scope check result", referenceResult],
     ["result.condition", "missing check result", DELETE],
     ["result.selectedBranch", "invalid selected branch", "other"],
     ["result.selectedBranch", "missing selected branch", DELETE],
     ["result.selectedResult", "missing selected result", DELETE],
     ["result.selectedResult.node", "mismatched selected node", reference],
-  ])("rejects %s: %s in every format", (path, _, value) => {
+  ])("rejects malformed %s: %s in every format", (path, _, value) => {
     const data = corrupt("(2) ? (3) : (4)", path, value);
     const json = JSON.stringify(data);
     for (const input of [data, json, toBase64(json)]) {
@@ -278,15 +280,13 @@ describe("conditional serialization", () => {
     ["-1", "result.operand"],
     ["(1)", "result.node.expression"],
     ["(1)", "result.inner"],
-  ])("rejects out-of-scope references in %s at %s", (notation, path) => {
+  ])("imports structurally valid references in %s at %s", (notation, path) => {
     const value = path.includes(".node.") ? reference : referenceResult;
-    expect(() => Roll.import(corrupt(notation, path, value))).toThrow(
-      ImportError,
-    );
+    expect(() => Roll.import(corrupt(notation, path, value))).not.toThrow();
   });
 
-  test("a nested check may use the outer scope but a top-level check may not", () => {
-    const roll = new Roll("(2) ? (($condition) ? (3) : (4)) : (5)");
+  test("generic references do not require a binding during import", () => {
+    const roll = new Roll("(2) ? (($$condition) ? (3) : (4)) : (5)");
     expect(Roll.import(roll.export()).result).toEqual(roll.result);
     const data = corrupt("(2) ? (3) : (4)", "result.node.condition", {
       type: "conditional",
@@ -294,20 +294,20 @@ describe("conditional serialization", () => {
       trueBranch: reference,
       falseBranch: reference,
     });
-    expect(() => Roll.import(data)).toThrow(ImportError);
+    expect(() => Roll.import(data)).not.toThrow();
   });
 
-  test("a binding does not escape from a conditional into sibling AST or results", () => {
+  test("references in siblings are validated without requiring bindings", () => {
     const notation = "((2) ? (3) : (4))+1";
     expect(() =>
       Roll.import(corrupt(notation, "result.node.right", reference)),
-    ).toThrow(ImportError);
+    ).not.toThrow();
     expect(() =>
       Roll.import(corrupt(notation, "result.right", referenceResult)),
-    ).toThrow(ImportError);
+    ).not.toThrow();
   });
 
-  test("a result's nested check cannot introduce its own binding", () => {
+  test("a result's nested check is accepted without resolving its references", () => {
     const data = corrupt("(2) ? (3) : (4)", "result.condition", {
       type: "conditional",
       node: {
@@ -321,8 +321,25 @@ describe("conditional serialization", () => {
       selectedBranch: "true",
       selectedResult: referenceResult,
     });
-    expect(() => Roll.import(data)).toThrow(
-      "data.result.condition.condition.node: $condition is only available inside a conditional branch",
-    );
+    expect(() => Roll.import(data)).not.toThrow();
   });
+
+  test.each(["result.node.trueBranch", "result.selectedResult"])(
+    "rejects obsolete condition-specific shapes at %s",
+    (path) => {
+      const obsoleteNode = { type: "condition-reference" };
+      const obsoleteResult = {
+        type: "condition-reference",
+        node: obsoleteNode,
+        value: 1,
+      };
+      const obsolete = path.endsWith(".node.trueBranch")
+        ? obsoleteNode
+        : obsoleteResult;
+
+      expect(() =>
+        Roll.import(corrupt("(2) ? (3) : (4)", path, obsolete)),
+      ).toThrow(ImportError);
+    },
+  );
 });

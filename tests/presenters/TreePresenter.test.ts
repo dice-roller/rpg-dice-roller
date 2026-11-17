@@ -9,7 +9,6 @@ import type {
   BinaryResult,
   ComparisonResult,
   ConditionalResult,
-  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -17,6 +16,7 @@ import type {
   NumberResult,
   ParenResult,
   PoolResult,
+  ReferenceResult,
   UnaryResult,
 } from "../../src/results/types.js";
 import { Roll } from "../../src/Roll.js";
@@ -60,7 +60,7 @@ class HookPresenter extends TreePresenter<string> {
   protected conditional(result: ConditionalResult): string {
     return `conditional(${this.visit(result.condition)}, ${result.selectedBranch}, ${this.visit(result.selectedResult)})`;
   }
-  protected conditionReference(result: ConditionReferenceResult): string {
+  protected override reference(result: ReferenceResult): string {
     return `reference(${result.value})`;
   }
 }
@@ -108,9 +108,9 @@ const sum: BinaryResult = {
   right: number(2),
 };
 
-const reference: ConditionReferenceResult = {
-  type: "condition-reference",
-  node: { type: "condition-reference" },
+const reference: ReferenceResult = {
+  type: "reference",
+  node: { type: "reference", namespace: "system", path: ["condition"] },
   value: 2,
 };
 
@@ -173,7 +173,7 @@ describe("TreePresenter", () => {
       } satisfies ComparisonResult,
       "comparison(binary(pool(die(3), die(4)) + number(2)) > pool(die(3), die(4)))",
     ],
-    ["condition-reference", reference, "reference(2)"],
+    ["reference", reference, "reference(2)"],
     ["conditional", conditional, "conditional(number(2), true, reference(2))"],
     [
       "paren",

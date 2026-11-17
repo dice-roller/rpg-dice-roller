@@ -219,17 +219,17 @@ describe("conditional results", () => {
     [
       conditional(2, astBinary("+", conditionReference(), 3), pool(1, 6)),
       [],
-      "(condition: 2 = 2, true: $condition+3)",
+      "(condition: 2 = 2, true: $$condition+3)",
     ],
     [
       conditional(0, pool(1, 6), conditionReference()),
       [],
-      "(condition: 0 = 0, false: $condition)",
+      "(condition: 0 = 0, false: $$condition)",
     ],
     [
       conditional(pool(1, 6), null, 9),
       [3],
-      "(condition: [3] = 3, true: $condition)",
+      "(condition: [3] = 3, true: $$condition)",
     ],
     [conditional(0, null, 9), [], "(condition: 0 = 0, false: 9)"],
     [
@@ -247,7 +247,7 @@ describe("conditional results", () => {
         0,
       ),
       [],
-      "(condition: 2 = 2, true: (condition: $condition-1 = 1, true: $condition)+$condition)",
+      "(condition: 2 = 2, true: (condition: $$condition-1 = 1, true: $$condition)+$$condition)",
     ],
     [
       astBinary("*", conditional(2, 3, 4), 5),
@@ -266,7 +266,7 @@ describe("conditional results", () => {
   );
 
   test("shows a deterministic target check value once without reevaluating", () => {
-    const notation = "(2d6>=5) ? (4d10+$condition) : (0)";
+    const notation = "(2d6>=5) ? (4d10+$$condition) : (0)";
     const settings = new RollSettings();
     const draws = [2, 5, 3, 10, 2, 3];
     const integer = jest
@@ -276,13 +276,13 @@ describe("conditional results", () => {
     const result = roll.result;
 
     expect(roll.toString()).toBe(
-      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition) = 19`,
+      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$$condition) = 19`,
     );
     expect(roll.result).toBe(result);
     expect(roll.total).toBe(19);
     expect(integer).toHaveBeenCalledTimes(6);
     expect(roll.toString()).toBe(
-      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition) = 19`,
+      `${notation}: (condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$$condition) = 19`,
     );
     expect(integer).toHaveBeenCalledTimes(6);
   });
@@ -304,10 +304,10 @@ describe("conditional results", () => {
     const presenter = new FixedPresenter();
 
     expect(presenter.present(history)).toBe(
-      `${roll.notation}: (condition: [3.0] = 3.0, true: $condition) = 3.0`,
+      `${roll.notation}: (condition: [3.0] = 3.0, true: $$condition) = 3.0`,
     );
     expect(presenter.present(history)).toBe(
-      `${roll.notation}: (condition: [3.0] = 3.0, true: $condition) = 3.0`,
+      `${roll.notation}: (condition: [3.0] = 3.0, true: $$condition) = 3.0`,
     );
     expect(integer).toHaveBeenCalledTimes(1);
   });
@@ -351,7 +351,7 @@ describe("conditional results", () => {
     },
   );
 
-  test("presents a condition reference on its own without changing its value", () => {
+  test("presents a system reference on its own without changing its value", () => {
     const roll = rollWith(conditional(2, conditionReference(), 0));
 
     expect(roll.result.type).toBe("conditional");
@@ -359,10 +359,11 @@ describe("conditional results", () => {
       throw new Error("Expected a conditional result");
     }
     expect(defaultTextPresenter.present(roll.result.selectedResult)).toBe(
-      "$condition",
+      "$$condition",
     );
     expect(roll.result.selectedResult).toMatchObject({
-      type: "condition-reference",
+      type: "reference",
+      node: { namespace: "system", path: ["condition"] },
       value: 2,
     });
   });
