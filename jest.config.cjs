@@ -14,6 +14,11 @@ module.exports = {
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1",
   },
+  coverageThreshold: {
+    global: {
+      statements: 98.06,
+    },
+  },
   collectCoverageFrom: [
     "<rootDir>/src/**/*.ts",
     "!<rootDir>/src/parser/generated/**",

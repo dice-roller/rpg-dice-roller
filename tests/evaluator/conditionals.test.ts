@@ -49,7 +49,7 @@ describe("conditional expressions", () => {
   ])("uses numeric truthiness for check %s", (check, expected) => {
     const { evaluate } = createEvaluator();
 
-    expect(evaluate(`(${check}) ? ($condition) : (10)`).value).toBe(expected);
+    expect(evaluate(`(${check}) ? ($$condition) : (10)`).value).toBe(expected);
   });
 
   test("evaluates a shorthand check once and uses its value when truthy", () => {
@@ -61,7 +61,11 @@ describe("conditional expressions", () => {
       value: 1,
       condition: { value: 1 },
       selectedBranch: "true",
-      selectedResult: { type: "condition-reference", value: 1 },
+      selectedResult: {
+        type: "reference",
+        node: { type: "reference", namespace: "system", path: ["condition"] },
+        value: 1,
+      },
     });
     expect(integer).toHaveBeenCalledTimes(1);
   });
@@ -81,7 +85,7 @@ describe("conditional expressions", () => {
 
   test("evaluates only the selected branch", () => {
     const { evaluate, integer } = createEvaluator();
-    const trueResult = evaluate("(2) ? ($condition+3) : (1d(0))");
+    const trueResult = evaluate("(2) ? ($$condition+3) : (1d(0))");
 
     expect(trueResult.value).toBe(5);
     expect(integer).not.toHaveBeenCalled();
@@ -94,14 +98,14 @@ describe("conditional expressions", () => {
 
     expect(
       evaluate(
-        "(2) ? ((($condition-1) ? ($condition+10) : (0))+$condition) : (0)",
+        "(2) ? ((($$condition-1) ? ($$condition+10) : (0)) + $$condition) : (0)",
       ).value,
     ).toBe(13);
   });
 
   test("accepts computed quantities and sides that reference the check", () => {
     const { evaluate, integer } = createEvaluator([2]);
-    const result = evaluate("(2) ? ((0+$condition)d($condition+1)) : (0)");
+    const result = evaluate("(2) ? ((0+$$condition)d($$condition+1)) : (0)");
 
     expect(result.value).toBe(3);
     expect(integer).toHaveBeenCalledTimes(2);
@@ -109,7 +113,7 @@ describe("conditional expressions", () => {
 
   test("allows a zero check binding in calculated quantities", () => {
     const { evaluate, integer } = createEvaluator();
-    expect(evaluate("(0) ? (1) : (($condition)d6)").value).toBe(0);
+    expect(evaluate("(0) ? (1) : (($$condition)d6)").value).toBe(0);
     expect(integer).not.toHaveBeenCalled();
   });
 

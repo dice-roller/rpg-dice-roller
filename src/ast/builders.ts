@@ -19,7 +19,6 @@ import {
   createComparePoint,
   createComparison,
   createConditional,
-  createConditionReference,
   createCriticalFailure,
   createCriticalSuccess,
   createDescription,
@@ -34,6 +33,7 @@ import {
   createNumber,
   createParen,
   createPool,
+  createReference,
   createReRoll,
   createSort,
   createTarget,
@@ -49,7 +49,6 @@ import type {
   BinaryNode,
   BinaryOperator,
   ConditionalNode,
-  ConditionReferenceNode,
   ComparisonNode,
   ComparePoint,
   CompareOperator,
@@ -72,6 +71,8 @@ import type {
   PoolEnd,
   PoolNode,
   ReRollNode,
+  ReferenceNamespace,
+  ReferenceNode,
   SortDirection,
   SortNode,
   TargetNode,
@@ -214,9 +215,32 @@ export function conditional(
   );
 }
 
-/** A read-only reference to the evaluated check in the current conditional branch. */
-export function conditionReference(): ConditionReferenceNode {
-  return createConditionReference();
+/** A convenience builder for the system binding `condition`. */
+export function conditionReference(): ReferenceNode {
+  return reference("system", "condition");
+}
+
+/** A caller-data or system reference, e.g. `reference("data", "character", "level")`. */
+export function reference(
+  namespace: ReferenceNamespace,
+  ...path: string[]
+): ReferenceNode {
+  const validNamespace = oneOf(
+    namespace,
+    ["system", "data"] as const,
+    "reference namespace",
+  );
+
+  if (
+    path.length === 0 ||
+    !path.every((segment) => /^[A-Za-z_][A-Za-z0-9_]*$/.test(segment))
+  ) {
+    throw new ValidationError(
+      "A reference must contain one or more valid identifier segments",
+    );
+  }
+
+  return createReference(validNamespace, path);
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -407,7 +431,7 @@ const EXPRESSION_TYPES: ReadonlySet<string> = new Set<ExpressionNode["type"]>([
   "paren",
   "function",
   "conditional",
-  "condition-reference",
+  "reference",
 ]);
 
 function isNode<T extends string>(

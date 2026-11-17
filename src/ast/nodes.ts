@@ -21,7 +21,7 @@ export type ExpressionNode =
   | ParenNode
   | FunctionNode
   | ConditionalNode
-  | ConditionReferenceNode;
+  | ReferenceNode;
 
 /** The `type` of every expression node. */
 export type ExpressionNodeType = ExpressionNode["type"];
@@ -154,9 +154,15 @@ export interface ConditionalNode {
   readonly falseBranch: ExpressionNode;
 }
 
-/** A read-only reference to the current conditional's evaluated check. */
-export interface ConditionReferenceNode {
-  readonly type: "condition-reference";
+/** The namespace used to resolve a reference. */
+export type ReferenceNamespace = "system" | "data";
+
+/** A reference to a caller data path or an externally supplied system binding. */
+export interface ReferenceNode {
+  readonly type: "reference";
+  readonly namespace: ReferenceNamespace;
+  /** Path segments are resolved within the selected namespace. */
+  readonly path: readonly string[];
 }
 
 /* ------------------------------------------------------------------------------------------------

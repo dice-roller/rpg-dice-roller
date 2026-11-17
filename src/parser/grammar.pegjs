@@ -120,7 +120,7 @@ PowerOperator
 
 Primary
   = Conditional
-  / ConditionReference
+  / Reference
   / MathFunction
   / DicePool
   / RollGroup
@@ -252,13 +252,21 @@ Conditional
       return ast.createConditional(condition, trueBranch, falseBranch);
     }
 
-ConditionReference
-  = "$" name:$([a-zA-Z_] [a-zA-Z0-9_]*) {
-      if (name !== "condition") {
-        error("Unknown variable `$" + name + "`; only `$condition` is supported");
-      }
-      return ast.createConditionReference();
+Reference
+  = "$$" path:ReferencePath {
+      return ast.createReference("system", path);
     }
+  / "$" path:ReferencePath {
+      return ast.createReference("data", path);
+    }
+
+ReferencePath
+  = head:Identifier tail:("." segment:Identifier { return segment; })* {
+      return [head, ...tail];
+    }
+
+Identifier
+  = $([a-zA-Z_] [a-zA-Z0-9_]*)
 
 
 // Roll groups, e.g. `{4d6+2d8, 3d20}k1`

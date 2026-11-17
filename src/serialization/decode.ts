@@ -276,64 +276,60 @@ const RESULT_TYPES = [
   "paren",
   "function",
   "conditional",
-  "condition-reference",
+  "reference",
 ] as const;
 
-function result(
-  value: unknown,
-  path: string,
-  conditionAvailable = false,
-): ExpressionResult {
+function result(value: unknown, path: string): ExpressionResult {
   const data = record(value, path);
   const type = oneOf(data.type, RESULT_TYPES, `${path}.type`);
 
   number(data.value, `${path}.value`);
 
-  if (expression(data.node, `${path}.node`, conditionAvailable).type !== type) {
+  if (expression(data.node, `${path}.node`).type !== type) {
     fail(`${path}.node`, `expected a ${type} node`);
   }
 
   switch (type) {
     case "number":
-    case "condition-reference":
+    case "reference":
       break;
     case "pool":
-      result(data.qty, `${path}.qty`, conditionAvailable);
+      result(data.qty, `${path}.qty`);
       each(data.dieArgs, `${path}.dieArgs`, (item, itemPath) =>
-        result(item, itemPath, conditionAvailable),
+        result(item, itemPath),
       );
       dieSnapshot(data.die, `${path}.die`);
       each(data.rolls, `${path}.rolls`, dieResult);
       break;
     case "group":
       each(data.members, `${path}.members`, (item, itemPath) =>
-        groupMember(item, itemPath, conditionAvailable),
+        groupMember(item, itemPath),
       );
       break;
     case "binary":
     case "comparison":
-      result(data.left, `${path}.left`, conditionAvailable);
-      result(data.right, `${path}.right`, conditionAvailable);
+      result(data.left, `${path}.left`);
+      result(data.right, `${path}.right`);
       break;
     case "unary":
-      result(data.operand, `${path}.operand`, conditionAvailable);
+      result(data.operand, `${path}.operand`);
       break;
     case "paren":
-      result(data.inner, `${path}.inner`, conditionAvailable);
+      result(data.inner, `${path}.inner`);
       break;
     case "function":
       each(data.args, `${path}.args`, (item, itemPath) =>
-        result(item, itemPath, conditionAvailable),
+        result(item, itemPath),
       );
       break;
     case "conditional":
-      result(data.condition, `${path}.condition`, conditionAvailable);
+      result(data.condition, `${path}.condition`);
       oneOf(
         data.selectedBranch,
         ["true", "false"] as const,
         `${path}.selectedBranch`,
       );
-      result(data.selectedResult, `${path}.selectedResult`, true);
+      result(data.selectedResult, `${path}.selectedResult`);
       break;
   }
 
@@ -357,15 +353,11 @@ function dieResult(value: unknown, path: string): void {
   scoredItem(data, path);
 }
 
-function groupMember(
-  value: unknown,
-  path: string,
-  conditionAvailable: boolean,
-): void {
+function groupMember(value: unknown, path: string): void {
   const data = record(value, path);
 
   oneOf(data.type, ["group-member"] as const, `${path}.type`);
-  result(data.result, `${path}.result`, conditionAvailable);
+  result(data.result, `${path}.result`);
   scoredItem(data, path);
 }
 
@@ -381,25 +373,19 @@ function dieSnapshot(value: unknown, path: string): void {
 
 /* --- AST ---------------------------------------------------------------------------------- */
 
-function expression(
-  value: unknown,
-  path: string,
-  conditionAvailable = false,
-): ExpressionNode {
+function expression(value: unknown, path: string): ExpressionNode {
   const node = record(value, path);
 
   switch (oneOf(node.type, RESULT_TYPES, `${path}.type`)) {
     case "number":
       finite(node.value, `${path}.value`);
       break;
-    case "condition-reference":
-      if (!conditionAvailable) {
-        fail(path, "$condition is only available inside a conditional branch");
-      }
+    case "reference":
+      referenceNode(node, path);
       break;
     case "pool":
-      expression(node.qty, `${path}.qty`, conditionAvailable);
-      dieNode(node.die, `${path}.die`, conditionAvailable);
+      expression(node.qty, `${path}.qty`);
+      dieNode(node.die, `${path}.die`);
       modifiers(node.modifiers, `${path}.modifiers`);
       optional(node.description, `${path}.description`, description);
       break;
@@ -409,51 +395,62 @@ function expression(
       }
 
       each(node.expressions, `${path}.expressions`, (item, itemPath) =>
-        expression(item, itemPath, conditionAvailable),
+        expression(item, itemPath),
       );
       modifiers(node.modifiers, `${path}.modifiers`);
       optional(node.description, `${path}.description`, description);
       break;
     case "binary":
       oneOf(node.op, BINARY_OPERATORS, `${path}.op`);
-      expression(node.left, `${path}.left`, conditionAvailable);
-      expression(node.right, `${path}.right`, conditionAvailable);
+      expression(node.left, `${path}.left`);
+      expression(node.right, `${path}.right`);
       break;
     case "comparison":
       oneOf(node.op, COMPARE_OPERATORS, `${path}.op`);
-      expression(node.left, `${path}.left`, conditionAvailable);
-      expression(node.right, `${path}.right`, conditionAvailable);
+      expression(node.left, `${path}.left`);
+      expression(node.right, `${path}.right`);
       break;
     case "unary":
       oneOf(node.op, ["-"] as const, `${path}.op`);
-      expression(node.operand, `${path}.operand`, conditionAvailable);
+      expression(node.operand, `${path}.operand`);
       break;
     case "paren":
-      expression(node.expression, `${path}.expression`, conditionAvailable);
+      expression(node.expression, `${path}.expression`);
       break;
     case "function":
       oneOf(node.name, MATH_FUNCTION_NAMES, `${path}.name`);
       each(node.args, `${path}.args`, (item, itemPath) =>
-        expression(item, itemPath, conditionAvailable),
+        expression(item, itemPath),
       );
       break;
     case "conditional":
-      expression(node.condition, `${path}.condition`, conditionAvailable);
+      expression(node.condition, `${path}.condition`);
       if (node.trueBranch !== null) {
-        expression(node.trueBranch, `${path}.trueBranch`, true);
+        expression(node.trueBranch, `${path}.trueBranch`);
       }
-      expression(node.falseBranch, `${path}.falseBranch`, true);
+      expression(node.falseBranch, `${path}.falseBranch`);
       break;
   }
 
   return node as unknown as ExpressionNode;
 }
 
-function dieNode(
-  value: unknown,
-  path: string,
-  conditionAvailable: boolean,
-): void {
+function referenceNode(node: Data, path: string): void {
+  oneOf(node.namespace, ["system", "data"] as const, `${path}.namespace`);
+  const segments = list(node.path, `${path}.path`);
+
+  if (segments.length === 0) {
+    fail(`${path}.path`, "a reference needs at least one path segment");
+  }
+
+  each(segments, `${path}.path`, (segment, segmentPath) => {
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(string(segment, segmentPath))) {
+      fail(segmentPath, "expected an identifier path segment");
+    }
+  });
+}
+
+function dieNode(value: unknown, path: string): void {
   const node = record(value, path);
 
   oneOf(node.type, ["die"] as const, `${path}.type`);
@@ -463,7 +460,7 @@ function dieNode(
   }
 
   each(node.args, `${path}.args`, (item, itemPath) =>
-    expression(item, itemPath, conditionAvailable),
+    expression(item, itemPath),
   );
 }
 

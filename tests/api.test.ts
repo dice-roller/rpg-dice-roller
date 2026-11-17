@@ -132,7 +132,7 @@ describe("Roller", () => {
 
     expect(result.total).toBe(14);
     expect(roller.history.rolls).toEqual([result]);
-    expect(evaluate).toHaveBeenCalledWith(roller.parse("4d6"));
+    expect(evaluate).toHaveBeenCalledWith(roller.parse("4d6"), "random", {});
   });
 
   test("options are passed on to the settings, including the presenter", () => {
@@ -202,7 +202,7 @@ describe("Roll", () => {
 
     expect(result.notation).toBe("4d6");
     expect(result.total).toBe(14);
-    expect(evaluate).toHaveBeenCalledWith(settings.parse("4d6"));
+    expect(evaluate).toHaveBeenCalledWith(settings.parse("4d6"), "random", {});
   });
 
   test("an AST input gets its notation from the AST", () => {

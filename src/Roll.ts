@@ -3,6 +3,8 @@ import { nodeToNotation } from "./ast/notation.js";
 import { validateExpression } from "./ast/validation.js";
 import { ImportError } from "./errors/ImportError.js";
 import { averageResult, containsConditional } from "./evaluator/average.js";
+import type { RollInputData } from "./evaluator/roll-input-data.js";
+import { snapshotRollInputData } from "./evaluator/roll-input-data.js";
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { EngineOption } from "./random/RandomEngine.js";
@@ -24,7 +26,7 @@ const roundTotal = (value: number): number => parseFloat(value.toFixed(2));
 function findDescription(node: ExpressionNode): DescriptionNode | undefined {
   switch (node.type) {
     case "number":
-    case "condition-reference":
+    case "reference":
       return undefined;
     case "conditional":
       return firstDescription([
@@ -71,7 +73,8 @@ function firstDescription(
  * `min` / `max` mode on first access, and are cached (or taken from the data on import). Each
  * evaluation gets a fresh generated-roll budget per pool; when it is spent, repeating modifiers
  * return the dice rolled so far instead of throwing for the limit. The readonly properties do not
- * make the result tree or shared settings deeply immutable.
+ * make the result tree or shared settings deeply immutable. Roll data is snapshotted per roll;
+ * rerolls reuse it unless replacement data is supplied.
  *
  * @example
  * const roll = new Roll("4d6kh3");   // rolls straight away
@@ -95,6 +98,7 @@ export class Roll<T = string> {
   #averageTotal: number | undefined;
   readonly #input: string | ExpressionNode;
   readonly #settings: RollSettings<T>;
+  readonly #data: RollInputData;
 
   /**
    * Parses (if a string) and rolls the input. `RollData` is restored as it is, without rolling or
@@ -110,6 +114,7 @@ export class Roll<T = string> {
     options?: RollOptions<T> | RollSettings<T>,
   ) {
     this.#settings = RollSettings.from(options);
+    this.#data = snapshotRollInputData(this.#settings.data);
 
     if (typeof input === "object" && input.type === "roll") {
       // the expression, rather than the notation, so builder rolls (whose notation may be
@@ -132,7 +137,7 @@ export class Roll<T = string> {
       const expression =
         typeof input === "string" ? this.#settings.parse(input) : input;
 
-      this.result = this.#settings.evaluate(expression);
+      this.result = this.#settings.evaluate(expression, "random", this.#data);
       this.total = roundTotal(this.result.value);
     }
   }
@@ -209,13 +214,17 @@ export class Roll<T = string> {
         : averageResult(this.result)) ?? (this.minTotal + this.maxTotal) / 2);
   }
 
-  /** Rolls the original input again; an engine override applies only to this reroll. Does not add to a history. */
-  reroll(options?: { engine?: EngineOption }): Roll<T> {
+  /** Rolls the original input again; omitted data reuses this roll's snapshot, supplied data replaces it, and an engine override applies only to this reroll. Does not add to a history. */
+  reroll(options?: { engine?: EngineOption; data?: RollInputData }): Roll<T> {
     const engine = options?.engine;
-    const settings =
+    let settings =
       engine === undefined
         ? this.#settings
         : RollSettings.withEngine(this.#settings, engine);
+
+    if (options?.data !== undefined) {
+      settings = RollSettings.withData(settings, options.data);
+    }
 
     return new Roll<T>(this.#input, settings);
   }
@@ -246,6 +255,8 @@ export class Roll<T = string> {
   }
 
   #totalIn(mode: "min" | "max"): number {
-    return roundTotal(this.#settings.evaluate(this.expression, mode).value);
+    return roundTotal(
+      this.#settings.evaluate(this.expression, mode, this.#data).value,
+    );
   }
 }

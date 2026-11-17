@@ -9,7 +9,6 @@ import type {
   BinaryResult,
   ComparisonResult,
   ConditionalResult,
-  ConditionReferenceResult,
   DieResult,
   ExpressionResult,
   FunctionResult,
@@ -18,6 +17,7 @@ import type {
   NumberResult,
   ParenResult,
   PoolResult,
+  ReferenceResult,
   UnaryResult,
 } from "../results/types.js";
 import type { Roll } from "../Roll.js";
@@ -27,7 +27,7 @@ import { TreePresenter } from "./TreePresenter.js";
 function containsDice(result: ExpressionResult): boolean {
   switch (result.type) {
     case "number":
-    case "condition-reference":
+    case "reference":
       return false;
     case "pool":
       return true;
@@ -88,8 +88,8 @@ export interface TextPresenterOptions {
  * (e.g. dropped, or a target success) is wrapped in parentheses: `([6, 3])d`.
  * An expression result is presented without notation or a total; an empty history produces `""`.
  * Conditionals show the evaluated condition and selected result, e.g.
- * `(condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$condition)`. References are rendered as `$condition`;
- * their numeric value is shown once beside the conditional's check.
+ * `(condition: [2, 5*] = 1, true: [3, 10, 2, 3]+$$condition)`. Caller-data references use `$` and
+ * system references use `$$`; their numeric value is shown once beside the conditional's check.
  */
 export class TextPresenter extends TreePresenter<string> {
   readonly flagSymbols: Readonly<Record<ResultFlag, string>>;
@@ -237,8 +237,9 @@ export class TextPresenter extends TreePresenter<string> {
     return `(condition: ${this.visit(result.condition)} = ${this.formatNumber(result.condition.value)}, ${result.selectedBranch}: ${this.visit(result.selectedResult)})`;
   }
 
-  protected conditionReference(_result: ConditionReferenceResult): string {
-    return "$condition";
+  protected override reference(result: ReferenceResult): string {
+    const name = result.node.path.join(".");
+    return `${result.node.namespace === "data" ? "$" : "$$"}${name}`;
   }
 }
 

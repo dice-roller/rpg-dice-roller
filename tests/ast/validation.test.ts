@@ -18,6 +18,7 @@ import {
   num,
   paren,
   pool,
+  reference,
   reRoll,
   sort,
   target,
@@ -136,6 +137,39 @@ describe("expression validation", () => {
     expect(() => validateExpression(node)).not.toThrow();
   });
 
+  test("accepts references without checking whether their bindings are available", () => {
+    expect(() => validateExpression(conditionReference())).not.toThrow();
+    expect(() =>
+      validateExpression(reference("system", "unknown")),
+    ).not.toThrow();
+    expect(() =>
+      validateExpression(reference("data", "character", "level")),
+    ).not.toThrow();
+    expect(() => validateExpression(reference("system", "data"))).not.toThrow();
+  });
+
+  test.each([
+    ["namespace", { type: "reference", namespace: "other", path: ["value"] }],
+    ["empty path", { type: "reference", namespace: "system", path: [] }],
+    ["empty segment", { type: "reference", namespace: "data", path: [""] }],
+    [
+      "invalid segment",
+      { type: "reference", namespace: "system", path: ["has-dash"] },
+    ],
+    ["non-array path", { type: "reference", namespace: "data", path: "value" }],
+  ] as [string, unknown][])(
+    "rejects a reference with an invalid %s",
+    (_name, node) => {
+      expect(() => validateExpression(node)).toThrow(ValidationError);
+    },
+  );
+
+  test("rejects obsolete condition reference nodes", () => {
+    expect(() => validateExpression({ type: "condition-reference" })).toThrow(
+      "Unknown expression node type: condition-reference",
+    );
+  });
+
   test.each([
     ["null", null, "Expected an expression node"],
     ["a primitive", 4, "Expected an expression node"],
@@ -218,11 +252,6 @@ describe("expression validation", () => {
       "a parenthesis without an expression",
       { type: "paren" },
       "Expected an expression node",
-    ],
-    [
-      "a condition reference outside a branch",
-      conditionReference(),
-      "$condition is only available inside a conditional branch",
     ],
     [
       "a conditional without a false branch",

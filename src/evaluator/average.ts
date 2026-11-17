@@ -38,7 +38,7 @@ export function containsConditional(node: ExpressionNode): boolean {
 export function averageResult(result: ExpressionResult): number | undefined {
   switch (result.type) {
     case "number":
-    case "condition-reference":
+    case "reference":
       return result.value;
     case "conditional":
       return undefined;

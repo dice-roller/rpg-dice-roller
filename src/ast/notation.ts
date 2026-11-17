@@ -115,8 +115,8 @@ function write(node: ExpressionNode): string {
         ? `${condition}?:${falseBranch}`
         : `${condition}?(${write(node.trueBranch)}):${falseBranch}`;
     }
-    case "condition-reference":
-      return "$condition";
+    case "reference":
+      return `${node.namespace === "system" ? "$$" : "$"}${node.path.join(".")}`;
   }
 }
 

@@ -1,6 +1,5 @@
 import type {
   BuiltInDieName,
-  ConditionReferenceNode,
   ConditionalNode,
   DieNode,
   ExpressionNode,
@@ -10,11 +9,14 @@ import type {
   ModifierNode,
   ModifierNodeOf,
   PoolNode,
+  ReferenceNode,
+  ReferenceNamespace,
 } from "../../src/ast/nodes.js";
 import {
   conditionReference,
   conditional,
   explode,
+  reference,
   reRoll,
   unique,
 } from "../../src/ast/builders.js";
@@ -40,14 +42,21 @@ assertType<
     | "paren"
     | "function"
     | "conditional"
-    | "condition-reference"
+    | "reference"
   >
 >();
 assertType<Equals<ExpressionResultType, ExpressionNodeType>>();
 assertType<Equals<ConditionalNode["trueBranch"], ExpressionNode | null>>();
-assertType<Equals<ConditionReferenceNode["type"], "condition-reference">>();
+assertType<Equals<ReturnType<typeof conditionReference>, ReferenceNode>>();
+assertType<
+  Equals<ReturnType<typeof conditionReference>, ReturnType<typeof reference>>
+>();
+assertType<Equals<ReferenceNamespace, "system" | "data">>();
+assertType<Equals<ReferenceNode["type"], "reference">>();
 accepts<ExpressionNode>(conditional(2, null, 4));
 accepts<ExpressionNode>(conditional(2, conditionReference(), 4));
+accepts<ExpressionNode>(reference("system", "character", "level"));
+accepts<ExpressionNode>(reference("data", "character", "level"));
 
 // every result points back at the node of the same type
 assertType<
@@ -159,7 +168,7 @@ export function describeResult(result: ExpressionResult): string {
     case "function":
     case "group":
     case "conditional":
-    case "condition-reference":
+    case "reference":
       return result.type;
     case "pool":
       accepts<PoolResult>(result);
