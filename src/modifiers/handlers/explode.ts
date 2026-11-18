@@ -28,7 +28,7 @@ import {
  */
 export const explodeHandler: ModifierHandler<ExplodeNode> = {
   name: "explode",
-  order: 3,
+  order: 4,
   appliesTo: ["pool"],
   apply<T extends ScoredItem>(
     items: readonly T[],

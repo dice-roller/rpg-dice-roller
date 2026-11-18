@@ -12,7 +12,7 @@ import { comparePointOrDefault } from "./utils.js";
  */
 export const criticalFailureHandler: ModifierHandler<CriticalFailureNode> = {
   name: "critical-failure",
-  order: 10,
+  order: 11,
   appliesTo: ["pool"],
   apply(items, input) {
     const comparePoint = comparePointOrDefault(input, "min");

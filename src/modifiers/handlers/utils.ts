@@ -5,6 +5,7 @@ import type {
   ComparePoint,
   CriticalFailureNode,
   CriticalSuccessNode,
+  ExplodeMatchingBatchNode,
   ExplodeNode,
   ReRollNode,
   UniqueNode,
@@ -120,6 +121,7 @@ export function comparePointOrDefault(
     modifier,
     die,
   }: ModifierInput<
+    | ExplodeMatchingBatchNode
     | ExplodeNode
     | ReRollNode
     | UniqueNode

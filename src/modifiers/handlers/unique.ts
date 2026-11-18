@@ -21,7 +21,7 @@ import { repeatableDie, resolveIterationBudget } from "./utils.js";
  */
 export const uniqueHandler: ModifierHandler<UniqueNode> = {
   name: "unique",
-  order: 5,
+  order: 6,
   appliesTo: ["pool"],
   apply<T extends ScoredItem>(
     items: readonly T[],

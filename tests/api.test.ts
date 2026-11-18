@@ -78,7 +78,7 @@ describe("Roller", () => {
     const roller = new Roller();
 
     expect(roller.dice).toBeInstanceOf(dice.DieRegistry);
-    expect(roller.modifiers.handlers).toHaveLength(11);
+    expect(roller.modifiers.handlers).toHaveLength(12);
     expect(roller.presenter).toBe(presenters.defaultTextPresenter);
   });
 

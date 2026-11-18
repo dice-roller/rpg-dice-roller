@@ -78,7 +78,8 @@ export function evaluateGroup(
 /**
  * The rolls of a pool in the v5 text style, for compact assertions: `3d` (dropped), `6*`
  * (success), `2_` (failure), `3^` (min), `3v` (max), `20**` / `1__` (critical), `6!` / `14!!` /
- * `6!p` (explode / compound / penetrate), `3r` / `3ro` / `3u` / `3uo` (re-roll / unique).
+ * `6!p` (explode / compound / penetrate), `6!m` / `6mf` (matching-batch trigger / failure),
+ * `3r` / `3ro` / `3u` / `3uo` (re-roll / unique).
  */
 export function rollsOf(result: PoolResult): string[] {
   return result.rolls.map(
@@ -120,6 +121,8 @@ const symbols: Readonly<Record<ResultFlag, string>> = {
   "critical-success": "**",
   "critical-failure": "__",
   explode: "!",
+  "explode-matching-batch": "!m",
+  "explode-matching-batch-failure": "mf",
   compound: "!!",
   penetrate: "p",
   "re-roll": "r",

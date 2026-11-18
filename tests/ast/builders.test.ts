@@ -9,6 +9,7 @@ import {
   die,
   drop,
   explode,
+  explodeMatchingBatch,
   fn,
   group,
   keep,
@@ -232,10 +233,41 @@ describe("defaults and options", () => {
   });
 
   test("keep and drop are de-duplicated per end, like the parser", () => {
-    const node = pool(4, 10, { modifiers: [drop("h", 1), drop("l", 2)] });
+    const node = pool(4, 10, {
+      modifiers: [drop("h", 1), drop("l", 2), drop("h", 3)],
+    });
 
-    expect(node.modifiers).toEqual([drop("h", 1), drop("l", 2)]);
-    expect(node).toEqual(parser.parse("4d10dh1dl2"));
+    expect(node.modifiers).toEqual([drop("h", 3), drop("l", 2)]);
+    expect(node).toEqual(parser.parse("4d10dh1dl2dh3"));
+  });
+
+  test("repeated matching-batch modifiers keep the last configuration at the first position", () => {
+    const node = pool(4, 6, {
+      modifiers: [
+        explodeMatchingBatch({
+          comparePoint: compare(">=", 4),
+          failureComparePoint: compare("=", 1),
+          limit: 2,
+        }),
+        min(3),
+        explodeMatchingBatch({
+          comparePoint: compare("<=", 6),
+          failureComparePoint: compare(">=", 2),
+          limit: 5,
+        }),
+      ],
+    });
+
+    expect(node.modifiers).toEqual([
+      explodeMatchingBatch({
+        comparePoint: compare("<=", 6),
+        failureComparePoint: compare(">=", 2),
+        limit: 5,
+      }),
+      min(3),
+    ]);
+    expect(nodeToNotation(node)).toBe("4d6!m5<=6f>=2min3");
+    expect(parser.parse(nodeToNotation(node))).toEqual(node);
   });
 
   test.each(["pool", "group"] as const)(
@@ -278,6 +310,28 @@ describe("defaults and options", () => {
         { kind: "failure", comparePoint: compare("<=", 2) },
       ]),
     );
+  });
+
+  test("matching-batch explode supports a failure comparison", () => {
+    const node = pool(4, 6, {
+      modifiers: [
+        explodeMatchingBatch({
+          comparePoint: compare(">=", 5),
+          failureComparePoint: compare("=", 1),
+          limit: 3,
+        }),
+      ],
+    });
+
+    expect(node.modifiers[0]).toEqual({
+      type: "modifier",
+      name: "explode-matching-batch",
+      comparePoint: compare(">=", 5),
+      failureComparePoint: compare("=", 1),
+      limit: 3,
+    });
+    expect(nodeToNotation(node)).toBe("4d6!m3>=5f=1");
+    expect(parser.parse(nodeToNotation(node))).toEqual(node);
   });
 
   test.each([0, 11, -1, 1.5, NaN, Infinity])(
@@ -406,6 +460,14 @@ describe("invalid input", () => {
     [
       "explode(bad compare point)",
       () => explode({ comparePoint: invalidPoint }),
+    ],
+    [
+      "explodeMatchingBatch(bad failure compare point)",
+      () => explodeMatchingBatch({ failureComparePoint: invalidPoint }),
+    ],
+    [
+      "explodeMatchingBatch(bad limit)",
+      () => explodeMatchingBatch({ limit: 0 }),
     ],
     ["explode(bad amount)", () => explode({ amount: 0 })],
     ["target(null)", () => target(null as unknown as ComparePoint)],

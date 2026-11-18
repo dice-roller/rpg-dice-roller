@@ -54,6 +54,8 @@ export const DEFAULT_FLAG_SYMBOLS: Readonly<Record<ResultFlag, string>> =
   Object.freeze({
     compound: "!",
     explode: "!",
+    "explode-matching-batch": "!m",
+    "explode-matching-batch-failure": "mf",
     "critical-failure": "cf",
     "critical-success": "cs",
     drop: "d",

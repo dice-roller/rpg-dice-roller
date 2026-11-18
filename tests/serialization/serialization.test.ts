@@ -70,6 +70,134 @@ describe("encoding numbers", () => {
 
 describe("rolls round-trip", () => {
   test.each(EXPORT_FORMATS)(
+    "matching-batch flags import without rolling through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const draws = [6, 6, 1, 1];
+      const integer = jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => draws.shift() ?? min);
+      const original = new Roll("2d6!m>=5f<=2", settings);
+      const importedSettings = new RollSettings();
+      const importedInteger = jest.spyOn(importedSettings.generator, "integer");
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.toString()).toBe(original.toString());
+      expect(integer).toHaveBeenCalledTimes(4);
+      expect(importedInteger).not.toHaveBeenCalled();
+    },
+  );
+
+  test("valid matching-batch flags preserve order and duplicates on import and export", () => {
+    const data = dataOf("d6!m1");
+    const result = data.result as { rolls: { flags: string[] }[] };
+    const flags = [
+      "target-success",
+      "explode-matching-batch",
+      "critical-success",
+      "explode-matching-batch",
+    ];
+    result.rolls[0].flags = flags;
+    const original = JSON.parse(JSON.stringify(data)) as Record<
+      string,
+      unknown
+    >;
+
+    const settings = new RollSettings();
+    const integer = jest.spyOn(settings.generator, "integer");
+    const imported = Roll.import(data as EncodedRollData, settings);
+
+    expect(imported.result.type).toBe("pool");
+    if (imported.result.type !== "pool") {
+      throw new Error("Expected a pool result");
+    }
+    expect(imported.result.rolls[0]?.flags).toEqual(flags);
+    expect(
+      (
+        JSON.parse(imported.export()) as {
+          result: { rolls: { flags: string[] }[] };
+        }
+      ).result.rolls[0]?.flags,
+    ).toEqual(flags);
+    expect(data).toEqual(original);
+    expect(integer).not.toHaveBeenCalled();
+  });
+
+  test("valid matching-batch flags preserve order and duplicates in nested results", () => {
+    const data = dataOf("{d6,d6}");
+    const result = data.result as {
+      members: {
+        flags: string[];
+        result: { rolls: { flags: string[] }[] };
+      }[];
+    };
+    const firstMember = result.members[0];
+    firstMember.flags = ["explode-matching-batch", "explode-matching-batch"];
+    firstMember.result.rolls[0].flags = [
+      "target-success",
+      "explode-matching-batch",
+      "critical-success",
+      "explode-matching-batch",
+    ];
+    const original = JSON.parse(JSON.stringify(data)) as Record<
+      string,
+      unknown
+    >;
+
+    const settings = new RollSettings();
+    const integer = jest.spyOn(settings.generator, "integer");
+    const imported = Roll.import(data as EncodedRollData, settings);
+
+    const importedGroup = imported.result;
+    expect(importedGroup.type).toBe("group");
+    if (importedGroup.type !== "group") {
+      throw new Error("Expected a group result");
+    }
+
+    const importedMember = importedGroup.members[0];
+    expect(importedMember?.flags).toEqual([
+      "explode-matching-batch",
+      "explode-matching-batch",
+    ]);
+    const nestedPool = importedMember?.result;
+    expect(nestedPool?.type).toBe("pool");
+    if (nestedPool?.type !== "pool") {
+      throw new Error("Expected a nested pool result");
+    }
+    expect(nestedPool.rolls[0]?.flags).toEqual([
+      "target-success",
+      "explode-matching-batch",
+      "critical-success",
+      "explode-matching-batch",
+    ]);
+
+    const exported = JSON.parse(imported.export()) as {
+      result: {
+        members: {
+          flags: string[];
+          result: { rolls: { flags: string[] }[] };
+        }[];
+      };
+    };
+    expect(exported.result.members[0]?.flags).toEqual([
+      "explode-matching-batch",
+      "explode-matching-batch",
+    ]);
+    expect(exported.result.members[0]?.result.rolls[0]?.flags).toEqual([
+      "target-success",
+      "explode-matching-batch",
+      "critical-success",
+      "explode-matching-batch",
+    ]);
+    expect(data).toEqual(original);
+    expect(integer).not.toHaveBeenCalled();
+  });
+
+  test.each(EXPORT_FORMATS)(
     "nested quantity and sides results import without rolling and reroll through %s",
     (format) => {
       const settings = new RollSettings();
@@ -524,6 +652,38 @@ describe("invalid data", () => {
       modifiers.push(modifiers[0]);
 
       expect(() => Roll.import(JSON.stringify(data))).toThrow(ImportError);
+    },
+  );
+
+  test.each([
+    ["pool die flags", "d6!m1", "result.rolls.0.flags"],
+    ["group member flags", "{d6,d6}", "result.members.0.flags"],
+    [
+      "nested pool die flags",
+      "{d6,d6}",
+      "result.members.0.result.rolls.0.flags",
+    ],
+  ])(
+    "rejects legacy matching-batch trigger flags in %s without rolling or mutating input",
+    (_, notation, path) => {
+      const data = JSON.parse(
+        corrupt(notation, path, ["explode-matching-batch-trigger"]),
+      ) as Record<string, unknown>;
+      const original = JSON.parse(JSON.stringify(data)) as Record<
+        string,
+        unknown
+      >;
+      const settings = new RollSettings();
+      const integer = jest.spyOn(settings.generator, "integer");
+
+      expect(() => Roll.import(data as EncodedRollData, settings)).toThrow(
+        ImportError,
+      );
+      expect(() => Roll.import(toBase64(JSON.stringify(data)))).toThrow(
+        ImportError,
+      );
+      expect(data).toEqual(original);
+      expect(integer).not.toHaveBeenCalled();
     },
   );
 

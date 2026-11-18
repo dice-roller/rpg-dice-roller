@@ -14,7 +14,7 @@ import { dropAt, indexesByValue } from "./utils.js";
  */
 export const dropHandler: ModifierHandler<DropNode> = {
   name: "drop",
-  order: 7,
+  order: 8,
   appliesTo: ["pool", "group"],
   groupHandling: "flatten",
   apply(items, { modifier }) {

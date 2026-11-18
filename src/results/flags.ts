@@ -5,6 +5,8 @@
  */
 export const RESULT_FLAGS = [
   "explode",
+  "explode-matching-batch",
+  "explode-matching-batch-failure",
   "compound",
   "penetrate",
   "re-roll",

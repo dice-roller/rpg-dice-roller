@@ -12,7 +12,7 @@ import { comparePointOrDefault } from "./utils.js";
  */
 export const criticalSuccessHandler: ModifierHandler<CriticalSuccessNode> = {
   name: "critical-success",
-  order: 9,
+  order: 10,
   appliesTo: ["pool"],
   apply(items, input) {
     const comparePoint = comparePointOrDefault(input, "max");

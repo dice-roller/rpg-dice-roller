@@ -235,6 +235,23 @@ export class Evaluator {
 
       return roll();
     };
+    const rollGeneratedBatch = (
+      batchCount: number,
+    ): DieResult[] | undefined => {
+      if (!Number.isSafeInteger(batchCount) || batchCount < 0) {
+        throw new EvaluationError(
+          "A generated batch size must be a non-negative safe integer",
+        );
+      }
+
+      if (batchCount > ctx.limits.maxGeneratedRolls - generatedRolls) {
+        return undefined;
+      }
+
+      generatedRolls += batchCount;
+
+      return Array.from({ length: batchCount }, roll);
+    };
     const rolls =
       node.modifiers.length === 0
         ? initialRolls
@@ -242,6 +259,7 @@ export class Evaluator {
             ctx,
             die,
             rollDie: rollGeneratedDie,
+            rollBatch: rollGeneratedBatch,
           });
 
     return {
@@ -578,6 +596,7 @@ export class Evaluator {
     for (const modifier of modifiers) {
       if (
         modifier.name === "explode" ||
+        modifier.name === "explode-matching-batch" ||
         modifier.name === "re-roll" ||
         modifier.name === "unique"
       ) {

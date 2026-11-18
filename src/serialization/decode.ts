@@ -482,6 +482,7 @@ function comparePoint(value: unknown, path: string): ComparePoint {
 
 const MODIFIER_NAMES: readonly ModifierName[] = [
   "explode",
+  "explode-matching-batch",
   "target",
   "drop",
   "keep",
@@ -514,6 +515,15 @@ function modifier(value: unknown, path: string): void {
       optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
       optional(node.limit, `${path}.limit`, positiveSafeInteger);
       optional(node.amount, `${path}.amount`, positiveSafeInteger);
+      break;
+    case "explode-matching-batch":
+      optional(node.comparePoint, `${path}.comparePoint`, comparePoint);
+      optional(
+        node.failureComparePoint,
+        `${path}.failureComparePoint`,
+        comparePoint,
+      );
+      optional(node.limit, `${path}.limit`, positiveSafeInteger);
       break;
     case "target": {
       if (node.rules === undefined) {

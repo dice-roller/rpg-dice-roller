@@ -3,6 +3,7 @@ import { criticalFailureHandler } from "./critical-failure.js";
 import { criticalSuccessHandler } from "./critical-success.js";
 import { dropHandler } from "./drop.js";
 import { explodeHandler } from "./explode.js";
+import { explodeMatchingBatchHandler } from "./explode-matching-batch.js";
 import { keepHandler } from "./keep.js";
 import { maxHandler } from "./max.js";
 import { minHandler } from "./min.js";
@@ -16,6 +17,7 @@ export {
   criticalSuccessHandler,
   dropHandler,
   explodeHandler,
+  explodeMatchingBatchHandler,
   keepHandler,
   maxHandler,
   minHandler,
@@ -31,6 +33,7 @@ export const builtInModifierHandlers: readonly ModifierHandler[] =
     [
       minHandler,
       maxHandler,
+      explodeMatchingBatchHandler,
       explodeHandler,
       reRollHandler,
       uniqueHandler,

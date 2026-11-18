@@ -1,5 +1,6 @@
 import type {
   BuiltInDieName,
+  ComparePoint,
   ConditionalNode,
   DieNode,
   ExpressionNode,
@@ -66,11 +67,12 @@ assertType<
   >
 >();
 
-// the 11 modifiers
+// the modifiers
 assertType<
   Equals<
     ModifierName,
     | "explode"
+    | "explode-matching-batch"
     | "target"
     | "drop"
     | "keep"
@@ -86,6 +88,12 @@ assertType<
 assertType<Equals<ModifierNodeOf<"keep">["end"], "h" | "l">>();
 assertType<Equals<ModifierNodeOf<"explode">["limit"], number | undefined>>();
 assertType<Equals<ModifierNodeOf<"explode">["amount"], number | undefined>>();
+assertType<
+  Equals<
+    ModifierNodeOf<"explode-matching-batch">["failureComparePoint"],
+    ComparePoint | undefined
+  >
+>();
 assertType<Equals<ModifierNodeOf<"re-roll">["limit"], number | undefined>>();
 assertType<Equals<ModifierNodeOf<"re-roll">["amount"], number | undefined>>();
 assertType<Equals<ModifierNodeOf<"unique">["limit"], number | undefined>>();

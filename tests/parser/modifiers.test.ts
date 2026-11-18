@@ -4,6 +4,7 @@ import {
   createCriticalSuccess,
   createDrop,
   createExplode,
+  createExplodeMatchingBatch,
   createKeep,
   createMax,
   createMin,
@@ -13,6 +14,7 @@ import {
   createUnique,
 } from "../../src/ast/factory.js";
 import type { ModifierNode } from "../../src/ast/nodes.js";
+import { nodeToNotation } from "../../src/ast/notation.js";
 import { Parser } from "../../src/parser/Parser.js";
 
 const parser = new Parser();
@@ -55,6 +57,16 @@ describe("modifiers", () => {
     ["4d6!p3", createExplode(false, true, undefined, 3)],
     ["4d6!p:2", createExplode(false, true, undefined, undefined, 2)],
     ["4d6!!p12>=5", createExplode(true, true, cp(">=", 5), 12)],
+    // matching-batch explode
+    ["4d6!m", createExplodeMatchingBatch()],
+    ["4d6!m3", createExplodeMatchingBatch(undefined, 3)],
+    ["4d6!m>=5", createExplodeMatchingBatch(cp(">=", 5))],
+    ["4d6!m3>=5f<=2", createExplodeMatchingBatch(cp(">=", 5), 3, cp("<=", 2))],
+    ["4d6!mf=1", createExplodeMatchingBatch(undefined, undefined, cp("=", 1))],
+    [
+      "4d6!m!=5f!=1",
+      createExplodeMatchingBatch(cp("!=", 5), undefined, cp("!=", 1)),
+    ],
     ["4d6!=3", createExplode(false, false, cp("=", 3))],
     // target
     ["8d10>=8", createTarget(cp(">=", 8))],
@@ -110,6 +122,19 @@ describe("modifiers", () => {
     ]);
   });
 
+  test("a repeated matching-batch modifier keeps its last configuration and first position", () => {
+    const parsed = parser.parse("4d6!m2>=4f=1min3!m5<=6f>=2");
+    const expected = [
+      createExplodeMatchingBatch(cp("<=", 6), 5, cp(">=", 2)),
+      createMin(3),
+    ];
+    const canonical = "4d6!m5<=6f>=2min3";
+
+    expect(modifiersOf("4d6!m2>=4f=1min3!m5<=6f>=2")).toEqual(expected);
+    expect(nodeToNotation(parsed)).toBe(canonical);
+    expect(parser.parse(canonical)).toEqual(parsed);
+  });
+
   test.each(["4d10", "{d10,d10}"])(
     "groups adjacent target conditions into one modifier in %s",
     (prefix) => {
@@ -158,6 +183,11 @@ describe("modifiers", () => {
   });
 
   test.each([
+    "d6!m0",
+    "d6!m1.5",
+    "d6!m9007199254740992",
+    "d6!m>=",
+    "d6!mf",
     "d6!:0",
     "d6!:1.5",
     "d6!:-1",

@@ -209,6 +209,7 @@ export interface DescriptionNode {
 
 /** A modifier selected by `name`; an omitted compare point uses the registered handler's default. */
 export type ModifierNode =
+  | ExplodeMatchingBatchNode
   | ExplodeNode
   | TargetNode
   | DropNode
@@ -247,6 +248,16 @@ export interface ExplodeNode {
   readonly limit?: number;
   /** Number of child dice generated for each matching roll; omitted amounts use 1. */
   readonly amount?: number;
+}
+
+/** `!m[limit][comparePoint][f failureComparePoint]` */
+export interface ExplodeMatchingBatchNode {
+  readonly type: "modifier";
+  readonly name: "explode-matching-batch";
+  readonly comparePoint?: ComparePoint;
+  readonly failureComparePoint?: ComparePoint;
+  /** Maximum additional explosions per initial batch; omitted limits use the context cap. */
+  readonly limit?: number;
 }
 
 /** A target comparison; amount is a whole number from 1 to 10 and defaults to 1. */
