@@ -295,6 +295,7 @@ describe("conditional results", () => {
         return value.toFixed(1);
       }
     }
+
     const settings = settingsWith([3, 4]);
     const integer = jest.spyOn(settings.generator, "integer");
     const roll = new Roll(
@@ -370,6 +371,22 @@ describe("conditional results", () => {
       new TextPresenter({ expandInlineRolls: true }).present(roll.result),
     ).toBe("(keep-high qty: ([2]) = 2) -> [1d, 6, 3]");
     expect(integer).toHaveBeenCalledTimes(calls);
+  });
+
+  test("does not expand computed modifier arguments without dice", () => {
+    const roll = rollWith("3d6kh(2)", [1, 6, 3]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe(new TextPresenter().present(roll.result));
+  });
+
+  test("expands a group whose computed modifier is its only dice", () => {
+    const roll = rollWith("{1,2}dl(d2)", [1]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toContain("drop-low qty: ([1]) = 1");
   });
 
   test("expands stored group modifier argument rolls", () => {
@@ -463,6 +480,7 @@ describe("comparison results", () => {
         return value.toFixed(1);
       }
     }
+
     const settings = settingsWith([4, 2, 1]);
     const integer = jest.spyOn(settings.generator, "integer");
     const roll = new Roll(comparison(">", pool(1, 6), pool(1, 6)), settings);
