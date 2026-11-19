@@ -295,6 +295,7 @@ describe("conditional results", () => {
         return value.toFixed(1);
       }
     }
+
     const settings = settingsWith([3, 4]);
     const integer = jest.spyOn(settings.generator, "integer");
     const roll = new Roll(
@@ -352,6 +353,49 @@ describe("conditional results", () => {
       ).toBe(expected);
     },
   );
+
+  test("expands stored pool modifier argument rolls without changing default output", () => {
+    const settings = new RollSettings();
+    const draws = [1, 6, 3, 2];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation((min) => draws.shift() ?? min);
+    const roll = new Roll("3d6kh(d4)", settings);
+    const calls = integer.mock.calls.length;
+
+    expect(roll.toString()).toBe("3d6kh(d4): [1d, 6, 3] = 9");
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([2]) = 2) -> [1d, 6, 3]");
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([2]) = 2) -> [1d, 6, 3]");
+    expect(integer).toHaveBeenCalledTimes(calls);
+  });
+
+  test("does not expand computed modifier arguments without dice", () => {
+    const roll = rollWith("3d6kh(2)", [1, 6, 3]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe(new TextPresenter().present(roll.result));
+  });
+
+  test("expands a group whose computed modifier is its only dice", () => {
+    const roll = rollWith("{1,2}dl(d2)", [1]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toContain("drop-low qty: ([1]) = 1");
+  });
+
+  test("expands stored group modifier argument rolls", () => {
+    const roll = rollWith("{d6,d6}kh(d2)", [2, 6, 1]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([1]) = 1) -> {([2])d, [6]}");
+  });
 
   test("presents a system reference on its own without changing its value", () => {
     const roll = rollWith(conditional(2, conditionReference(), 0));
@@ -436,6 +480,7 @@ describe("comparison results", () => {
         return value.toFixed(1);
       }
     }
+
     const settings = settingsWith([4, 2, 1]);
     const integer = jest.spyOn(settings.generator, "integer");
     const roll = new Roll(comparison(">", pool(1, 6), pool(1, 6)), settings);

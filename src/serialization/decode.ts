@@ -6,6 +6,7 @@ import {
 import type {
   ComparePoint,
   ExpressionNode,
+  ModifierNode,
   ModifierName,
 } from "../ast/nodes.js";
 import { isPositiveSafeInteger } from "../ast/validation.js";
@@ -284,12 +285,13 @@ function result(value: unknown, path: string): ExpressionResult {
   const type = oneOf(data.type, RESULT_TYPES, `${path}.type`);
 
   number(data.value, `${path}.value`);
+  const node = expression(data.node, `${path}.node`);
 
-  if (expression(data.node, `${path}.node`).type !== type) {
+  if (node.type !== type) {
     fail(`${path}.node`, `expected a ${type} node`);
   }
 
-  switch (type) {
+  switch (node.type) {
     case "number":
     case "reference":
       break;
@@ -300,11 +302,13 @@ function result(value: unknown, path: string): ExpressionResult {
       );
       dieSnapshot(data.die, `${path}.die`);
       each(data.rolls, `${path}.rolls`, dieResult);
+      modifierArguments(data.modifierArguments, node.modifiers, path);
       break;
     case "group":
       each(data.members, `${path}.members`, (item, itemPath) =>
         groupMember(item, itemPath),
       );
+      modifierArguments(data.modifierArguments, node.modifiers, path);
       break;
     case "binary":
     case "comparison":
@@ -342,6 +346,136 @@ function scoredItem(data: Data, path: string): void {
   boolean(data.useInTotal, `${path}.useInTotal`);
   each(data.flags, `${path}.flags`, (flag, flagPath) =>
     oneOf(flag, RESULT_FLAGS, flagPath),
+  );
+}
+
+function modifierArguments(
+  value: unknown,
+  modifiers: readonly ModifierNode[],
+  path: string,
+): void {
+  const computedIndexes = new Set<number>();
+
+  modifiers.forEach((modifier, index) => {
+    if (
+      (modifier.name === "keep" || modifier.name === "drop") &&
+      typeof modifier.qty !== "number"
+    ) {
+      computedIndexes.add(index);
+    }
+  });
+
+  const argumentPath = `${path}.modifierArguments`;
+
+  if (value === undefined) {
+    if (computedIndexes.size > 0) {
+      fail(argumentPath, "missing computed modifier arguments");
+    }
+    return;
+  }
+
+  if (computedIndexes.size === 0) {
+    fail(argumentPath, "no computed modifier quantities to associate");
+  }
+
+  const entries = list(value, argumentPath);
+
+  if (entries.length !== computedIndexes.size) {
+    fail(argumentPath, "expected one result for each computed modifier");
+  }
+
+  const seenIndexes = new Set<number>();
+
+  each(entries, argumentPath, (value, entryPath) => {
+    const entry = record(value, entryPath);
+    const modifierIndex = number(
+      entry.modifierIndex,
+      `${entryPath}.modifierIndex`,
+    );
+
+    if (!Number.isSafeInteger(modifierIndex) || modifierIndex < 0) {
+      fail(
+        `${entryPath}.modifierIndex`,
+        "expected a non-negative safe integer",
+      );
+    }
+
+    if (!computedIndexes.has(modifierIndex)) {
+      fail(
+        `${entryPath}.modifierIndex`,
+        "doesn't reference a computed modifier",
+      );
+    }
+
+    if (seenIndexes.has(modifierIndex)) {
+      fail(`${entryPath}.modifierIndex`, "duplicate modifier argument result");
+    }
+
+    const modifier = modifiers[modifierIndex];
+    if (
+      modifier === undefined ||
+      (modifier.name !== "keep" && modifier.name !== "drop") ||
+      typeof modifier.qty === "number"
+    ) {
+      fail(
+        `${entryPath}.modifierIndex`,
+        "doesn't reference a computed modifier",
+      );
+    }
+
+    const argument = result(entry.result, `${entryPath}.result`);
+
+    if (!Number.isSafeInteger(argument.value) || argument.value < 0) {
+      fail(`${entryPath}.result.value`, "expected a non-negative safe integer");
+    }
+
+    if (!sameStructure(argument.node, modifier.qty)) {
+      fail(
+        `${entryPath}.result.node`,
+        "doesn't match its source modifier quantity",
+      );
+    }
+
+    seenIndexes.add(modifierIndex);
+  });
+}
+
+function sameStructure(left: unknown, right: unknown): boolean {
+  if (left === right) {
+    return true;
+  }
+
+  if (Array.isArray(left) || Array.isArray(right)) {
+    return (
+      Array.isArray(left) &&
+      Array.isArray(right) &&
+      left.length === right.length &&
+      left.every((item, index) => sameStructure(item, right[index]))
+    );
+  }
+
+  if (
+    typeof left !== "object" ||
+    left === null ||
+    typeof right !== "object" ||
+    right === null
+  ) {
+    return false;
+  }
+
+  const leftKeys = Object.keys(left).sort();
+  const rightKeys = Object.keys(right).sort();
+
+  return (
+    leftKeys.length === rightKeys.length &&
+    leftKeys.every(
+      (key, index) =>
+        key === rightKeys[index] &&
+        sameStructure(
+          (left as Record<string, unknown>)[key],
+          (right as Record<string, unknown>)[key],
+        ),
+    )
   );
 }
 
@@ -564,11 +698,12 @@ function modifier(value: unknown, path: string): void {
     case "keep":
       oneOf(node.end, ["h", "l"] as const, `${path}.end`);
 
-      if (
-        !Number.isSafeInteger(finite(node.qty, `${path}.qty`)) ||
-        (node.qty as number) < 1
-      ) {
-        fail(`${path}.qty`, "expected a positive integer");
+      if (typeof node.qty === "number") {
+        if (!Number.isSafeInteger(node.qty) || node.qty < 1) {
+          fail(`${path}.qty`, "expected a positive integer");
+        }
+      } else {
+        expression(node.qty, `${path}.qty`);
       }
       break;
     case "re-roll":

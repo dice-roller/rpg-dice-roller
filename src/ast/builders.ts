@@ -19,6 +19,8 @@ import {
   createComparePoint,
   createComparison,
   createConditional,
+  createComputedDrop,
+  createComputedKeep,
   createCriticalFailure,
   createCriticalSuccess,
   createDescription,
@@ -55,6 +57,8 @@ import type {
   CompareOperator,
   CriticalFailureNode,
   CriticalSuccessNode,
+  ComputedDropNode,
+  ComputedKeepNode,
   DescriptionNode,
   DieNode,
   DropNode,
@@ -356,13 +360,31 @@ export function target(
 }
 
 /** Drop `qty` highest (`h`) or lowest (`l`) items; quantity defaults to 1. */
-export function drop(end: PoolEnd, qty = 1): DropNode {
-  return createDrop(poolEnd(end), positiveInteger(qty));
+export function drop(end: PoolEnd, qty?: number): DropNode;
+export function drop(end: PoolEnd, qty: ExpressionNode): ComputedDropNode;
+export function drop(
+  end: PoolEnd,
+  qty: number | ExpressionNode = 1,
+): DropNode | ComputedDropNode {
+  const validEnd = poolEnd(end);
+
+  return typeof qty === "number"
+    ? createDrop(validEnd, positiveInteger(qty))
+    : createComputedDrop(validEnd, expression(qty));
 }
 
 /** Keep `qty` highest (`h`) or lowest (`l`) items; quantity defaults to 1. */
-export function keep(end: PoolEnd, qty = 1): KeepNode {
-  return createKeep(poolEnd(end), positiveInteger(qty));
+export function keep(end: PoolEnd, qty?: number): KeepNode;
+export function keep(end: PoolEnd, qty: ExpressionNode): ComputedKeepNode;
+export function keep(
+  end: PoolEnd,
+  qty: number | ExpressionNode = 1,
+): KeepNode | ComputedKeepNode {
+  const validEnd = poolEnd(end);
+
+  return typeof qty === "number"
+    ? createKeep(validEnd, positiveInteger(qty))
+    : createComputedKeep(validEnd, expression(qty));
 }
 
 /**

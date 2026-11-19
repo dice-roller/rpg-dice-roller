@@ -6,6 +6,19 @@ import {
 } from "../../src/dice/custom-die-notation.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
 
+describe("formatCustomDieNumber", () => {
+  test.each([Number.NaN, Number.POSITIVE_INFINITY, Number.NEGATIVE_INFINITY])(
+    "rejects non-finite value %s",
+    (value) => {
+      expect(() => formatCustomDieNumber(value)).toThrow(
+        new ValidationError(
+          `Custom die values must be finite numbers: ${value}`,
+        ),
+      );
+    },
+  );
+});
+
 describe("customDieFaces", () => {
   test("keeps face order, duplicates and a single face", () => {
     expect(customDieFaces([2, 1, 1])).toEqual([2, 1, 1]);

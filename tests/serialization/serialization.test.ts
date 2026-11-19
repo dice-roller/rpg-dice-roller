@@ -6,16 +6,16 @@ import { ValidationError } from "../../src/errors/ValidationError.js";
 import { Roll } from "../../src/Roll.js";
 import { Roller } from "../../src/Roller.js";
 import { RollSettings } from "../../src/RollSettings.js";
-import { decode } from "../../src/serialization/decode.js";
 import {
+  decode,
   encode,
   encodeNumber,
   encodeNumbers,
   toBase64,
   toRollData,
-} from "../../src/serialization/encode.js";
-import { EXPORT_FORMATS } from "../../src/serialization/formats.js";
-import type { EncodedRollData } from "../../src/serialization/formats.js";
+  EXPORT_FORMATS,
+} from "../../src/serialization/index.js";
+import type { EncodedRollData } from "../../src/serialization/index.js";
 
 const seeded = (seed = 1) =>
   new RollSettings({ engine: { name: "mersenne", seed } });
@@ -231,6 +231,90 @@ describe("rolls round-trip", () => {
   );
 
   test.each(EXPORT_FORMATS)(
+    "computed modifier argument results round-trip without rolling through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const originalDraws = [1, 6, 3, 2];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => originalDraws.shift() ?? min);
+      const original = new Roll("3d6kh(d4)", settings);
+
+      const importedSettings = new RollSettings();
+      const integer = jest.spyOn(importedSettings.generator, "integer");
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.result).toMatchObject({
+        modifierArguments: [
+          { modifierIndex: 0, result: { type: "paren", value: 2 } },
+        ],
+      });
+      expect(imported.toString()).toBe(original.toString());
+      expect(integer).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
+    "computed group modifier arguments round-trip without rolling through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const draws = [2, 6, 1];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => draws.shift() ?? min);
+      const original = new Roll("{d6,d6}kh(d2)", settings);
+
+      const importedSettings = new RollSettings();
+      const integer = jest.spyOn(importedSettings.generator, "integer");
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.result).toMatchObject({
+        modifierArguments: [
+          { modifierIndex: 0, result: { type: "paren", value: 1 } },
+        ],
+      });
+      expect(imported.toString()).toBe(original.toString());
+      expect(integer).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
+    "computed group modifier arguments round-trip without rolling through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const originalDraws = [2, 6, 1];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => originalDraws.shift() ?? min);
+      const original = new Roll("{d6,d6}kh(d2)", settings);
+
+      const importedSettings = new RollSettings();
+      const integer = jest.spyOn(importedSettings.generator, "integer");
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.result).toMatchObject({
+        modifierArguments: [
+          { modifierIndex: 0, result: { type: "paren", value: 1 } },
+        ],
+      });
+      expect(imported.toString()).toBe(original.toString());
+      expect(integer).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
     "calculated empty pools import and reroll through %s",
     (format) => {
       const original = new Roll("(1-1)d6u", seeded());
@@ -340,6 +424,28 @@ describe("rolls round-trip", () => {
     const imported = Roll.import(JSON.stringify(input));
     expect(imported.result.node).toEqual(
       new Roll("d10>=5f=1", seeded()).result.node,
+    );
+  });
+
+  test("legacy success-only target nodes are normalized on import", () => {
+    const input = JSON.parse(new Roll("d10>=5", seeded()).export()) as {
+      result: {
+        node: {
+          modifiers: {
+            rules?: { comparePoint: unknown }[];
+            success?: unknown;
+          }[];
+        };
+      };
+    };
+    const target = input.result.node.modifiers[0];
+    target.success = target.rules![0].comparePoint;
+    delete target.rules;
+
+    const imported = Roll.import(JSON.stringify(input));
+
+    expect(imported.result.node).toEqual(
+      new Roll("d10>=5", seeded()).result.node,
     );
   });
 
@@ -786,6 +892,84 @@ describe("invalid data", () => {
     ],
     ["an amount on unique", "d6u", "result.node.modifiers.0.amount", 2],
     ["a zero explode limit", "d6!", "result.node.modifiers.0.limit", 0],
+    [
+      "a missing computed modifier argument result",
+      "3d6kh(d4)",
+      "result.modifierArguments",
+      DELETE,
+    ],
+    [
+      "a computed modifier argument result with the wrong count",
+      "3d6kh(d4)",
+      "result.modifierArguments",
+      [],
+    ],
+    [
+      "an out-of-range computed modifier argument index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      1,
+    ],
+    [
+      "a negative computed modifier argument index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      -1,
+    ],
+    [
+      "an unsafe computed modifier argument index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      Number.MAX_SAFE_INTEGER + 1,
+    ],
+    [
+      "a computed modifier argument associated with a numeric modifier",
+      "3d6kh(d4)!",
+      "result.modifierArguments.0.modifierIndex",
+      1,
+    ],
+    [
+      "duplicate computed modifier argument indexes",
+      "3d6dh(d4)kh(d4)",
+      "result.modifierArguments.1.modifierIndex",
+      1,
+    ],
+    [
+      "a fractional computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      1.5,
+    ],
+    [
+      "a negative computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      -1,
+    ],
+    [
+      "an unsafe computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      Number.MAX_SAFE_INTEGER + 1,
+    ],
+    [
+      "a computed argument result associated with the wrong source",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.node.expression",
+      { type: "number", value: 1 },
+    ],
+    [
+      "a computed argument node with a different primitive value",
+      "3d6kh(2)",
+      "result.modifierArguments.0.result.node.expression.value",
+      3,
+    ],
+    [
+      "modifier arguments on a numeric modifier",
+      "3d6kh1",
+      "result.modifierArguments",
+      [],
+    ],
     ["a fractional re-roll limit", "d6r", "result.node.modifiers.0.limit", 1.5],
     [
       "an unsafe unique limit",
@@ -854,6 +1038,79 @@ describe("invalid data", () => {
 
     expect(() => Roll.import(input)).toThrow(
       "Invalid import data at data.result.rolls[1].value: expected a number",
+    );
+  });
+
+  test.each([
+    [
+      "a missing computed modifier argument result",
+      "3d6kh(d4)",
+      "result.modifierArguments",
+      DELETE,
+      "Invalid import data at data.result.modifierArguments: missing computed modifier arguments",
+    ],
+    [
+      "a computed argument collection with the wrong length",
+      "3d6kh(d4)",
+      "result.modifierArguments",
+      [],
+      "Invalid import data at data.result.modifierArguments: expected one result for each computed modifier",
+    ],
+    [
+      "a negative computed modifier index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      -1,
+      "Invalid import data at data.result.modifierArguments[0].modifierIndex: expected a non-negative safe integer",
+    ],
+    [
+      "an unsafe computed modifier index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      Number.MAX_SAFE_INTEGER + 1,
+      "Invalid import data at data.result.modifierArguments[0].modifierIndex: expected a non-negative safe integer",
+    ],
+    [
+      "a computed argument associated with a non-computed modifier",
+      "3d6kh(d4)!",
+      "result.modifierArguments.0.modifierIndex",
+      1,
+      "Invalid import data at data.result.modifierArguments[0].modifierIndex: doesn't reference a computed modifier",
+    ],
+    [
+      "a negative computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      -1,
+      "Invalid import data at data.result.modifierArguments[0].result.value: expected a non-negative safe integer",
+    ],
+    [
+      "an unsafe computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      Number.MAX_SAFE_INTEGER + 1,
+      "Invalid import data at data.result.modifierArguments[0].result.value: expected a non-negative safe integer",
+    ],
+    [
+      "a malformed nested computed argument result",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.inner.value",
+      "not a number",
+      "Invalid import data at data.result.modifierArguments[0].result.inner.value: expected a number",
+    ],
+  ])("%s reports its validation error", (_, notation, path, value, message) => {
+    expect(() => Roll.import(corrupt(notation, path, value))).toThrow(message);
+  });
+
+  test("duplicate computed modifier argument results report the second index", () => {
+    const data = dataOf("3d6dh(d4)kh(d4)") as {
+      result: { modifierArguments: { modifierIndex: number }[] };
+    };
+    const [first, second] = data.result.modifierArguments;
+    second.modifierIndex = first.modifierIndex;
+
+    expect(() => Roll.import(JSON.stringify(data))).toThrow(
+      "Invalid import data at data.result.modifierArguments[1].modifierIndex: duplicate modifier argument result",
     );
   });
 

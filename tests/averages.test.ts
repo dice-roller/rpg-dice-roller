@@ -37,6 +37,23 @@ describe("roll averages", () => {
     expect(integer).toHaveBeenCalledTimes(1);
   });
 
+  test("computed modifier quantities retain existing mode and average policies", () => {
+    const settings = new RollSettings();
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockReturnValue(3);
+    const roll = new Roll("3d6kh(d4)", settings);
+
+    expect(roll.total).toBe(9);
+    const minTotal = roll.minTotal;
+    const maxTotal = roll.maxTotal;
+
+    expect(minTotal).toBeGreaterThanOrEqual(0);
+    expect(maxTotal).toBeGreaterThanOrEqual(minTotal);
+    expect(roll.averageTotal).toBe((minTotal + maxTotal) / 2);
+    expect(integer).toHaveBeenCalledTimes(4);
+  });
+
   test("conditionals nested in comparisons retain the whole-roll fallback", () => {
     const settings = new RollSettings();
     const integer = jest

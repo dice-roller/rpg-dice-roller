@@ -369,10 +369,12 @@ KeepModifier
 
 KeepQuantity
   = value:UnsignedDecimalToken { return modifierQuantity(value, "Keep"); }
+  / value:ComputedValue { return value; }
   / .? { expected("a positive keep quantity (e.g. kh1)"); }
 
 DropQuantity
   = value:UnsignedDecimalToken { return modifierQuantity(value, "Drop"); }
+  / value:ComputedValue { return value; }
   / .? { expected("a positive drop quantity (e.g. dl1)"); }
 
 // `r`, `ro`, `r3`, `r<3`

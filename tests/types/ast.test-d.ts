@@ -1,6 +1,8 @@
 import type {
   BuiltInDieName,
   ComparePoint,
+  ComputedDropNode,
+  ComputedKeepNode,
   ConditionalNode,
   DieNode,
   ExpressionNode,
@@ -16,11 +18,15 @@ import type {
 import {
   conditionReference,
   conditional,
+  drop,
   explode,
+  keep,
+  paren,
   reference,
   reRoll,
   unique,
 } from "../../src/ast/builders.js";
+import type { ModifierHandlerOf } from "../../src/modifiers/types.js";
 import type { ResultFlag } from "../../src/results/flags.js";
 import type {
   ExpressionResult,
@@ -58,6 +64,11 @@ accepts<ExpressionNode>(conditional(2, null, 4));
 accepts<ExpressionNode>(conditional(2, conditionReference(), 4));
 accepts<ExpressionNode>(reference("system", "character", "level"));
 accepts<ExpressionNode>(reference("data", "character", "level"));
+accepts<ComputedKeepNode>(
+  // builder overloads preserve expression quantities without widening numeric keep nodes
+  keep("h", paren(2)),
+);
+accepts<ComputedDropNode>(drop("l", paren(2)));
 
 // every result points back at the node of the same type
 assertType<
@@ -158,6 +169,17 @@ accepts<PoolNode>({
   modifiers: [{ type: "modifier", name: "keep", end: "h", qty: 3 }],
   description: { text: "fire", style: "block" },
 });
+
+const numericKeepHandler: ModifierHandlerOf<"keep"> = {
+  name: "keep",
+  order: 0,
+  appliesTo: ["pool"],
+  apply(items, input) {
+    accepts<number>(input.modifier.qty);
+    return [...items];
+  },
+};
+void numericKeepHandler;
 
 // @ts-expect-error - descriptions are `inline` or `block`
 accepts<PoolNode["description"]>({ text: "x", style: "multiline" });
