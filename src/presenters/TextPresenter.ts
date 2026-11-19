@@ -14,12 +14,14 @@ import type {
   FunctionResult,
   GroupMemberResult,
   GroupResult,
+  ModifierArgumentResult,
   NumberResult,
   ParenResult,
   PoolResult,
   ReferenceResult,
   UnaryResult,
 } from "../results/types.js";
+import type { ModifierNode } from "../ast/nodes.js";
 import type { Roll } from "../Roll.js";
 import type { RollHistory } from "../RollHistory.js";
 import { TreePresenter } from "./TreePresenter.js";
@@ -32,7 +34,11 @@ function containsDice(result: ExpressionResult): boolean {
     case "pool":
       return true;
     case "group":
-      return result.members.some(({ result }) => containsDice(result));
+      return (
+        result.members.some(({ result }) => containsDice(result)) ||
+        (result.modifierArguments?.some(({ result }) => containsDice(result)) ??
+          false)
+      );
     case "binary":
     case "comparison":
       return containsDice(result.left) || containsDice(result.right);
@@ -166,6 +172,13 @@ export class TextPresenter extends TreePresenter<string> {
       }
     }
 
+    parameters.push(
+      ...this.modifierArgumentParameters(
+        result.modifierArguments,
+        result.node.modifiers,
+      ),
+    );
+
     return parameters.length > 0
       ? `(${parameters.join(", ")}) -> ${rolls}`
       : rolls;
@@ -178,7 +191,41 @@ export class TextPresenter extends TreePresenter<string> {
 
   /** `{[3, 5]+2, ([4])d}` */
   protected group(result: GroupResult): string {
-    return `{${result.members.map((member) => this.member(member)).join(", ")}}`;
+    const members = `{${result.members.map((member) => this.member(member)).join(", ")}}`;
+
+    if (!this.expandInlineRolls) {
+      return members;
+    }
+
+    const parameters = this.modifierArgumentParameters(
+      result.modifierArguments,
+      result.node.modifiers,
+    );
+
+    return parameters.length > 0
+      ? `(${parameters.join(", ")}) -> ${members}`
+      : members;
+  }
+
+  private modifierArgumentParameters(
+    args: readonly ModifierArgumentResult[] | undefined,
+    modifiers: readonly ModifierNode[],
+  ): string[] {
+    return (args ?? []).flatMap(({ modifierIndex, result }) => {
+      if (!containsDice(result)) {
+        return [];
+      }
+
+      const modifier = modifiers[modifierIndex];
+      const label =
+        modifier?.name === "keep" || modifier?.name === "drop"
+          ? `${modifier.name}-${modifier.end === "h" ? "high" : "low"} qty`
+          : `modifier ${modifierIndex + 1} qty`;
+
+      return [
+        `${label}: ${this.visit(result)} = ${this.formatNumber(result.value)}`,
+      ];
+    });
   }
 
   /** A group member: `[3, 5]+2`, or `([3, 5]+2)*` with flags. */

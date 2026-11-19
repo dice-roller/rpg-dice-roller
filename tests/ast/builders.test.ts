@@ -63,6 +63,11 @@ describe("builders match the parser", () => {
     ["4d6k3", pool(4, 6, { modifiers: [keep("h", 3)] })],
     ["4d6d1", pool(4, 6, { modifiers: [drop("l")] })],
     ["4d6dh2", pool(4, 6, { modifiers: [drop("h", 2)] })],
+    [
+      "4d6kh(2+1)",
+      pool(4, 6, { modifiers: [keep("h", paren(binary("+", 2, 1)))] }),
+    ],
+    ["4d6dl(d4)", pool(4, 6, { modifiers: [drop("l", paren(pool(1, 4)))] })],
     ["2d6!", pool(2, 6, { modifiers: [explode()] })],
     ["2d6!3", pool(2, 6, { modifiers: [explode({ limit: 3 })] })],
     ["2d6!!", pool(2, 6, { modifiers: [explode({ compound: true })] })],
@@ -456,6 +461,8 @@ describe("invalid input", () => {
     ["keep(0)", () => keep("h", 0)],
     ["keep(1.5)", () => keep("h", 1.5)],
     ["drop(-1)", () => drop("l", -1)],
+    ["keep(invalid expression)", () => keep("h", {} as ExpressionNode)],
+    ["drop(invalid expression)", () => drop("l", {} as ExpressionNode)],
     ["drop('x')", () => drop("x" as "h")],
     [
       "explode(bad compare point)",

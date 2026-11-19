@@ -231,6 +231,34 @@ describe("rolls round-trip", () => {
   );
 
   test.each(EXPORT_FORMATS)(
+    "computed modifier argument results round-trip without rolling through %s",
+    (format) => {
+      const settings = new RollSettings();
+      const originalDraws = [1, 6, 3, 2];
+      jest
+        .spyOn(settings.generator, "integer")
+        .mockImplementation((min) => originalDraws.shift() ?? min);
+      const original = new Roll("3d6kh(d4)", settings);
+
+      const importedSettings = new RollSettings();
+      const integer = jest.spyOn(importedSettings.generator, "integer");
+      const imported = Roll.import(
+        original.export(format as "json"),
+        importedSettings,
+      );
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.result).toMatchObject({
+        modifierArguments: [
+          { modifierIndex: 0, result: { type: "paren", value: 2 } },
+        ],
+      });
+      expect(imported.toString()).toBe(original.toString());
+      expect(integer).not.toHaveBeenCalled();
+    },
+  );
+
+  test.each(EXPORT_FORMATS)(
     "calculated empty pools import and reroll through %s",
     (format) => {
       const original = new Roll("(1-1)d6u", seeded());
@@ -786,6 +814,36 @@ describe("invalid data", () => {
     ],
     ["an amount on unique", "d6u", "result.node.modifiers.0.amount", 2],
     ["a zero explode limit", "d6!", "result.node.modifiers.0.limit", 0],
+    [
+      "a missing computed modifier argument result",
+      "3d6kh(d4)",
+      "result.modifierArguments",
+      DELETE,
+    ],
+    [
+      "an out-of-range computed modifier argument index",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.modifierIndex",
+      1,
+    ],
+    [
+      "a fractional computed modifier argument value",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.value",
+      1.5,
+    ],
+    [
+      "a computed argument result associated with the wrong source",
+      "3d6kh(d4)",
+      "result.modifierArguments.0.result.node.expression",
+      { type: "number", value: 1 },
+    ],
+    [
+      "modifier arguments on a numeric modifier",
+      "3d6kh1",
+      "result.modifierArguments",
+      [],
+    ],
     ["a fractional re-roll limit", "d6r", "result.node.modifiers.0.limit", 1.5],
     [
       "an unsafe unique limit",

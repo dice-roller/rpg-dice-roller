@@ -74,6 +74,15 @@ export interface PoolResult {
   /** The values of the die the factory created, for presenters. */
   readonly die: DieSnapshot;
   readonly rolls: readonly DieResult[];
+  /** Evaluated Keep/Drop expressions, in modifier execution order; omitted for numeric modifiers. */
+  readonly modifierArguments?: readonly ModifierArgumentResult[];
+}
+
+/** An evaluated expression used as a computed Keep/Drop quantity. */
+export interface ModifierArgumentResult {
+  /** Index of the source modifier in the owning node's deduplicated modifier array. */
+  readonly modifierIndex: number;
+  readonly result: ExpressionResult;
 }
 
 /** One expression of a roll group, with scoring separate from its nested expression result. */
@@ -90,6 +99,8 @@ export interface GroupResult {
   /** The sum of `calculationValue` for members included in the total. */
   readonly value: number;
   readonly members: readonly GroupMemberResult[];
+  /** Evaluated Keep/Drop expressions, in modifier execution order; omitted for numeric modifiers. */
+  readonly modifierArguments?: readonly ModifierArgumentResult[];
 }
 
 /** A binary operation and its evaluated operands. */

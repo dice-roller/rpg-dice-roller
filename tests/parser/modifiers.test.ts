@@ -2,6 +2,8 @@ import {
   createComparePoint as cp,
   createCriticalFailure,
   createCriticalSuccess,
+  createComputedDrop,
+  createComputedKeep,
   createDrop,
   createExplode,
   createExplodeMatchingBatch,
@@ -78,6 +80,16 @@ describe("modifiers", () => {
     ["4d6dl2", createDrop("l", 2)],
     ["4d6k3", createKeep("h", 3)],
     ["4d6kl2", createKeep("l", 2)],
+    ["4d6k(d4)", createComputedKeep("h", parser.parse("(d4)"))],
+    ["4d6kh(2+1)", createComputedKeep("h", parser.parse("(2+1)"))],
+    [
+      "4d6kl(max(d4, 1))",
+      createComputedKeep("l", parser.parse("(max(d4, 1))")),
+    ],
+    ["4d6d(d4)", createComputedDrop("l", parser.parse("(d4)"))],
+    ["4d6dh(2+1)", createComputedDrop("h", parser.parse("(2+1)"))],
+    ["4d6dl({d4,d6}k1)", createComputedDrop("l", parser.parse("({d4,d6}k1)"))],
+    ["{d6,d8}k(d4)", createComputedKeep("h", parser.parse("(d4)"))],
     // re-roll / unique
     ["2d20r", createReRoll(false)],
     ["2d20r12", createReRoll(false, undefined, 12)],
@@ -254,6 +266,11 @@ describe("modifiers", () => {
     ]);
     expect(modifiersOf("4d10d1dl2")).toEqual([createDrop("l", 2)]);
   });
+
+  test.each(["4d6k()", "4d6kh(1+)", "4d6kl(", "4d6d()", "4d6dh(1+"])(
+    "rejects malformed computed quantity in %s",
+    (notation) => expect(() => parser.parse(notation)).toThrow(),
+  );
 
   test("roll groups take modifiers", () => {
     expect(modifiersOf("{4d6+2d8, 3d20}k1")).toEqual([createKeep("h", 1)]);

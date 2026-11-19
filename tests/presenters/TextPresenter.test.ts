@@ -353,6 +353,33 @@ describe("conditional results", () => {
     },
   );
 
+  test("expands stored pool modifier argument rolls without changing default output", () => {
+    const settings = new RollSettings();
+    const draws = [1, 6, 3, 2];
+    const integer = jest
+      .spyOn(settings.generator, "integer")
+      .mockImplementation((min) => draws.shift() ?? min);
+    const roll = new Roll("3d6kh(d4)", settings);
+    const calls = integer.mock.calls.length;
+
+    expect(roll.toString()).toBe("3d6kh(d4): [1d, 6, 3] = 9");
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([2]) = 2) -> [1d, 6, 3]");
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([2]) = 2) -> [1d, 6, 3]");
+    expect(integer).toHaveBeenCalledTimes(calls);
+  });
+
+  test("expands stored group modifier argument rolls", () => {
+    const roll = rollWith("{d6,d6}kh(d2)", [2, 6, 1]);
+
+    expect(
+      new TextPresenter({ expandInlineRolls: true }).present(roll.result),
+    ).toBe("(keep-high qty: ([1]) = 1) -> {([2])d, [6]}");
+  });
+
   test("presents a system reference on its own without changing its value", () => {
     const roll = rollWith(conditional(2, conditionReference(), 0));
 

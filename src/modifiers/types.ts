@@ -1,4 +1,9 @@
-import type { ModifierName, ModifierNode } from "../ast/nodes.js";
+import type {
+  ComputedDropNode,
+  ComputedKeepNode,
+  ModifierName,
+  ModifierNode,
+} from "../ast/nodes.js";
 import type { ResolvedDie } from "../dice/types.js";
 import type { RollContext } from "../evaluator/RollContext.js";
 import type { DieResult, ScoredItem } from "../results/types.js";
@@ -8,7 +13,10 @@ export type ModifierTarget = "pool" | "group";
 
 /** Context and modifier node supplied to a handler alongside its items. */
 export interface ModifierInput<N extends ModifierNode = ModifierNode> {
-  /** The modifier node from the AST. */
+  /**
+   * The modifier node from the AST for numeric quantities; computed Keep/Drop quantities arrive as
+   * a temporary numeric view while their original expressions remain on the source AST and result.
+   */
   readonly modifier: N;
   /** Roll mode, random generator, and safety limits for this evaluation. */
   readonly ctx: RollContext;
@@ -67,5 +75,8 @@ export interface ModifierHandler<N extends ModifierNode = ModifierNode> {
 
 /** The handler for the modifier with the given name. */
 export type ModifierHandlerOf<K extends ModifierName> = ModifierHandler<
-  Extract<ModifierNode, { name: K }>
+  Extract<
+    Exclude<ModifierNode, ComputedDropNode | ComputedKeepNode>,
+    { name: K }
+  >
 >;

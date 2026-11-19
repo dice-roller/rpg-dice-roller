@@ -42,6 +42,7 @@ import type {
   FunctionResult,
   GroupMemberResult,
   GroupResult,
+  ModifierArgumentResult,
   NumberResult,
   ParenResult,
   PoolResult,
@@ -71,6 +72,11 @@ const functionArity: Readonly<Record<MathFunctionName, number>> = {
   max: 2,
   min: 2,
 };
+
+interface ModifierApplication<T extends ScoredItem> {
+  readonly items: T[];
+  readonly modifierArguments: readonly ModifierArgumentResult[];
+}
 
 /**
  * The sum of `calculationValue` for the items that are `useInTotal`.
@@ -252,15 +258,16 @@ export class Evaluator {
 
       return Array.from({ length: batchCount }, roll);
     };
-    const rolls =
+    const modifierApplication =
       node.modifiers.length === 0
-        ? initialRolls
+        ? { items: initialRolls, modifierArguments: [] }
         : this.applyModifiers(initialRolls, node.modifiers, "pool", {
             ctx,
             die,
             rollDie: rollGeneratedDie,
             rollBatch: rollGeneratedBatch,
           });
+    const rolls = modifierApplication.items;
 
     return {
       type: "pool",
@@ -270,6 +277,9 @@ export class Evaluator {
       dieArgs,
       die: dieSnapshot(die),
       rolls,
+      ...(modifierApplication.modifierArguments.length > 0 && {
+        modifierArguments: modifierApplication.modifierArguments,
+      }),
     };
   }
 
@@ -307,10 +317,19 @@ export class Evaluator {
         flags: [],
       };
     });
+    const modifierArguments: ModifierArgumentResult[] = [];
 
     for (const modifier of this.orderedModifiers(node.modifiers)) {
       const handler = this.handlerFor(modifier, "group");
-      const input: ModifierInput = { modifier, ctx };
+      const resolved = this.resolveModifier(
+        modifier,
+        node.modifiers.indexOf(modifier),
+        ctx,
+      );
+      if (resolved.argument) {
+        modifierArguments.push(resolved.argument);
+      }
+      const input: ModifierInput = { modifier: resolved.modifier, ctx };
 
       if (handler.groupHandling === "flatten" && members.length === 1) {
         members = members.map((member) =>
@@ -348,6 +367,7 @@ export class Evaluator {
       node,
       value: sumIncluded(members),
       members,
+      ...(modifierArguments.length > 0 && { modifierArguments }),
     };
   }
 
@@ -576,17 +596,58 @@ export class Evaluator {
     modifiers: readonly ModifierNode[],
     target: ModifierTarget,
     input: Omit<ModifierInput, "modifier">,
-  ): T[] {
+  ): ModifierApplication<T> {
     this.validateIterationLimits(modifiers, input.ctx);
 
-    return this.orderedModifiers(modifiers).reduce<T[]>(
-      (current, modifier) =>
-        this.runHandler(this.handlerFor(modifier, target), current, {
-          ...input,
+    const modifierArguments: ModifierArgumentResult[] = [];
+    const modifiedItems = this.orderedModifiers(modifiers).reduce<T[]>(
+      (current, modifier) => {
+        const handler = this.handlerFor(modifier, target);
+        const resolved = this.resolveModifier(
           modifier,
-        }),
+          modifiers.indexOf(modifier),
+          input.ctx,
+        );
+
+        if (resolved.argument) {
+          modifierArguments.push(resolved.argument);
+        }
+
+        return this.runHandler(handler, current, {
+          ...input,
+          modifier: resolved.modifier,
+        });
+      },
       [...items],
     );
+
+    return { items: modifiedItems, modifierArguments };
+  }
+
+  private resolveModifier(
+    modifier: ModifierNode,
+    modifierIndex: number,
+    ctx: RollContext,
+  ): { modifier: ModifierNode; argument?: ModifierArgumentResult } {
+    if (
+      (modifier.name === "keep" || modifier.name === "drop") &&
+      typeof modifier.qty !== "number"
+    ) {
+      const result = this.evaluateNode(modifier.qty, ctx);
+
+      if (!Number.isSafeInteger(result.value) || result.value < 0) {
+        throw new EvaluationError(
+          `A computed ${modifier.name} quantity must be a non-negative safe integer: ${result.value}`,
+        );
+      }
+
+      return {
+        modifier: { ...modifier, qty: result.value },
+        argument: { modifierIndex, result },
+      };
+    }
+
+    return { modifier };
   }
 
   private validateIterationLimits(

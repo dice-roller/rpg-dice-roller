@@ -55,9 +55,9 @@ export function modifierToNotation(modifier: ModifierNode): string {
         )
         .join("");
     case "drop":
-      return `d${modifier.end}${modifier.qty}`;
+      return `d${modifier.end}${modifierQuantity(modifier.qty)}`;
     case "keep":
-      return `k${modifier.end}${modifier.qty}`;
+      return `k${modifier.end}${modifierQuantity(modifier.qty)}`;
     case "re-roll":
       return `r${modifier.once ? "o" : (modifier.limit ?? "")}${modifier.amount !== undefined ? `:${modifier.amount}` : ""}${comparePoint(modifier.comparePoint)}`;
     case "unique":
@@ -228,6 +228,14 @@ function parenthesised(node: ExpressionNode): string {
   return node.type === "number" || node.type === "paren"
     ? write(node)
     : `(${write(node)})`;
+}
+
+function modifierQuantity(quantity: number | ExpressionNode): string {
+  if (typeof quantity === "number") {
+    return String(quantity);
+  }
+
+  return quantity.type === "paren" ? write(quantity) : `(${write(quantity)})`;
 }
 
 function modifiers(nodes: readonly ModifierNode[]): string {

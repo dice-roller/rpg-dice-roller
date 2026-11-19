@@ -12,6 +12,8 @@ import type {
   BinaryNode,
   BinaryOperator,
   ComparisonNode,
+  ComputedDropNode,
+  ComputedKeepNode,
   ConditionalNode,
   ComparePoint,
   CompareOperator,
@@ -258,11 +260,39 @@ export function createTarget(
   };
 }
 
-export function createDrop(end: PoolEnd, qty: number): DropNode {
+export function createDrop(end: PoolEnd, qty: number): DropNode;
+export function createDrop(end: PoolEnd, qty: ExpressionNode): ComputedDropNode;
+export function createDrop(
+  end: PoolEnd,
+  qty: number | ExpressionNode,
+): DropNode | ComputedDropNode {
+  return typeof qty === "number"
+    ? { type: "modifier", name: "drop", end, qty }
+    : createComputedDrop(end, qty);
+}
+
+export function createComputedDrop(
+  end: PoolEnd,
+  qty: ExpressionNode,
+): ComputedDropNode {
   return { type: "modifier", name: "drop", end, qty };
 }
 
-export function createKeep(end: PoolEnd, qty: number): KeepNode {
+export function createKeep(end: PoolEnd, qty: number): KeepNode;
+export function createKeep(end: PoolEnd, qty: ExpressionNode): ComputedKeepNode;
+export function createKeep(
+  end: PoolEnd,
+  qty: number | ExpressionNode,
+): KeepNode | ComputedKeepNode {
+  return typeof qty === "number"
+    ? { type: "modifier", name: "keep", end, qty }
+    : createComputedKeep(end, qty);
+}
+
+export function createComputedKeep(
+  end: PoolEnd,
+  qty: ExpressionNode,
+): ComputedKeepNode {
   return { type: "modifier", name: "keep", end, qty };
 }
 

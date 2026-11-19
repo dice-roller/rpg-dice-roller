@@ -52,6 +52,8 @@ const validModifiers = [
   ],
   ["keep", keep("h", 1)],
   ["drop", drop("l", 1)],
+  ["computed keep", keep("h", paren(2))],
+  ["computed drop", drop("l", paren(binary("+", 1, 2)))],
   ["sort", sort("a")],
   ["min", min(1)],
   ["max", max(6)],
@@ -388,6 +390,19 @@ describe("expression validation", () => {
       ).toThrow(new ValidationError("Invalid modifier node"));
     },
   );
+
+  test("recursively validates computed modifier quantities", () => {
+    expect(() =>
+      validateExpression(
+        poolWithModifier({
+          ...keep("h", paren(2)),
+          qty: { type: "number", value: "two" },
+        }) as never,
+      ),
+    ).toThrow(
+      new ValidationError("A number node must contain a numeric value"),
+    );
+  });
 
   test("validates a skipped branch without rolling dice or invoking modifiers", () => {
     const generator = new NumberGenerator(

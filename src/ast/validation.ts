@@ -265,11 +265,21 @@ function validateModifierStructure(value: unknown): void {
         });
       break;
     case "keep":
-    case "drop":
-      valid =
-        (modifier.end === "h" || modifier.end === "l") &&
-        typeof modifier.qty === "number";
+    case "drop": {
+      const validEnd = modifier.end === "h" || modifier.end === "l";
+
+      if (typeof modifier.qty === "number") {
+        valid = validEnd;
+      } else if (
+        typeof modifier.qty === "object" &&
+        modifier.qty !== null &&
+        typeof (modifier.qty as Record<string, unknown>).type === "string"
+      ) {
+        validateNode(modifier.qty);
+        valid = validEnd;
+      }
       break;
+    }
     case "sort":
       valid = modifier.direction === "a" || modifier.direction === "d";
       break;

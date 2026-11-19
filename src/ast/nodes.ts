@@ -213,7 +213,9 @@ export type ModifierNode =
   | ExplodeNode
   | TargetNode
   | DropNode
+  | ComputedDropNode
   | KeepNode
+  | ComputedKeepNode
   | ReRollNode
   | UniqueNode
   | CriticalSuccessNode
@@ -282,12 +284,28 @@ export interface DropNode {
   readonly qty: number;
 }
 
+/** A drop quantity preserved as an unevaluated parenthesised expression. */
+export interface ComputedDropNode {
+  readonly type: "modifier";
+  readonly name: "drop";
+  readonly end: PoolEnd;
+  readonly qty: ExpressionNode;
+}
+
 /** `k`, `kh`, `kl`. */
 export interface KeepNode {
   readonly type: "modifier";
   readonly name: "keep";
   readonly end: PoolEnd;
   readonly qty: number;
+}
+
+/** A keep quantity preserved as an unevaluated parenthesised expression. */
+export interface ComputedKeepNode {
+  readonly type: "modifier";
+  readonly name: "keep";
+  readonly end: PoolEnd;
+  readonly qty: ExpressionNode;
 }
 
 /** `r`, `ro` and numeric re-roll limits. */

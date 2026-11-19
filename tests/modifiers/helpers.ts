@@ -3,6 +3,7 @@ import { DieRegistry } from "../../src/dice/DieRegistry.js";
 import { Evaluator } from "../../src/evaluator/Evaluator.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
 import type { RollLimits, RollMode } from "../../src/evaluator/RollContext.js";
+import type { RollInputData } from "../../src/evaluator/roll-input-data.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import { Parser } from "../../src/parser/Parser.js";
 import { NumberGenerator } from "../../src/random/NumberGenerator.js";
@@ -21,6 +22,8 @@ export interface EvaluateOptions {
   rolls?: readonly number[];
   modifiers?: ModifierRegistry;
   limits?: Partial<RollLimits>;
+  system?: Readonly<Record<string, unknown>>;
+  data?: RollInputData;
 }
 
 /** Evaluates notation (or a node), with the generator returning the queued rolls. */
@@ -31,6 +34,8 @@ export function evaluate(
     rolls = [],
     modifiers = new ModifierRegistry(),
     limits,
+    system,
+    data,
   }: EvaluateOptions = {},
 ): ExpressionResult {
   const queue = [...rolls];
@@ -45,7 +50,7 @@ export function evaluate(
 
   return evaluator.evaluate(
     node,
-    createRollContext({ generator, mode, limits }),
+    createRollContext({ generator, mode, limits, system, data }),
   );
 }
 
