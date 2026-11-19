@@ -20,7 +20,7 @@ import type { ModifierHandler, ModifierHandlerOf } from "./types.js";
 export class ModifierRegistry {
   readonly #handlers = new Map<ModifierName, ModifierHandler>();
 
-  /** A registry with the 11 built-in handlers registered. */
+  /** A registry with the built-in handlers registered. */
   constructor() {
     this.register(...builtInModifierHandlers);
   }

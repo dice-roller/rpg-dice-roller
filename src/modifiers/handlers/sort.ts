@@ -10,7 +10,7 @@ import { compareValues } from "./utils.js";
  */
 export const sortHandler: ModifierHandler<SortNode> = {
   name: "sort",
-  order: 11,
+  order: 12,
   appliesTo: ["pool", "group"],
   groupHandling: "each-pool",
   apply(items, { modifier }) {

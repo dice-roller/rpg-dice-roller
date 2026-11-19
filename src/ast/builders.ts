@@ -25,6 +25,7 @@ import {
   createDie,
   createDrop,
   createExplode,
+  createExplodeMatchingBatch,
   createFunction,
   createGroup,
   createKeep,
@@ -57,6 +58,7 @@ import type {
   DescriptionNode,
   DieNode,
   DropNode,
+  ExplodeMatchingBatchNode,
   ExplodeNode,
   ExpressionNode,
   FunctionNode,
@@ -282,6 +284,21 @@ export function explode(
     optionalComparePoint(options.comparePoint),
     options.limit,
     options.amount,
+  );
+}
+
+/** Explodes complete pool batches whose dice all match; an optional failure comparison stops `!m`. */
+export function explodeMatchingBatch(
+  options: {
+    comparePoint?: ComparePoint;
+    failureComparePoint?: ComparePoint;
+    limit?: number;
+  } = {},
+): ExplodeMatchingBatchNode {
+  return createExplodeMatchingBatch(
+    optionalComparePoint(options.comparePoint),
+    options.limit,
+    optionalComparePoint(options.failureComparePoint),
   );
 }
 

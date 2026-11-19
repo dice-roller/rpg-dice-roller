@@ -9,6 +9,7 @@ import {
   die,
   drop,
   explode,
+  explodeMatchingBatch,
   fn,
   group,
   keep,
@@ -36,6 +37,10 @@ import { NumberGenerator } from "../../src/random/NumberGenerator.js";
 
 const validModifiers = [
   ["explode", explode()],
+  [
+    "explode-matching-batch",
+    explodeMatchingBatch({ failureComparePoint: compare("=", 1), limit: 2 }),
+  ],
   ["re-roll", reRoll()],
   ["unique", unique()],
   [
@@ -59,6 +64,18 @@ const invalidModifiers: [string, unknown][] = [
   ["wrong type", { type: "other", name: "keep" }],
   ["explode", { ...explode(), compound: "yes" }],
   ["explode amount", { ...explode(), amount: "two" }],
+  ["matching-batch limit", { ...explodeMatchingBatch(), limit: 0 }],
+  [
+    "matching-batch explosion comparison",
+    { ...explodeMatchingBatch(), comparePoint: { operator: "~", value: 1 } },
+  ],
+  [
+    "matching-batch failure comparison",
+    {
+      ...explodeMatchingBatch(),
+      failureComparePoint: { operator: "=", value: Number.POSITIVE_INFINITY },
+    },
+  ],
   ["re-roll", { ...reRoll(), once: "yes" }],
   ["unique", { ...unique(), limit: "many" }],
   [

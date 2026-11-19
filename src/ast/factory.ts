@@ -21,6 +21,7 @@ import type {
   DescriptionStyle,
   DieNode,
   DropNode,
+  ExplodeMatchingBatchNode,
   ExplodeNode,
   ExpressionNode,
   FunctionNode,
@@ -214,6 +215,22 @@ export function createExplode(
     ...(comparePoint && { comparePoint }),
     ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
     ...(normalizedAmount !== undefined && { amount: normalizedAmount }),
+  };
+}
+
+export function createExplodeMatchingBatch(
+  comparePoint?: ComparePoint,
+  limit?: number,
+  failureComparePoint?: ComparePoint,
+): ExplodeMatchingBatchNode {
+  const normalizedLimit = normalizeModifierLimit(limit);
+
+  return {
+    type: "modifier",
+    name: "explode-matching-batch",
+    ...(comparePoint && { comparePoint }),
+    ...(failureComparePoint && { failureComparePoint }),
+    ...(normalizedLimit !== undefined && { limit: normalizedLimit }),
   };
 }
 

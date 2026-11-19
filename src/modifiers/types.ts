@@ -16,6 +16,8 @@ export interface ModifierInput<N extends ModifierNode = ModifierNode> {
   readonly die?: ResolvedDie;
   /** Rolls one more die of the pool, or returns `undefined` when its per-pool budget is spent. Initial dice are excluded; repeating handlers must handle exhaustion and keep the results rolled so far. */
   readonly rollDie?: () => DieResult | undefined;
+  /** Rolls a complete batch atomically, or returns `undefined` without drawing if the remaining per-pool budget is insufficient. */
+  readonly rollBatch?: (count: number) => readonly DieResult[] | undefined;
 }
 
 /**
@@ -45,6 +47,8 @@ export interface ModifierHandler<N extends ModifierNode = ModifierNode> {
    * with multiple expressions it operates on members instead. Flattened dice are written back to
    * their original pools, so returned dice must retain their pool association (e.g. by copying an
    * input item with object spread). New, unassociated dice cause an `EvaluationError`.
+   * The matching-batch modifier treats every item supplied to it as its initial batch, so earlier
+   * modifiers can change its batch size.
    */
   readonly groupHandling?: "flatten" | "each-pool";
 
@@ -52,8 +56,8 @@ export interface ModifierHandler<N extends ModifierNode = ModifierNode> {
    * Applies the modifier.
    *
    * `items` are die results for a pool, or group members for a group (or die results, as set by
-   * `groupHandling`). Group calls, including calls for their pool dice, do not supply `die` or
-   * `rollDie`. The evaluator requires an array result.
+   * `groupHandling`). Group calls, including calls for their pool dice, do not supply `die`,
+   * `rollDie` or `rollBatch`. The evaluator requires an array result.
    */
   apply<T extends ScoredItem>(
     items: readonly T[],

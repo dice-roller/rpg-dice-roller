@@ -204,8 +204,12 @@ function validateModifierStructure(value: unknown): void {
     point === undefined ||
     (typeof point === "object" &&
       point !== null &&
-      typeof (point as Record<string, unknown>).operator === "string" &&
-      typeof (point as Record<string, unknown>).value === "number");
+      COMPARE_OPERATORS.includes(
+        (point as Record<string, unknown>)
+          .operator as (typeof COMPARE_OPERATORS)[number],
+      ) &&
+      typeof (point as Record<string, unknown>).value === "number" &&
+      Number.isFinite((point as Record<string, unknown>).value));
 
   if (modifier.type !== "modifier") {
     throw new ValidationError("Invalid modifier node");
@@ -221,6 +225,13 @@ function validateModifierStructure(value: unknown): void {
         optionalNumber("limit") &&
         optionalNumber("amount") &&
         compare(modifier.comparePoint);
+      break;
+    case "explode-matching-batch":
+      valid =
+        (modifier.limit === undefined ||
+          isPositiveSafeInteger(modifier.limit)) &&
+        compare(modifier.comparePoint) &&
+        compare(modifier.failureComparePoint);
       break;
     case "re-roll":
       valid =

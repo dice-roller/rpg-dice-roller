@@ -25,7 +25,7 @@ import {
  */
 export const reRollHandler: ModifierHandler<ReRollNode> = {
   name: "re-roll",
-  order: 4,
+  order: 5,
   appliesTo: ["pool"],
   apply<T extends ScoredItem>(
     items: readonly T[],

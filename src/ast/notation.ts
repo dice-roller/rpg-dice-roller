@@ -44,6 +44,9 @@ export function modifierToNotation(modifier: ModifierNode): string {
       const prefix = `!${modifier.compound ? "!" : ""}${modifier.penetrate ? "p" : ""}`;
       return `${prefix}${modifier.limit ?? ""}${modifier.amount !== undefined ? `:${modifier.amount}` : ""}${comparePoint(modifier.comparePoint, prefix === "!" && modifier.limit === undefined && modifier.amount === undefined)}`;
     }
+    case "explode-matching-batch": {
+      return `!m${modifier.limit ?? ""}${comparePoint(modifier.comparePoint)}${modifier.failureComparePoint === undefined ? "" : `f${comparePoint(modifier.failureComparePoint)}`}`;
+    }
     case "target":
       return modifier.rules
         .map(

@@ -119,19 +119,20 @@ describe("DieRegistry", () => {
 describe("ModifierRegistry", () => {
   const registry = new ModifierRegistry();
 
-  test("the 11 handlers run in the v5 order", () => {
+  test("the handlers run in built-in execution order", () => {
     expect(registry.handlers.map(({ name, order }) => [name, order])).toEqual([
       ["min", 1],
       ["max", 2],
-      ["explode", 3],
-      ["re-roll", 4],
-      ["unique", 5],
-      ["keep", 6],
-      ["drop", 7],
-      ["target", 8],
-      ["critical-success", 9],
-      ["critical-failure", 10],
-      ["sort", 11],
+      ["explode-matching-batch", 3],
+      ["explode", 4],
+      ["re-roll", 5],
+      ["unique", 6],
+      ["keep", 7],
+      ["drop", 8],
+      ["target", 9],
+      ["critical-success", 10],
+      ["critical-failure", 11],
+      ["sort", 12],
     ]);
   });
 
@@ -210,7 +211,7 @@ describe("ModifierRegistry", () => {
 
     expect(custom.remove("keep")).toBe(true);
     expect(custom.has("keep")).toBe(false);
-    expect(custom.handlers).toHaveLength(10);
+    expect(custom.handlers).toHaveLength(11);
     expect(() => custom.getOrThrow("keep")).toThrow(EvaluationError);
     expect(custom.remove("keep")).toBe(false);
     expect(registry.has("keep")).toBe(true);

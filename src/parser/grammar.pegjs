@@ -285,7 +285,8 @@ Modifiers
   }
 
 NonTargetModifier
-  = ExplodeModifier
+  = ExplodeMatchingBatchModifier
+  / ExplodeModifier
   / DropModifier
   / KeepModifier
   / ReRollModifier
@@ -300,6 +301,11 @@ NonTargetModifier
 ExplodeModifier
   = "!" compound:"!"? penetrate:"p"? limit:ModifierLimit? amount:ModifierAmount? comparePoint:ComparePoint? {
     return ast.createExplode(compound !== null, penetrate !== null, comparePoint ?? undefined, limit ?? undefined, amount ?? undefined);
+  }
+
+ExplodeMatchingBatchModifier
+  = "!m" limit:ModifierLimit? comparePoint:ComparePoint? failureComparePoint:("f" ComparePoint)? {
+    return ast.createExplodeMatchingBatch(comparePoint ?? undefined, limit ?? undefined, failureComparePoint?.[1] ?? undefined);
   }
 
 ModifierLimit

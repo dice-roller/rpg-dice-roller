@@ -15,7 +15,7 @@ import { dropAt, indexesByValue } from "./utils.js";
  */
 export const keepHandler: ModifierHandler<KeepNode> = {
   name: "keep",
-  order: 6,
+  order: 7,
   appliesTo: ["pool", "group"],
   groupHandling: "flatten",
   apply(items, { modifier }) {

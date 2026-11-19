@@ -12,7 +12,7 @@ import type { ModifierHandler } from "../types.js";
  */
 export const targetHandler: ModifierHandler<TargetNode> = {
   name: "target",
-  order: 8,
+  order: 9,
   appliesTo: ["pool", "group"],
   apply(items, { modifier }) {
     validateTargetAmounts(modifier);
