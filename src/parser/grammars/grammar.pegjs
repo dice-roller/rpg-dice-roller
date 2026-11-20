@@ -7,7 +7,7 @@ Main = Expression
 
 // Expression / roll groups
 RollGroup
-  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* descriptions:__ {
+  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:GroupModifier* descriptions:__ {
     return new RollGroup(
       [
         expr,
@@ -63,6 +63,13 @@ Modifier
   / SortingModifier
   / MaxModifier
   / MinModifier
+
+// Modifiers supported by roll groups
+GroupModifier
+  = TargetModifier
+  / DropModifier
+  / KeepModifier
+  / SortingModifier
 
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
