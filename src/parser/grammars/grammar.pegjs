@@ -7,7 +7,7 @@ Main = Expression
 
 // Expression / roll groups
 RollGroup
-  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:Modifier* descriptions:__ {
+  = "{" _ expr:Expression exprs:(_ "," _ Expression)* _ "}" modifiers:GroupModifier* descriptions:__ {
     return new RollGroup(
       [
         expr,
@@ -63,6 +63,13 @@ Modifier
   / SortingModifier
   / MaxModifier
   / MinModifier
+
+// Modifiers supported by roll groups
+GroupModifier
+  = TargetModifier
+  / DropModifier
+  / KeepModifier
+  / SortingModifier
 
 // Explode, Penetrate, Compound modifier
 ExplodeModifier
@@ -151,7 +158,7 @@ CompareOperator
 // Either a positive integer or an expression within parenthesis (Handy for dice qty or sides)
 IntegerOrExpression
   = IntegerNumber
-  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return evaluate(text()) }
+  / l:"(" _ expr:(FloatNumber (_ Operator _ FloatNumber)+) _ r:")" { return evaluate(text().replace(/\*\*/g, '^')) }
 
 // Generic expression
 Expression
