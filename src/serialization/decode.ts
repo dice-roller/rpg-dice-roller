@@ -15,6 +15,7 @@ import { RESULT_FLAGS } from "../results/flags.js";
 import type { ExpressionResult } from "../results/types.js";
 import { DATA_VERSION, NON_FINITE_NUMBERS } from "./formats.js";
 import type {
+  ConciseRollData,
   EncodedExportData,
   ExportData,
   HistoryData,
@@ -35,9 +36,110 @@ import type {
  * @throws {ImportError} the data is malformed, or has an unknown `type` or `version`
  */
 export function decode(input: string | EncodedExportData): ExportData {
-  const data: unknown = typeof input === "string" ? parse(input) : input;
+  return exportData(readImport(input), "data");
+}
 
-  return exportData(hydrate(data), "data");
+/** Reads either a versioned export or an unversioned concise roll. */
+export function decodeImport(
+  input: string | EncodedExportData | ConciseRollData,
+): ExportData | ConciseRollData {
+  const data = record(readImport(input), "data");
+
+  if (
+    !Object.hasOwn(data, "type") &&
+    !Object.hasOwn(data, "version") &&
+    !Object.hasOwn(data, "result") &&
+    Object.hasOwn(data, "rolls")
+  ) {
+    return data as unknown as ConciseRollData;
+  }
+
+  return exportData(data, "data");
+}
+
+function readImport(
+  input: string | EncodedExportData | ConciseRollData,
+): unknown {
+  return hydrate(typeof input === "string" ? parse(input) : input);
+}
+
+/** Validates the shape before the supplied results are matched against their notation. */
+export function conciseRollData(value: unknown): ConciseRollData {
+  const data = record(value, "data");
+  if (Object.hasOwn(data, "rawRolls")) {
+    fail("data.rawRolls", "cannot be combined with concise results");
+  }
+  string(data.notation, "data.notation");
+  conciseEach(data.rolls, "data.rolls", (pool, poolPath) =>
+    conciseEach(pool, poolPath, (die, diePath) => {
+      if (typeof die === "number") {
+        finite(die, diePath);
+        return;
+      }
+
+      const item = record(die, diePath);
+      finite(item.value, `${diePath}.value`);
+      optional(item.initialValue, `${diePath}.initialValue`, finite);
+      conciseScore(item, diePath);
+    }),
+  );
+  optional(data.groups, "data.groups", (groups, path) =>
+    indexedEntries(groups, path, (value, groupPath) => {
+      const group = record(value, groupPath);
+      optional(group.order, `${groupPath}.order`, (order, orderPath) =>
+        conciseEach(order, orderPath, nonNegativeIndex),
+      );
+      optional(group.members, `${groupPath}.members`, (members, membersPath) =>
+        indexedEntries(members, membersPath, (member, memberPath) =>
+          conciseScore(record(member, memberPath), memberPath),
+        ),
+      );
+    }),
+  );
+
+  return data as unknown as ConciseRollData;
+}
+
+function conciseScore(item: Data, path: string): void {
+  optional(item.value, `${path}.value`, finite);
+  optional(item.calculationValue, `${path}.calculationValue`, finite);
+  optional(item.useInTotal, `${path}.useInTotal`, boolean);
+  optional(item.flags, `${path}.flags`, (flags, flagPath) =>
+    conciseEach(flags, flagPath, (flag, path) =>
+      oneOf(flag, RESULT_FLAGS, path),
+    ),
+  );
+}
+
+function conciseEach(
+  value: unknown,
+  path: string,
+  validate: (entry: unknown, path: string) => void,
+): void {
+  for (const [index, entry] of list(value, path).entries()) {
+    validate(entry, `${path}[${index}]`);
+  }
+}
+
+function nonNegativeIndex(value: unknown, path: string): void {
+  if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0) {
+    fail(path, "expected a non-negative safe integer");
+  }
+}
+
+function indexedEntries(
+  value: unknown,
+  path: string,
+  validate: (entry: unknown, path: string) => void,
+): void {
+  for (const [key, entry] of Object.entries(record(value, path))) {
+    const entryPath = `${path}.${key}`;
+    if (!/^(0|[1-9]\d*)$/.test(key)) {
+      fail(entryPath, "expected a non-negative index");
+    }
+    nonNegativeIndex(Number(key), entryPath);
+    validate(entry, entryPath);
+  }
 }
 
 /* ------------------------------------------------------------------------------------------------

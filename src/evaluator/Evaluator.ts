@@ -624,7 +624,7 @@ export class Evaluator {
     return { items: modifiedItems, modifierArguments };
   }
 
-  private resolveModifier(
+  protected resolveModifier(
     modifier: ModifierNode,
     modifierIndex: number,
     ctx: RollContext,

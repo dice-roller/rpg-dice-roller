@@ -1,4 +1,8 @@
-import type { ExpressionResult } from "../results/types.js";
+import type {
+  DieResult,
+  ExpressionResult,
+  ScoredItem,
+} from "../results/types.js";
 
 /**
  * - `object`: plain JSON-safe data (`EncodedRollData` / `EncodedHistoryData`)
@@ -36,6 +40,29 @@ export interface HistoryData {
   readonly rolls: readonly RollData[];
   /** Can be `NaN`, e.g. for a history of `1/0` and `-1/0`. */
   readonly total: number;
+}
+
+/** A finished die result. A number sets all three values and includes the die in the total. */
+export type ConciseDieResult =
+  | number
+  | (Pick<DieResult, "value"> & Partial<Omit<DieResult, "type" | "value">>);
+
+/** Overrides for a group's finished members, indexed by their position in the notation. */
+export interface ConciseGroupResult {
+  /** A permutation of member indexes in the order they should appear in the result. */
+  readonly order?: readonly number[];
+  /** Scoring fields keyed by the member's original index. */
+  readonly members?: Readonly<Record<number, Partial<ScoredItem>>>;
+}
+
+/** Hand-written, evaluated results that can be expanded into a roll snapshot. */
+export interface ConciseRollData {
+  readonly type?: never;
+  readonly notation: string;
+  /** One array per visited pool, with the parent before any pools in its parameters. */
+  readonly rolls: readonly (readonly ConciseDieResult[])[];
+  /** Overrides keyed by the group's zero-based encounter index. */
+  readonly groups?: Readonly<Record<number, ConciseGroupResult>>;
 }
 
 /** Anything that can be exported / imported. */
