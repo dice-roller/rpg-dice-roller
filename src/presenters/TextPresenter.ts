@@ -23,6 +23,7 @@ import type {
 } from "../results/types.js";
 import type { ModifierNode } from "../ast/nodes.js";
 import type { Roll } from "../Roll.js";
+import type { DrawMode } from "../evaluator/DrawDieRequest.js";
 import type { RollHistory } from "../RollHistory.js";
 import { TreePresenter } from "./TreePresenter.js";
 
@@ -140,7 +141,7 @@ export class TextPresenter extends TreePresenter<string> {
   }
 
   /** `notation: <result> = total`. */
-  protected roll(roll: Roll<unknown>): string {
+  protected roll(roll: Roll<unknown, DrawMode>): string {
     return `${roll.notation}: ${this.visit(roll.result)} = ${this.formatNumber(roll.total)}`;
   }
 

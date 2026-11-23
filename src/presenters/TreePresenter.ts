@@ -13,6 +13,7 @@ import type {
   UnaryResult,
 } from "../results/types.js";
 import type { Roll } from "../Roll.js";
+import type { DrawMode } from "../evaluator/DrawDieRequest.js";
 import type { RollHistory } from "../RollHistory.js";
 import type { Presentable } from "./Presentable.js";
 import { isRoll, isRollHistory } from "./Presentable.js";
@@ -75,7 +76,7 @@ export abstract class TreePresenter<T> implements Presenter<T> {
 
   protected abstract history(history: RollHistory): T;
   /** Usually wraps `this.visit(roll.result)`. */
-  protected abstract roll(roll: Roll<unknown>): T;
+  protected abstract roll(roll: Roll<unknown, DrawMode>): T;
   protected abstract number(result: NumberResult): T;
   protected abstract pool(result: PoolResult): T;
   protected abstract die(result: DieResult, pool: PoolResult): T;

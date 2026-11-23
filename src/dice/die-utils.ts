@@ -217,6 +217,42 @@ export function rollDie(die: ResolvedDie, ctx: RollContext): number {
   }
 }
 
+/** Validates a face returned by an external source against the resolved die. */
+export function validateFaceValue(die: ResolvedDie, face: unknown): void {
+  if (typeof face !== "number" || !Number.isFinite(face)) {
+    throw new EvaluationError(
+      `External draw for die "${die.notation}" returned a value that isn't a finite number: ${String(face)}`,
+    );
+  }
+
+  if (isFacesDie(die.source)) {
+    if (!die.source.faces.includes(face)) {
+      throw new EvaluationError(
+        `External draw for die "${die.notation}" returned ${face}, which isn't one of its faces`,
+      );
+    }
+
+    return;
+  }
+
+  if (face < die.min || face > die.max) {
+    throw new EvaluationError(
+      `External draw for die "${die.notation}" returned ${face}, outside the range ${die.min} to ${die.max}`,
+    );
+  }
+
+  if (
+    die.source.roll === undefined &&
+    Number.isSafeInteger(die.min) &&
+    Number.isSafeInteger(die.max) &&
+    !Number.isInteger(face)
+  ) {
+    throw new EvaluationError(
+      `External draw for die "${die.notation}" returned fractional face ${face} for an integer die`,
+    );
+  }
+}
+
 function rollFunction(
   die: DieLike,
   { min, max }: DieSnapshot,

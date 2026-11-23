@@ -7,6 +7,7 @@ import {
   faceCount,
   resolveDie,
   rollDie,
+  validateFaceValue,
 } from "../../src/dice/die-utils.js";
 import {
   faceDie,
@@ -239,6 +240,40 @@ describe("resolveDie", () => {
     ["a non-string notation", { min: 1, max: 6, notation: 6 }],
   ])("%s throws a ValidationError", (_, die) => {
     expect(() => resolveDie(die as DieLike)).toThrow(ValidationError);
+  });
+});
+
+describe("validateFaceValue", () => {
+  test.each([1, 6])("accepts %s for a d6", (face) => {
+    expect(() =>
+      validateFaceValue(resolveDie(standardDie(6)), face),
+    ).not.toThrow();
+  });
+
+  test.each<[string, unknown]>([
+    ["a non-numeric face", "six"],
+    ["a NaN face", Number.NaN],
+    ["an infinite face", Number.POSITIVE_INFINITY],
+    ["a face below the range", 0],
+    ["a face above the range", 7],
+    ["a fractional face for an integer die", 3.5],
+  ])("rejects %s", (_, face) => {
+    expect(() => validateFaceValue(resolveDie(standardDie(6)), face)).toThrow(
+      EvaluationError,
+    );
+  });
+
+  test("accepts only values in a die's face list", () => {
+    const die = resolveDie(faceDie([1, 2, 3]));
+
+    expect(() => validateFaceValue(die, 2)).not.toThrow();
+    expect(() => validateFaceValue(die, 4)).toThrow(EvaluationError);
+  });
+
+  test("allows fractional faces for a range die with a custom roll", () => {
+    const die = resolveDie({ min: 0.5, max: 1.5, roll: () => 1 });
+
+    expect(() => validateFaceValue(die, 1.25)).not.toThrow();
   });
 });
 

@@ -6,6 +6,11 @@ import {
   resolveRollLimits,
 } from "./evaluator/RollContext.js";
 import type { RollLimits, RollMode } from "./evaluator/RollContext.js";
+import type {
+  DrawDieCallback,
+  DrawDieOptions,
+  DrawMode,
+} from "./evaluator/DrawDieRequest.js";
 import { ValidationError } from "./errors/ValidationError.js";
 import type { RollInputData } from "./evaluator/roll-input-data.js";
 import { snapshotRollInputData } from "./evaluator/roll-input-data.js";
@@ -27,7 +32,7 @@ import type { ExpressionResult } from "./results/types.js";
  *
  * @typeParam T the output type of the presenter
  */
-export interface RollOptions<T = string> {
+export interface RollOptions<T = string, Mode extends DrawMode = DrawMode> {
   /** The source of randomness (default `nativeMath`); may be a name, engine instance, or definition. */
   engine?: EngineOption;
   /** Default nested values available through `$path`; each roll snapshots these unless replaced by per-roll data. */
@@ -40,8 +45,15 @@ export interface RollOptions<T = string> {
   modifiers?: ModifierRegistry;
   /** Safety limits: `maxQty` 999, `maxIterations` 1000 and `maxGeneratedRolls` 1,000,000 generated rolls per pool/evaluation; each must be a positive safe integer. The generated-roll limit excludes initial dice and truncates repeating modifiers without throwing. */
   limits?: Partial<RollLimits>;
+  /** External dice source used instead of the random generator when configured. */
+  drawDie?: DrawDieOptionsForMode<Mode>;
   /** Used by `Roll.present()` and `Roller.present()` (default: the default `TextPresenter`). */
   presenter?: Presenter<T>;
+}
+
+interface DrawDieOptionsForMode<Mode extends DrawMode> {
+  readonly drawMode: Mode;
+  readonly callback: DrawDieCallback;
 }
 
 /**
@@ -53,12 +65,13 @@ export interface RollOptions<T = string> {
  *
  * @typeParam T the output type of the presenter
  */
-export class RollSettings<T = string> {
+export class RollSettings<T = string, Mode extends DrawMode = "sync"> {
   readonly generator: NumberGenerator;
   readonly engines: EngineRegistry;
   readonly dice: DieRegistry;
   readonly modifiers: ModifierRegistry;
   readonly limits: RollLimits;
+  readonly drawDie?: DrawDieOptionsForMode<Mode>;
   /** A validated, deeply frozen snapshot of the default roll data. */
   readonly data: RollInputData;
   readonly presenter: Presenter<T>;
@@ -66,25 +79,29 @@ export class RollSettings<T = string> {
   readonly evaluator: Evaluator;
 
   /** Resolves options and validates limits; supplied registries and presenter are shared by reference. */
-  constructor(options: RollOptions<T> = {}) {
-    this.limits = Object.freeze(resolveRollLimits(options.limits));
-    this.data = snapshotRollInputData(options.data ?? {});
+  constructor(options?: RollOptions<T, Mode>) {
+    const config: RollOptions<T, Mode> = options ?? {};
+    this.limits = Object.freeze(resolveRollLimits(config.limits));
+    this.drawDie = validateDrawDieOptions(
+      config.drawDie as DrawDieOptions | undefined,
+    ) as DrawDieOptionsForMode<Mode> | undefined;
+    this.data = snapshotRollInputData(config.data ?? {});
     if (
-      options.engines !== undefined &&
-      !(options.engines instanceof EngineRegistry)
+      config.engines !== undefined &&
+      !(config.engines instanceof EngineRegistry)
     ) {
       throw new ValidationError("The engines option must be an EngineRegistry");
     }
 
-    this.engines = options.engines ?? new EngineRegistry();
+    this.engines = config.engines ?? new EngineRegistry();
     this.generator = new NumberGenerator(
-      resolveEngineOption(options.engine, this.engines),
+      resolveEngineOption(config.engine, this.engines),
     );
-    this.dice = options.dice ?? new DieRegistry();
-    this.modifiers = options.modifiers ?? new ModifierRegistry();
+    this.dice = config.dice ?? new DieRegistry();
+    this.modifiers = config.modifiers ?? new ModifierRegistry();
     // without a presenter, T is the default `string`
     this.presenter =
-      options.presenter ?? (defaultTextPresenter as unknown as Presenter<T>);
+      config.presenter ?? (defaultTextPresenter as unknown as Presenter<T>);
     this.parser = new Parser({ maxQty: this.limits.maxQty });
     this.evaluator = new Evaluator({
       dice: this.dice,
@@ -93,44 +110,63 @@ export class RollSettings<T = string> {
   }
 
   /** Returns settings as they are, or creates settings from options (undefined: fresh defaults). */
-  static from<T = string>(
-    options?: RollOptions<T> | RollSettings<T>,
-  ): RollSettings<T> {
+  static from<T = string, Mode extends DrawMode = "sync">(
+    options?: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): RollSettings<T, Mode> {
     if (options instanceof RollSettings) {
       return options;
     }
 
-    return new RollSettings(options);
+    return new RollSettings<T, Mode>(options);
   }
 
   /** Creates settings with a new engine and all other configuration shared with the source. */
-  static withEngine<T>(
-    settings: RollSettings<T>,
+  static withEngine<T, Mode extends DrawMode>(
+    settings: RollSettings<T, Mode>,
     engine: EngineOption,
-  ): RollSettings<T> {
-    return new RollSettings({
+  ): RollSettings<T, Mode> {
+    return new RollSettings<T, Mode>({
       engine,
       data: settings.data,
       engines: settings.engines,
       dice: settings.dice,
       modifiers: settings.modifiers,
       limits: settings.limits,
+      drawDie: settings.drawDie,
       presenter: settings.presenter,
     });
   }
 
   /** Creates settings with replacement data and all other configuration shared with the source. */
-  static withData<T>(
-    settings: RollSettings<T>,
+  static withData<T, Mode extends DrawMode>(
+    settings: RollSettings<T, Mode>,
     data: RollInputData,
-  ): RollSettings<T> {
-    return new RollSettings({
+  ): RollSettings<T, Mode> {
+    return new RollSettings<T, Mode>({
       engine: settings.generator.engine,
       data,
       engines: settings.engines,
       dice: settings.dice,
       modifiers: settings.modifiers,
       limits: settings.limits,
+      drawDie: settings.drawDie,
+      presenter: settings.presenter,
+    });
+  }
+
+  /** Creates settings with a new external dice source and all other configuration shared. */
+  static withDrawDie<T, Mode extends DrawMode>(
+    settings: RollSettings<T, DrawMode>,
+    drawDie: DrawDieOptionsForMode<Mode> | undefined,
+  ): RollSettings<T, Mode> {
+    return new RollSettings<T, Mode>({
+      engine: settings.generator.engine,
+      data: settings.data,
+      engines: settings.engines,
+      dice: settings.dice,
+      modifiers: settings.modifiers,
+      limits: settings.limits,
+      drawDie,
       presenter: settings.presenter,
     });
   }
@@ -152,10 +188,51 @@ export class RollSettings<T = string> {
         generator: this.generator,
         mode,
         limits: this.limits,
+        drawDie: this.drawDie as DrawDieOptions | undefined,
         data,
       }),
     );
   }
+
+  /** Evaluates the AST asynchronously using the configured external dice source. */
+  evaluateAsync(
+    expression: ExpressionNode,
+    mode: RollMode = "random",
+    data: RollInputData = this.data,
+  ): Promise<ExpressionResult> {
+    return this.evaluator.evaluateAsync(
+      expression,
+      createRollContext({
+        generator: this.generator,
+        mode,
+        limits: this.limits,
+        drawDie: this.drawDie as DrawDieOptions | undefined,
+        data,
+      }),
+    );
+  }
+}
+
+function validateDrawDieOptions(
+  options: DrawDieOptions | undefined,
+): DrawDieOptions | undefined {
+  if (options === undefined) {
+    return undefined;
+  }
+
+  if (typeof options !== "object" || options === null) {
+    throw new ValidationError("The drawDie option must be an object");
+  }
+
+  if (options.drawMode !== "sync" && options.drawMode !== "async") {
+    throw new ValidationError('drawDie.drawMode must be "sync" or "async"');
+  }
+
+  if (typeof options.callback !== "function") {
+    throw new ValidationError("drawDie.callback must be a function");
+  }
+
+  return options;
 }
 
 function resolveEngineOption(

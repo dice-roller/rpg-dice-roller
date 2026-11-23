@@ -2,7 +2,13 @@ import type { DescriptionNode, ExpressionNode } from "./ast/nodes.js";
 import { nodeToNotation } from "./ast/notation.js";
 import { validateExpression } from "./ast/validation.js";
 import { ImportError } from "./errors/ImportError.js";
+import { ValidationError } from "./errors/ValidationError.js";
 import { averageResult, containsConditional } from "./evaluator/average.js";
+import type {
+  DrawDieAsyncOptions,
+  DrawDieSyncOptions,
+  DrawMode,
+} from "./evaluator/DrawDieRequest.js";
 import type { RollInputData } from "./evaluator/roll-input-data.js";
 import { snapshotRollInputData } from "./evaluator/roll-input-data.js";
 import type { Presenter } from "./presenters/Presenter.js";
@@ -23,6 +29,32 @@ import type {
 
 /** Rounds a total to 2 decimal places, as in v5. */
 const roundTotal = (value: number): number => parseFloat(value.toFixed(2));
+
+export type SyncRollOptions<T = string> = Omit<RollOptions<T>, "drawDie"> & {
+  drawDie?: DrawDieSyncOptions;
+};
+
+export type AsyncRollOptions<T = string> = Omit<RollOptions<T>, "drawDie"> & {
+  drawDie: DrawDieAsyncOptions;
+};
+
+type RollInput = string | ExpressionNode | RollData | ConciseRollData;
+type RollExpressionInput = string | ExpressionNode;
+
+const PREPARED_ROLL = Symbol("prepared roll");
+
+interface PreparedRoll<T> {
+  readonly [PREPARED_ROLL]: true;
+  readonly input: RollExpressionInput;
+  readonly settings: RollSettings<T, DrawMode>;
+  readonly data: RollInputData;
+  readonly notation: string;
+  readonly result: ExpressionResult;
+  readonly total: number;
+  readonly minTotal: number | undefined;
+  readonly maxTotal: number | undefined;
+  readonly averageTotal: number | undefined;
+}
 
 /** The first description in the expression tree. */
 function findDescription(node: ExpressionNode): DescriptionNode | undefined {
@@ -66,6 +98,98 @@ function firstDescription(
   return undefined;
 }
 
+function prepareRoll<T>(
+  input: RollInput,
+  settings: RollSettings<T, DrawMode>,
+  asyncMode: false,
+): PreparedRoll<T>;
+function prepareRoll<T>(
+  input: RollInput,
+  settings: RollSettings<T, DrawMode>,
+  asyncMode: true,
+): Promise<PreparedRoll<T>>;
+function prepareRoll<T>(
+  input: RollInput,
+  settings: RollSettings<T, DrawMode>,
+  asyncMode: boolean,
+): PreparedRoll<T> | Promise<PreparedRoll<T>> {
+  const data = snapshotRollInputData(settings.data);
+  const createPrepared = (
+    expressionInput: RollExpressionInput,
+    notation: string,
+    result: ExpressionResult,
+    total = roundTotal(result.value),
+    minTotal?: number,
+    maxTotal?: number,
+    averageTotal?: number,
+  ): PreparedRoll<T> => ({
+    [PREPARED_ROLL]: true,
+    input: expressionInput,
+    settings,
+    data,
+    notation,
+    result,
+    total,
+    minTotal,
+    maxTotal,
+    averageTotal,
+  });
+
+  if (typeof input === "object" && input.type === "roll") {
+    const prepared = createPrepared(
+      input.result.node,
+      input.notation,
+      input.result,
+      input.total,
+      input.minTotal,
+      input.maxTotal,
+      input.averageTotal,
+    );
+
+    return asyncMode ? Promise.resolve(prepared) : prepared;
+  }
+
+  if (
+    typeof input === "object" &&
+    input.type === undefined &&
+    "rolls" in input
+  ) {
+    const result = ConciseRollEvaluator.restore(input, settings);
+    const prepared = createPrepared(result.node, input.notation, result);
+
+    return asyncMode ? Promise.resolve(prepared) : prepared;
+  }
+
+  if (!asyncMode && settings.drawDie?.drawMode === "async") {
+    throw new ValidationError(
+      "Use Roll.create() to construct a roll with an asynchronous drawDie source",
+    );
+  }
+
+  if (typeof input !== "string") {
+    validateExpression(input);
+  }
+
+  const notation = typeof input === "string" ? input : nodeToNotation(input);
+  const expression = typeof input === "string" ? settings.parse(input) : input;
+
+  if (asyncMode) {
+    return settings
+      .evaluateAsync(expression, "random", data)
+      .then((result) => createPrepared(input, notation, result));
+  }
+
+  return createPrepared(
+    input,
+    notation,
+    settings.evaluate(expression, "random", data),
+  );
+}
+
+function isPreparedRoll<T>(input: unknown): input is PreparedRoll<T> {
+  return typeof input === "object" && input !== null && PREPARED_ROLL in input;
+}
+
 /**
  * One evaluated notation: the result tree and its totals.
  *
@@ -87,7 +211,7 @@ function firstDescription(
  *
  * @typeParam T the output type of the configured presenter
  */
-export class Roll<T = string> {
+export class Roll<T = string, Mode extends DrawMode = "sync"> {
   /** The original notation (or the notation of an AST input). */
   readonly notation: string;
   /** The evaluated expression tree, including individual dice results. */
@@ -99,7 +223,7 @@ export class Roll<T = string> {
   #maxTotal: number | undefined;
   #averageTotal: number | undefined;
   readonly #input: string | ExpressionNode;
-  readonly #settings: RollSettings<T>;
+  readonly #settings: RollSettings<T, DrawMode>;
   readonly #data: RollInputData;
 
   /**
@@ -112,45 +236,57 @@ export class Roll<T = string> {
    * @throws {ValidationError | NotationError} the notation is invalid
    */
   constructor(
-    input: string | ExpressionNode | RollData | ConciseRollData,
-    options?: RollOptions<T> | RollSettings<T>,
+    input: RollInput | PreparedRoll<T>,
+    options?: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
   ) {
-    this.#settings = RollSettings.from(options);
-    this.#data = snapshotRollInputData(this.#settings.data);
+    const settings = isPreparedRoll<T>(input)
+      ? input.settings
+      : RollSettings.from<T, DrawMode>(options);
+    const prepared = isPreparedRoll<T>(input)
+      ? input
+      : prepareRoll(input, settings, false);
 
-    if (typeof input === "object" && input.type === "roll") {
-      // the expression, rather than the notation, so builder rolls (whose notation may be
-      // display-only) can be re-rolled
-      this.#input = input.result.node;
-      this.notation = input.notation;
-      this.result = input.result;
-      this.total = input.total;
-      this.#minTotal = input.minTotal;
-      this.#maxTotal = input.maxTotal;
-      this.#averageTotal = input.averageTotal;
-    } else if (
-      typeof input === "object" &&
-      input.type === undefined &&
-      "rolls" in input
-    ) {
-      this.result = ConciseRollEvaluator.restore(input, this.#settings);
-      this.#input = this.result.node;
-      this.notation = input.notation;
-      this.total = roundTotal(this.result.value);
-    } else {
-      this.#input = input;
+    this.#input = prepared.input;
+    this.#settings = prepared.settings;
+    this.#data = prepared.data;
+    this.notation = prepared.notation;
+    this.result = prepared.result;
+    this.total = prepared.total;
+    this.#minTotal = prepared.minTotal;
+    this.#maxTotal = prepared.maxTotal;
+    this.#averageTotal = prepared.averageTotal;
+  }
 
-      if (typeof input !== "string") {
-        validateExpression(input);
-      }
+  /** Creates a fully initialized roll using the configured synchronous or asynchronous driver. */
+  static create<T = string>(
+    input: RollInput,
+    options?: SyncRollOptions<T>,
+  ): Roll<T, "sync">;
+  static create<T = string>(
+    input: RollInput,
+    options: AsyncRollOptions<T>,
+  ): Promise<Roll<T, "async">>;
+  static create<T = string, Mode extends DrawMode = DrawMode>(
+    input: RollInput,
+    options: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Mode extends "async" ? Promise<Roll<T, "async">> : Roll<T, "sync">;
+  static create<T = string, Mode extends DrawMode = DrawMode>(
+    input: RollInput,
+    options?: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Mode extends "async" ? Promise<Roll<T, "async">> : Roll<T, "sync">;
+  static create<T = string>(
+    input: RollInput,
+    options?: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
+  ): Roll<T, "sync"> | Promise<Roll<T, "async">> {
+    const settings = RollSettings.from<T, DrawMode>(options);
 
-      this.notation = typeof input === "string" ? input : nodeToNotation(input);
-      const expression =
-        typeof input === "string" ? this.#settings.parse(input) : input;
-
-      this.result = this.#settings.evaluate(expression, "random", this.#data);
-      this.total = roundTotal(this.result.value);
+    if (settings.drawDie?.drawMode === "async") {
+      return Promise.resolve()
+        .then(() => prepareRoll(input, settings, true))
+        .then((prepared) => new Roll(prepared));
     }
+
+    return new Roll(input, settings);
   }
 
   /**
@@ -163,9 +299,28 @@ export class Roll<T = string> {
    */
   static fromJSON<T = string>(
     data: EncodedRollData | ConciseRollData,
-    options?: RollOptions<T> | RollSettings<T>,
-  ): Roll<T> {
-    return Roll.import(data, options);
+    options: SyncRollOptions<T>,
+  ): Roll<T, "sync">;
+  static fromJSON<T = string>(
+    data: EncodedRollData | ConciseRollData,
+    options: AsyncRollOptions<T>,
+  ): Roll<T, "async">;
+  static fromJSON<T = string, Mode extends DrawMode = DrawMode>(
+    data: EncodedRollData | ConciseRollData,
+    options: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Roll<T, Mode>;
+  static fromJSON<T = string>(
+    data: EncodedRollData | ConciseRollData,
+  ): Roll<T, "sync">;
+  static fromJSON<T = string, Mode extends DrawMode = DrawMode>(
+    data: EncodedRollData | ConciseRollData,
+    options?: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Roll<T, Mode>;
+  static fromJSON<T = string>(
+    data: EncodedRollData | ConciseRollData,
+    options?: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
+  ): Roll<T, DrawMode> {
+    return Roll.import<T, DrawMode>(data, options);
   }
 
   /**
@@ -175,8 +330,27 @@ export class Roll<T = string> {
    */
   static import<T = string>(
     data: string | EncodedRollData | ConciseRollData,
-    options?: RollOptions<T> | RollSettings<T>,
-  ): Roll<T> {
+    options: SyncRollOptions<T>,
+  ): Roll<T, "sync">;
+  static import<T = string>(
+    data: string | EncodedRollData | ConciseRollData,
+    options: AsyncRollOptions<T>,
+  ): Roll<T, "async">;
+  static import<T = string, Mode extends DrawMode = DrawMode>(
+    data: string | EncodedRollData | ConciseRollData,
+    options: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Roll<T, Mode>;
+  static import<T = string>(
+    data: string | EncodedRollData | ConciseRollData,
+  ): Roll<T, "sync">;
+  static import<T = string, Mode extends DrawMode = DrawMode>(
+    data: string | EncodedRollData | ConciseRollData,
+    options?: RollOptions<T, Mode> | RollSettings<T, Mode>,
+  ): Roll<T, Mode>;
+  static import<T = string>(
+    data: string | EncodedRollData | ConciseRollData,
+    options?: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
+  ): Roll<T, DrawMode> {
     const decoded = decodeImport(data);
 
     if (decoded.type === "history") {
@@ -185,7 +359,7 @@ export class Roll<T = string> {
       );
     }
 
-    return new Roll<T>(decoded, options);
+    return new Roll<T, DrawMode>(decoded, options);
   }
 
   /** The AST that was evaluated. */
@@ -226,7 +400,14 @@ export class Roll<T = string> {
   }
 
   /** Rolls the original input again; omitted data reuses this roll's snapshot, supplied data replaces it, and an engine override applies only to this reroll. Does not add to a history. */
-  reroll(options?: { engine?: EngineOption; data?: RollInputData }): Roll<T> {
+  reroll(options?: {
+    engine?: EngineOption;
+    data?: RollInputData;
+  }): Mode extends "async" ? Promise<Roll<T, "async">> : Roll<T, "sync">;
+  reroll(
+    this: Roll<T, Mode>,
+    options?: { engine?: EngineOption; data?: RollInputData },
+  ): Roll<T, "sync"> | Promise<Roll<T, "async">> {
     const engine = options?.engine;
     let settings =
       engine === undefined
@@ -237,7 +418,7 @@ export class Roll<T = string> {
       settings = RollSettings.withData(settings, options.data);
     }
 
-    return new Roll<T>(this.#input, settings);
+    return Roll.create<T>(this.#input, settings);
   }
 
   /** Presents the roll with the presenter, or the one from the options (default `TextPresenter`). */

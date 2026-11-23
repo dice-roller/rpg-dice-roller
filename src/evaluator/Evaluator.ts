@@ -14,7 +14,7 @@ import type {
   UnaryNode,
 } from "../ast/nodes.js";
 import type { DieRegistry } from "../dice/DieRegistry.js";
-import { dieSnapshot, resolveDie, rollDie } from "../dice/die-utils.js";
+import { dieSnapshot, resolveDie } from "../dice/die-utils.js";
 import type { ResolvedDie } from "../dice/types.js";
 import { EvaluationError } from "../errors/EvaluationError.js";
 import { ValidationError } from "../errors/ValidationError.js";
@@ -50,9 +50,12 @@ import type {
   ScoredItem,
   UnaryResult,
 } from "../results/types.js";
+import type { EvaluationDrawRequest } from "./EvaluationDrawRequest.js";
 import { functions, negate, operators } from "./math.js";
 import type { RollContext } from "./RollContext.js";
 import { resolveReference } from "./roll-input-data.js";
+import { AsyncEvaluationDriver } from "./AsyncEvaluationDriver.js";
+import { SyncEvaluationDriver } from "./SyncEvaluationDriver.js";
 
 /** The number of arguments each maths function takes (matching the grammar). */
 const functionArity: Readonly<Record<MathFunctionName, number>> = {
@@ -77,6 +80,8 @@ interface ModifierApplication<T extends ScoredItem> {
   readonly items: T[];
   readonly modifierArguments: readonly ModifierArgumentResult[];
 }
+
+type GeneratorResult<T> = T | Generator<EvaluationDrawRequest, T, number>;
 
 /**
  * The sum of `calculationValue` for the items that are `useInTotal`.
@@ -116,33 +121,55 @@ export class Evaluator {
    * @throws {EvaluationError} if a node, quantity, operation or modifier result is invalid
    */
   evaluate(node: ExpressionNode, ctx: RollContext): ExpressionResult {
-    validateExpression(node);
-    return this.evaluateNode(node, ctx);
+    return new SyncEvaluationDriver().evaluate(
+      this.evaluateGenerator(node, ctx),
+      ctx,
+    );
   }
 
-  protected evaluateNode(
+  /** Evaluates an expression tree while awaiting externally supplied die faces. */
+  evaluateAsync(
     node: ExpressionNode,
     ctx: RollContext,
-  ): ExpressionResult {
+  ): Promise<ExpressionResult> {
+    return new AsyncEvaluationDriver().evaluate(
+      this.evaluateGenerator(node, ctx),
+      ctx,
+    );
+  }
+
+  /** Creates a resumable evaluation of an expression tree. */
+  *evaluateGenerator(
+    node: ExpressionNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, ExpressionResult, number> {
+    validateExpression(node);
+    return yield* this.evaluateNode(node, ctx);
+  }
+
+  protected *evaluateNode(
+    node: ExpressionNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, ExpressionResult, number> {
     switch (node.type) {
       case "number":
         return this.evaluateNumber(node, ctx);
       case "pool":
-        return this.evaluatePool(node, ctx);
+        return yield* this.evaluatePool(node, ctx);
       case "group":
-        return this.evaluateGroup(node, ctx);
+        return yield* this.evaluateGroup(node, ctx);
       case "binary":
-        return this.evaluateBinary(node, ctx);
+        return yield* this.evaluateBinary(node, ctx);
       case "comparison":
-        return this.evaluateComparison(node, ctx);
+        return yield* this.evaluateComparison(node, ctx);
       case "unary":
-        return this.evaluateUnary(node, ctx);
+        return yield* this.evaluateUnary(node, ctx);
       case "paren":
-        return this.evaluateParen(node, ctx);
+        return yield* this.evaluateParen(node, ctx);
       case "function":
-        return this.evaluateFunction(node, ctx);
+        return yield* this.evaluateFunction(node, ctx);
       case "conditional":
-        return this.evaluateConditional(node, ctx);
+        return yield* this.evaluateConditional(node, ctx);
       case "reference":
         return this.evaluateReference(node, ctx);
       default: {
@@ -153,11 +180,11 @@ export class Evaluator {
     }
   }
 
-  protected evaluateConditional(
+  protected *evaluateConditional(
     node: ConditionalNode,
     ctx: RollContext,
-  ): ConditionalResult {
-    const condition = this.evaluateNode(node.condition, ctx);
+  ): Generator<EvaluationDrawRequest, ConditionalResult, number> {
+    const condition = yield* this.evaluateNode(node.condition, ctx);
     const selectedBranch = condition.value === 0 ? "false" : "true";
     const branch =
       selectedBranch === "true" ? node.trueBranch : node.falseBranch;
@@ -165,13 +192,16 @@ export class Evaluator {
       ...ctx,
       system: Object.freeze({ ...ctx.system, condition: condition.value }),
     };
-    const selectedResult =
-      branch === null
-        ? this.evaluateReference(
-            createReference("system", ["condition"]),
-            branchContext,
-          )
-        : this.evaluateNode(branch, branchContext);
+    let selectedResult: ExpressionResult;
+
+    if (branch === null) {
+      selectedResult = this.evaluateReference(
+        createReference("system", ["condition"]),
+        branchContext,
+      );
+    } else {
+      selectedResult = yield* this.evaluateNode(branch, branchContext);
+    }
 
     return {
       type: "conditional",
@@ -209,8 +239,11 @@ export class Evaluator {
    * die with `registries.dice.create(node.die.name, ...args)`, resolves it with `resolveDie()`,
    * rolls it `qty` times with `rollDie()`, then applies the modifiers.
    */
-  protected evaluatePool(node: PoolNode, ctx: RollContext): PoolResult {
-    const qty = this.evaluateNode(node.qty, ctx);
+  protected *evaluatePool(
+    node: PoolNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, PoolResult, number> {
+    const qty = yield* this.evaluateNode(node.qty, ctx);
     const count = qty.value;
     const minQty = node.qty.type === "number" ? 1 : 0;
 
@@ -224,44 +257,30 @@ export class Evaluator {
       );
     }
 
-    const dieArgs = node.die.args.map((arg) => this.evaluateNode(arg, ctx));
+    const dieArgs: ExpressionResult[] = [];
+
+    for (const arg of node.die.args) {
+      dieArgs.push(yield* this.evaluateNode(arg, ctx));
+    }
+
     const die = this.createDie(
       node,
       dieArgs.map(({ value }) => value),
     );
-    const roll = (): DieResult => createDieResult(rollDie(die, ctx));
-    const initialRolls = Array.from({ length: count }, roll);
-    let generatedRolls = 0;
-    const rollGeneratedDie = (): DieResult | undefined => {
-      if (generatedRolls >= ctx.limits.maxGeneratedRolls) {
-        return undefined;
-      }
+    const initialRolls: DieResult[] = [];
 
-      generatedRolls++;
-
-      return roll();
-    };
-    const rollGeneratedBatch = (
-      batchCount: number,
-    ): DieResult[] | undefined => {
-      if (!Number.isSafeInteger(batchCount) || batchCount < 0) {
-        throw new EvaluationError(
-          "A generated batch size must be a non-negative safe integer",
-        );
-      }
-
-      if (batchCount > ctx.limits.maxGeneratedRolls - generatedRolls) {
-        return undefined;
-      }
-
-      generatedRolls += batchCount;
-
-      return Array.from({ length: batchCount }, roll);
-    };
+    for (let index = 0; index < count; index++) {
+      initialRolls.push(createDieResult(yield* this.drawPoolDie(node, die)));
+    }
+    const generatedRolls = { count: 0 };
+    const rollGeneratedDie = () =>
+      this.rollGeneratedDie(node, die, generatedRolls, ctx);
+    const rollGeneratedBatch = (batchCount: number) =>
+      this.rollGeneratedBatch(node, die, batchCount, generatedRolls, ctx);
     const modifierApplication =
       node.modifiers.length === 0
         ? { items: initialRolls, modifierArguments: [] }
-        : this.applyModifiers(initialRolls, node.modifiers, "pool", {
+        : yield* this.applyModifiers(initialRolls, node.modifiers, "pool", {
             ctx,
             die,
             rollDie: rollGeneratedDie,
@@ -288,6 +307,55 @@ export class Evaluator {
     return resolveDie(this.registries.dice.create(node.die.name, ...args));
   }
 
+  protected *drawPoolDie(
+    node: PoolNode,
+    die: ResolvedDie,
+  ): Generator<EvaluationDrawRequest, number, number> {
+    return yield { die, factoryName: node.die.name };
+  }
+
+  private *rollGeneratedDie(
+    node: PoolNode,
+    die: ResolvedDie,
+    budget: { count: number },
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, DieResult | undefined, number> {
+    if (budget.count >= ctx.limits.maxGeneratedRolls) {
+      return undefined;
+    }
+
+    budget.count++;
+
+    return createDieResult(yield* this.drawPoolDie(node, die));
+  }
+
+  private *rollGeneratedBatch(
+    node: PoolNode,
+    die: ResolvedDie,
+    batchCount: number,
+    budget: { count: number },
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, DieResult[] | undefined, number> {
+    if (!Number.isSafeInteger(batchCount) || batchCount < 0) {
+      throw new EvaluationError(
+        "A generated batch size must be a non-negative safe integer",
+      );
+    }
+
+    if (batchCount > ctx.limits.maxGeneratedRolls - budget.count) {
+      return undefined;
+    }
+
+    budget.count += batchCount;
+    const results: DieResult[] = [];
+
+    for (let index = 0; index < batchCount; index++) {
+      results.push(createDieResult(yield* this.drawPoolDie(node, die)));
+    }
+
+    return results;
+  }
+
   /**
    * Evaluates each expression, then applies the modifiers in execution order.
    *
@@ -298,30 +366,35 @@ export class Evaluator {
    *   again to write them back into their pools and recalculate everything above them.
    * - `each-pool`: the handler gets each nested group's members and each pool's dice.
    */
-  protected evaluateGroup(node: GroupNode, ctx: RollContext): GroupResult {
+  protected *evaluateGroup(
+    node: GroupNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, GroupResult, number> {
     if (node.expressions.length === 0) {
       throw new EvaluationError("A group needs at least one expression");
     }
 
     this.validateIterationLimits(node.modifiers, ctx);
 
-    let members = node.expressions.map((expression): GroupMemberResult => {
-      const result = this.evaluateNode(expression, ctx);
+    let members: GroupMemberResult[] = [];
 
-      return {
+    for (const expression of node.expressions) {
+      const result = yield* this.evaluateNode(expression, ctx);
+
+      members.push({
         type: "group-member",
         result,
         value: result.value,
         calculationValue: result.value,
         useInTotal: true,
         flags: [],
-      };
-    });
+      });
+    }
     const modifierArguments: ModifierArgumentResult[] = [];
 
     for (const modifier of this.orderedModifiers(node.modifiers)) {
       const handler = this.handlerFor(modifier, "group");
-      const resolved = this.resolveModifier(
+      const resolved = yield* this.resolveModifier(
         modifier,
         node.modifiers.indexOf(modifier),
         ctx,
@@ -332,32 +405,39 @@ export class Evaluator {
       const input: ModifierInput = { modifier: resolved.modifier, ctx };
 
       if (handler.groupHandling === "flatten" && members.length === 1) {
-        members = members.map((member) =>
-          withMemberResult(
-            member,
-            this.applyToFlattenedDice(member.result, (dice) =>
-              this.runHandler(handler, dice, input),
-            ),
-          ),
-        );
+        const updatedMembers: GroupMemberResult[] = [];
+
+        for (const member of members) {
+          const result = yield* this.applyToFlattenedDice(
+            member.result,
+            handler,
+            input,
+          );
+          updatedMembers.push(withMemberResult(member, result));
+        }
+
+        members = updatedMembers;
       } else {
-        members = this.runHandler(handler, members, input);
+        members = yield* this.runHandler(handler, members, input);
 
         if (handler.groupHandling === "each-pool") {
-          members = members.map((member) =>
-            withMemberResult(
-              member,
-              this.rebuildPools(
-                member.result,
-                (pool) =>
-                  withPoolRolls(
-                    pool,
-                    this.runHandler(handler, pool.rolls, input),
-                  ),
-                (nested) => this.runHandler(handler, nested, input),
-              ),
-            ),
-          );
+          const runHandler = this.runHandler.bind(this);
+          const updatedMembers: GroupMemberResult[] = [];
+
+          for (const member of members) {
+            const result = yield* this.rebuildPools(
+              member.result,
+              function* (pool) {
+                const rolls = yield* runHandler(handler, pool.rolls, input);
+
+                return withPoolRolls(pool, rolls);
+              },
+              (nested) => runHandler(handler, nested, input),
+            );
+            updatedMembers.push(withMemberResult(member, result));
+          }
+
+          members = updatedMembers;
         }
       }
     }
@@ -379,23 +459,26 @@ export class Evaluator {
    *
    * @throws {EvaluationError} the handler returned a die that didn't come from a pool
    */
-  protected applyToFlattenedDice(
+  protected *applyToFlattenedDice(
     result: ExpressionResult,
-    apply: (dice: readonly TaggedDieResult[]) => TaggedDieResult[],
-  ): ExpressionResult {
+    handler: ModifierHandler,
+    input: ModifierInput,
+  ): Generator<EvaluationDrawRequest, ExpressionResult, number> {
     const pools: PoolResult[] = [];
 
-    this.rebuildPools(result, (pool) => {
+    yield* this.rebuildPools(result, (pool) => {
       pools.push(pool);
 
       return pool;
     });
 
     const byPool = pools.map((): DieResult[] => []);
-    const taggedList = apply(
+    const taggedList = yield* this.runHandler(
+      handler,
       pools.flatMap((pool, index) =>
         pool.rolls.map((roll): TaggedDieResult => ({ ...roll, [POOL]: index })),
       ),
+      input,
     );
 
     for (const tagged of taggedList) {
@@ -413,9 +496,9 @@ export class Evaluator {
       rolls.push(roll);
     }
 
-    return this.rebuildPools(result, (pool, index) =>
-      withPoolRolls(pool, byPool[index] ?? []),
-    );
+    return yield* this.rebuildPools(result, (pool, index) => {
+      return withPoolRolls(pool, byPool[index] ?? []);
+    });
   }
 
   /**
@@ -425,33 +508,40 @@ export class Evaluator {
    * Pools in a pool's quantity or die arguments aren't visited (they've already been used), nor
    * are pools in nested groups unless `transformMembers` is supplied.
    */
-  protected rebuildPools(
+  protected *rebuildPools(
     result: ExpressionResult,
-    replace: (pool: PoolResult, index: number) => PoolResult,
+    replace: (pool: PoolResult, index: number) => GeneratorResult<PoolResult>,
     transformMembers?: (
       members: readonly GroupMemberResult[],
-    ) => GroupMemberResult[],
-  ): ExpressionResult {
+    ) => GeneratorResult<GroupMemberResult[]>,
+  ): Generator<EvaluationDrawRequest, ExpressionResult, number> {
     let index = 0;
 
-    const visit = (current: ExpressionResult): ExpressionResult => {
+    const visit = function* (
+      current: ExpressionResult,
+    ): Generator<EvaluationDrawRequest, ExpressionResult, number> {
       switch (current.type) {
         case "pool":
-          return replace(current, index++);
+          return yield* resolveGeneratorResult(replace(current, index++));
         case "group": {
           if (!transformMembers) {
             return current;
           }
 
-          const members = transformMembers(current.members).map((member) =>
-            withMemberResult(member, visit(member.result)),
+          const transformedMembers = yield* resolveGeneratorResult(
+            transformMembers(current.members),
           );
+          const members: GroupMemberResult[] = [];
+
+          for (const member of transformedMembers) {
+            members.push(withMemberResult(member, yield* visit(member.result)));
+          }
 
           return { ...current, members, value: sumIncluded(members) };
         }
         case "binary": {
-          const left = visit(current.left);
-          const right = visit(current.right);
+          const left = yield* visit(current.left);
+          const right = yield* visit(current.right);
 
           return {
             ...current,
@@ -461,8 +551,8 @@ export class Evaluator {
           };
         }
         case "comparison": {
-          const left = visit(current.left);
-          const right = visit(current.right);
+          const left = yield* visit(current.left);
+          const right = yield* visit(current.right);
 
           return {
             ...current,
@@ -477,17 +567,21 @@ export class Evaluator {
           };
         }
         case "unary": {
-          const operand = visit(current.operand);
+          const operand = yield* visit(current.operand);
 
           return { ...current, operand, value: negate(operand.value) };
         }
         case "paren": {
-          const inner = visit(current.inner);
+          const inner = yield* visit(current.inner);
 
           return { ...current, inner, value: inner.value };
         }
         case "function": {
-          const args = current.args.map(visit);
+          const args: ExpressionResult[] = [];
+
+          for (const arg of current.args) {
+            args.push(yield* visit(arg));
+          }
 
           return {
             ...current,
@@ -498,7 +592,7 @@ export class Evaluator {
           };
         }
         case "conditional": {
-          const selectedResult = visit(current.selectedResult);
+          const selectedResult = yield* visit(current.selectedResult);
           return { ...current, selectedResult, value: selectedResult.value };
         }
         default:
@@ -506,17 +600,20 @@ export class Evaluator {
       }
     };
 
-    return visit(result);
+    return yield* visit(result);
   }
 
   /** Uses `operators` from `math.ts`. */
-  protected evaluateBinary(node: BinaryNode, ctx: RollContext): BinaryResult {
+  protected *evaluateBinary(
+    node: BinaryNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, BinaryResult, number> {
     if (!Object.hasOwn(operators, node.op)) {
       throw new EvaluationError(`Unknown operator: ${String(node.op)}`);
     }
 
-    const left = this.evaluateNode(node.left, ctx);
-    const right = this.evaluateNode(node.right, ctx);
+    const left = yield* this.evaluateNode(node.left, ctx);
+    const right = yield* this.evaluateNode(node.right, ctx);
 
     return {
       type: "binary",
@@ -527,12 +624,12 @@ export class Evaluator {
     };
   }
 
-  protected evaluateComparison(
+  protected *evaluateComparison(
     node: ComparisonNode,
     ctx: RollContext,
-  ): ComparisonResult {
-    const left = this.evaluateNode(node.left, ctx);
-    const right = this.evaluateNode(node.right, ctx);
+  ): Generator<EvaluationDrawRequest, ComparisonResult, number> {
+    const left = yield* this.evaluateNode(node.left, ctx);
+    const right = yield* this.evaluateNode(node.right, ctx);
 
     return {
       type: "comparison",
@@ -549,23 +646,29 @@ export class Evaluator {
   }
 
   /** Uses `negate` from `math.ts`. */
-  protected evaluateUnary(node: UnaryNode, ctx: RollContext): UnaryResult {
-    const operand = this.evaluateNode(node.operand, ctx);
+  protected *evaluateUnary(
+    node: UnaryNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, UnaryResult, number> {
+    const operand = yield* this.evaluateNode(node.operand, ctx);
 
     return { type: "unary", node, value: negate(operand.value), operand };
   }
 
-  protected evaluateParen(node: ParenNode, ctx: RollContext): ParenResult {
-    const inner = this.evaluateNode(node.expression, ctx);
+  protected *evaluateParen(
+    node: ParenNode,
+    ctx: RollContext,
+  ): Generator<EvaluationDrawRequest, ParenResult, number> {
+    const inner = yield* this.evaluateNode(node.expression, ctx);
 
     return { type: "paren", node, value: inner.value, inner };
   }
 
   /** Uses `functions` from `math.ts`. */
-  protected evaluateFunction(
+  protected *evaluateFunction(
     node: FunctionNode,
     ctx: RollContext,
-  ): FunctionResult {
+  ): Generator<EvaluationDrawRequest, FunctionResult, number> {
     if (!Object.hasOwn(functions, node.name)) {
       throw new EvaluationError(`Unknown maths function: ${String(node.name)}`);
     }
@@ -576,7 +679,11 @@ export class Evaluator {
       );
     }
 
-    const args = node.args.map((arg) => this.evaluateNode(arg, ctx));
+    const args: ExpressionResult[] = [];
+
+    for (const arg of node.args) {
+      args.push(yield* this.evaluateNode(arg, ctx));
+    }
 
     return {
       type: "function",
@@ -591,49 +698,52 @@ export class Evaluator {
    *
    * @throws {EvaluationError} a handler doesn't apply to the target (e.g. `explode` on a group)
    */
-  protected applyModifiers<T extends ScoredItem>(
+  protected *applyModifiers<T extends ScoredItem>(
     items: readonly T[],
     modifiers: readonly ModifierNode[],
     target: ModifierTarget,
     input: Omit<ModifierInput, "modifier">,
-  ): ModifierApplication<T> {
+  ): Generator<EvaluationDrawRequest, ModifierApplication<T>, number> {
     this.validateIterationLimits(modifiers, input.ctx);
 
     const modifierArguments: ModifierArgumentResult[] = [];
-    const modifiedItems = this.orderedModifiers(modifiers).reduce<T[]>(
-      (current, modifier) => {
-        const handler = this.handlerFor(modifier, target);
-        const resolved = this.resolveModifier(
-          modifier,
-          modifiers.indexOf(modifier),
-          input.ctx,
-        );
+    let modifiedItems = [...items];
 
-        if (resolved.argument) {
-          modifierArguments.push(resolved.argument);
-        }
+    for (const modifier of this.orderedModifiers(modifiers)) {
+      const handler = this.handlerFor(modifier, target);
+      const resolved = yield* this.resolveModifier(
+        modifier,
+        modifiers.indexOf(modifier),
+        input.ctx,
+      );
 
-        return this.runHandler(handler, current, {
-          ...input,
-          modifier: resolved.modifier,
-        });
-      },
-      [...items],
-    );
+      if (resolved.argument) {
+        modifierArguments.push(resolved.argument);
+      }
+
+      modifiedItems = yield* this.runHandler(handler, modifiedItems, {
+        ...input,
+        modifier: resolved.modifier,
+      });
+    }
 
     return { items: modifiedItems, modifierArguments };
   }
 
-  protected resolveModifier(
+  protected *resolveModifier(
     modifier: ModifierNode,
     modifierIndex: number,
     ctx: RollContext,
-  ): { modifier: ModifierNode; argument?: ModifierArgumentResult } {
+  ): Generator<
+    EvaluationDrawRequest,
+    { modifier: ModifierNode; argument?: ModifierArgumentResult },
+    number
+  > {
     if (
       (modifier.name === "keep" || modifier.name === "drop") &&
       typeof modifier.qty !== "number"
     ) {
-      const result = this.evaluateNode(modifier.qty, ctx);
+      const result = yield* this.evaluateNode(modifier.qty, ctx);
 
       if (!Number.isSafeInteger(result.value) || result.value < 0) {
         throw new EvaluationError(
@@ -710,20 +820,31 @@ export class Evaluator {
   }
 
   /** @throws {EvaluationError} the handler doesn't return an array */
-  protected runHandler<T extends ScoredItem>(
+  protected *runHandler<T extends ScoredItem>(
     handler: ModifierHandler,
     items: readonly T[],
     input: ModifierInput,
-  ): T[] {
-    const result: unknown = handler.apply(items, input);
+  ): Generator<EvaluationDrawRequest, T[], number> {
+    const result = handler.apply(items, input);
+    let returnedItems: unknown;
 
-    if (!Array.isArray(result)) {
+    if (Array.isArray(result)) {
+      returnedItems = result;
+    } else if (isGenerator(result)) {
+      returnedItems = yield* result;
+    } else {
       throw new EvaluationError(
         `The "${handler.name}" handler must return an array of items`,
       );
     }
 
-    return result as T[];
+    if (!Array.isArray(returnedItems)) {
+      throw new EvaluationError(
+        `The "${handler.name}" handler must return an array of items`,
+      );
+    }
+
+    return returnedItems as T[];
   }
 }
 
@@ -738,6 +859,27 @@ function withPoolRolls(
   rolls: readonly DieResult[],
 ): PoolResult {
   return { ...pool, rolls, value: sumIncluded(rolls) };
+}
+
+function isGenerator<T>(
+  value: Generator<EvaluationDrawRequest, T, number> | T,
+): value is Generator<EvaluationDrawRequest, T, number> {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "next" in value &&
+    typeof value.next === "function"
+  );
+}
+
+function* resolveGeneratorResult<T>(
+  value: GeneratorResult<T>,
+): Generator<EvaluationDrawRequest, T, number> {
+  if (isGenerator(value)) {
+    return yield* value;
+  }
+
+  return value;
 }
 
 /**

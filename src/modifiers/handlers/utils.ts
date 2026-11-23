@@ -13,6 +13,7 @@ import type {
 import { isPositiveSafeInteger } from "../../ast/validation.js";
 import { createComparePoint } from "../../ast/factory.js";
 import { EvaluationError } from "../../errors/EvaluationError.js";
+import type { EvaluationDrawRequest } from "../../evaluator/EvaluationDrawRequest.js";
 import type { RollLimits } from "../../evaluator/RollContext.js";
 import { excludeFromTotal, withFlags } from "../../results/die-result.js";
 import type { ResolvedDie } from "../../dice/types.js";
@@ -95,7 +96,14 @@ export function repeatableDie(
   { modifier, die, rollDie }: ModifierInput,
   action: string,
   hasItems = true,
-): { die: ResolvedDie; rollDie: () => DieResult | undefined } {
+): {
+  die: ResolvedDie;
+  rollDie: () => Generator<
+    EvaluationDrawRequest,
+    DieResult | undefined,
+    number
+  >;
+} {
   if (!die || !rollDie) {
     throw new EvaluationError(
       `The "${modifier.name}" modifier can only be used on a dice pool`,
