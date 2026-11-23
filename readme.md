@@ -25,6 +25,45 @@ npm install @dice-roller/rpg-dice-roller
 Check out the documentation at https://dice-roller.github.io/documentation
 
 
+## Import finished dice results
+
+Use `Roll.import()` to build a roll from finished results, or pass the same data to
+`roller.import()` to add it to a history.
+
+```js
+import { Roll } from '@dice-roller/rpg-dice-roller';
+
+const roll = Roll.import({
+  notation: '3d6kh2 + d8min3 * 2',
+  rolls: [
+    [6, { value: 3, useInTotal: false, flags: ['drop'] }, 5],
+    [{ initialValue: 1, value: 3, flags: ['min'] }],
+  ],
+});
+
+console.log(roll.total); // 17
+```
+
+The importer uses the finished die results in each pool, with no new dice draws or
+modifier effects applied to those results. A number is shorthand for an included
+die whose original, final and scoring values are all that number. For an object,
+`initialValue` and `calculationValue` default to `value`, `useInTotal` defaults to
+`true`, and `flags` defaults to `[]`. Flags describe the outcome for presenters.
+Use `useInTotal` and `calculationValue` to control scoring. Each pool array contains
+its complete final list, including any dice added by modifiers.
+
+List the pool arrays from left to right. For computed expressions, include the parent
+pool before pools in its quantity, die arguments and computed modifier quantities
+(in modifier execution order). Conditional expressions use pools in the condition and
+the selected branch. For a reordered group, supply `groups: { 0: { order: [1, 0] } }`
+to display the first group's second member first. Pool arrays stay in source order.
+Use `groups[0].members` to override group member scoring by original member index.
+Groups are numbered from zero, with parents before their nested groups.
+
+`roll.export()` produces the full versioned snapshot for saving and restoring later.
+Exporting a concise import may evaluate the notation separately for the theoretical
+minimum and maximum totals, as for an ordinary roll.
+
 ## Usage in the wild
 
 ### Official

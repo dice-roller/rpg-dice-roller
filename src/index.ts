@@ -70,6 +70,9 @@ export type { Presenter } from "./presenters/Presenter.js";
 export type { ComparisonResult, ExpressionResult } from "./results/types.js";
 export { EXPORT_FORMATS, NON_FINITE_NUMBERS } from "./serialization/formats.js";
 export type {
+  ConciseDieResult,
+  ConciseGroupResult,
+  ConciseRollData,
   Encoded,
   EncodedExportData,
   EncodedHistoryData,

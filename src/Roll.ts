@@ -11,9 +11,11 @@ import type { EngineOption } from "./random/RandomEngine.js";
 import type { ExpressionResult } from "./results/types.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
-import { decode } from "./serialization/decode.js";
+import { ConciseRollEvaluator } from "./serialization/ConciseRollEvaluator.js";
+import { decodeImport } from "./serialization/decode.js";
 import { encode, encodeNumbers, toRollData } from "./serialization/encode.js";
 import type {
+  ConciseRollData,
   EncodedRollData,
   ExportFormat,
   RollData,
@@ -102,15 +104,15 @@ export class Roll<T = string> {
 
   /**
    * Parses (if a string) and rolls the input. `RollData` is restored as it is, without rolling or
-   * validating: its result and totals are used, and `reroll()` rolls its expression. Use
-   * `Roll.import()` / `Roll.fromJSON()` for exported data, which validate it.
+   * validating: its result and totals are used, and `reroll()` rolls its expression. Concise data reconstructs
+   * the result from finished outcomes. Use `Roll.import()` or `Roll.fromJSON()` to validate exported data.
    *
-   * @param input the notation or expression to roll, or data to restore without validation
+   * @param input the notation or expression to roll, or the data to restore
    * @param options how to roll; `RollSettings` are used as they are, so they can be shared
    * @throws {ValidationError | NotationError} the notation is invalid
    */
   constructor(
-    input: string | ExpressionNode | RollData,
+    input: string | ExpressionNode | RollData | ConciseRollData,
     options?: RollOptions<T> | RollSettings<T>,
   ) {
     this.#settings = RollSettings.from(options);
@@ -126,6 +128,15 @@ export class Roll<T = string> {
       this.#minTotal = input.minTotal;
       this.#maxTotal = input.maxTotal;
       this.#averageTotal = input.averageTotal;
+    } else if (
+      typeof input === "object" &&
+      input.type === undefined &&
+      "rolls" in input
+    ) {
+      this.result = ConciseRollEvaluator.restore(input, this.#settings);
+      this.#input = this.result.node;
+      this.notation = input.notation;
+      this.total = roundTotal(this.result.value);
     } else {
       this.#input = input;
 
@@ -143,7 +154,7 @@ export class Roll<T = string> {
   }
 
   /**
-   * Creates a roll from exported data (e.g. from `toJSON()`), without rolling.
+   * Creates a roll from exported data or concise finished results, without rolling.
    *
    * The options are used by `reroll()`. Pools refer to their die by factory name, so re-rolling
    * uses the die registered under that name in these settings.
@@ -151,24 +162,24 @@ export class Roll<T = string> {
    * @throws {ImportError} the data is invalid, or is a history
    */
   static fromJSON<T = string>(
-    data: EncodedRollData,
+    data: EncodedRollData | ConciseRollData,
     options?: RollOptions<T> | RollSettings<T>,
   ): Roll<T> {
     return Roll.import(data, options);
   }
 
   /**
-   * Imports an exported roll (an object, JSON or base64), without rolling.
+   * Imports an exported roll or concise finished results (an object, JSON or base64), without rolling.
    *
    * @throws {ImportError} the data is invalid, or is a history
    */
   static import<T = string>(
-    data: string | EncodedRollData,
+    data: string | EncodedRollData | ConciseRollData,
     options?: RollOptions<T> | RollSettings<T>,
   ): Roll<T> {
-    const decoded = decode(data);
+    const decoded = decodeImport(data);
 
-    if (decoded.type !== "roll") {
+    if (decoded.type === "history") {
       throw new ImportError(
         "Expected a roll, but got a history; use Roller.import()",
       );

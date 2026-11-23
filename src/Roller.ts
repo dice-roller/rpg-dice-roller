@@ -11,9 +11,10 @@ import { Roll } from "./Roll.js";
 import { RollHistory } from "./RollHistory.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
-import { decode } from "./serialization/decode.js";
+import { decodeImport } from "./serialization/decode.js";
 import { encode, toHistoryData } from "./serialization/encode.js";
 import type {
+  ConciseRollData,
   EncodedExportData,
   EncodedHistoryData,
   ExportFormat,
@@ -112,7 +113,7 @@ export class Roller<T = string> {
   }
 
   /**
-   * Imports exported rolls (a roll or a whole history, as an object, JSON or base64), and adds them
+   * Imports a roll, a whole history or concise finished results (an object, JSON or base64), and adds the rolls
    * to the history, without rolling.
    *
    * The data is validated first, so nothing is added if any of it is invalid. Imported rolls share
@@ -121,8 +122,8 @@ export class Roller<T = string> {
    * @returns the imported rolls
    * @throws {ImportError} the data is invalid
    */
-  import(data: string | EncodedExportData): Roll<T>[] {
-    const decoded = decode(data);
+  import(data: string | EncodedExportData | ConciseRollData): Roll<T>[] {
+    const decoded = decodeImport(data);
     const rolls = (decoded.type === "history" ? decoded.rolls : [decoded]).map(
       (roll) => new Roll(roll, this.settings),
     );
