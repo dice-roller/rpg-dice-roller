@@ -1,4 +1,6 @@
 import type { Presenter } from "../../src/index.js";
+import { encode } from "../../src/serialization/index.js";
+import type { ExportFormat } from "../../src/serialization/index.js";
 import {
   Roll,
   RollSettings,
@@ -21,12 +23,33 @@ import type { Equals } from "./helpers.js";
 
 declare const html: Presenter<HTMLElement>;
 declare const roll: Roll;
+declare const rawRollData: RollData;
+declare const exportFormat: ExportFormat;
 const randomEngine: RandomEngine = { next: () => 0 };
 const engineDefinition: EngineDefinition = { name: "mersenne", seed: 42 };
 const rollData: RollInputData = { character: { score: 18, proficient: true } };
 accepts<EngineOption>(randomEngine);
 accepts<EngineOption>(engineDefinition);
 accepts<RollInputData>(rollData);
+
+const encodedByDefault = encode(rawRollData);
+assertType<Equals<typeof encodedByDefault, EncodedRollData>>();
+accepts<EncodedRollData>(encodedByDefault);
+const encodedWithUndefined = encode(rawRollData, undefined);
+assertType<Equals<typeof encodedWithUndefined, EncodedRollData>>();
+accepts<EncodedRollData>(encodedWithUndefined);
+const encodedWithObject = encode(rawRollData, "object");
+assertType<Equals<typeof encodedWithObject, EncodedRollData>>();
+accepts<EncodedRollData>(encodedWithObject);
+const encodedWithJson = encode(rawRollData, "json");
+assertType<Equals<typeof encodedWithJson, string>>();
+accepts<string>(encodedWithJson);
+const encodedWithBase64 = encode(rawRollData, "base64");
+assertType<Equals<typeof encodedWithBase64, string>>();
+accepts<string>(encodedWithBase64);
+const encodedWithAnyFormat = encode(rawRollData, exportFormat);
+assertType<Equals<typeof encodedWithAnyFormat, EncodedRollData | string>>();
+accepts<EncodedRollData | string>(encodedWithAnyFormat);
 
 // the roller's presenter decides the output type of `present()`
 const textRoller = new Roller();
@@ -45,10 +68,44 @@ accepts<HTMLElement>(roll.present(html));
 accepts<string>(roll.present());
 
 // export formats
-accepts<EncodedHistoryData>(htmlRoller.export("object"));
-accepts<string>(htmlRoller.export("base64"));
-accepts<string>(htmlRoller.export());
-accepts<EncodedRollData>(roll.export("object"));
+const defaultHistoryExport = htmlRoller.export();
+assertType<Equals<typeof defaultHistoryExport, EncodedHistoryData>>();
+accepts<EncodedHistoryData>(defaultHistoryExport);
+const undefinedHistoryExport = htmlRoller.export(undefined);
+assertType<Equals<typeof undefinedHistoryExport, EncodedHistoryData>>();
+accepts<EncodedHistoryData>(undefinedHistoryExport);
+const objectHistoryExport = htmlRoller.export("object");
+assertType<Equals<typeof objectHistoryExport, EncodedHistoryData>>();
+accepts<EncodedHistoryData>(objectHistoryExport);
+const jsonHistoryExport = htmlRoller.export("json");
+assertType<Equals<typeof jsonHistoryExport, string>>();
+accepts<string>(jsonHistoryExport);
+const base64HistoryExport = htmlRoller.export("base64");
+assertType<Equals<typeof base64HistoryExport, string>>();
+accepts<string>(base64HistoryExport);
+const anyFormatHistoryExport = htmlRoller.export(exportFormat);
+assertType<
+  Equals<typeof anyFormatHistoryExport, EncodedHistoryData | string>
+>();
+accepts<EncodedHistoryData | string>(anyFormatHistoryExport);
+const defaultRollExport = roll.export();
+assertType<Equals<typeof defaultRollExport, EncodedRollData>>();
+accepts<EncodedRollData>(defaultRollExport);
+const undefinedRollExport = roll.export(undefined);
+assertType<Equals<typeof undefinedRollExport, EncodedRollData>>();
+accepts<EncodedRollData>(undefinedRollExport);
+const objectRollExport = roll.export("object");
+assertType<Equals<typeof objectRollExport, EncodedRollData>>();
+accepts<EncodedRollData>(objectRollExport);
+const jsonRollExport = roll.export("json");
+assertType<Equals<typeof jsonRollExport, string>>();
+accepts<string>(jsonRollExport);
+const base64RollExport = roll.export("base64");
+assertType<Equals<typeof base64RollExport, string>>();
+accepts<string>(base64RollExport);
+const anyFormatRollExport = roll.export(exportFormat);
+assertType<Equals<typeof anyFormatRollExport, EncodedRollData | string>>();
+accepts<EncodedRollData | string>(anyFormatRollExport);
 accepts<EncodedRollData>(roll.toJSON());
 // @ts-expect-error - JSON is a string, not data
 accepts<EncodedRollData>(roll.export("json"));
@@ -56,6 +113,8 @@ accepts<EncodedRollData>(roll.export("json"));
 accepts<RollData>(roll.export("object"));
 // @ts-expect-error - unknown export format
 htmlRoller.export("xml");
+// @ts-expect-error - unknown export format
+roll.export("xml");
 
 // a roller with any presenter can restore dice on import, from encoded or plain data
 Roll.fromJSON({} as EncodedRollData, htmlRoller.settings);

@@ -176,11 +176,11 @@ export class Roller<
     return (presenter ?? this.presenter).present(this.history);
   }
 
-  /** Exports the history as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. May evaluate uncached min/max totals. */
-  export(format: "object"): EncodedHistoryData;
-  export(format?: "json" | "base64"): string;
+  /** Exports the history as a JSON-safe object (default), JSON, or UTF-8 base64 JSON. May evaluate uncached min/max totals. */
+  export(format?: "object"): EncodedHistoryData;
+  export(format: "json" | "base64"): string;
   export(format: ExportFormat): EncodedHistoryData | string;
-  export(format: ExportFormat = "json"): EncodedHistoryData | string {
+  export(format: ExportFormat = "object"): EncodedHistoryData | string {
     return encode(toHistoryData(this.history), format);
   }
 

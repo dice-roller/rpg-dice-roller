@@ -22,7 +22,7 @@ function mutateExport(
   changes: readonly [path: string, value: unknown][],
 ): EncodedRollData {
   const data = JSON.parse(
-    new Roll("$profile.score", { data: rollData() }).export(),
+    new Roll("$profile.score", { data: rollData() }).export("json"),
   ) as Record<string, unknown>;
 
   for (const [path, value] of changes) {

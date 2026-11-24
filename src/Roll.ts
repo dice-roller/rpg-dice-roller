@@ -438,11 +438,11 @@ export class Roll<T = string, Mode extends DrawMode = "sync"> {
     return encodeNumbers(toRollData(this));
   }
 
-  /** Exports as JSON (default), a JSON-safe object, or UTF-8 base64 JSON. Uncached min/max totals use fresh per-pool budgets and truncate generated rolls at the limit. */
-  export(format: "object"): EncodedRollData;
-  export(format?: "json" | "base64"): string;
+  /** Exports as a JSON-safe object (default), JSON, or UTF-8 base64 JSON. Uncached min/max totals use fresh per-pool budgets and truncate generated rolls at the limit. */
+  export(format?: "object"): EncodedRollData;
+  export(format: "json" | "base64"): string;
   export(format: ExportFormat): EncodedRollData | string;
-  export(format: ExportFormat = "json"): EncodedRollData | string {
+  export(format: ExportFormat = "object"): EncodedRollData | string {
     return encode(toRollData(this), format);
   }
 

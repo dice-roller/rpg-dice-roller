@@ -27,10 +27,9 @@ const referenceResult = {
 };
 
 function corrupt(path: string, value: unknown): EncodedRollData {
-  const data = JSON.parse(new Roll(comparison("<", 1, 2)).export()) as Record<
-    string,
-    unknown
-  >;
+  const data = JSON.parse(
+    new Roll(comparison("<", 1, 2)).export("json"),
+  ) as Record<string, unknown>;
   const keys = path.split(".");
   const last = keys.pop()!;
   let parent = data;

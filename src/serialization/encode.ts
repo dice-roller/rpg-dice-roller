@@ -100,11 +100,11 @@ export function toBase64(text: string): string {
  * - `json`: `JSON.stringify()` of that data
  * - `base64`: the JSON, UTF-8 encoded then base64 encoded
  *
- * The default format is `json`.
+ * The default format is `object`.
  */
 export function encode<D extends ExportData>(
   data: D,
-  format: "object",
+  format?: "object",
 ): Encoded<D>;
 export function encode(data: ExportData, format?: "json" | "base64"): string;
 export function encode<D extends ExportData>(
@@ -113,7 +113,7 @@ export function encode<D extends ExportData>(
 ): Encoded<D> | string;
 export function encode(
   data: ExportData,
-  format: ExportFormat = "json",
+  format: ExportFormat = "object",
 ): Encoded<ExportData> | string {
   const encoded = encodeNumbers(data);
 

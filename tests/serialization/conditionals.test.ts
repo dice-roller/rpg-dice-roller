@@ -33,7 +33,7 @@ function corrupt(
   path: string,
   value: unknown,
 ): EncodedRollData {
-  const data = JSON.parse(new Roll(notation).export()) as Record<
+  const data = JSON.parse(new Roll(notation).export("json")) as Record<
     string,
     unknown
   >;
@@ -131,7 +131,9 @@ describe("conditional serialization", () => {
   );
 
   test("normalizes legacy target modifiers inside conditional AST and results without rolling", () => {
-    const data = JSON.parse(new Roll("(1) ? (d10>=5f=1) : (0)").export()) as {
+    const data = JSON.parse(
+      new Roll("(1) ? (d10>=5f=1) : (0)").export("json"),
+    ) as {
       result: {
         node: {
           trueBranch: {

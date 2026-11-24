@@ -22,7 +22,7 @@ const seeded = (seed = 1) =>
 
 /** A roll's JSON-safe data, as a plain mutable object, for corrupting. */
 function dataOf(notation: string): Record<string, unknown> {
-  return JSON.parse(new Roll(notation, seeded()).export()) as Record<
+  return JSON.parse(new Roll(notation, seeded()).export("json")) as Record<
     string,
     unknown
   >;
@@ -118,7 +118,7 @@ describe("rolls round-trip", () => {
     expect(imported.result.rolls[0]?.flags).toEqual(flags);
     expect(
       (
-        JSON.parse(imported.export()) as {
+        JSON.parse(imported.export("json")) as {
           result: { rolls: { flags: string[] }[] };
         }
       ).result.rolls[0]?.flags,
@@ -175,7 +175,7 @@ describe("rolls round-trip", () => {
       "explode-matching-batch",
     ]);
 
-    const exported = JSON.parse(imported.export()) as {
+    const exported = JSON.parse(imported.export("json")) as {
       result: {
         members: {
           flags: string[];
@@ -406,7 +406,9 @@ describe("rolls round-trip", () => {
   );
 
   test("legacy success and failure nodes are normalized on import", () => {
-    const input = JSON.parse(new Roll("d10>=5f=1", seeded()).export()) as {
+    const input = JSON.parse(
+      new Roll("d10>=5f=1", seeded()).export("json"),
+    ) as {
       result: {
         node: {
           modifiers: {
@@ -428,7 +430,7 @@ describe("rolls round-trip", () => {
   });
 
   test("legacy success-only target nodes are normalized on import", () => {
-    const input = JSON.parse(new Roll("d10>=5", seeded()).export()) as {
+    const input = JSON.parse(new Roll("d10>=5", seeded()).export("json")) as {
       result: {
         node: {
           modifiers: {
@@ -490,12 +492,37 @@ describe("rolls round-trip", () => {
     expect(JSON.parse(JSON.stringify(data))).toEqual(data);
   });
 
-  test("toJSON() is the JSON export", () => {
-    const roll = new Roll("2d6", seeded());
+  test("defaults to an object and imports every format", () => {
+    const original = new Roll("4d6!kh3", seeded());
+    const object = original.export();
+    const json = original.export("json");
+    const base64 = original.export("base64");
 
-    expect(JSON.stringify(roll)).toBe(roll.export());
-    expect(roll.toJSON()).toEqual(roll.export("object"));
-    expect(Roll.fromJSON(roll.toJSON()).total).toBe(roll.total);
+    expect(object).toEqual(original.export("object"));
+    expect(json).toBe(JSON.stringify(object));
+    expect(base64).toBe(toBase64(json));
+
+    for (const data of [object, json, base64]) {
+      const imported = Roll.import(data);
+
+      expect(imported.result).toEqual(original.result);
+      expect(imported.total).toBe(original.total);
+      expect(imported.minTotal).toBe(original.minTotal);
+      expect(imported.maxTotal).toBe(original.maxTotal);
+      expect(imported.averageTotal).toBe(original.averageTotal);
+    }
+  });
+
+  test("toJSON() is the JSON export", () => {
+    const roll = new Roll("1/0", seeded());
+    const object = roll.export();
+    const json = roll.export("json");
+
+    expect(object.total).toEqual({ $number: "Infinity" });
+    expect(json).toBe(JSON.stringify(object));
+    expect(JSON.stringify(roll)).toBe(json);
+    expect(roll.toJSON()).toEqual(object);
+    expect(Roll.fromJSON(roll.toJSON()).total).toBe(Number.POSITIVE_INFINITY);
   });
 
   test("the data has the documented shape", () => {
@@ -534,7 +561,7 @@ describe("rolls round-trip", () => {
   test("whitespace around JSON and base64 is ignored", () => {
     const roll = new Roll("2d6", seeded());
 
-    expect(Roll.import(`  ${roll.export()}\n`).total).toBe(roll.total);
+    expect(Roll.import(`  ${roll.export("json")}\n`).total).toBe(roll.total);
     expect(Roll.import(`\n${roll.export("base64")} `).total).toBe(roll.total);
   });
 });
@@ -558,7 +585,7 @@ describe("non-finite numbers", () => {
   });
 
   test("they're tagged rather than turned into null", () => {
-    const json = new Roll("1/0", seeded()).export();
+    const json = new Roll("1/0", seeded()).export("json");
 
     expect(json).toContain('"total":{"$number":"Infinity"}');
     expect(json).not.toContain("null");
@@ -571,7 +598,20 @@ describe("non-finite numbers", () => {
     roller.roll("-1/0");
 
     expect(roller.history.total).toBeNaN();
-    expect(roller.export()).toContain('"total":{"$number":"NaN"}');
+    const object = roller.export();
+    const json = roller.export("json");
+    expect(object.total).toEqual({ $number: "NaN" });
+    expect(json).toContain('"total":{"$number":"NaN"}');
+    expect(JSON.stringify(roller.history)).toBe(json);
+    expect(roller.history.toJSON()).toEqual(object);
+
+    const defaultImported = new Roller();
+    defaultImported.import(object);
+    expect(defaultImported.history.total).toBeNaN();
+    expect(defaultImported.history.rolls.map(({ total }) => total)).toEqual([
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+    ]);
 
     for (const format of EXPORT_FORMATS) {
       const data = decode(roller.export(format as "json"));
@@ -595,6 +635,27 @@ describe("non-finite numbers", () => {
 });
 
 describe("histories", () => {
+  test("defaults to an encoded object and imports it", () => {
+    const roller = new Roller({ engine: { name: "mersenne", seed: 3 } });
+
+    roller.roll("4d6");
+    roller.roll("2d10!+3");
+
+    const object = roller.export();
+    const imported = new Roller();
+    const rolls = imported.import(object);
+
+    expect(object).toEqual(roller.export("object"));
+    expect(roller.export("json")).toBe(JSON.stringify(object));
+    expect(roller.export("base64")).toBe(toBase64(roller.export("json")));
+    expect(rolls.map(({ result }) => result)).toEqual(
+      roller.history.rolls.map(({ result }) => result),
+    );
+    expect(imported.history.total).toBe(roller.history.total);
+    expect(JSON.stringify(roller.history)).toBe(roller.export("json"));
+    expect(roller.history.toJSON()).toEqual(object);
+  });
+
   test.each(EXPORT_FORMATS)("round-trip through %s", (format) => {
     const roller = new Roller({ engine: { name: "mersenne", seed: 3 } });
 
@@ -608,7 +669,8 @@ describe("histories", () => {
     expect(imported.history.rolls).toEqual(rolls);
     expect(imported.history.total).toBe(roller.history.total);
     expect(String(imported)).toBe(String(roller));
-    expect(JSON.stringify(roller.history)).toBe(roller.export());
+    expect(roller.export()).toEqual(roller.export("object"));
+    expect(JSON.stringify(roller.history)).toBe(roller.export("json"));
   });
 
   test("a single roll can be imported into a roller", () => {
@@ -621,14 +683,25 @@ describe("histories", () => {
 
   test("an empty history round-trips", () => {
     const roller = new Roller();
+    const object = roller.export();
+    const json = roller.export("json");
+    const base64 = roller.export("base64");
 
-    expect(roller.export("object")).toEqual({
+    expect(object).toEqual({
       type: "history",
       version: 1,
       rolls: [],
       total: 0,
     });
-    expect(new Roller().import(roller.export())).toEqual([]);
+    expect(roller.export("object")).toEqual(object);
+    expect(json).toBe(JSON.stringify(object));
+    expect(base64).toBe(toBase64(json));
+    expect(JSON.stringify(roller.history)).toBe(json);
+    expect(roller.history.toJSON()).toEqual(object);
+
+    for (const data of [object, json, base64]) {
+      expect(new Roller().import(data)).toEqual([]);
+    }
   });
 
   test("a history import is atomic", () => {
@@ -648,7 +721,7 @@ describe("histories", () => {
   });
 
   test("Roll.import() rejects a history", () => {
-    expect(() => Roll.import(new Roller().export())).toThrow(ImportError);
+    expect(() => Roll.import(new Roller().export("json"))).toThrow(ImportError);
     expect(() => Roll.fromJSON(new Roller().export("object") as never)).toThrow(
       ImportError,
     );
@@ -1127,10 +1200,16 @@ describe("invalid data", () => {
 });
 
 describe("encode()", () => {
-  test("defaults to JSON", () => {
-    const data = toRollData(new Roll("2d6", seeded()));
+  test("defaults to an encoded object and supports each explicit format", () => {
+    const data = toRollData(new Roll("1/0", seeded()));
+    const encoded = encodeNumbers(data);
+    const json = JSON.stringify(encoded);
 
-    expect(encode(data)).toBe(JSON.stringify(encodeNumbers(data)));
-    expect(encode(data, "base64")).toBe(toBase64(encode(data)));
+    expect(encode(data)).toEqual(encoded);
+    expect(encode(data, undefined)).toEqual(encoded);
+    expect(encode(data, "object")).toEqual(encoded);
+    expect(encode(data, "json")).toBe(json);
+    expect(encode(data, "base64")).toBe(toBase64(json));
+    expect(encoded.total).toEqual({ $number: "Infinity" });
   });
 });
