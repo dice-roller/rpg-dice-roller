@@ -1,4 +1,5 @@
 import type { UniqueNode } from "../../ast/nodes.js";
+import type { EvaluationDrawRequest } from "../../evaluator/EvaluationDrawRequest.js";
 import { withFlags, withValue } from "../../results/die-result.js";
 import type { ScoredItem } from "../../results/types.js";
 import { matchesComparePoint } from "../compare-point.js";
@@ -23,10 +24,10 @@ export const uniqueHandler: ModifierHandler<UniqueNode> = {
   name: "unique",
   order: 6,
   appliesTo: ["pool"],
-  apply<T extends ScoredItem>(
+  *apply<T extends ScoredItem>(
     items: readonly T[],
     input: ModifierInput<UniqueNode>,
-  ): T[] {
+  ): Generator<EvaluationDrawRequest, T[], number> {
     const { modifier, ctx } = input;
     const { rollDie } = repeatableDie(input, "re-roll", items.length > 0);
     const { comparePoint } = modifier;
@@ -43,7 +44,7 @@ export const uniqueHandler: ModifierHandler<UniqueNode> = {
       let exhausted = false;
 
       for (let i = 0; i < iterations && shouldReRoll(current); i++) {
-        const extra = rollDie();
+        const extra = yield* rollDie();
 
         if (!extra) {
           exhausted = true;

@@ -16,20 +16,38 @@
  */
 import type { ExpressionNode } from "./ast/nodes.js";
 import { Roll } from "./Roll.js";
+import type { AsyncRollOptions, SyncRollOptions } from "./Roll.js";
+import type { DrawMode } from "./evaluator/DrawDieRequest.js";
 import type { RollOptions, RollSettings } from "./RollSettings.js";
 
 /** Shorthand for `new Roll(input, options)`: rolls notation (or an AST) once, without a history. */
 export function roll<T = string>(
   input: string | ExpressionNode,
-  options?: RollOptions<T> | RollSettings<T>,
-): Roll<T> {
-  return new Roll<T>(input, options);
+  options?: SyncRollOptions<T> | RollSettings<T, "sync">,
+): Roll<T, "sync">;
+export function roll<T = string>(
+  input: string | ExpressionNode,
+  options: AsyncRollOptions<T> | RollSettings<T, "async">,
+): Promise<Roll<T, "async">>;
+export function roll<T = string>(
+  input: string | ExpressionNode,
+  options: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
+): Roll<T, "sync"> | Promise<Roll<T, "async">>;
+export function roll<T = string>(
+  input: string | ExpressionNode,
+): Roll<T, "sync">;
+export function roll<T = string>(
+  input: string | ExpressionNode,
+  options?: RollOptions<T, DrawMode> | RollSettings<T, DrawMode>,
+): Roll<T, "sync"> | Promise<Roll<T, "async">> {
+  return Roll.create(input, options);
 }
 
 // the main classes
 export { Roll } from "./Roll.js";
 export { RollSettings } from "./RollSettings.js";
 export type { RollOptions } from "./RollSettings.js";
+export type { AsyncRollOptions, SyncRollOptions } from "./Roll.js";
 export { Roller } from "./Roller.js";
 export type { RollerOptions } from "./Roller.js";
 export { RollHistory } from "./RollHistory.js";
@@ -48,6 +66,14 @@ export type {
   RollLimits,
   RollMode,
 } from "./evaluator/RollContext.js";
+export type {
+  DrawDieCallback,
+  DrawDieOptions,
+  DrawDieAsyncOptions,
+  DrawDieSyncOptions,
+  DrawDieRequest,
+  DrawMode,
+} from "./evaluator/DrawDieRequest.js";
 export type { RollInputData } from "./evaluator/roll-input-data.js";
 export type { NumberGenerator } from "./random/NumberGenerator.js";
 export { EngineRegistry } from "./random/EngineRegistry.js";

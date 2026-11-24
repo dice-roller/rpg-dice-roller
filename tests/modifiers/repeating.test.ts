@@ -3,16 +3,22 @@ import { createComparePoint } from "../../src/ast/factory.js";
 import type { ModifierNode } from "../../src/ast/nodes.js";
 import { EvaluationError } from "../../src/errors/EvaluationError.js";
 import { ValidationError } from "../../src/errors/ValidationError.js";
+import type { EvaluationDrawRequest } from "../../src/evaluator/EvaluationDrawRequest.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
 import { Roll } from "../../src/Roll.js";
 import { RollSettings } from "../../src/RollSettings.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
 import {
-  explodeHandler,
-  reRollHandler,
-  uniqueHandler,
+  explodeHandler as generatorExplodeHandler,
+  reRollHandler as generatorReRollHandler,
+  uniqueHandler as generatorUniqueHandler,
 } from "../../src/modifiers/handlers/index.js";
+import type {
+  ModifierHandler,
+  ModifierInput,
+} from "../../src/modifiers/types.js";
 import { createDieResult } from "../../src/results/die-result.js";
+import type { DieResult, ScoredItem } from "../../src/results/types.js";
 import {
   evaluate,
   evaluateGroup,
@@ -21,6 +27,62 @@ import {
   poolsOf,
   rollsOf,
 } from "./helpers.js";
+
+type SynchronousModifierInput = Omit<ModifierInput, "rollDie" | "rollBatch"> & {
+  rollDie?: () => DieResult | undefined;
+  rollBatch?: (count: number) => readonly DieResult[] | undefined;
+};
+
+function valueGenerator<T>(
+  value: T,
+): Generator<EvaluationDrawRequest, T, number> {
+  return (function* () {
+    yield* [];
+    return value;
+  })();
+}
+
+function synchronousHandler<N extends ModifierNode>(
+  handler: ModifierHandler<N>,
+) {
+  return {
+    ...handler,
+    apply<T extends ScoredItem>(
+      items: readonly T[],
+      input: SynchronousModifierInput,
+    ): T[] {
+      const adaptedInput = {
+        ...input,
+        ...(input.rollDie && {
+          rollDie: () => valueGenerator(input.rollDie?.()),
+        }),
+        ...(input.rollBatch && {
+          rollBatch: (count: number) =>
+            valueGenerator(input.rollBatch?.(count)),
+        }),
+      } as ModifierInput<N>;
+      const result = handler.apply(items, adaptedInput);
+
+      if (Array.isArray(result)) {
+        return result;
+      }
+
+      const step = result.next();
+
+      if (!step.done) {
+        throw new Error(
+          "A synchronous modifier test unexpectedly yielded a draw",
+        );
+      }
+
+      return step.value;
+    },
+  };
+}
+
+const explodeHandler = synchronousHandler(generatorExplodeHandler);
+const reRollHandler = synchronousHandler(generatorReRollHandler);
+const uniqueHandler = synchronousHandler(generatorUniqueHandler);
 
 /** Notation, the generator's values (initial rolls first), the expected rolls, and the total. */
 type Example = [string, number[], string[], number];
@@ -948,7 +1010,7 @@ describe("repeating handlers", () => {
   ] as const)("%s needs a pool die", (_, handler, modifier) => {
     expect(() =>
       handler.apply([createDieResult(1)], {
-        modifier: modifier as never,
+        modifier,
         ctx: createRollContext(),
       }),
     ).toThrow(EvaluationError);

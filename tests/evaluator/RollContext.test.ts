@@ -71,3 +71,25 @@ describe("roll limits", () => {
     }
   });
 });
+
+describe("external dice source configuration", () => {
+  test("passes drawDie through contexts and derived settings", () => {
+    const drawDie = { drawMode: "sync" as const, callback: () => 4 };
+    const settings = new RollSettings({ drawDie });
+
+    expect(createRollContext({ drawDie }).drawDie).toBe(drawDie);
+    expect(settings.drawDie).toBe(drawDie);
+    expect(RollSettings.withEngine(settings, "mersenne").drawDie).toBe(drawDie);
+    expect(RollSettings.withData(settings, {}).drawDie).toBe(drawDie);
+  });
+
+  test.each([
+    [{}, "drawDie.drawMode"],
+    [{ drawMode: "sync" }, "drawDie.callback"],
+    [{ drawMode: "invalid", callback: () => 1 }, "drawDie.drawMode"],
+  ])("rejects malformed configuration %p", (drawDie, message) => {
+    expect(() => new RollSettings({ drawDie: drawDie as never })).toThrow(
+      message,
+    );
+  });
+});

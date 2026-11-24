@@ -1,4 +1,5 @@
 import type { ExplodeNode } from "../../ast/nodes.js";
+import type { EvaluationDrawRequest } from "../../evaluator/EvaluationDrawRequest.js";
 import { withFlags, withValue } from "../../results/die-result.js";
 import type { ResultFlag } from "../../results/flags.js";
 import type { ScoredItem } from "../../results/types.js";
@@ -30,10 +31,10 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
   name: "explode",
   order: 4,
   appliesTo: ["pool"],
-  apply<T extends ScoredItem>(
+  *apply<T extends ScoredItem>(
     items: readonly T[],
     input: ModifierInput<ExplodeNode>,
-  ): T[] {
+  ): Generator<EvaluationDrawRequest, T[], number> {
     const { modifier, ctx } = input;
     const iterations = resolveIterationBudget(modifier, ctx.limits);
     const { rollDie } = repeatableDie(input, "explode", items.length > 0);
@@ -42,7 +43,9 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
       ? ["explode", "penetrate"]
       : ["explode"];
 
-    return items.flatMap((item) => {
+    const output: T[] = [];
+
+    for (const item of items) {
       interface ExplosionFrame {
         item: ScoredItem;
         rawValue: number;
@@ -64,11 +67,7 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
       const amount = modifier.amount ?? 1;
 
       while (stack.length > 0) {
-        const frame = stack.at(-1);
-
-        if (!frame) {
-          break;
-        }
+        const frame = stack.at(-1)!;
 
         if (!frame.initialized) {
           frame.initialized = true;
@@ -88,7 +87,7 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
           continue;
         }
 
-        const extra = rollDie();
+        const extra = yield* rollDie();
 
         if (!extra) {
           if (frame.childIndex === 0) {
@@ -117,12 +116,14 @@ export const explodeHandler: ModifierHandler<ExplodeNode> = {
       if (modifier.compound && traversal.length > 1) {
         const total = traversal.reduce((sum, { value }) => sum + value, 0);
 
-        return [
+        output.push(
           withFlags(withValue(item, total), "explode", "compound", ...flags),
-        ];
+        );
+      } else {
+        output.push(...(traversal as T[]));
       }
+    }
 
-      return traversal as T[];
-    });
+    return output;
   },
 };

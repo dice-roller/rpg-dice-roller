@@ -1,15 +1,16 @@
 import type { Presenter } from "./presenters/Presenter.js";
 import { defaultTextPresenter } from "./presenters/TextPresenter.js";
+import type { DrawMode } from "./evaluator/DrawDieRequest.js";
 import type { Roll } from "./Roll.js";
 import { encodeNumbers, toHistoryData } from "./serialization/encode.js";
 import type { EncodedHistoryData } from "./serialization/formats.js";
 
 /** A log of rolls. */
-export class RollHistory implements Iterable<Roll<unknown>> {
-  readonly #rolls: Roll<unknown>[] = [];
+export class RollHistory implements Iterable<Roll<unknown, DrawMode>> {
+  readonly #rolls: Roll<unknown, DrawMode>[] = [];
 
   /** A copy of the rolls, oldest first. */
-  get rolls(): readonly Roll<unknown>[] {
+  get rolls(): readonly Roll<unknown, DrawMode>[] {
     return [...this.#rolls];
   }
 
@@ -24,7 +25,7 @@ export class RollHistory implements Iterable<Roll<unknown>> {
   }
 
   /** Appends rolls in order. */
-  add(...rolls: Roll<unknown>[]): void {
+  add(...rolls: Roll<unknown, DrawMode>[]): void {
     this.#rolls.push(...rolls);
   }
 
@@ -34,7 +35,7 @@ export class RollHistory implements Iterable<Roll<unknown>> {
   }
 
   /** Iterates over a snapshot of the rolls, oldest first. */
-  [Symbol.iterator](): Iterator<Roll<unknown>> {
+  [Symbol.iterator](): Iterator<Roll<unknown, DrawMode>> {
     return this.rolls[Symbol.iterator]();
   }
 

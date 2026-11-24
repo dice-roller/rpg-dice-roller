@@ -1,4 +1,5 @@
 import type { ReRollNode } from "../../ast/nodes.js";
+import type { EvaluationDrawRequest } from "../../evaluator/EvaluationDrawRequest.js";
 import { withFlags, withValue } from "../../results/die-result.js";
 import type { ScoredItem } from "../../results/types.js";
 import { matchesComparePoint } from "../compare-point.js";
@@ -27,10 +28,10 @@ export const reRollHandler: ModifierHandler<ReRollNode> = {
   name: "re-roll",
   order: 5,
   appliesTo: ["pool"],
-  apply<T extends ScoredItem>(
+  *apply<T extends ScoredItem>(
     items: readonly T[],
     input: ModifierInput<ReRollNode>,
-  ): T[] {
+  ): Generator<EvaluationDrawRequest, T[], number> {
     const { modifier, ctx } = input;
     const { rollDie } = repeatableDie(input, "re-roll", items.length > 0);
     const comparePoint = comparePointOrDefault(input, "min");
@@ -38,7 +39,9 @@ export const reRollHandler: ModifierHandler<ReRollNode> = {
     const iterations = resolveIterationBudget(modifier, ctx.limits);
     const amount = modifier.amount ?? 1;
 
-    return items.flatMap((item) => {
+    const output: T[] = [];
+
+    for (const item of items) {
       interface ReRollFrame {
         item: ScoredItem;
         remaining: number;
@@ -57,11 +60,7 @@ export const reRollHandler: ModifierHandler<ReRollNode> = {
       ];
 
       while (stack.length > 0) {
-        const frame = stack.at(-1);
-
-        if (!frame) {
-          break;
-        }
+        const frame = stack.at(-1)!;
 
         if (!frame.initialized) {
           frame.initialized = true;
@@ -83,7 +82,7 @@ export const reRollHandler: ModifierHandler<ReRollNode> = {
           continue;
         }
 
-        const extra = rollDie();
+        const extra = yield* rollDie();
 
         if (!extra) {
           if (frame.childIndex === 0) {
@@ -113,7 +112,9 @@ export const reRollHandler: ModifierHandler<ReRollNode> = {
         });
       }
 
-      return terminalResults as T[];
-    });
+      output.push(...(terminalResults as T[]));
+    }
+
+    return output;
   },
 };

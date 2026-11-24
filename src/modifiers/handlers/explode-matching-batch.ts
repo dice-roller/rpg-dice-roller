@@ -1,5 +1,6 @@
 import type { ExplodeMatchingBatchNode } from "../../ast/nodes.js";
 import { EvaluationError } from "../../errors/EvaluationError.js";
+import type { EvaluationDrawRequest } from "../../evaluator/EvaluationDrawRequest.js";
 import { withCalculationValue, withFlags } from "../../results/die-result.js";
 import type { ResultFlag } from "../../results/flags.js";
 import type { ScoredItem } from "../../results/types.js";
@@ -22,10 +23,10 @@ export const explodeMatchingBatchHandler: ModifierHandler<ExplodeMatchingBatchNo
     name: "explode-matching-batch",
     order: 3,
     appliesTo: ["pool"],
-    apply<T extends ScoredItem>(
+    *apply<T extends ScoredItem>(
       items: readonly T[],
       input: ModifierInput<ExplodeMatchingBatchNode>,
-    ): T[] {
+    ): Generator<EvaluationDrawRequest, T[], number> {
       const { modifier, ctx, die, rollBatch } = input;
 
       if (!die || !rollBatch) {
@@ -80,7 +81,7 @@ export const explodeMatchingBatchHandler: ModifierHandler<ExplodeMatchingBatchNo
           return batches.flat();
         }
 
-        const nextBatch = rollBatch(batchSize);
+        const nextBatch = yield* rollBatch(batchSize);
 
         if (!nextBatch) {
           return batches.flat();

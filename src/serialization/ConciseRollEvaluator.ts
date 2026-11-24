@@ -2,8 +2,10 @@ import type { GroupNode, ModifierNode, PoolNode } from "../ast/nodes.js";
 import { dieSnapshot } from "../dice/die-utils.js";
 import { ImportError } from "../errors/ImportError.js";
 import { Evaluator, sumIncluded } from "../evaluator/Evaluator.js";
-import { createRollContext } from "../evaluator/RollContext.js";
+import type { DrawMode } from "../evaluator/DrawDieRequest.js";
+import type { EvaluationDrawRequest } from "../evaluator/EvaluationDrawRequest.js";
 import type { RollContext } from "../evaluator/RollContext.js";
+import { createRollContext } from "../evaluator/RollContext.js";
 import { createDieResult } from "../results/die-result.js";
 import type {
   ExpressionResult,
@@ -23,14 +25,14 @@ export class ConciseRollEvaluator extends Evaluator {
 
   private constructor(
     private readonly input: ConciseRollData,
-    settings: RollSettings<unknown>,
+    settings: RollSettings<unknown, DrawMode>,
   ) {
     super(settings.evaluator.registries);
   }
 
   static restore(
     input: ConciseRollData,
-    settings: RollSettings<unknown>,
+    settings: RollSettings<unknown, DrawMode>,
   ): ExpressionResult {
     const data = conciseRollData(input);
     const evaluator = new ConciseRollEvaluator(data, settings);
@@ -69,17 +71,17 @@ export class ConciseRollEvaluator extends Evaluator {
     }
   }
 
-  protected override evaluatePool(
+  protected override *evaluatePool(
     node: PoolNode,
     ctx: RollContext,
-  ): PoolResult {
+  ): Generator<EvaluationDrawRequest, PoolResult, number> {
     const index = this.#poolIndex++;
     const outcomes = this.input.rolls[index];
     if (!outcomes) {
       throw new ImportError(`Missing pool results at data.rolls[${index}]`);
     }
 
-    const qty = this.evaluateNode(node.qty, ctx);
+    const qty = yield* this.evaluateNode(node.qty, ctx);
     if (
       !Number.isSafeInteger(qty.value) ||
       qty.value < 0 ||
@@ -90,7 +92,11 @@ export class ConciseRollEvaluator extends Evaluator {
       );
     }
 
-    const dieArgs = node.die.args.map((arg) => this.evaluateNode(arg, ctx));
+    const dieArgs: ExpressionResult[] = [];
+
+    for (const arg of node.die.args) {
+      dieArgs.push(yield* this.evaluateNode(arg, ctx));
+    }
     const die = this.createDie(
       node,
       dieArgs.map(({ value }) => value),
@@ -108,7 +114,7 @@ export class ConciseRollEvaluator extends Evaluator {
         flags: [...(outcome.flags ?? [])],
       };
     });
-    const modifierArguments = this.evaluateModifierArguments(
+    const modifierArguments = yield* this.evaluateModifierArguments(
       node.modifiers,
       ctx,
     );
@@ -125,10 +131,10 @@ export class ConciseRollEvaluator extends Evaluator {
     };
   }
 
-  protected override evaluateGroup(
+  protected override *evaluateGroup(
     node: GroupNode,
     ctx: RollContext,
-  ): GroupResult {
+  ): Generator<EvaluationDrawRequest, GroupResult, number> {
     const index = this.#groupIndex++;
     const group = this.input.groups?.[index];
     const path = `data.groups.${index}`;
@@ -138,19 +144,22 @@ export class ConciseRollEvaluator extends Evaluator {
       }
     }
 
-    const members = node.expressions.map((child, source): GroupMemberResult => {
-      const result = this.evaluateNode(child, ctx);
+    const members: GroupMemberResult[] = [];
+
+    for (const [source, child] of node.expressions.entries()) {
+      const result = yield* this.evaluateNode(child, ctx);
       const score = group?.members?.[source];
       const value = score?.value ?? result.value;
-      return {
+
+      members.push({
         type: "group-member",
         result,
         value,
         calculationValue: score?.calculationValue ?? value,
         useInTotal: score?.useInTotal ?? true,
         flags: [...(score?.flags ?? [])],
-      };
-    });
+      });
+    }
 
     const order = group?.order;
     if (
@@ -165,7 +174,7 @@ export class ConciseRollEvaluator extends Evaluator {
     }
 
     const orderedMembers = order?.map((source) => members[source]) ?? members;
-    const modifierArguments = this.evaluateModifierArguments(
+    const modifierArguments = yield* this.evaluateModifierArguments(
       node.modifiers,
       ctx,
     );
@@ -178,25 +187,32 @@ export class ConciseRollEvaluator extends Evaluator {
     };
   }
 
-  private evaluateModifierArguments(
+  private *evaluateModifierArguments(
     modifiers: readonly ModifierNode[],
     ctx: RollContext,
-  ): ModifierArgumentResult[] {
+  ): Generator<EvaluationDrawRequest, ModifierArgumentResult[], number> {
     const computed = modifiers.filter(
       (modifier) =>
         (modifier.name === "keep" || modifier.name === "drop") &&
         typeof modifier.qty !== "number",
     );
 
-    return this.registries.modifiers
-      .inExecutionOrder(computed)
-      .flatMap((modifier) => {
-        const { argument } = this.resolveModifier(
-          modifier,
-          modifiers.indexOf(modifier),
-          ctx,
-        );
-        return argument ? [argument] : [];
-      });
+    const arguments_: ModifierArgumentResult[] = [];
+
+    for (const modifier of this.registries.modifiers.inExecutionOrder(
+      computed,
+    )) {
+      const { argument } = yield* this.resolveModifier(
+        modifier,
+        modifiers.indexOf(modifier),
+        ctx,
+      );
+
+      if (argument) {
+        arguments_.push(argument);
+      }
+    }
+
+    return arguments_;
   }
 }

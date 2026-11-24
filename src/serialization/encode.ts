@@ -1,4 +1,5 @@
 import type { Roll } from "../Roll.js";
+import type { DrawMode } from "../evaluator/DrawDieRequest.js";
 import type { RollHistory } from "../RollHistory.js";
 import { DATA_VERSION } from "./formats.js";
 import type {
@@ -11,7 +12,7 @@ import type {
 } from "./formats.js";
 
 /** The export data for a roll (its stored totals included). */
-export function toRollData(roll: Roll<unknown>): RollData {
+export function toRollData(roll: Roll<unknown, DrawMode>): RollData {
   return {
     type: "roll",
     version: DATA_VERSION,

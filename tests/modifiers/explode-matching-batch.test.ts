@@ -1,7 +1,11 @@
 import { RollSettings } from "../../src/RollSettings.js";
 import { createExplodeMatchingBatch } from "../../src/ast/factory.js";
+import { createRollContext } from "../../src/evaluator/RollContext.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
-import { explodeHandler } from "../../src/modifiers/handlers/explode.js";
+import {
+  explodeHandler,
+  explodeMatchingBatchHandler,
+} from "../../src/modifiers/handlers/index.js";
 import type { PoolResult } from "../../src/results/types.js";
 
 function settingsWithRolls(
@@ -32,6 +36,20 @@ function evaluatePool(settings: RollSettings, notation: string): PoolResult {
 }
 
 describe("matching-batch explode", () => {
+  test("requires a pool die and batch helper", () => {
+    const result = explodeMatchingBatchHandler.apply([], {
+      modifier: createExplodeMatchingBatch(),
+      ctx: createRollContext(),
+    });
+
+    if (Array.isArray(result)) {
+      throw new Error("Expected a generator handler result");
+    }
+
+    expect(() => result.next()).toThrow(
+      'The "explode-matching-batch" modifier can only be used on a dice pool',
+    );
+  });
   test("flags matching full batches and leaves a mixed stopping batch unmarked", () => {
     const { settings, integer, remaining } = settingsWithRolls([
       4, 4, 4, 4, 4, 5,
@@ -299,8 +317,12 @@ describe("matching-batch explode", () => {
     const modifiers = new ModifierRegistry().register({
       ...explodeHandler,
       order: 2,
-      apply(items, input) {
-        input.rollBatch?.(-1);
+      *apply(items, input) {
+        if (!input.rollBatch) {
+          throw new Error("Expected a batch draw helper");
+        }
+
+        yield* input.rollBatch(-1);
 
         return [...items];
       },

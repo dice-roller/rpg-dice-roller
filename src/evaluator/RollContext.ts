@@ -1,5 +1,6 @@
 import { ValidationError } from "../errors/ValidationError.js";
 import { NumberGenerator } from "../random/NumberGenerator.js";
+import type { DrawDieOptions } from "./DrawDieRequest.js";
 import type { RollInputData } from "./roll-input-data.js";
 import { snapshotRollInputData } from "./roll-input-data.js";
 
@@ -57,6 +58,7 @@ export interface RollContext {
   readonly generator: NumberGenerator;
   readonly mode: RollMode;
   readonly limits: RollLimits;
+  readonly drawDie?: DrawDieOptions;
   /** Bindings reserved for built-ins and evaluator-defined values. */
   readonly system: Readonly<Record<string, unknown>>;
   /** A validated snapshot of caller-provided values. */
@@ -67,6 +69,7 @@ export interface RollContextOptions {
   generator?: NumberGenerator;
   mode?: RollMode;
   limits?: Partial<RollLimits>;
+  drawDie?: DrawDieOptions;
   system?: Readonly<Record<string, unknown>>;
   data?: RollInputData;
 }
@@ -86,6 +89,7 @@ export function createRollContext(
     generator: options.generator ?? new NumberGenerator(),
     mode: options.mode ?? "random",
     limits: resolveRollLimits(options.limits),
+    drawDie: options.drawDie,
     system: copySystemBindings(options.system),
     data: snapshotRollInputData(inputData),
   };

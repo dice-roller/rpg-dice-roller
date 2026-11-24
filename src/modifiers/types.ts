@@ -5,6 +5,7 @@ import type {
   ModifierNode,
 } from "../ast/nodes.js";
 import type { ResolvedDie } from "../dice/types.js";
+import type { EvaluationDrawRequest } from "../evaluator/EvaluationDrawRequest.js";
 import type { RollContext } from "../evaluator/RollContext.js";
 import type { DieResult, ScoredItem } from "../results/types.js";
 
@@ -23,9 +24,19 @@ export interface ModifierInput<N extends ModifierNode = ModifierNode> {
   /** The pool's die (pools only). */
   readonly die?: ResolvedDie;
   /** Rolls one more die of the pool, or returns `undefined` when its per-pool budget is spent. Initial dice are excluded; repeating handlers must handle exhaustion and keep the results rolled so far. */
-  readonly rollDie?: () => DieResult | undefined;
+  readonly rollDie?: () => Generator<
+    EvaluationDrawRequest,
+    DieResult | undefined,
+    number
+  >;
   /** Rolls a complete batch atomically, or returns `undefined` without drawing if the remaining per-pool budget is insufficient. */
-  readonly rollBatch?: (count: number) => readonly DieResult[] | undefined;
+  readonly rollBatch?: (
+    count: number,
+  ) => Generator<
+    EvaluationDrawRequest,
+    readonly DieResult[] | undefined,
+    number
+  >;
 }
 
 /**
@@ -65,12 +76,13 @@ export interface ModifierHandler<N extends ModifierNode = ModifierNode> {
    *
    * `items` are die results for a pool, or group members for a group (or die results, as set by
    * `groupHandling`). Group calls, including calls for their pool dice, do not supply `die`,
-   * `rollDie` or `rollBatch`. The evaluator requires an array result.
+   * `rollDie` or `rollBatch`. The evaluator requires an array result. A generator handler may yield
+   * die requests through those helpers and resumes with the externally supplied face.
    */
   apply<T extends ScoredItem>(
     items: readonly T[],
     input: ModifierInput<N>,
-  ): T[];
+  ): T[] | Generator<EvaluationDrawRequest, T[], number>;
 }
 
 /** The handler for the modifier with the given name. */

@@ -1,9 +1,11 @@
 import type { ExpressionResult } from "../results/types.js";
+import type { DrawMode } from "../evaluator/DrawDieRequest.js";
 import type { Roll } from "../Roll.js";
 import type { RollHistory } from "../RollHistory.js";
 
 /** A roll, history, or evaluated expression result; an individual die result is not presentable. */
-export type Presentable = Roll<unknown> | RollHistory | ExpressionResult;
+export type Presentable =
+  Roll<unknown, DrawMode> | RollHistory | ExpressionResult;
 
 /*
  * The guards check the shape rather than using `instanceof`, which avoids an import cycle with
@@ -15,7 +17,7 @@ export type Presentable = Roll<unknown> | RollHistory | ExpressionResult;
  * Narrows a presentable to a roll by its shape: no `type` property and a `result` property.
  * This is not validation of arbitrary input; lookalike objects can match.
  */
-export function isRoll(target: Presentable): target is Roll<unknown> {
+export function isRoll(target: Presentable): target is Roll<unknown, DrawMode> {
   return !("type" in target) && "result" in target;
 }
 

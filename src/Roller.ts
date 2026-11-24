@@ -1,5 +1,11 @@
 import type { ExpressionNode } from "./ast/nodes.js";
 import type { DieRegistry } from "./dice/DieRegistry.js";
+import type {
+  DrawDieAsyncOptions,
+  DrawDieOptions,
+  DrawDieSyncOptions,
+  DrawMode,
+} from "./evaluator/DrawDieRequest.js";
 import type { RollLimits } from "./evaluator/RollContext.js";
 import type { RollInputData } from "./evaluator/roll-input-data.js";
 import type { ModifierRegistry } from "./modifiers/ModifierRegistry.js";
@@ -8,6 +14,7 @@ import { defaultTextPresenter } from "./presenters/TextPresenter.js";
 import type { NumberGenerator } from "./random/NumberGenerator.js";
 import type { EngineOption } from "./random/RandomEngine.js";
 import { Roll } from "./Roll.js";
+import type { SyncRollOptions } from "./Roll.js";
 import { RollHistory } from "./RollHistory.js";
 import { RollSettings } from "./RollSettings.js";
 import type { RollOptions } from "./RollSettings.js";
@@ -26,6 +33,36 @@ import type {
  */
 export type RollerOptions<T = string> = RollOptions<T>;
 
+type DrawModeOf<Options> = Options extends {
+  readonly drawMode: infer Mode extends DrawMode;
+}
+  ? Mode
+  : "sync";
+
+type ConfiguredDrawMode<Options> = Options extends {
+  drawDie?: infer DrawDie;
+}
+  ? DrawModeOf<NonNullable<DrawDie>>
+  : "sync";
+
+type RollResultForMode<T, Mode extends DrawMode> = Mode extends "async"
+  ? Promise<Roll<T, "async">>
+  : Roll<T, "sync">;
+
+interface RollCallOptions {
+  engine?: EngineOption;
+  data?: RollInputData;
+  drawDie?: DrawDieOptions;
+}
+
+type SyncRollCallOptions = Omit<RollCallOptions, "drawDie"> & {
+  drawDie: DrawDieSyncOptions;
+};
+
+type AsyncRollCallOptions = Omit<RollCallOptions, "drawDie"> & {
+  drawDie: DrawDieAsyncOptions;
+};
+
 /**
  * Rolls notation and keeps a history of the rolls.
  *
@@ -40,14 +77,21 @@ export type RollerOptions<T = string> = RollOptions<T>;
  *
  * @typeParam T the output type of the configured presenter
  */
-export class Roller<T = string> {
+export class Roller<
+  T = string,
+  Options extends RollerOptions<T> = SyncRollOptions<T>,
+> {
   /** Mutable history of rolls made or imported by this roller. */
   readonly history = new RollHistory();
   /** Shared by every roll of this roller (and their re-rolls). */
-  readonly settings: RollSettings<T>;
+  readonly settings: RollSettings<T, ConfiguredDrawMode<Options>>;
 
-  constructor(options: RollerOptions<T> = {}) {
-    this.settings = new RollSettings(options);
+  constructor(
+    options: Options & RollerOptions<T> = {} as Options & RollerOptions<T>,
+  ) {
+    this.settings = new RollSettings<T, ConfiguredDrawMode<Options>>(
+      options as RollOptions<T, ConfiguredDrawMode<Options>>,
+    );
   }
 
   get presenter(): Presenter<T> {
@@ -75,13 +119,30 @@ export class Roller<T = string> {
     return this.settings.parse(notation);
   }
 
-  /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. Per-roll data replaces the roller's defaults and is snapshotted for the roll. */
+  /** Rolls notation (or an AST), and adds the roll to the history only if it succeeds. Async rolls are appended in completion order. Per-roll data replaces the roller's defaults and is snapshotted for the roll. */
   roll(
     input: string | ExpressionNode,
-    options?: { engine?: EngineOption; data?: RollInputData },
-  ): Roll<T> {
+    options: AsyncRollCallOptions,
+  ): Promise<Roll<T, "async">>;
+  roll(
+    input: string | ExpressionNode,
+    options: SyncRollCallOptions,
+  ): Roll<T, "sync">;
+  roll(
+    this: Roller<T, Options>,
+    input: string | ExpressionNode,
+    options?: Omit<RollCallOptions, "drawDie">,
+  ): RollResultForMode<T, ConfiguredDrawMode<Options>>;
+  roll(
+    input: string | ExpressionNode,
+    options: RollCallOptions,
+  ): Roll<T, "sync"> | Promise<Roll<T, "async">>;
+  roll(
+    input: string | ExpressionNode,
+    options?: RollCallOptions,
+  ): Roll<T, "sync"> | Promise<Roll<T, "async">> {
     const engine = options?.engine;
-    let settings =
+    let settings: RollSettings<T, DrawMode> =
       engine === undefined
         ? this.settings
         : RollSettings.withEngine(this.settings, engine);
@@ -90,7 +151,18 @@ export class Roller<T = string> {
       settings = RollSettings.withData(settings, options.data);
     }
 
-    const roll = new Roll(input, settings);
+    if (options?.drawDie !== undefined) {
+      settings = RollSettings.withDrawDie(settings, options.drawDie);
+    }
+
+    const roll = Roll.create<T>(input, settings);
+
+    if (roll instanceof Promise) {
+      return roll.then((completed) => {
+        this.history.add(completed);
+        return completed;
+      });
+    }
 
     this.history.add(roll);
 
@@ -122,10 +194,12 @@ export class Roller<T = string> {
    * @returns the imported rolls
    * @throws {ImportError} the data is invalid
    */
-  import(data: string | EncodedExportData | ConciseRollData): Roll<T>[] {
+  import(
+    data: string | EncodedExportData | ConciseRollData,
+  ): Roll<T, ConfiguredDrawMode<Options>>[] {
     const decoded = decodeImport(data);
     const rolls = (decoded.type === "history" ? decoded.rolls : [decoded]).map(
-      (roll) => new Roll(roll, this.settings),
+      (roll) => new Roll<T, ConfiguredDrawMode<Options>>(roll, this.settings),
     );
 
     this.history.add(...rolls);

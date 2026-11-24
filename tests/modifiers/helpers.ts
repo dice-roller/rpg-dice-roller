@@ -2,6 +2,7 @@ import type { ExpressionNode } from "../../src/ast/nodes.js";
 import { DieRegistry } from "../../src/dice/DieRegistry.js";
 import { Evaluator } from "../../src/evaluator/Evaluator.js";
 import { createRollContext } from "../../src/evaluator/RollContext.js";
+import type { DrawDieOptions } from "../../src/evaluator/DrawDieRequest.js";
 import type { RollLimits, RollMode } from "../../src/evaluator/RollContext.js";
 import type { RollInputData } from "../../src/evaluator/roll-input-data.js";
 import { ModifierRegistry } from "../../src/modifiers/ModifierRegistry.js";
@@ -22,6 +23,7 @@ export interface EvaluateOptions {
   rolls?: readonly number[];
   modifiers?: ModifierRegistry;
   limits?: Partial<RollLimits>;
+  drawDie?: DrawDieOptions;
   system?: Readonly<Record<string, unknown>>;
   data?: RollInputData;
 }
@@ -34,6 +36,7 @@ export function evaluate(
     rolls = [],
     modifiers = new ModifierRegistry(),
     limits,
+    drawDie,
     system,
     data,
   }: EvaluateOptions = {},
@@ -50,7 +53,7 @@ export function evaluate(
 
   return evaluator.evaluate(
     node,
-    createRollContext({ generator, mode, limits, system, data }),
+    createRollContext({ generator, mode, limits, drawDie, system, data }),
   );
 }
 
